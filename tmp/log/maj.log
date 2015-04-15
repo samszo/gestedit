@@ -1,0 +1,92 @@
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta compagnon_base_version_maj_init etape 0: compagnon_create 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: compagnon_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta compagnon_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta compagnon_base_version_maj_1.0.0 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: compagnon_base_version_maj_1.0.0: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta compagnon_base_version: 1.0.0 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. compagnon_base_version: 1.0.0
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta forum_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: forum_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta forum_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta forum_base_version_maj_1.2.1 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: forum_base_version_maj_1.2.1: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta forum_base_version: 1.2.1 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. forum_base_version: 1.2.1
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta mots_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: mots_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta mots_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta mots_base_version_maj_2.1.1 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: mots_base_version_maj_2.1.1: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta mots_base_version: 2.1.1 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. mots_base_version: 2.1.1
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta organiseur_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: organiseur_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta organiseur_base_version_maj_init etape 1: sql_alter TABLE spip_auteurs ADD imessage VARCHAR(3)
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: organiseur_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta organiseur_base_version_maj_init etape 2: sql_alter TABLE spip_auteurs ADD messagerie VARCHAR(3)
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: organiseur_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta organiseur_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta organiseur_base_version_maj_1.1.1 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: organiseur_base_version_maj_1.1.1: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta organiseur_base_version: 1.1.1 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. organiseur_base_version: 1.1.1
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta petitions_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: petitions_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta petitions_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta petitions_base_version_maj_1.1.6 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: petitions_base_version_maj_1.1.6: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta petitions_base_version: 1.1.6 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. petitions_base_version: 1.1.6
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta revisions_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: revisions_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta revisions_base_version_maj_init etape 1: revisions_upate_meta 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: revisions_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta revisions_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta revisions_base_version_maj_1.1.4 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: revisions_base_version_maj_1.1.4: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta revisions_base_version: 1.1.4 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. revisions_base_version: 1.1.4
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta sites_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: sites_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta sites_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta sites_base_version_maj_1.0.0 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: sites_base_version_maj_1.0.0: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta sites_base_version: 1.0.0 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. sites_base_version: 1.0.0
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta stats_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: stats_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta stats_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta stats_base_version_maj_1.0.0 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: stats_base_version_maj_1.0.0: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta stats_base_version: 1.0.0 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. stats_base_version: 1.0.0
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta svp_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: svp_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta svp_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta svp_base_version_maj_0.4.0 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: svp_base_version_maj_0.4.0: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta svp_base_version: 0.4.0 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. svp_base_version: 0.4.0
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta urls_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: urls_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta urls_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta urls_base_version_maj_1.1.4 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: urls_base_version_maj_1.1.4: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta urls_base_version: 1.1.4 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. urls_base_version: 1.1.4
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta breves_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: breves_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta breves_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta breves_base_version_maj_1.0.0 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: breves_base_version_maj_1.0.0: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta breves_base_version: 1.0.0 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. breves_base_version: 1.0.0
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta medias_base_version_maj_init etape 0: maj_tables Array
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: medias_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta medias_base_version_maj_init etape 1: creer_base_types_doc 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: medias_base_version_maj_init: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta medias_base_version: init en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: maj meta medias_base_version_maj_1.2.6 etape 0: inc_config_dist 
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: medias_base_version_maj_1.2.6: ok
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: meta medias_base_version: 1.2.6 en 0 secondes
+Apr 08 17:25:20 ::1 (pid 95015) :Pri:!INFO: MAJ terminee. medias_base_version: 1.2.6

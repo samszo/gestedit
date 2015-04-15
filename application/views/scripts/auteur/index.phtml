@@ -1,0 +1,113 @@
+<?php 
+if(!$this->ajax){
+	echo '<!DOCTYPE html>
+<html>
+	<head>
+		<title>ISTE - Auteurs</title>
+		<link rel="stylesheet" type="text/css" href="css/w2ui.css" />
+		<link rel="stylesheet" type="text/css" href="font/font-awesome/font-awesome.css" />
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/w2ui.js"></script>
+		<script type="text/javascript" src="js/global.js"></script>
+		</head>
+<body>';
+}
+$idGrid = "gridAut";
+?>
+
+<div id="<?php echo $idGrid;?>" style="width: 100%; height: 400px;"></div>
+<br>
+<button class="btn" onclick="showChanged('<?php echo $idGrid;?>')">Get Changed</button>
+
+<script type="text/javascript">
+$(function () {
+    $('#<?php echo $idGrid;?>').w2grid({ 
+        name: '<?php echo $idGrid;?>', 
+		header: 'Auteurs',		
+        show: { 
+			header			: true,		
+            toolbar			: true,
+			toolbarReload   : true,
+			toolbarColumns  : true,
+            	toolbarSearch   : true,
+            	toolbarAdd      : true,
+            	toolbarDelete   : true,
+            	toolbarSave		: true,
+        },
+        columnGroups: [
+                       { caption: '', span: 1 },
+                       { caption: 'Informations générales', span: 3 },
+                       { caption: 'Coordonnées', span: 7 }
+                   ],        
+        columns: [                
+            { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
+            { field: 'prenom', caption: 'Prénom', size: '120px', sortable: true, resizable: true, 
+                editable: { type: 'text' }
+            },
+            { field: 'nom', caption: 'Nom', size: '120px', sortable: true, resizable: true, 
+                editable: { type: 'text' }
+            },
+            { field: 'isni', caption: 'ISNI', size: '80px', sortable: true, resizable: true,
+                editable: { type: 'text'}
+            },
+            { field: 'adresse', caption: 'Adresse', size: '180px', sortable: true, resizable: true,
+                editable: { type: 'text' }
+            },            
+            { field: 'code_postal', caption: 'Code Postal', size: '80px', sortable: true, resizable: true, 
+                editable: { type: 'text' }
+            },
+            { field: 'ville', caption: 'Ville', size: '80px', sortable: true, resizable: true, 
+                editable: { type: 'text' } 
+            },
+            { field: 'pays', caption: 'Pays', size: '80px', sortable: true, resizable: true, 
+                editable: { type: 'text' } 
+            },
+            { field: 'telephone', caption: 'Téléphone', size: '80px', sortable: true, resizable: true, 
+                editable: { type: 'text' } 
+            },
+            { field: 'mail', caption: 'E-mail', size: '80px', sortable: true, resizable: true, 
+                editable: { type: 'text' } 
+            },
+            { field: 'url', caption: 'URL', size: '80px', sortable: true, resizable: true, 
+                editable: { type: 'text' } 
+            },
+            { field: 'institution', caption: 'Institution', size: '60%',
+                render: function (record) {
+                   return '<div><button class="w2ui-btn" onclick="getPopup('+record.recid+')"> Afficher </button></div>';
+                }
+            },            
+        ],
+        toolbar: {
+            items: [
+                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+            ],
+            onClick: function (event) {
+                if (event.target == 'export') {
+                    w2ui.<?php echo $idGrid;?>.add({ recid: w2ui.<?php echo $idGrid;?>.records.length + 1 });
+                }
+            }
+        },
+        records: [
+            { recid: 1, nom:"szo", prenom:"sam", isni:"", adresse:"la"
+                , code_postal: '12346', ville: 'Paris', pays:'France'
+                , telephone:"0778987867", mail:"samszo@free.fr", url:"hhtp://jkhqkjhu"     }
+        ],
+        onSave: function(event) {
+            console.log(event);
+        }
+    });    
+});
+function getPopup(id){
+	$.get('institution',
+	  {ajax:1,idObj:id,typeObj:'auteur'},
+	  function(html){
+		  openPopup("gInst_auteur_"+id, html);
+	  });            
+}
+</script>
+<?php 
+if(!$this->ajax){
+	echo '</body>
+</html>';
+}
+?>

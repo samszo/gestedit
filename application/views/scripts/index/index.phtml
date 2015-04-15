@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ISTE - Tableau de bord</title>
+    <link rel="stylesheet" type="text/css" href="css/w2ui.css" />
+    <link rel="stylesheet" type="text/css" href="font/font-awesome/font-awesome.css" />
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/w2ui.min.js"></script>
+	<script type="text/javascript" src="js/global.js"></script>
+    <style type="text/css">
+    </style>
+</head>
+<body>
+
+<div id="layout" style="width: 100%; height: 600px;"></div>
+
+<script type="text/javascript">
+$(function () {
+    var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
+    $('#layout').w2layout({
+        name: 'layout',
+        padding: 4,
+        panels: [
+            { type: 'top', size: 50, resizable: false, style: pstyle, content: 'top' },
+            { type: 'left', size: 176, resizable: true, style: pstyle, content: 'mettre ici les alertes' },
+            { type: 'main', style: pstyle, content: 'main' },
+            { type: 'right', size: 200, resizable: true, style: pstyle, content: 'mettre ici les éditions' },
+            { type: 'bottom', size: 50, resizable: false, style: pstyle, content: 'mettre ici la date' }
+       	]
+    });
+    w2ui['layout'].load('top', 'index/top')
+});
+</script>
+
+</body>
+</html>
