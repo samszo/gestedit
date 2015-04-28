@@ -1,25 +1,25 @@
 <?php
 /**
- * Ce fichier contient la classe Iste_commite.
+ * Ce fichier contient la classe Iste_comite.
  *
  * @copyright  2013 Samuel Szoniecky
  * @license    "New" BSD License
 */
-class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
+class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
 {
     
     /**
      * Nom de la table.
      */
-    protected $_name = 'iste_commite';
+    protected $_name = 'iste_comite';
     
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_commite';
+    public $_primary = 'id_comite';
     
     /**
-     * Vérifie si une entrée Iste_commite existe.
+     * Vérifie si une entrée Iste_comite existe.
      *
      * @param array $data
      *
@@ -28,17 +28,17 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
     public function existe($data)
     {
 		$select = $this->select();
-		$select->from($this, array('id_commite'));
+		$select->from($this, array('id_comite'));
 		foreach($data as $k=>$v){
 			$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
-	    if($rows->count()>0)$id=$rows[0]->id_commite; else $id=false;
+	    if($rows->count()>0)$id=$rows[0]->id_comite; else $id=false;
         return $id;
     } 
         
     /**
-     * Ajoute une entrée Iste_commite.
+     * Ajoute une entrée Iste_comite.
      *
      * @param array $data
      * @param boolean $existe
@@ -57,7 +57,7 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
     } 
            
     /**
-     * Recherche une entrée Iste_commite avec la clef primaire spécifiée
+     * Recherche une entrée Iste_comite avec la clef primaire spécifiée
      * et modifie cette entrée avec les nouvelles données.
      *
      * @param integer $id
@@ -68,11 +68,11 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
    	
-    	$this->update($data, 'iste_commite.id_commite = ' . $id);
+    	$this->update($data, 'iste_comite.id_comite = ' . $id);
     }
     
     /**
-     * Recherche une entrée Iste_commite avec la clef primaire spécifiée
+     * Recherche une entrée Iste_comite avec la clef primaire spécifiée
      * et supprime cette entrée.
      *
      * @param integer $id
@@ -81,11 +81,11 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_commite.id_commite = ' . $id);
+    	$this->delete('iste_comite.id_comite = ' . $id);
     }
 
     /**
-     * Recherche les entrées de Iste_commite avec la clef de lieu
+     * Recherche les entrées de Iste_comite avec la clef de lieu
      * et supprime ces entrées.
      *
      * @param integer $idLieu
@@ -98,14 +98,14 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
     }
     
     /**
-     * Récupère toutes les entrées Iste_commite avec certains critères
+     * Récupère toutes les entrées Iste_comite avec certains critères
      * de tri, intervalles
      */
     public function getAll($order=null, $limit=0, $from=0)
     {
    	
     	$query = $this->select()
-                    ->from( array("iste_commite" => "iste_commite") );
+                    ->from( array("iste_comite" => "iste_comite") );
                     
         if($order != null)
         {
@@ -122,23 +122,23 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
 
     
     	/**
-     * Recherche une entrée Iste_commite avec la valeur spécifiée
+     * Recherche une entrée Iste_comite avec la valeur spécifiée
      * et retourne cette entrée.
      *
-     * @param int $id_commite
+     * @param int $id_comite
      *
      * @return array
      */
-    public function findById_commite($id_commite)
+    public function findById_comite($id_comite)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_commite") )                           
-                    ->where( "i.id_commite = ?", $id_commite );
+                    ->from( array("i" => "iste_comite") )                           
+                    ->where( "i.id_comite = ?", $id_comite );
 
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
-     * Recherche une entrée Iste_commite avec la valeur spécifiée
+     * Recherche une entrée Iste_comite avec la valeur spécifiée
      * et retourne cette entrée.
      *
      * @param varchar $titre_fr
@@ -148,13 +148,13 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
     public function findByTitre_fr($titre_fr)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_commite") )                           
+                    ->from( array("i" => "iste_comite") )                           
                     ->where( "i.titre_fr = ?", $titre_fr );
 
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
-     * Recherche une entrée Iste_commite avec la valeur spécifiée
+     * Recherche une entrée Iste_comite avec la valeur spécifiée
      * et retourne cette entrée.
      *
      * @param varchar $titre_en
@@ -164,13 +164,13 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
     public function findByTitre_en($titre_en)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_commite") )                           
+                    ->from( array("i" => "iste_comite") )                           
                     ->where( "i.titre_en = ?", $titre_en );
 
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
-     * Recherche une entrée Iste_commite avec la valeur spécifiée
+     * Recherche une entrée Iste_comite avec la valeur spécifiée
      * et retourne cette entrée.
      *
      * @param varchar $soustitre_fr
@@ -180,13 +180,13 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
     public function findBySoustitre_fr($soustitre_fr)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_commite") )                           
+                    ->from( array("i" => "iste_comite") )                           
                     ->where( "i.soustitre_fr = ?", $soustitre_fr );
 
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
-     * Recherche une entrée Iste_commite avec la valeur spécifiée
+     * Recherche une entrée Iste_comite avec la valeur spécifiée
      * et retourne cette entrée.
      *
      * @param varchar $soustitre_en
@@ -196,7 +196,7 @@ class Model_DbTable_Iste_commite extends Zend_Db_Table_Abstract
     public function findBySoustitre_en($soustitre_en)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_commite") )                           
+                    ->from( array("i" => "iste_comite") )                           
                     ->where( "i.soustitre_en = ?", $soustitre_en );
 
         return $this->fetchAll($query)->toArray(); 

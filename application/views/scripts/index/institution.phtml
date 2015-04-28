@@ -7,11 +7,12 @@ if(!$this->ajax){
 <html>
 	<head>
 		<title>ISTE - Institutions</title>
-		<link rel="stylesheet" type="text/css" href="css/w2ui.css" />
-		<link rel="stylesheet" type="text/css" href="font/font-awesome/font-awesome.css" />
-		<script type="text/javascript" src="js/jquery.min.js"></script>
-		<script type="text/javascript" src="js/w2ui.js"></script>
-		<script type="text/javascript" src="js/global.js"></script>
+		<link rel="stylesheet" type="text/css" href="../css/w2ui.css" />
+		<link rel="stylesheet" type="text/css" href="../font/font-awesome/font-awesome.css" />
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/w2ui.js"></script>
+		<script type="text/javascript" src="../js/global.js"></script>
+		<script type="text/javascript" src="../js/data.js"></script>
 	</head>
 <body>';
 	$toolbar="true";	
@@ -72,7 +73,11 @@ var config = {grid:
             console.log(event);
         },
         onAdd: function(event) {
-            w2ui.<?php echo $idGrid;?>.add({ recid: w2ui.<?php echo $idGrid;?>.records.length + 1 });
+	        	$.get('ajout',
+        			  {idObj:id,typeObj:'institution'},
+        			  function(newId){	        		            
+        		            w2ui.<?php echo $idGrid;?>.add({ recid: newId });
+        			  });            
         }
     }
 }

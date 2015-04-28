@@ -6449,6 +6449,7 @@ w2utils.event = {
             } else {
                 var pos1, pos2;
                 var search = this.toolbar.get('w2ui-search');
+                if(!search) return;
                 var tmp = search.html;
                 pos1 = tmp.indexOf('placeholder="');
                 pos2 = tmp.indexOf('"', pos1+13);

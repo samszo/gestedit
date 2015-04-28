@@ -4,18 +4,26 @@
     <title>ISTE - Tableau de bord</title>
     <link rel="stylesheet" type="text/css" href="css/w2ui.css" />
     <link rel="stylesheet" type="text/css" href="font/font-awesome/font-awesome.css" />
+	<script type="text/javascript">
+		//pour la gestion des vues ajax
+		var urlP = "";
+	</script>		
     <script type="text/javascript" src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="js/w2ui.min.js"></script>
+    <script type="text/javascript" src="js/w2ui.js"></script>
 	<script type="text/javascript" src="js/global.js"></script>
-    <style type="text/css">
-    </style>
+	<script type="text/javascript" src="js/data.js"></script>
+	<script type="text/javascript">
+		//pur la gestion des vues ajax
+		initAll();                        		
+	</script>		
 </head>
 <body>
 
-<div id="layout" style="width: 100%; height: 600px;"></div>
+<div id="layout" style="width: 100%; height: 800px;"></div>
 
 <script type="text/javascript">
 $(function () {
+	
     var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
     $('#layout').w2layout({
         name: 'layout',
@@ -28,7 +36,7 @@ $(function () {
             { type: 'bottom', size: 50, resizable: false, style: pstyle, content: 'mettre ici la date' }
        	]
     });
-    w2ui['layout'].load('top', 'index/top')
+    w2ui['layout'].load('top', 'index/top');
 });
 </script>
 

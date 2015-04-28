@@ -34,7 +34,7 @@ $(function () {
     w2ui.toolbar.on('*', function (event) { 
         console.log('EVENT: '+ event.type + ' TARGET: '+ event.target, event);
         if(event.target=="tbAuteurs"){
-	        	w2ui['layout'].load('main', 'auteur?ajax=1');
+	        	w2ui['layout'].load('main', 'index/auteur?ajax=1');
         }
     });
 });

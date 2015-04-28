@@ -15,8 +15,9 @@ class Model_DbTable_Iste_collection extends Zend_Db_Table_Abstract
     
     /**
      * Clef primaire de la table.
+     * public poru la création dynamique des listes cf. index/liste?obj=
      */
-    protected $_primary = 'id_collection';
+    public $_primary = 'id_collection';
     
     /**
      * Vérifie si une entrée Iste_collection existe.

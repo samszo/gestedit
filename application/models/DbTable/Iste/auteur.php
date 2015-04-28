@@ -42,18 +42,22 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+	    	if($rs)
+			return $this->findById_auteur($id);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -81,32 +85,25 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_auteur.id_auteur = ' . $id);
+	    	$this->delete('iste_auteur.id_auteur = ' . $id);
     }
 
-    /**
-     * Recherche les entrées de Iste_auteur avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
     
     /**
      * Récupère toutes les entrées Iste_auteur avec certains critères
      * de tri, intervalles
      */
-    public function getAll($order=null, $limit=0, $from=0)
+    public function getAll($order="a.nom", $limit=0, $from=0)
     {
    	
-    	$query = $this->select()
-                    ->from( array("iste_auteur" => "iste_auteur") );
-                    
+	    	$query = $this->select()
+		->from( array("a" => "iste_auteur"))
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("aid" => "iste_auteur"),
+                'a.id_auteur = aid.id_auteur', array("recid"=>"id_auteur"))
+			->joinLeft(array("i" => "iste_institution"),
+                'i.id_institution = a.id_institution', array("instNom"=>"nom"));
+		
         if($order != null)
         {
             $query->order($order);
@@ -132,8 +129,13 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
     public function findById_auteur($id_auteur)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_auteur") )                           
-                    ->where( "i.id_auteur = ?", $id_auteur );
+		->from( array("a" => "iste_auteur"))
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("aid" => "iste_auteur"),
+                'a.id_auteur = aid.id_auteur', array("recid"=>"id_auteur"))
+			->joinLeft(array("i" => "iste_institution"),
+                'i.id_institution = a.id_institution', array("instNom"=>"nom"))
+        ->where( "i.id_auteur = ?", $id_auteur );
 
         return $this->fetchAll($query)->toArray(); 
     }

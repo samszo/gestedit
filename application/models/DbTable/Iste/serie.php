@@ -16,7 +16,7 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_serie';
+    public $_primary = 'id_serie';
     
     /**
      * Vérifie si une entrée Iste_serie existe.

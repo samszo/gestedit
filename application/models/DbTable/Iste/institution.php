@@ -16,7 +16,7 @@ class Model_DbTable_Iste_institution extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_institution';
+    public $_primary = 'id_institution';
     
     /**
      * Vérifie si une entrée Iste_institution existe.
@@ -66,9 +66,8 @@ class Model_DbTable_Iste_institution extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_institution.id_institution = ' . $id);
+    {            	   		
+	    	$this->update($data, 'iste_institution.id_institution = ' . $id);
     }
     
     /**
@@ -101,11 +100,14 @@ class Model_DbTable_Iste_institution extends Zend_Db_Table_Abstract
      * Récupère toutes les entrées Iste_institution avec certains critères
      * de tri, intervalles
      */
-    public function getAll($order=null, $limit=0, $from=0)
+    public function getAll($order="nom", $limit=0, $from=0)
     {
    	
-    	$query = $this->select()
-                    ->from( array("iste_institution" => "iste_institution") );
+    		$query = $this->select()
+        		->from( array("i" => "iste_institution") );
+
+        return $this->fetchAll($query)->toArray(); 
+                    
                     
         if($order != null)
         {

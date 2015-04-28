@@ -1,25 +1,25 @@
 <?php
 /**
- * Ce fichier contient la classe Iste_commitexauteur.
+ * Ce fichier contient la classe Iste_comitexauteur.
  *
  * @copyright  2013 Samuel Szoniecky
  * @license    "New" BSD License
 */
-class Model_DbTable_Iste_commitexauteur extends Zend_Db_Table_Abstract
+class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
 {
     
     /**
      * Nom de la table.
      */
-    protected $_name = 'iste_commitexauteur';
+    protected $_name = 'iste_comitexauteur';
     
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_commite';
+    protected $_primary = 'id_comite';
     
     /**
-     * Vérifie si une entrée Iste_commitexauteur existe.
+     * Vérifie si une entrée Iste_comitexauteur existe.
      *
      * @param array $data
      *
@@ -28,17 +28,17 @@ class Model_DbTable_Iste_commitexauteur extends Zend_Db_Table_Abstract
     public function existe($data)
     {
 		$select = $this->select();
-		$select->from($this, array('id_commite'));
+		$select->from($this, array('id_comite'));
 		foreach($data as $k=>$v){
 			$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
-	    if($rows->count()>0)$id=$rows[0]->id_commite; else $id=false;
+	    if($rows->count()>0)$id=$rows[0]->id_comite; else $id=false;
         return $id;
     } 
         
     /**
-     * Ajoute une entrée Iste_commitexauteur.
+     * Ajoute une entrée Iste_comitexauteur.
      *
      * @param array $data
      * @param boolean $existe
@@ -57,7 +57,7 @@ class Model_DbTable_Iste_commitexauteur extends Zend_Db_Table_Abstract
     } 
            
     /**
-     * Recherche une entrée Iste_commitexauteur avec la clef primaire spécifiée
+     * Recherche une entrée Iste_comitexauteur avec la clef primaire spécifiée
      * et modifie cette entrée avec les nouvelles données.
      *
      * @param integer $id
@@ -68,11 +68,11 @@ class Model_DbTable_Iste_commitexauteur extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
    	
-    	$this->update($data, 'iste_commitexauteur.id_commite = ' . $id);
+    	$this->update($data, 'iste_comitexauteur.id_comite = ' . $id);
     }
     
     /**
-     * Recherche une entrée Iste_commitexauteur avec la clef primaire spécifiée
+     * Recherche une entrée Iste_comitexauteur avec la clef primaire spécifiée
      * et supprime cette entrée.
      *
      * @param integer $id
@@ -81,11 +81,11 @@ class Model_DbTable_Iste_commitexauteur extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_commitexauteur.id_commite = ' . $id);
+    	$this->delete('iste_comitexauteur.id_comite = ' . $id);
     }
 
     /**
-     * Recherche les entrées de Iste_commitexauteur avec la clef de lieu
+     * Recherche les entrées de Iste_comitexauteur avec la clef de lieu
      * et supprime ces entrées.
      *
      * @param integer $idLieu
@@ -98,14 +98,14 @@ class Model_DbTable_Iste_commitexauteur extends Zend_Db_Table_Abstract
     }
     
     /**
-     * Récupère toutes les entrées Iste_commitexauteur avec certains critères
+     * Récupère toutes les entrées Iste_comitexauteur avec certains critères
      * de tri, intervalles
      */
     public function getAll($order=null, $limit=0, $from=0)
     {
    	
     	$query = $this->select()
-                    ->from( array("iste_commitexauteur" => "iste_commitexauteur") );
+                    ->from( array("iste_comitexauteur" => "iste_comitexauteur") );
                     
         if($order != null)
         {
@@ -122,23 +122,23 @@ class Model_DbTable_Iste_commitexauteur extends Zend_Db_Table_Abstract
 
     
     	/**
-     * Recherche une entrée Iste_commitexauteur avec la valeur spécifiée
+     * Recherche une entrée Iste_comitexauteur avec la valeur spécifiée
      * et retourne cette entrée.
      *
-     * @param int $id_commite
+     * @param int $id_comite
      *
      * @return array
      */
-    public function findById_commite($id_commite)
+    public function findById_comite($id_comite)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_commitexauteur") )                           
-                    ->where( "i.id_commite = ?", $id_commite );
+                    ->from( array("i" => "iste_comitexauteur") )                           
+                    ->where( "i.id_comite = ?", $id_comite );
 
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
-     * Recherche une entrée Iste_commitexauteur avec la valeur spécifiée
+     * Recherche une entrée Iste_comitexauteur avec la valeur spécifiée
      * et retourne cette entrée.
      *
      * @param int $id_auteur
@@ -148,7 +148,7 @@ class Model_DbTable_Iste_commitexauteur extends Zend_Db_Table_Abstract
     public function findById_auteur($id_auteur)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_commitexauteur") )                           
+                    ->from( array("i" => "iste_comitexauteur") )                           
                     ->where( "i.id_auteur = ?", $id_auteur );
 
         return $this->fetchAll($query)->toArray(); 

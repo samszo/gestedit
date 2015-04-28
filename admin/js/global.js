@@ -1,7 +1,18 @@
+
+
 function showChanged(id) {
     console.log(w2ui[id].getChanges()); 
     w2alert('Changed records are displayed in the console');
 }
+function updateBdd(url,data) {
+	$.get(url,
+		data,
+		function(html){
+			w2alert(html);
+		});                        
+}
+
+
 function openPopup(name, html) {
 	$().w2destroy(name);	
 	w2popup.open({
