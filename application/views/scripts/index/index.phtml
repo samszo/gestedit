@@ -91,7 +91,7 @@ $(function () {
 	            w2ui['form_gridAut_coordination'].destroy();
 	            w2ui['form_gridAut_comite'].destroy();
 	        }
-	        	w2ui['layout'].load('main', 'index/auteur?ajax=1');
+	        	w2ui['layout'].load('main', 'Index/auteur?ajax=1');
 	    }
 	    if(event.target=="tbLivres"){
 	        //supprime les objets si déjà présent
@@ -113,7 +113,7 @@ $(function () {
 	            w2ui['grid_Livre_auteur'].destroy();
 	            if(w2ui['form_Livre_auteur'])w2ui['form_Livre_auteur'].destroy();
 	        }
-	        	w2ui['layout'].load('main', 'index/livre?ajax=1');
+	        	w2ui['layout'].load('main', 'Index/livre?ajax=1');
 	    }
 	    if(event.target=="tbTrad"){
 	        //supprime les objets si déjà présent
@@ -126,7 +126,7 @@ $(function () {
 	            w2ui['grid_Traduction_trad_chapitre'].destroy();
 	            w2ui['form_Traduction_trad_chapitre'].destroy();
 	        }
-	        	w2ui['layout'].load('main', 'index/traduction?ajax=1');
+	        	w2ui['layout'].load('main', 'Index/traduction?ajax=1');
 	    }    
 	    if(event.target=="utiSignOut"){
 		    	deconnexion();

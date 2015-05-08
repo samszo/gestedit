@@ -12,21 +12,21 @@ arrListes['alerte'] = ['1 semaine avant', '10 jours avant','2 jours avant','le j
                       
 function initAll(fct){
 	//chargements AJAX
-	$.get(urlP+"index/liste",{obj:'institution'},function(js){
+	$.get(urlP+"Index/liste",{obj:'institution'},function(js){
 		arrListes['institution']=js;
-		$.get(urlP+"index/liste",{obj:'collection'},function(js){
+		$.get(urlP+"Index/liste",{obj:'collection'},function(js){
 			arrListes['collection']=js;
-			$.get(urlP+"index/liste",{obj:'serie'},function(js){
+			$.get(urlP+"Index/liste",{obj:'serie'},function(js){
 				arrListes['serie']=js;
-				$.get(urlP+"index/liste",{obj:'comite'},function(js){
+				$.get(urlP+"Index/liste",{obj:'comite'},function(js){
 					arrListes['comite']=js;
-					$.get(urlP+"index/liste",{obj:'editeur'},function(js){
+					$.get(urlP+"Index/liste",{obj:'editeur'},function(js){
 						arrListes['editeur']=js;
-						$.get(urlP+"index/liste",{obj:'auteur'},function(js){
+						$.get(urlP+"Index/liste",{obj:'auteur'},function(js){
 							arrListes['auteur']=js;
-							$.get(urlP+"index/liste",{obj:'uti'},function(js){
+							$.get(urlP+"Index/liste",{obj:'uti'},function(js){
 								arrListes['uti']=js;
-								$.get(urlP+"index/liste",{obj:'traducteur'},function(js){
+								$.get(urlP+"Index/liste",{obj:'traducteur'},function(js){
 									arrListes['traducteur']=js;
 									//initialisation des configurations de layout
 									if(fct)fct();
