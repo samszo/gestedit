@@ -42,19 +42,23 @@ class Model_DbTable_Iste_comitexlivre extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
-    } 
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}else return "existe";
+	    	if($rs)
+	    		return $this->findByLivreComite($data["id_livre"], $data["id_comite"]);
+	    	else
+		    	return $id;
+	} 
            
     /**
      * Recherche une entrée Iste_comitexlivre avec la clef primaire spécifiée
@@ -75,26 +79,14 @@ class Model_DbTable_Iste_comitexlivre extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_comitexlivre avec la clef primaire spécifiée
      * et supprime cette entrée.
      *
-     * @param integer $id
+     * @param int $idLivre
+     * @param int $idComite
      *
      * @return void
      */
-    public function remove($id)
+    public function remove($idLivre, $idComite)
     {
-    	$this->delete('iste_comitexlivre.id_comite = ' . $id);
-    }
-
-    /**
-     * Recherche les entrées de Iste_comitexlivre avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
+	    	$this->delete('iste_comitexlivre.id_livre = '.$idLivre.' AND iste_comitexlivre.id_comite = '.$idComite);
     }
     
     /**
@@ -141,18 +133,42 @@ class Model_DbTable_Iste_comitexlivre extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_comitexlivre avec la valeur spécifiée
      * et retourne cette entrée.
      *
-     * @param int $id_livre
+     * @param int $idLivre
      *
      * @return array
      */
-    public function findById_livre($id_livre)
+    public function findById_livre($idLivre)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_comitexlivre") )                           
-                    ->where( "i.id_livre = ?", $id_livre );
-
+			->from( array("i" => "iste_comitexlivre") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("c" => "iste_comite"),
+                'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_comite"))
+            ->where( "i.id_livre = ?", $idLivre );
+			
         return $this->fetchAll($query)->toArray(); 
     }
-    
+
+/**
+     * Recherche une entrée Iste_comitexlivre avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idLivre
+     * @param int $idComite
+     *
+     * @return array
+     */
+    public function findByLivreComite($idLivre, $idComite)
+    {
+        $query = $this->select()
+        		->from( array("i" => "iste_comitexlivre") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("c" => "iste_comite"),
+                'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_comite"))
+        		->where( "i.id_comite = ?", $idComite )
+            ->where( "i.id_livre = ?", $idLivre );
+        		
+        return $this->fetchAll($query)->toArray(); 
+    }    
     
 }

@@ -1,20 +1,3 @@
 <?php
-	if($this->ajax){
-		echo json_encode(array("uti"=>$this->rs,"erreur"=>$this->erreur));
-	}else{
-		$this->form->setAction($this->url());
-		echo '<!DOCTYPE html>
-		<html>
-		<head>
-			<meta charset="utf-8" />
-			<title>Jardin des connaissances : login</title>
-			<link rel="stylesheet" href="../css/site.css" />
-		</head>
-		<body>
-			<h1>Le jardin des connaissances</h1>
-			<h4>'.$this->erreur.'</h4>
-			'.$this->form.'
-		  </body>
-		</html>	';	
-	}
+	echo json_encode(array("uti"=>$this->rs,"erreur"=>$this->erreur));
 ?>

@@ -16,7 +16,7 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_proposition';
+    public $_primary = 'id_proposition';
     
     /**
      * Vérifie si une entrée Iste_proposition existe.
@@ -42,18 +42,23 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=true)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    		if(!isset($data['date_debut']))$data['date_debut']= new Zend_Db_Expr('NOW()');
+	    	 	$id = $this->insert($data);
+	    	}
+	    	if($rs)
+			return $this->findById_proposition($id);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -67,8 +72,7 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
      */
     public function edit($id, $data)
     {        
-   	
-    	$this->update($data, 'iste_proposition.id_proposition = ' . $id);
+	    	$this->update($data, 'iste_proposition.id_proposition = ' . $id);
     }
     
     /**
@@ -83,19 +87,6 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
     {
     	$this->delete('iste_proposition.id_proposition = ' . $id);
     }
-
-    /**
-     * Recherche les entrées de Iste_proposition avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
     
     /**
      * Récupère toutes les entrées Iste_proposition avec certains critères
@@ -104,7 +95,7 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
     public function getAll($order=null, $limit=0, $from=0)
     {
    	
-    	$query = $this->select()
+    		$query = $this->select()
                     ->from( array("iste_proposition" => "iste_proposition") );
                     
         if($order != null)
@@ -132,8 +123,11 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
     public function findById_proposition($id_proposition)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_proposition") )                           
-                    ->where( "i.id_proposition = ?", $id_proposition );
+            ->from( array("p" => "iste_proposition") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("pid" => "iste_proposition"),
+                'p.id_proposition = pid.id_proposition', array("recid"=>"id_proposition"))
+            ->where( "p.id_proposition = ?", $id_proposition );
 
         return $this->fetchAll($query)->toArray(); 
     }
@@ -285,15 +279,18 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_proposition avec la valeur spécifiée
      * et retourne cette entrée.
      *
-     * @param int $iste_livre_id_livre
+     * @param int $idLivre
      *
      * @return array
      */
-    public function findByIste_livre_id_livre($iste_livre_id_livre)
+    public function findById_livre($idLivre)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_proposition") )                           
-                    ->where( "i.iste_livre_id_livre = ?", $iste_livre_id_livre );
+			->from( array("p" => "iste_proposition") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("pid" => "iste_proposition"),
+                'p.id_proposition = pid.id_proposition', array("recid"=>"id_proposition"))
+			->where( "p.id_livre = ?", $idLivre );
 
         return $this->fetchAll($query)->toArray(); 
     }

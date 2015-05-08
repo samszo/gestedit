@@ -1,0 +1,769 @@
+<?php 
+if(!$this->ajax){
+	echo '<!DOCTYPE html>
+<html>
+	<head>
+		<title>ISTE - Livres</title>
+		<link rel="stylesheet" type="text/css" href="../css/w2ui.css" />
+		<link rel="stylesheet" type="text/css" href="../font/font-awesome/font-awesome.css" />
+		<script type="text/javascript">
+			var urlP = "../";
+		</script>		
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/w2ui.js"></script>
+		<script type="text/javascript" src="../js/global.js"></script>
+		<script type="text/javascript" src="../js/data.js"></script>
+		<script type="text/javascript">
+			$(function () {initAll(initLivre); });                       		
+		</script>		
+		</head>
+<body>';
+}
+$idPage = "Livre";
+?>
+<div id="<?php echo $idPage;?>" style="width: 1200px; height: 700px;"></div>
+
+<script type="text/javascript">
+var rs = <?php echo $this->json; ?>;
+
+//widget configuration
+var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
+var pstyleDetail = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
+var config;
+
+function initLivre() {
+
+	config = {
+		    layoutLivre: {
+		        name: 'layout_<?php echo $idPage;?>',
+		        padding: 4,
+		        panels: [
+		 		    { type: 'top', size: 200, style: pstyle},
+					{ type: 'main', size: 306, resizable: true, style: pstyleDetail},
+		            { type: 'left', size: 1200, resizable: true, hidden: true, style: pstyle},
+		            { type: 'right', size: 894, resizable: true, hidden: false, style: pstyleDetail}
+		        ]
+		    },
+		    gridLivre: { 
+		        name: 'grid_<?php echo $idPage;?>', 
+				header: 'Livres',		
+		        show: { 
+					header			: true,		
+		            toolbar			: true,
+					toolbarReload   : true,
+					toolbarColumns  : true,
+		            	toolbarSearch   : true,
+		            	toolbarAdd      : true,
+		            	toolbarDelete   : true,
+		            	toolbarSave		: true,
+		        },
+		        columns: [                
+		            { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
+		            { field: 'reference', caption: 'Référence', size: '80px', sortable: true, resizable: true, 
+		                editable: { type: 'int'}
+		            },
+		            { field: 'titre_fr', caption: 'Titre français', size: '50%', sortable: true, resizable: true, 
+		                editable: { type: 'text' }
+		            },
+		            { field: 'titre_en', caption: 'Titre anglais', size: '50%', sortable: true, resizable: true, 
+		                editable: { type: 'text' }
+		            },
+		            { field: 'soustitre_fr', caption: 'Sous titre français', size: '200px', sortable: true, resizable: true, 
+		                editable: { type: 'text'},
+		            },		            
+		            { field: 'soustitre_en', caption: 'Sous titre anglais', size: '200px', sortable: true, resizable: true, 
+		                editable: { type: 'text'},
+		            },		            
+		            { field: 'num_vol', caption: 'N° vol.', size: '60px', sortable: true, resizable: true, 
+		                editable: { type: 'int'},
+		            },		            
+		            { field: 'type_1', caption: 'Type 1', size: '60px', sortable: true, resizable: true, 
+			            	editable: { type: 'list', items: arrListes['type1'], showAll: true },
+		                render: function (record, index, col_index) {
+		                    var html = this.getCellValue(index, col_index);
+		                    return html.text ? html.text : html;
+		                }
+		            },		            
+		            { field: 'type_2', caption: 'Type 2', size: '60px', sortable: true, resizable: true, 
+		            		editable: { type: 'list', items: arrListes['type2'], showAll: true },
+		                render: function (record, index, col_index) {
+		                    var html = this.getCellValue(index, col_index);
+		                    return html.text ? html.text : html;
+		                }
+		            },		            
+		        ],
+		        toolbar: {
+		            items: [
+		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		            ],
+		            onClick: function (event) {
+		                if (event.target == 'export') {
+		                    w2ui.<?php echo $idPage;?>.add({ recid: w2ui.<?php echo $idPage;?>.records.length + 1 });
+		                }
+		            }
+		        },
+		        records: rs,
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>'].getChanges();
+		            changes.forEach(function(c, i){
+			            c.obj = 'livre';
+			            if(c.type_1)c.type_1=c.type_1.text;			            
+			            if(c.type_2)c.type_2=c.type_2.text;			            
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(html){
+			        				if(changes.length==i+1)w2alert(html);
+			        			});                        
+		            });
+		        },
+		        onDelete: function(event) {            
+					console.log(event);
+					var p = {id:itemSelect.recid, obj:'livre'};
+					if(event.force){
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+							p,
+			            		function(js){
+			            			w2alert(js.message);
+			           		},"json");
+					}
+			    },
+		        onAdd: function(event) {            
+		            w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
+		            w2ui['layout_<?php echo $idPage;?>'].hide('main', true);
+		            w2ui['layout_<?php echo $idPage;?>'].hide('right', true);
+			    },
+		        onClick: function (event) {
+		            itemSelect = this.get(event.recid);
+		            var g;
+			        //gestion de la proposition
+					$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
+						{id:itemSelect.recid, obj:'proposition'},
+		            		function(js){
+		            			//mise à jour du formulaire
+				            g = w2ui['form_<?php echo $idPage;?>_propo'];
+				            g.clear();
+							g.record = js.rs[0];
+							g.refresh();		            			
+		           		},"json"); 
+					//gestion des collections
+		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
+							{id:itemSelect.recid, obj:'livrexcollection'},
+			            		function(js){
+					            g = w2ui['grid_<?php echo $idPage;?>_collection'];
+					            g.clear();
+								g.add(js.rs);								
+			           		},"json");
+			        //gestion des comite
+		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
+							{id:itemSelect.recid, obj:'comitexlivre'},
+			            		function(js){
+					            g = w2ui['grid_<?php echo $idPage;?>_comite'];
+					            g.clear();
+								g.add(js.rs);
+			           		},"json");
+				    //gestion des série
+		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
+							{id:itemSelect.recid, obj:'livrexserie'},
+			            		function(js){
+					            g = w2ui['grid_<?php echo $idPage;?>_serie'];
+					            g.clear();
+								g.add(js.rs);
+			           		},"json");	           		           
+					//gestion des isbn
+		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
+							{id:itemSelect.recid, obj:'isbn'},
+			            		function(js){
+					            g = w2ui['grid_<?php echo $idPage;?>_isbn'];
+					            g.clear();
+								g.add(js.rs);
+			           		},"json");	           		           
+					//gestion des auteurs
+		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
+							{id:itemSelect.recid, obj:'livrexauteur'},
+			            		function(js){
+					            g = w2ui['grid_<?php echo $idPage;?>_auteur'];
+					            g.clear();
+								g.add(js.rs);
+			           		},"json");	           		           
+		        }	    
+		    },	    
+		    formLivre: { 
+		        header: 'Ajouter un livre',
+		        name: 'form_<?php echo $idPage;?>',
+		        fields: [
+		            { name: 'reference', type: 'int', required: true, html: { caption: 'Référence', attr: 'size="40" maxlength="40"' } },
+		            { name: 'titre_fr', type: 'text', required: true, html: { caption: 'Titre français', attr: 'size="200" ' } },
+		            { name: 'titre_en', type: 'text', required: true, html: { caption: 'Titre anglais', attr: 'size="200" ' } },
+		            { name: 'soustitre_fr', type: 'text', html: { caption: 'Sous titre français', attr: 'size="200"' } },
+		            { name: 'soustitre_en', type: 'text', html: { caption: 'Sous titre anglais', attr: 'size="200"' } },
+		            { name: 'num_vol', type: 'int', html: { caption: 'N° vol.', attr: 'size="10"' } },
+		            { name: 'type_1', type: 'list', options: { items: arrListes['type1'] }
+		            		, html: { caption: 'Type 1', attr: 'size="20"' } 
+		            		},
+		            { name: 'type_2', type: 'list', options: { items: arrListes['type2'] }
+		            		, html: { caption: 'Type 2', attr: 'size="20"' } 
+		            		}
+		        ],
+		        actions: {
+		            Reset: function () {
+		                w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
+		                w2ui['layout_<?php echo $idPage;?>'].toggle('main', true);
+		                w2ui['layout_<?php echo $idPage;?>'].toggle('right', true);
+		                this.clear();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+			            if(data.type_1)data.type_1=data.type_1.text;			            
+			            if(data.type_2)data.type_2=data.type_2.text;			            
+		                data.obj = "livre";
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+				                var g = w2ui['grid_<?php echo $idPage;?>'];
+								g.add(js.rs.rsLivre);
+								g.selectNone();
+				                g = w2ui['form_<?php echo $idPage;?>'];
+								g.clear();
+		                        	w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
+		                        	w2ui['layout_<?php echo $idPage;?>'].toggle('main', true);
+		    		                w2ui['layout_<?php echo $idPage;?>'].toggle('right', true);
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
+	    		formPropo: { 
+			        header: 'Proposition',
+			        name: 'form_<?php echo $idPage;?>_propo',
+			        fields: [
+			            { name: 'date_debut', type: 'date', options:{format: 'yyyy-mm-dd'}, required: true,  html: {caption: 'Date de début'} },
+			            { name: 'date_contrat', type: 'date', options:{format: 'yyyy-mm-dd'}, required: false, html: { caption: 'Date de contrat'} },
+			            { name: 'base_contrat', type: 'list', required: true, html: { caption: 'Base contrat'}
+			            		,options: { items: arrListes['contrat'] }} , 
+			            { name: 'date_manuscrit', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date du manuscrit' } },
+			            { name: 'langue', type: 'list', html: { caption: 'Langue'}
+			            		,options: { items: arrListes['langues'] }} , 
+				        { name: 'traduction', type: 'list', html: { caption: 'Traduction'}
+						    ,options: { items: arrListes['langues'] }},
+			            { name: 'publication_fr', type: 'checkbox', html: { caption: 'Publication français' } },
+			            { name: 'publication_en', type: 'checkbox', html: { caption: 'Publication anglais' } },
+			            { name: 'nb_page', type: 'int', html: { caption: 'Nombre de page' } }
+			        ],
+			        actions: {
+			            Save: function () {
+			                var errors = this.validate();
+			                if (errors.length > 0) return;
+			                var data = this.record;
+				            if(data.base_contrat)data.base_contrat=data.base_contrat.text;			            
+				            if(data.langue)data.langue=data.langue.text;			            
+				            if(data.traduction)data.traduction=data.traduction.text;			            
+				            data.id_livre = itemSelect.recid;			            
+			                data.obj = "proposition";
+				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+								data,
+				            		function(js){
+				            			w2alert(js.message);
+				           		},"json");
+			            }
+			        }
+			    },
+		    layoutDetail : {
+		        name: 'layoutDetail_<?php echo $idPage;?>',
+		        panels: [
+		            { type: 'main', size: '376px', style: pstyleDetail, resizable: true },
+		            { type: 'left', size: '505px', style: pstyleDetail, resizable: true },
+		            { type: 'top', size: 200, style: pstyleDetail, resizable: true },
+		            { type: 'bottom', size: '183px', hidden:true, style: pstyleDetail, resizable: true }
+		        ]
+		    },
+		    layoutThemes : {
+		        name: 'layoutThemes_<?php echo $idPage;?>',
+		        panels: [
+		            { type: 'left', size: '30%', resizable: true, style: pstyleDetail},
+		            { type: 'main', size: '30%', resizable: true, style: pstyleDetail},
+		            { type: 'right', size: '40%', resizable: true, style: pstyleDetail},
+		            { type: 'top', size: '188px', hidden: true, resizable: true, style: pstyleDetail}
+		        ]
+		    },		    
+		    gridCollection : {
+	            header: 'Collection',
+	            show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: false,
+	                	header			: true, 
+	                	columnHeaders	: false},
+	            name: 'grid_<?php echo $idPage;?>_collection', 
+	            columns: [                
+	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
+			            { field: 'titre', caption: 'Titre', size: '80%', sortable: true, resizable: true},
+	            ],
+	            onAdd: function(event) {
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('main', true);
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('left', true);		            
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('right', true);	
+	                if(w2ui['form_<?php echo $idPage;?>_collection'])w2ui['form_<?php echo $idPage;?>_collection'].destroy();	            
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].content('top', $().w2form(config.formCollection));
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('top', true);
+			    },
+		        onDelete: function(event) {            
+					console.log(event);
+					var p = {'id_livre':itemSelect.recid,'obj':'livrexcollection'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id_collection = s[0];
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+								p,
+				            		function(js){
+				            			w2alert(js.message);
+				           		},"json");
+					}
+			    },
+	    		},
+	    		formCollection: { 
+		        header: 'Ajouter une collection',
+		        name: 'form_<?php echo $idPage;?>_collection',
+		        fields: [
+		            { name: 'collection', type: 'list', required: true
+			            	, html: { caption: 'Collection', attr: 'size="60" maxlength="60"' } 
+		            		, options: { items: arrListes['collection'] }
+		           	}
+		        ],
+		        actions: {
+		            Reset: function () {
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('main', true);
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('left', true);		            
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('right', true);		            
+		                w2ui['form_<?php echo $idPage;?>_collection'].destroy();	            
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('top', true);
+		                this.clear();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var g = w2ui['grid_<?php echo $idPage;?>_collection'];
+		                var data = this.record;
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							{obj:"livrexcollection",id_livre:itemSelect["id_livre"],id_collection:data.collection.id},
+			            		function(js){
+			            			if(js.rs){					            			
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('main', true);
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('left', true);		            
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('right', true);		            
+				                w2ui['form_<?php echo $idPage;?>_collection'].destroy();	            
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('top', true);
+					            w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },	    					    
+		    gridComite : {
+	            header: 'Comité',
+	            show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: false,
+	                	header			: true, 
+	                	columnHeaders	: false},
+	            name: 'grid_<?php echo $idPage;?>_comite', 
+	            columns: [                
+	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
+			            { field: 'titre', caption: 'Titre', size: '80%', sortable: true, resizable: true},
+	            ],
+	            onAdd: function(event) {
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('main', true);
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('left', true);		            
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('right', true);	
+	                if(w2ui['form_<?php echo $idPage;?>_comite'])w2ui['form_<?php echo $idPage;?>_comite'].destroy();	            
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].content('top', $().w2form(config.formComite));
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('top', true);
+			    },
+		        onDelete: function(event) {            
+					console.log(event);
+					var p = {'id_livre':itemSelect.recid,'obj':'comitexlivre'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id_comite = s[0];
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+								p,
+				            		function(js){
+				            			w2alert(js.message);
+				           		},"json");
+					}
+			    },
+	    		},
+	    		formComite: { 
+		        header: 'Ajouter un comite',
+		        name: 'form_<?php echo $idPage;?>_comite',
+		        fields: [
+		            { name: 'comite', type: 'list', required: true
+			            	, html: { caption: 'Comité', attr: 'size="60" maxlength="60"' } 
+		            		, options: { items: arrListes['comite'] }
+		           	}
+		        ],
+		        actions: {
+		            Reset: function () {
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('main', true);
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('left', true);		            
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('right', true);	
+		                w2ui['form_<?php echo $idPage;?>_comite'].destroy();	            
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('top', true);
+		                this.clear();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var g = w2ui['grid_<?php echo $idPage;?>_comite'];
+		                var data = this.record;
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							{obj:"comitexlivre",id_livre:itemSelect["id_livre"],id_comite:data.comite.id},
+			            		function(js){
+			            			if(js.rs){					            			
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('main', true);
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('left', true);		            
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('right', true);	
+				                w2ui['form_<?php echo $idPage;?>_comite'].destroy();	            
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('top', true);
+					            w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
+		    gridSerie : {
+	            header: 'Série',
+	            show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: false,
+	                	header			: true, 
+	                	columnHeaders	: false},
+	            name: 'grid_<?php echo $idPage;?>_serie', 
+	            columns: [                
+	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
+			            { field: 'titre', caption: 'Titre', size: '80%', sortable: true, resizable: true},
+	            ],
+	            onAdd: function(event) {
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('main', true);
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('left', true);		            
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('right', true);	
+	                if(w2ui['form_<?php echo $idPage;?>_serie'])w2ui['form_<?php echo $idPage;?>_serie'].destroy();	            
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].content('top', $().w2form(config.formSerie));
+		            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('top', true);
+			    },
+		        onDelete: function(event) {            
+					console.log(event);
+					var p = {'id_livre':itemSelect.recid,'obj':'livrexserie'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id_serie = s[0];
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+								p,
+				            		function(js){
+				            			w2alert(js.message);
+				           		},"json");
+					}
+			    },
+	    		},
+	    		formSerie: { 
+		        header: 'Ajouter une série',
+		        name: 'form_<?php echo $idPage;?>_serie',
+		        fields: [
+		            { name: 'serie', type: 'list', required: true
+			            	, html: { caption: 'Série', attr: 'size="60" maxlength="60"' } 
+		            		, options: { items: arrListes['serie'] }
+		           	}
+		        ],
+		        actions: {
+		            Reset: function () {
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('main', true);
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('left', true);		            
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('right', true);	
+		                w2ui['form_<?php echo $idPage;?>_serie'].destroy();	            
+			            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('top', true);
+		                this.clear();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var g = w2ui['grid_<?php echo $idPage;?>_serie'];
+		                var data = this.record;
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							{obj:"livrexserie",id_livre:itemSelect["id_livre"],id_serie:data.serie.id},
+			            		function(js){
+			            			if(js.rs){					            			
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('main', true);
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('left', true);		            
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('right', true);	
+				                w2ui['form_<?php echo $idPage;?>_serie'].destroy();	            
+					            w2ui['layoutThemes_<?php echo $idPage;?>'].hide('top', true);
+					            w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
+		    gridISBN : {
+	            header: 'ISBN',
+	            show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: true,
+	                	header			: true, 
+	                	columnHeaders	: true},
+	            name: 'grid_<?php echo $idPage;?>_isbn', 
+	            columns: [                
+	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
+			            { field: 'num', caption: 'ISBN', size: '140px', sortable: true, resizable: true,
+			                editable: { type: 'text'}},
+			            { field: 'date_parution', caption: 'Parution', size: '90px', sortable: true, resizable: true,
+			                editable: { type: 'date'}},
+			            { field: 'id_editeur', caption: 'Editeur', size: '130px', sortable: true, resizable: true,
+			            	editable: { type: 'select', items: arrListes['editeur'] }, 
+			                render: function (record, index, col_index) {
+			                    var html = '';
+			                    for (var p in arrListes['editeur']) {
+			                        if (arrListes['editeur'][p].id == this.getCellValue(index, col_index)) html = arrListes['editeur'][p].text;
+			                    }
+			                    return html;
+			                }},
+			            { field: 'tirage', caption: 'Tirage', size: '60px', sortable: true, resizable: true, render: 'int',
+			                    editable: { type: 'int', min: 0}},
+			            { field: 'nb_page', caption: 'Nb. page', size: '70px', sortable: true, resizable: true, render: 'int',
+			                        editable: { type: 'int', min: 0}},
+			            /*
+			            { field: 'cout_total', caption: 'Coût total', size: '120px', sortable: true, resizable: true},
+			            { field: 'cout_page', caption: 'Coût page', size: '120px', sortable: true, resizable: true},
+			            { field: 'prix_catalogue', caption: 'Prix', size: '120px', sortable: true, resizable: true},
+			            { field: 'devise', caption: 'Devise', size: '120px', sortable: true, resizable: true},
+			            { field: 'date_parution', caption: 'Parution', size: '120px', sortable: true, resizable: true},
+			            { field: 'type', caption: 'Type', size: '120px', sortable: true, resizable: true}
+			            */			            
+	            ],
+	            onAdd: function(event) {
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('main', true);
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('left', true);		            
+	                if(w2ui['form_<?php echo $idPage;?>_isbn'])w2ui['form_<?php echo $idPage;?>_isbn'].destroy();	            
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].content('bottom', $().w2form(config.formISBN));
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('bottom', true);
+			    },
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_isbn'].getChanges();
+		            changes.forEach(function(c, i){
+			            c.obj = 'isbn';
+			            c.date_parution = w2utils.formatDate(c.date_parution, 'yyyy-mm-dd');
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(html){
+			        				if(changes.length==i+1)w2alert(html);
+			        			});                        
+		            });
+		        },
+		        onDelete: function(event) {            
+					console.log(event);
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+			            			{'id':s[0],'obj':'isbn'},
+				            		function(js){
+				            			w2alert(js.message);
+				           		},"json");
+					}
+			    },
+	    		},		    				    	    		    
+	    		formISBN: { 
+		        header: 'Ajouter un ISBN',
+		        name: 'form_<?php echo $idPage;?>_isbn',
+		        fields: [
+		            { name: 'num', type: 'text', required: true, html: { caption: 'ISBN', attr: 'size="60"' } },
+		            { name: 'id_editeur', required: true, type: 'list', options: { items: arrListes['editeur'] }
+		            		, html: { caption: 'Editeur', attr: 'size="20"' } 
+		            		},
+				    { name: 'date_parution', type: 'date', options:{format: 'yyyy-mm-dd'}, html: {caption: 'Date de parution'} },
+		            { name: 'tirage', type: 'int', html: { caption: 'Tirage', attr: 'size="60px"' } },
+		            { name: 'nb_page', type: 'int', html: { caption: 'Nb. page', attr: 'size="70px"' } },
+		        ],
+		        actions: {
+		            Reset: function () {
+			            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('main', true);
+			            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('left', true);		            
+		                w2ui['form_<?php echo $idPage;?>_isbn'].destroy();	            
+			            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('bottom', true);
+		                this.clear();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var g = w2ui['grid_<?php echo $idPage;?>_isbn'];
+		                var data = this.record;
+		                data.id_livre = itemSelect["id_livre"];
+		                data.id_editeur = data.id_editeur.id;
+		                data.obj = "isbn";
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+			            			if(js.rs){					            			
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+					            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('main', true);
+					            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('left', true);		            
+				                w2ui['form_<?php echo $idPage;?>_isbn'].destroy();	            
+					            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('bottom', true);
+					            w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
+			gridAuteur : {
+	            header: 'Auteurs',
+	            show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: false,
+	                	header			: true, 
+	                	columnHeaders	: true},
+	            name: 'grid_<?php echo $idPage;?>_auteur', 
+	            columns: [                
+	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
+			            { field: 'id_auteur', caption: 'Auteur', size: '60%', sortable: true, resizable: true,
+			            	editable: { type: 'select', items: arrListes['auteur'] }, 
+			                render: function (record, index, col_index) {
+			                    var html = '';
+			                    for (var p in arrListes['auteur']) {
+			                        if (arrListes['auteur'][p].id == this.getCellValue(index, col_index)) html = arrListes['auteur'][p].text;
+			                    }
+			                    return html;
+			                }},	  		            
+			            { field: 'role', caption: 'Role', size: '40%', sortable: true, resizable: true,
+				                editable: { type: 'list', items: arrListes['roles'], showAll: true },
+				                render: function (record, index, col_index) {
+				                    var html = this.getCellValue(index, col_index);
+				                    return html.text ? html.text : html;
+				                }},
+	            ],
+	            onAdd: function(event) {
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('main', true);
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('left', true);		            
+	                if(w2ui['form_<?php echo $idPage;?>_auteur'])w2ui['form_<?php echo $idPage;?>_auteur'].destroy();	            
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].content('bottom', $().w2form(config.formAuteur));
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('bottom', true);
+			    },
+		        onDelete: function(event) {            
+					console.log(event);
+					var p = {'obj':'livrexauteur'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id = s[0];
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+								p,
+				            		function(js){
+				            			w2alert(js.message);
+				           		},"json");
+					}
+			    },
+	    		},	
+	    		formAuteur: { 
+		        header: 'Ajouter un auteur',
+		        name: 'form_<?php echo $idPage;?>_auteur',
+		        fields: [
+		            { name: 'id_auteur', required: true, type: 'list', options: { items: arrListes['auteur'] }
+		            		, html: { caption: 'Auteur', attr: 'size="20"' } 
+		            		},
+		            { name: 'role', required: true, type: 'list', options: { items: arrListes['roles'] }
+		            		, html: { caption: 'Rôle', attr: 'size="20"' } 
+		            		},
+		        ],
+		        actions: {
+		            Reset: function () {
+			            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('main', true);
+			            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('left', true);		            
+		                w2ui['form_<?php echo $idPage;?>_auteur'].destroy();	            
+			            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('bottom', true);
+		                this.clear();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var g = w2ui['grid_<?php echo $idPage;?>_auteur'];
+		                var data = this.record;
+		                data.id_livre = itemSelect["id_livre"];
+		                data.id_auteur = data.id_auteur.id;
+		                data.role = data.role.text;
+		                data.obj = "livrexauteur";
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+			            			if(js.rs){					            			
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+					            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('main', true);
+					            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('left', true);		            
+				                w2ui['form_<?php echo $idPage;?>_auteur'].destroy();	            
+					            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('bottom', true);
+					            w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
+		};
+	
+    // initialisation
+    $('#<?php echo $idPage;?>').w2layout(config.layoutLivre);
+    w2ui.layout_<?php echo $idPage;?>.content('top', $().w2grid(config.gridLivre));
+    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2form(config.formPropo));
+    w2ui.layout_<?php echo $idPage;?>.content('left', $().w2form(config.formLivre));
+    w2ui.layout_<?php echo $idPage;?>.content('right', $().w2layout(config.layoutDetail));
+    w2ui.layoutDetail_<?php echo $idPage;?>.content('main', $().w2grid(config.gridAuteur));    
+    w2ui.layoutDetail_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutThemes));    
+    w2ui.layoutDetail_<?php echo $idPage;?>.content('left', $().w2grid(config.gridISBN));
+    w2ui.layoutThemes_<?php echo $idPage;?>.content('right', $().w2grid(config.gridComite));
+    w2ui.layoutThemes_<?php echo $idPage;?>.content('left', $().w2grid(config.gridCollection));
+    w2ui.layoutThemes_<?php echo $idPage;?>.content('main', $().w2grid(config.gridSerie));
+
+}
+</script>
+
+<?php 
+if(!$this->ajax){
+	echo '</body>
+</html>';
+}else{
+	echo '<script type="text/javascript">
+			$(function () {initLivre(); });                       		
+		</script>		
+		';	
+}
+
+?>

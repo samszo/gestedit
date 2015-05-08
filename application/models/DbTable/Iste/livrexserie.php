@@ -42,18 +42,21 @@ class Model_DbTable_Iste_livrexserie extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+    public function ajouter($data, $existe=true, $rs=false)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}else return "existe";
+	    	if($rs)
+	    		return $this->findByLivreSerie($data["id_livre"], $data["id_serie"]);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -67,34 +70,21 @@ class Model_DbTable_Iste_livrexserie extends Zend_Db_Table_Abstract
      */
     public function edit($id, $data)
     {        
-   	
-    	$this->update($data, 'iste_livrexserie.id_livre = ' . $id);
+	   	$this->update($data, 'iste_livrexserie.id_livre = ' . $id);
     }
     
     /**
      * Recherche une entrée Iste_livrexserie avec la clef primaire spécifiée
      * et supprime cette entrée.
      *
-     * @param integer $id
+     * @param int $idLivre
+     * @param int $idSerie
      *
      * @return void
      */
-    public function remove($id)
+    public function remove($idLivre, $idSerie)
     {
-    	$this->delete('iste_livrexserie.id_livre = ' . $id);
-    }
-
-    /**
-     * Recherche les entrées de Iste_livrexserie avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
+    		$this->delete('iste_livrexserie.id_serie = ' . $idSerie.' AND iste_livrexserie.id_livre = ' . $idLivre);
     }
     
     /**
@@ -104,7 +94,7 @@ class Model_DbTable_Iste_livrexserie extends Zend_Db_Table_Abstract
     public function getAll($order=null, $limit=0, $from=0)
     {
    	
-    	$query = $this->select()
+    		$query = $this->select()
                     ->from( array("iste_livrexserie" => "iste_livrexserie") );
                     
         if($order != null)
@@ -132,9 +122,12 @@ class Model_DbTable_Iste_livrexserie extends Zend_Db_Table_Abstract
     public function findById_livre($id_livre)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_livrexserie") )                           
-                    ->where( "i.id_livre = ?", $id_livre );
-
+        		->from( array("ls" => "iste_livrexserie") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("s" => "iste_serie"),
+                's.id_serie = ls.id_serie', array("titre"=>"CONCAT(s.titre_fr,' / ',s.titre_en)", "recid"=>"id_serie"))
+        		->where( "ls.id_livre = ?", $id_livre );
+        
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
@@ -154,5 +147,26 @@ class Model_DbTable_Iste_livrexserie extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
-    
+	/**
+     * Recherche une entrée Iste_livrexserie avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idLivre
+     * @param int $idSerie
+     *
+     * @return array
+     */
+    public function findByLivreSerie($idLivre, $idSerie)
+    {
+        $query = $this->select()
+        		->from( array("ls" => "iste_livrexserie") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("s" => "iste_serie"),
+                'ls.id_serie = s.id_serie', array("titre"=>"CONCAT(s.titre_fr,' / ',s.titre_en)", "recid"=>"id_serie"))
+        		->where( "ls.id_serie = ?", $idSerie )
+            ->where( "ls.id_livre = ?", $idLivre );
+        		
+        return $this->fetchAll($query)->toArray(); 
+    }    
+            
 }

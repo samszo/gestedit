@@ -538,3 +538,9 @@ ul.icons li [class*=" fa-"] {
 .fa-github-alt:before           { content: "\f113"; }
 .fa-folder-close-alt:before     { content: "\f114"; }
 .fa-folder-open-alt:before      { content: "\f115"; }
+
+/*
+ajout samszo
+*/
+.fa-language:before			   { content: "\f1ab"; }
+.fa-sign-out:before			   { content: "\f08b"; }

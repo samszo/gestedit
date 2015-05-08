@@ -80,7 +80,7 @@ a [class*=" fa-"] {
 /* makes the font 33% larger relative to the icon container */
 .fa-large:before {
   vertical-align: -10%;
-  font-size: 7em;
+  font-size: 1.3333333333333333em;
 }
 .btn [class^="fa-"],
 .nav [class^="fa-"],
@@ -538,3 +538,8 @@ ul.icons li [class*=" fa-"] {
 .fa-github-alt:before           { content: "\f113"; }
 .fa-folder-close-alt:before     { content: "\f114"; }
 .fa-folder-open-alt:before      { content: "\f115"; }
+
+/*
+ajout samszo
+*/
+.fa-language:before			   { content: "\f1ab"; }

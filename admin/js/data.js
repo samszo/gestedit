@@ -1,28 +1,41 @@
 
-var arrListes = ['civilites','institution','collection','serie','comite']
+var itemSelect;
+var arrListes = [];
 arrListes['civilites'] = ['Mr', 'Mme', 'Mlle', 'Docteur', 'Doctor', 'Professeur', 'Professor'];
-
-function initAll(){
+arrListes['type1'] = ['Edited', 'Author'];
+arrListes['type2'] = ['Set', 'Focus', 'Classic'];
+arrListes['contrat'] = ['GB','FR'];
+arrListes['langues'] = ['anglais','français'];
+arrListes['roles'] = ['auteur','coordinateur','préfacier'];
+arrListes['traduction'] = ['français -> anglais', 'anglais -> français','anglais <-> français'];
+arrListes['alerte'] = ['1 semaine avant', '10 jours avant','2 jours avant','le jour même'];
+                      
+function initAll(fct){
 	//chargements AJAX
-	arrListes.forEach(function(l, i){
-		if(l!="civilites"){
-			if(l=="institution"){
-				$.get(urlP+"index/liste",{obj:l},function(js){
-					arrListes[l]=js;
+	$.get(urlP+"index/liste",{obj:'institution'},function(js){
+		arrListes['institution']=js;
+		$.get(urlP+"index/liste",{obj:'collection'},function(js){
+			arrListes['collection']=js;
+			$.get(urlP+"index/liste",{obj:'serie'},function(js){
+				arrListes['serie']=js;
+				$.get(urlP+"index/liste",{obj:'comite'},function(js){
+					arrListes['comite']=js;
+					$.get(urlP+"index/liste",{obj:'editeur'},function(js){
+						arrListes['editeur']=js;
+						$.get(urlP+"index/liste",{obj:'auteur'},function(js){
+							arrListes['auteur']=js;
+							$.get(urlP+"index/liste",{obj:'uti'},function(js){
+								arrListes['uti']=js;
+								$.get(urlP+"index/liste",{obj:'traducteur'},function(js){
+									arrListes['traducteur']=js;
+									//initialisation des configurations de layout
+									if(fct)fct();
+									},"json");                        				
+								},"json");                        				
+							},"json");                        				
+						},"json");                        				
 					},"json");                        				
-			}else{
-				arrListes[l]=['fr','en'];
-				$.get(urlP+"index/liste",{obj:l, text:'titre_fr'},function(js){
-					arrListes[l]['fr']=js;
-					},"json");                        		
-				$.get(urlP+"index/liste",{obj:l, text:'titre_en'},function(js){
-					arrListes[l]['en']=js;
-					//initialisation des grilles quand tout est chargé
-					if(i==arrListes.length-1){
-						initAuteur();
-					}
-					},"json");                        		
-			}			
-		}
-	});	
+				},"json");                        				
+			},"json");                        				
+		},"json");                        				
 }

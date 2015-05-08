@@ -47,13 +47,13 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
      */
     public function ajouter($data, $existe=true)
     {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    		//if(!isset($data['debut']))$data['debut']= new Zend_Db_Expr('NOW()');
+	    		$id = $this->insert($data);
+	    	}
+	    	return $id;
     } 
            
     /**
@@ -66,9 +66,8 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_prevision.id_prevision = ' . $id);
+    {          	
+	    	$this->update($data, 'iste_prevision.id_prevision = ' . $id);
     }
     
     /**
@@ -82,19 +81,6 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
     public function remove($id)
     {
     	$this->delete('iste_prevision.id_prevision = ' . $id);
-    }
-
-    /**
-     * Recherche les entrées de Iste_prevision avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
     }
     
     /**

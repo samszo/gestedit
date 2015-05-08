@@ -16,7 +16,7 @@ class Model_DbTable_Iste_traducteur extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_traducteur';
+    public $_primary = 'id_traducteur';
     
     /**
      * Vérifie si une entrée Iste_traducteur existe.

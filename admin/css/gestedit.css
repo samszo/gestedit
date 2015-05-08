@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+#promptCompat{ 
+	display: none; 
+} 
+#promptCompat.no_dialog{ 
+	box-shadow: 0 0 5px 2px red; 
+	padding: 10px; 
+	display: block; 
+	text-align: center; 
+	font-weight: bold; 
+} 
+.boutons{ 
+	padding: 10px; 
+} 
+dialog{ 
+	border-radius: 10px; 
+	box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3); 
+} 
+dialog::backdrop{ 
+	background-color: rgba(0, 0, 0, 0.6); 
+}
+			

@@ -16,7 +16,15 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_livre';
+    public $_primary = 'id_livre';
+    
+protected $_dependentTables = array(
+       "Model_DbTable_Iste_livrexauteur"
+       ,"Model_DbTable_Iste_livrexcollection"
+       ,"Model_DbTable_Iste_livrexprevision"
+       ,"Model_DbTable_Iste_livrexserie"
+       ,"Model_DbTable_Iste_comitexlivre"
+       );    
     
     /**
      * Vérifie si une entrée Iste_livre existe.
@@ -42,19 +50,22 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
-    } 
+    public function ajouter($data, $existe=true, $rs)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	};
+	    	if($rs)
+			return $this->findById_livre($id);
+	    	else
+		    	return $id;
+	    	} 
            
     /**
      * Recherche une entrée Iste_livre avec la clef primaire spécifiée
@@ -66,9 +77,8 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_livre.id_livre = ' . $id);
+    {           	
+    		$this->update($data, 'iste_livre.id_livre = ' . $id);
     }
     
     /**
@@ -81,20 +91,12 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_livre.id_livre = ' . $id);
-    }
-
-    /**
-     * Recherche les entrées de Iste_livre avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
+        $dt = $this->getDependentTables();
+        foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+		    	$dbT->delete('id_livre ='.$id);
+        }
+	    	$this->delete('iste_livre.id_livre = ' . $id);
     }
     
     /**
@@ -104,9 +106,12 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     public function getAll($order=null, $limit=0, $from=0)
     {
    	
-    	$query = $this->select()
-                    ->from( array("iste_livre" => "iste_livre") );
-                    
+	    	$query = $this->select()
+			->from( array("l" => "iste_livre") )
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("lid" => "iste_livre"),
+                'l.id_livre = lid.id_livre', array("recid"=>"id_livre"));
+			
         if($order != null)
         {
             $query->order($order);
@@ -132,8 +137,11 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     public function findById_livre($id_livre)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_livre") )                           
-                    ->where( "i.id_livre = ?", $id_livre );
+            ->from( array("l" => "iste_livre") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("lid" => "iste_livre"),
+                'l.id_livre = lid.id_livre', array("recid"=>"id_livre"))
+            ->where( "l.id_livre = ?", $id_livre );
 
         return $this->fetchAll($query)->toArray(); 
     }
@@ -265,6 +273,29 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    
+    	/**
+     * récupère les livres à traduire
+     *
+     * @return array
+     */
+    public function getTraductionLivre()
+    {
+ 	$sql = "SELECT 
+			i.id_isbn recid, i.date_parution, i.num isbn, i.nb_page 
+			, GROUP_CONCAT(DISTINCT CONCAT(a.prenom, ' ', a.nom)) auteurs
+			, l.titre_en, l.soustitre_en, l.type_2, l.id_livre
+		    , CONCAT(p.langue, ' -> ', p.traduction) traduction
+		    , GROUP_CONCAT(DISTINCT e.nom) editeur
+		FROM iste_livre l
+			INNER JOIN iste_isbn i ON i.id_livre = l.id_livre 
+			INNER JOIN iste_proposition p ON p.id_livre = l.id_livre     
+			INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.role = 'auteur'
+			INNER JOIN iste_auteur a ON a.id_auteur = la.id_auteur 
+			INNER JOIN iste_editeur e ON e.id_editeur = i.id_editeur 
+		GROUP BY i.id_livre";
+	    	//echo $sql."<br/>";
+	    	$db = $this->_db->query($sql);
+	    	return $db->fetchAll();
+    }
     
 }

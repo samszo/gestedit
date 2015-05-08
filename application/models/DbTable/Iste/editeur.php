@@ -16,7 +16,7 @@ class Model_DbTable_Iste_editeur extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_editeur';
+    public $_primary = 'id_editeur';
     
     /**
      * Vérifie si une entrée Iste_editeur existe.
@@ -42,18 +42,21 @@ class Model_DbTable_Iste_editeur extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+    public function ajouter($data, $existe=true, $rs=false)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}else return "existe";
+	    	if($rs)
+			return $this->findById_editeur($id);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -132,9 +135,12 @@ class Model_DbTable_Iste_editeur extends Zend_Db_Table_Abstract
     public function findById_editeur($id_editeur)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_editeur") )                           
-                    ->where( "i.id_editeur = ?", $id_editeur );
-
+			->from( array("e" => "iste_editeur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("eid" => "iste_editeur"),
+                'e.id_editeur = eid.id_editeur', array("recid"=>"id_editeur"))
+            ->where( "e.id_editeur = ?", $id_proposition );
+			
         return $this->fetchAll($query)->toArray(); 
     }
     	/**

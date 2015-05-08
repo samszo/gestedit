@@ -1,6 +1,6 @@
 <?php
 /**
- * Ce fichier contient la classe Iste_comite.
+ * Ce fichier contient la classe Iste_chapitre.
  *
  * @copyright  2013 Samuel Szoniecky
  * @license    "New" BSD License

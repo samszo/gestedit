@@ -42,18 +42,21 @@ class Model_DbTable_Iste_livrexcollection extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+    public function ajouter($data, $existe=true, $rs=false)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}else return "existe";
+	    	if($rs)
+	    		return $this->findByLivreCollection($data["id_livre"], $data["id_collection"]);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -67,34 +70,21 @@ class Model_DbTable_Iste_livrexcollection extends Zend_Db_Table_Abstract
      */
     public function edit($id, $data)
     {        
-   	
-    	$this->update($data, 'iste_livrexcollection.id_livre = ' . $id);
+	    	$this->update($data, 'iste_livrexcollection.id_livre = ' . $id);
     }
     
     /**
      * Recherche une entrée Iste_livrexcollection avec la clef primaire spécifiée
      * et supprime cette entrée.
      *
-     * @param integer $id
+     * @param int $idLivre
+     * @param int $idCollection
      *
      * @return void
      */
-    public function remove($id)
+    public function remove($idLivre, $idCollection)
     {
-    	$this->delete('iste_livrexcollection.id_livre = ' . $id);
-    }
-
-    /**
-     * Recherche les entrées de Iste_livrexcollection avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
+	    	$this->delete('iste_livrexcollection.id_collection = '.$idCollection.' AND iste_livrexcollection.id_livre = '.$idLivre);
     }
     
     /**
@@ -132,8 +122,11 @@ class Model_DbTable_Iste_livrexcollection extends Zend_Db_Table_Abstract
     public function findById_livre($id_livre)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_livrexcollection") )                           
-                    ->where( "i.id_livre = ?", $id_livre );
+			->from( array("i" => "iste_livrexcollection") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("c" => "iste_collection"),
+                'i.id_collection = c.id_collection', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_collection"))
+        		->where( "i.id_livre = ?", $id_livre );
 
         return $this->fetchAll($query)->toArray(); 
     }
@@ -148,11 +141,35 @@ class Model_DbTable_Iste_livrexcollection extends Zend_Db_Table_Abstract
     public function findById_collection($id_collection)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_livrexcollection") )                           
-                    ->where( "i.id_collection = ?", $id_collection );
-
+			->from( array("i" => "iste_livrexcollection") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("c" => "iste_collection"),
+                'i.id_collection = c.id_collection', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_collection"))
+        		->where( "i.id_collection = ?", $idCollection );
+ 
         return $this->fetchAll($query)->toArray(); 
     }
     
-    
+	/**
+     * Recherche une entrée Iste_livrexcollection avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idLivre
+     * @param int $idCollection
+     *
+     * @return array
+     */
+    public function findByLivreCollection($idLivre, $idCollection)
+    {
+        $query = $this->select()
+        		->from( array("i" => "iste_livrexcollection") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("c" => "iste_collection"),
+                'i.id_collection = c.id_collection', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_collection"))
+        		->where( "i.id_collection = ?", $idCollection )
+            ->where( "i.id_livre = ?", $idLivre );
+        		
+        return $this->fetchAll($query)->toArray(); 
+    }    
+        
 }

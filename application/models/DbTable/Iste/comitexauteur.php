@@ -16,7 +16,7 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_comite';
+    public $_primary = 'id_comite';
     
     /**
      * Vérifie si une entrée Iste_comitexauteur existe.
@@ -42,18 +42,22 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+    public function ajouter($data, $existe=true, $rs=false)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}else return "existe";
+	    	if($rs)
+	    		return $this->findByAuteurComite($data["id_auteur"], $data["id_comite"]);
+	    	else
+		    	return $id;
+	    	 
     } 
            
     /**
@@ -66,35 +70,22 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_comitexauteur.id_comite = ' . $id);
+    {           	
+	    	$this->update($data, 'iste_comitexauteur.id_comite = ' . $id);
     }
     
     /**
      * Recherche une entrée Iste_comitexauteur avec la clef primaire spécifiée
      * et supprime cette entrée.
      *
-     * @param integer $id
+     * @param int $idAuteur
+     * @param int $idComite
      *
      * @return void
      */
-    public function remove($id)
+    public function remove($idAuteur, $idComite)
     {
-    	$this->delete('iste_comitexauteur.id_comite = ' . $id);
-    }
-
-    /**
-     * Recherche les entrées de Iste_comitexauteur avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
+    		$this->delete('iste_comitexauteur.id_auteur = '.$idAuteur.' AND iste_comitexauteur.id_comite = '.$idComite);
     }
     
     /**
@@ -132,8 +123,8 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
     public function findById_comite($id_comite)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_comitexauteur") )                           
-                    ->where( "i.id_comite = ?", $id_comite );
+			->from( array("i" => "iste_comitexauteur") )                           
+            ->where( "i.id_comite = ?", $id_comite );
 
         return $this->fetchAll($query)->toArray(); 
     }
@@ -148,9 +139,34 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
     public function findById_auteur($id_auteur)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_comitexauteur") )                           
-                    ->where( "i.id_auteur = ?", $id_auteur );
+        		->from( array("i" => "iste_comitexauteur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("c" => "iste_comite"),
+                'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_comite"))
+        		->where( "i.id_auteur = ?", $id_auteur );
+        		
+        return $this->fetchAll($query)->toArray(); 
+    }
 
+    	/**
+     * Recherche une entrée Iste_comitexauteur avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idAuteur
+     * @param int $idComite
+     *
+     * @return array
+     */
+    public function findByAuteurComite($idAuteur, $idComite)
+    {
+        $query = $this->select()
+        		->from( array("i" => "iste_comitexauteur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("c" => "iste_comite"),
+                'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_comite"))
+        		->where( "i.id_comite = ?", $idComite )
+            ->where( "i.id_auteur = ?", $idAuteur );
+        		
         return $this->fetchAll($query)->toArray(); 
     }
     

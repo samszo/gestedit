@@ -1,23 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
     <title>ISTE - Tableau de bord</title>
+	<link rel="stylesheet" type="text/css" href="css/gestedit.css" />
     <link rel="stylesheet" type="text/css" href="css/w2ui.css" />
     <link rel="stylesheet" type="text/css" href="font/font-awesome/font-awesome.css" />
 	<script type="text/javascript">
 		//pour la gestion des vues ajax
 		var urlP = "";
+		var uti = <?php echo $this->uti;?>;
+		var fctInit = false;
 	</script>		
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/w2ui.js"></script>
 	<script type="text/javascript" src="js/global.js"></script>
 	<script type="text/javascript" src="js/data.js"></script>
+	<script type="text/javascript" src="js/log.js"></script>
 	<script type="text/javascript">
 		//pur la gestion des vues ajax
 		initAll();                        		
+		function init() {
+			if(uti.id_uti!=0)
+				utiIsConnect();
+			else
+    	  			diagLogin.showModal();				
+		};		
 	</script>		
 </head>
-<body>
+<body onload="init()">
+	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
+	<div id="utiConnect"></div>
+	<dialog id="diagLogin" close> 
+		<label for="iptLogin">Login : </label>
+        <input type="text" name="iptLogin" id="iptLogin" required="required">
+        <label for="iptlogin">Mot de passe : </label>
+        <input type="password" name="iptMdp" id="iptMdp" required="required">
+	    <div class="boutons">
+			<button onclick="connecte()">Connexion</button> 
+		</div> 
+	</dialog> 
 
 <div id="layout" style="width: 100%; height: 800px;"></div>
 
@@ -29,14 +51,87 @@ $(function () {
         name: 'layout',
         padding: 4,
         panels: [
-            { type: 'top', size: 50, resizable: false, style: pstyle, content: 'top' },
-            { type: 'left', size: 176, resizable: true, style: pstyle, content: 'mettre ici les alertes' },
-            { type: 'main', style: pstyle, content: 'main' },
-            { type: 'right', size: 200, resizable: true, style: pstyle, content: 'mettre ici les éditions' },
+            { type: 'top', size: 50, resizable: false, style: pstyle, content: '<div style="float:left;width:176px;">'
+	            +'<img src="img/logo-iste.png" alt="ISTE Editions - ouvrages scientifiques et techniques en langue française">'
+	            +'</div>'
+	            +'<div id="toolbar" style="padding: 4px; border: 1px solid silver; border-radius: 3px"></div>' },
+            { type: 'left', size: 280, resizable: true, style: pstyle, content: 'mettre ici les alertes' },
+            { type: 'main', style: pstyle, resizable: true, content: 'main', size:1200  },
+            { type: 'right', size: "10%", resizable: true, style: pstyle, content: 'mettre ici les éditions' },
             { type: 'bottom', size: 50, resizable: false, style: pstyle, content: 'mettre ici la date' }
        	]
     });
-    w2ui['layout'].load('top', 'index/top');
+    $('#toolbar').w2toolbar({
+	    name: 'mainTB',
+	    items: [
+	        { type: 'button',  id: 'tbAuteurs', caption: 'Auteurs', icon:'fa-group'},
+	        { type: 'break',  id: 'break0' },
+	        { type: 'button',  id: 'tbLivres', caption: 'Livres', icon:'fa-book'},
+	        { type: 'break',  id: 'break0' },
+	        { type: 'button',  id: 'tbTrad', caption: 'Traduction', icon:'fa-language'},
+	        { type: 'break',  id: 'break0' },
+	        { type: 'spacer' },
+	        { type: 'button',  id: 'utiLog',  caption: uti.login, icon: 'fa-user' },            
+	        { type: 'button',  id: 'utiSignOut',  caption: 'déconnexion', icon: 'fa-sign-out' }
+	    ]
+	});
+	
+	w2ui.mainTB.on('click', function (event) { 
+	    console.log('EVENT: '+ event.type + ' TARGET: '+ event.target, event);
+	    if(event.target=="tbAuteurs"){
+	        //supprime les objets si déjà présent
+	        if(w2ui['layout_gridAut']){
+	            w2ui['layout_gridAut'].destroy();
+	            w2ui['grid_gridAut'].destroy();
+	            w2ui['form_gridAut'].destroy();
+	            w2ui['layoutDetail_gridAut'].destroy();
+	            w2ui['grid_gridAut_detail1'].destroy();
+	            w2ui['grid_gridAut_Coordination'].destroy();
+	            w2ui['grid_gridAut_Comite'].destroy();
+	            w2ui['form_gridAut_coordination'].destroy();
+	            w2ui['form_gridAut_comite'].destroy();
+	        }
+	        	w2ui['layout'].load('main', 'index/auteur?ajax=1');
+	    }
+	    if(event.target=="tbLivres"){
+	        //supprime les objets si déjà présent
+	        if(w2ui['layout_Livre']){
+	            w2ui['layout_Livre'].destroy();
+	            w2ui['grid_Livre'].destroy();
+	            w2ui['form_Livre'].destroy();
+	            w2ui['layoutDetail_Livre'].destroy();
+	            w2ui['layoutThemes_Livre'].destroy();
+	            w2ui['form_Livre_propo'].destroy();
+	            w2ui['grid_Livre_collection'].destroy();
+	            if(w2ui['form_Livre_collection'])w2ui['form_Livre_collection'].destroy();
+	            w2ui['grid_Livre_comite'].destroy();
+	            if(w2ui['form_Livre_comite'])w2ui['form_Livre_comite'].destroy();
+	            w2ui['grid_Livre_serie'].destroy();
+	            if(w2ui['form_Livre_serie'])w2ui['form_Livre_serie'].destroy();
+	            w2ui['grid_Livre_isbn'].destroy();
+	            if(w2ui['form_Livre_isbn'])w2ui['form_Livre_isbn'].destroy();
+	            w2ui['grid_Livre_auteur'].destroy();
+	            if(w2ui['form_Livre_auteur'])w2ui['form_Livre_auteur'].destroy();
+	        }
+	        	w2ui['layout'].load('main', 'index/livre?ajax=1');
+	    }
+	    if(event.target=="tbTrad"){
+	        //supprime les objets si déjà présent
+	        if(w2ui['layout_Traduction']){            	
+	            w2ui['layout_Traduction'].destroy();
+	            w2ui['grid_Traduction_traduction'].destroy();
+	            w2ui['layout_Traduction_trad_livre'].destroy();
+	            w2ui['grid_Traduction_trad_livre_resp'].destroy();
+	            w2ui['grid_Traduction_trad_livre'].destroy();
+	            w2ui['grid_Traduction_trad_chapitre'].destroy();
+	            w2ui['form_Traduction_trad_chapitre'].destroy();
+	        }
+	        	w2ui['layout'].load('main', 'index/traduction?ajax=1');
+	    }    
+	    if(event.target=="utiSignOut"){
+		    	deconnexion();
+	    }
+	});    
 });
 </script>
 

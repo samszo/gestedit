@@ -16,7 +16,7 @@ class Model_DbTable_Iste_uti extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_uti';
+    public $_primary = 'id_uti';
     
     /**
      * Vérifie si une entrée Iste_uti existe.
@@ -166,8 +166,8 @@ class Model_DbTable_Iste_uti extends Zend_Db_Table_Abstract
         $query = $this->select()
                     ->from( array("i" => "iste_uti") )                           
                     ->where( "i.login = ?", $login );
-
-        return $this->fetchAll($query)->toArray(); 
+		$rs = $this->fetchAll($query)->toArray(); 
+        return count($rs) ? $rs[0] : $rs; 
     }
     	/**
      * Recherche une entrée Iste_uti avec la valeur spécifiée

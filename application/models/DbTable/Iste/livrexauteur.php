@@ -16,7 +16,7 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_livre';
+    public $_primary = 'id_livrexauteur';
     
     /**
      * Vérifie si une entrée Iste_livrexauteur existe.
@@ -42,18 +42,22 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}else return "existe";
+	    	if($rs)
+	    		return $this->findByLivreAuteurRole($data["id_livrexauteur"]);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -68,7 +72,7 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
    	
-    	$this->update($data, 'iste_livrexauteur.id_livre = ' . $id);
+    	$this->update($data, 'iste_livrexauteur.id_livrexauteur = ' . $id);
     }
     
     /**
@@ -81,22 +85,10 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_livrexauteur.id_livre = ' . $id);
+    		$this->delete('iste_livrexauteur.id_livrexauteur = '.$id);
     }
 
-    /**
-     * Recherche les entrées de Iste_livrexauteur avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
-    
+
     /**
      * Récupère toutes les entrées Iste_livrexauteur avec certains critères
      * de tri, intervalles
@@ -132,9 +124,12 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
     public function findById_livre($id_livre)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_livrexauteur") )                           
-                    ->where( "i.id_livre = ?", $id_livre );
-
+        		->from( array("la" => "iste_livrexauteur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("a" => "iste_auteur"),
+                'la.id_auteur = a.id_auteur', array("auteur"=>"CONCAT(a.prenom,' ',a.nom)", "recid"=>"la.id_livrexauteur"))
+            ->where( "la.id_livre = ?", $id_livre);
+        
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
@@ -148,9 +143,12 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
     public function findById_auteur($id_auteur)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_livrexauteur") )                           
-                    ->where( "i.id_auteur = ?", $id_auteur );
-
+        		->from( array("la" => "iste_livrexauteur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("a" => "iste_auteur"),
+                'la.id_auteur = a.id_auteur', array("auteur"=>"CONCAT(a.prenom,' ',a.nom)", "recid"=>"la.id_livrexauteur"))
+        		->where( "la.id_auteur = ?", $idAuteur );
+        
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
@@ -170,5 +168,46 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
+	/**
+     * Recherche une entrée Iste_livrexauteur avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idLivre
+     * @param int $idAuteur
+     *
+     * @return array
+     */
+    public function findByLivreAuteur($idLivre, $idAuteur)
+    {
+        $query = $this->select()
+        		->from( array("la" => "iste_livrexauteur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("a" => "iste_auteur"),
+                'la.id_auteur = a.id_auteur', array("auteur"=>"CONCAT(a.prenom,' ',a.nom)", "recid"=>"la.id_livrexauteur"))
+        		->where( "la.id_auteur = ?", $idAuteur )
+            ->where( "la.id_livre = ?", $idLivre );
+        		
+        return $this->fetchAll($query)->toArray(); 
+    }
+
+	/**
+     * Recherche une entrée Iste_livrexauteur avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int 		$id
+     *
+     * @return array
+     */
+    public function findByLivreAuteurRole($id)
+    {
+        $query = $this->select()
+        		->from( array("la" => "iste_livrexauteur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("a" => "iste_auteur"),
+                'la.id_auteur = a.id_auteur', array("auteur"=>"CONCAT(a.prenom,' ',a.nom)", "recid"=>"la.id_livrexauteur"))
+        		->where( "la.id_livrexauteur = ?", $id);
+        		
+        return $this->fetchAll($query)->toArray(); 
+    }
     
 }

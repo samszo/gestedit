@@ -42,18 +42,21 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+    public function ajouter($data, $existe=true, $rs=false)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}else return "existe";
+	    	if($rs)
+			return $this->findById_isbn($id);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -132,9 +135,12 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
     public function findById_isbn($id_isbn)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_isbn") )                           
-                    ->where( "i.id_isbn = ?", $id_isbn );
-
+			->from( array("i" => "iste_isbn") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("iid" => "iste_isbn"),
+                'i.id_isbn = iid.id_isbn', array("recid"=>"id_isbn"))
+            ->where( "i.id_isbn = ?", $id_isbn );
+			
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
@@ -148,8 +154,11 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
     public function findById_livre($id_livre)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_isbn") )                           
-                    ->where( "i.id_livre = ?", $id_livre );
+			->from( array("i" => "iste_isbn") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("iid" => "iste_isbn"),
+                'i.id_isbn = iid.id_isbn', array("recid"=>"id_isbn"))
+			->where( "i.id_livre = ?", $id_livre );
 
         return $this->fetchAll($query)->toArray(); 
     }

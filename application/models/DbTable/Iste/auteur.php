@@ -16,7 +16,7 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_auteur';
+    public $_primary = 'id_auteur';
     
     /**
      * Vérifie si une entrée Iste_auteur existe.
@@ -135,7 +135,7 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
                 'a.id_auteur = aid.id_auteur', array("recid"=>"id_auteur"))
 			->joinLeft(array("i" => "iste_institution"),
                 'i.id_institution = a.id_institution', array("instNom"=>"nom"))
-        ->where( "i.id_auteur = ?", $id_auteur );
+        ->where( "a.id_auteur = ?", $id_auteur );
 
         return $this->fetchAll($query)->toArray(); 
     }

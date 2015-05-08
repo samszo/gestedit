@@ -18,3 +18,17 @@ temp/
 # Legacy ZF1
 demos/
 extras/documentation
+
+application/configs/applicationNL.ini
+
+application/configs/configNL.php
+
+application/configs/applicationGapai.ini
+
+application/configs/configGapai.php
+
+bdd/import/ISTEGlobal2015.csv
+
+bdd/iste.sql
+
+bdd/iste_bdd.sql
