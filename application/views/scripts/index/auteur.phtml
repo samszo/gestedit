@@ -4,34 +4,62 @@ if(!$this->ajax){
 <html>
 	<head>
 		<title>ISTE - Auteurs</title>
+		<link rel="stylesheet" type="text/css" href="../css/gestedit.css" />
 		<link rel="stylesheet" type="text/css" href="../css/w2ui.css" />
-		<link rel="stylesheet" type="text/css" href="../font/font-awesome/font-awesome.css" />
+		<link rel="stylesheet" type="text/css" href="../fonts/font-awesome/font-awesome.css" />
 		<script type="text/javascript">
 			var urlP = "../";
+			var uti = '.$this->uti.';
+			var fctInit;			
 		</script>		
 		<script type="text/javascript" src="../js/jquery.min.js"></script>
 		<script type="text/javascript" src="../js/w2ui.js"></script>
 		<script type="text/javascript" src="../js/global.js"></script>
 		<script type="text/javascript" src="../js/data.js"></script>
+		<script type="text/javascript" src="../js/log.js"></script>
 		<script type="text/javascript">
-			$(function () {initAll(initAuteur); });                       		
+			$(function () {
+				fctInit = initAuteur;			
+				initAll(); 
+	  			if(uti.id_uti!=0)
+					utiIsConnect();
+	  			else
+		    	  		diagLogin.showModal();				
+			});                       		
 		</script>		
 		</head>
-<body>';
+<body>
+	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
+	<div id="utiConnect"></div>
+	<dialog id="diagLogin" close> 
+		<label for="iptLogin">Login : </label>
+        <input type="text" name="iptLogin" id="iptLogin" required="required">
+        <label for="iptlogin">Mot de passe : </label>
+        <input type="password" name="iptMdp" id="iptMdp" required="required">
+	    <div class="boutons">
+			<button onclick="diagLogin.close()">Fermer</button> 
+			<button onclick="connecte()">Connexion</button> 
+		</div> 
+	</dialog> 
+';
 }
-$idGrid = "gridAut";
+$idPage = "Auteur";
 ?>
-<div id="<?php echo $idGrid;?>" style="width: 1200px; height: 700px;"></div>
+<div id="<?php echo $idPage;?>" style="width: 100%; height: 1000px;"></div>
 
 <script type="text/javascript">
 var rs = <?php echo $this->json; ?>;
 var arrDetail = [{ recid: 0, name: 'URL :', value: 'url' },                
-	{name: 'Adresse :', value: 'adresse' },
+	{name: 'Adresse 1 :', value: 'adresse_1' },
+	{name: 'Adresse 2 :', value: 'adresse_2' },
 	{name: 'Code Postal :', value: 'code_postal' },
 	{name: 'Ville :', value: 'ville' },
 	{name: 'Pays :', value: 'pays' },
-	{name: 'Téléphone :', value: 'telephone' },
-	{name: 'E-mail :', value: 'mail' }
+	{name: 'Tél. mobile :', value: 'telephone_mobile' },
+	{name: 'Tél. fixe dom. :', value: 'telephone_fixe_dom' },
+	{name: 'Tél. fixe bureau. :', value: 'telephone_fixe_bureau' },
+	{name: 'E-mail 1 :', value: 'mail_1' },
+	{name: 'E-mail 2 :', value: 'mail_2' }
 ];
 var arrChange=[];
 
@@ -44,16 +72,35 @@ function initAuteur() {
 
 	config = {
 		    layoutAuteur: {
-		        name: 'layout_<?php echo $idGrid;?>',
+		        name: 'layout_<?php echo $idPage;?>',
 		        padding: 4,
 		        panels: [
-					{ type: 'main', size: 600, style: pstyle},
+					{ type: 'main', size: "80%", style: pstyle},
 		            { type: 'left', size: 754, resizable: true, hidden: true, style: pstyle},
-		            { type: 'right', size: 600, resizable: true, hidden: false, style: pstyle}
+		            { type: 'right', size: 600, resizable: true, hidden: false, style: pstyle},
+		            { type: 'bottom', size: "280px", resizable: true, hidden: false, style: pstyle}
+		        ]
+		    },
+		    layoutAuteurDetail1: {
+		        name: 'layout_<?php echo $idPage;?>_Detail1',
+		        padding: 4,
+		        panels: [
+					{ type: 'top', size: "70%", resizable: true, style: pstyleDetail},
+		            { type: 'main', size: "30%", resizable: true, style: pstyleDetail}
+		        ]
+		    },
+		    layoutDetail : {
+		        name: 'layoutDetail_<?php echo $idPage;?>',
+		        panels: [
+		            { type: 'top', size: 350, style: pstyleDetail},
+		            { type: 'main', size: 160, style: pstyleDetail, resizable: true },
+		            { type: 'bottom', size: 160, style: pstyleDetail, resizable: true },
+		            { type: 'right', size: 588, style: pstyleDetail, resizable: true },
+		            { type: 'left', size: 588, style: pstyleDetail, resizable: true }
 		        ]
 		    },
 		    gridAuteur: { 
-		        name: 'grid_<?php echo $idGrid;?>', 
+		        name: 'grid_<?php echo $idPage;?>', 
 				header: 'Auteurs',		
 		        show: { 
 					header			: true,		
@@ -64,11 +111,8 @@ function initAuteur() {
 		            	toolbarAdd      : true,
 		            	toolbarDelete   : true,
 		            	toolbarSave		: true,
+		            	footer: true,
 		        },
-		        columnGroups: [
-		                       { caption: '', span: 1 },
-		                       { caption: 'Informations générales', span: 4 }
-		                      ],        
 		        columns: [                
 		            { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
 		            { field: 'civilite', caption: 'Civilité', size: '120px', sortable: true, resizable: true, 
@@ -94,13 +138,13 @@ function initAuteur() {
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
-		                    w2ui.<?php echo $idGrid;?>.add({ recid: w2ui.<?php echo $idGrid;?>.records.length + 1 });
+		                		open(urlP+'export?obj=auteur',"_blank")
 		                }
 		            }
 		        },
 		        records: rs,
 		        onSave: function(event) {
-		            var changes = w2ui['grid_<?php echo $idGrid;?>'].getChanges();
+		            var changes = w2ui['grid_<?php echo $idPage;?>'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'auteur';
 			            if(c.civilite)c.civilite=c.civilite.text;			            
@@ -112,7 +156,6 @@ function initAuteur() {
 		            });
 		        },
 		        onDelete: function(event) {            
-					console.log(event);
 					var p = {id:itemSelect.recid, obj:'auteur'};
 					if(event.force){
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
@@ -123,20 +166,26 @@ function initAuteur() {
 					}
 			    },
 		        onAdd: function(event) {            
-		            w2ui['layout_<?php echo $idGrid;?>'].toggle('left', true);
-		            w2ui['layout_<?php echo $idGrid;?>'].hide('main', true);
-		            w2ui['layout_<?php echo $idGrid;?>'].hide('right', true);
+		            w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
+		            w2ui['layout_<?php echo $idPage;?>'].hide('main', true);
+		            w2ui['layout_<?php echo $idPage;?>'].hide('right', true);
 			    },
 		        onClick: function (event) {
 		            itemSelect = this.get(event.recid);
 			        //gestion des coordonnées
-		            var g = w2ui['grid_<?php echo $idGrid;?>_detail1'];
+		            var g = w2ui['grid_<?php echo $idPage;?>_detail1'];
 		            g.clear();
 		            arrDetail.forEach(function(d, i){
 		                g.add({ recid: i, name: d.name, value: itemSelect[d.value] });               
 		            });
+			        //gestion du commentaire
+		            g = w2ui['form_<?php echo $idPage;?>_commentaire'];
+		            g.clear();
+					g.record = {recid:itemSelect["id_auteur"],commentaire:itemSelect['commentaire']};
+					g.refresh();		            			
+		            
 			        //gestion des coordinations
-		            g = w2ui['grid_<?php echo $idGrid;?>_Coordination'];
+		            g = w2ui['grid_<?php echo $idPage;?>_Coordination'];
 		            g.clear();
 		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/auteurdata',
 							{id:itemSelect.recid, obj:'coordination'},
@@ -144,18 +193,46 @@ function initAuteur() {
 								g.add(js.rs);
 
 						        //gestion des comite
-					            g = w2ui['grid_<?php echo $idGrid;?>_Comite'];
+					            g = w2ui['grid_<?php echo $idPage;?>_Comite'];
 					            g.clear();
 					            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/auteurdata',
 										{id:itemSelect.recid, obj:'comitexauteur'},
 						            		function(js){
 											g.add(js.rs);
+										    w2ui.layout_<?php echo $idPage;?>.unlock('right');
 						           		},"json");
 								
 			           		},"json");
-		           		
-		            //w2ui['layout_<?php echo $idGrid;?>'].hide('right', false);	            
+			        //gestion des livres
+		            var gL = w2ui['grid_<?php echo $idPage;?>_Livre'];
+		            gL.clear();
+		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/auteurdata',
+							{id:itemSelect.recid, obj:'livrexauteur'},
+			            		function(js){
+								gL.add(js.rs);								
+			           		},"json");		           		
 		        }	    
+		    },
+		    formCommentaire: { 
+		        name: 'form_<?php echo $idPage;?>_commentaire',
+		        fields: [
+		            { name: 'commentaire', type: 'textarea'
+			            , html: { caption: 'Commentaires :', attr: 'style="width: 100%; height: 200px; resize: none"'} 
+		           	}
+		        ],
+		        actions: {
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.obj = "auteur";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+							data,
+			            		function(html){
+			            			w2alert(html);
+			           		});
+		            }
+		        }
 		    },
 		    coor : {
 		            header: 'Coordonnées',
@@ -168,14 +245,14 @@ function initAuteur() {
 		                	toolbarSave		: true,
 		                	header: true, 
 		                	columnHeaders: false},
-		            name: 'grid_<?php echo $idGrid;?>_detail1', 
+		            name: 'grid_<?php echo $idPage;?>_detail1', 
 		            columns: [                
 		                { field: 'name', caption: 'Name', size: '100px', style: 'background-color: #efefef; border-bottom: 1px solid white; padding-right: 5px;', attr: "align=right" },
 		                { field: 'value', caption: 'Value', size: '100%', editable: { type: 'text' } }
 		            ],
 					onSave: function(event) {
 						var data = {'recid':itemSelect.recid,'obj':'auteur'};
-					    var changes = w2ui['grid_<?php echo $idGrid;?>_detail1'].getChanges();
+					    var changes = w2ui['grid_<?php echo $idPage;?>_detail1'].getChanges();
 					    changes.forEach(function(d){
 					    		data[arrDetail[d.recid].value] = d.value;
 					    		itemSelect[arrDetail[d.recid].value] = d.value;
@@ -185,7 +262,7 @@ function initAuteur() {
 		    },		    
 		    formAuteur: { 
 		        header: 'Ajouter un auteur',
-		        name: 'form_<?php echo $idGrid;?>',
+		        name: 'form_<?php echo $idPage;?>',
 		        fields: [
 		            { name: 'civilite', type: 'list'
 		            		, options: { items: arrListes['civilites'] }
@@ -193,12 +270,16 @@ function initAuteur() {
 		           	},
 		            { name: 'prenom', type: 'text', required: true, html: { caption: 'Prénom', attr: 'size="40" maxlength="40"' } },
 		            { name: 'nom', type: 'text', required: true, html: { caption: 'Nom', attr: 'size="40"' } },
-		            { name: 'adresse', type: 'text', html: { caption: 'Adresse', attr: 'size="40"' } },
+		            { name: 'adresse_1', type: 'text', html: { caption: 'Adresse 1', attr: 'size="40"' } },
+		            { name: 'adresse_2', type: 'text', html: { caption: 'Adresse 2', attr: 'size="40"' } },
 		            { name: 'code_postal', type: 'text', html: { caption: 'Code Postal', attr: 'size="10"' } },
 		            { name: 'ville', type: 'text', html: { caption: 'Ville', attr: 'size="40"' } },
 		            { name: 'pays', type: 'text', html: { caption: 'Pays', attr: 'size="30"' } },
-		            { name: 'telephone', type: 'text', html: { caption: 'Téléphone', attr: 'size="10"' } },
-		            { name: 'mail', type: 'email', html: { caption: 'E-mail', attr: 'size="30"' } },
+		            { name: 'telephone_mobile', type: 'text', html: { caption: 'Tél. mobile', attr: 'size="10"' } },
+		            { name: 'telephone_fixe_dom', type: 'text', html: { caption: 'Tél. fixe dom.', attr: 'size="10"' } },
+		            { name: 'telephone_fixe_bureau', type: 'text', html: { caption: 'Tél. fixe bur.', attr: 'size="10"' } },
+		            { name: 'mail_1', type: 'email', html: { caption: 'E-mail 1', attr: 'size="30"' } },
+		            { name: 'mail_2', type: 'email', html: { caption: 'E-mail 2', attr: 'size="30"' } },
 		            { name: 'url', type: 'url', html: { caption: 'URL', attr: 'size="30"' } },
 		            { name: 'institution', type: 'combo', options: { items: arrListes['institution'] }
 		            		, html: { caption: 'Institution', attr: 'size="30"' } 
@@ -206,15 +287,15 @@ function initAuteur() {
 		        ],
 		        actions: {
 		            Reset: function () {
-		                w2ui['layout_<?php echo $idGrid;?>'].toggle('left', true);
-		                w2ui['layout_<?php echo $idGrid;?>'].toggle('main', true);
-		                w2ui['layout_<?php echo $idGrid;?>'].toggle('right', true);
+		                w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
+		                w2ui['layout_<?php echo $idPage;?>'].toggle('main', true);
+		                w2ui['layout_<?php echo $idPage;?>'].toggle('right', true);
 		                this.clear();
 		            },
 		            Save: function () {
 		                var errors = this.validate();
 		                if (errors.length > 0) return;
-		                var g = w2ui['grid_<?php echo $idGrid;?>'];
+		                var g = w2ui['grid_<?php echo $idPage;?>'];
 		                var data = this.record;
 		                data.civilite = data.civilite.text; 
 		                data.obj = "auteur";
@@ -224,25 +305,33 @@ function initAuteur() {
 			            		function(js){
 								g.add(js.rs);
 								g.selectNone();
-		                        	w2ui['layout_<?php echo $idGrid;?>'].toggle('left', true);
-		                        	w2ui['layout_<?php echo $idGrid;?>'].toggle('main', true);
-		    		                w2ui['layout_<?php echo $idGrid;?>'].toggle('right', true);
+		                        	w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
+		                        	w2ui['layout_<?php echo $idPage;?>'].toggle('main', true);
+		    		                w2ui['layout_<?php echo $idPage;?>'].toggle('right', true);
 			            			w2alert(js.message);
 			           		},"json");
 		            }
 		        }
 		    },
-		    layoutDetail : {
-		        name: 'layoutDetail_<?php echo $idGrid;?>',
-		        panels: [
-		            { type: 'top', size: 248, style: pstyleDetail},
-		            { type: 'main', size: 160, style: pstyleDetail, resizable: true },
-		            { type: 'bottom', size: 160, style: pstyleDetail, resizable: true },
-		            { type: 'right', size: 588, style: pstyleDetail, resizable: true },
-		            { type: 'left', size: 588, style: pstyleDetail, resizable: true }
-		        ]
-		    },
-		    gridCoordination : {
+		    gridLivre : {
+	            header: "Livre(s) de l'auteur",
+	            show: {toolbar		: false,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : false,
+	                	toolbarDelete   : false,
+	                	toolbarSave		: false,
+	                	header			: true, 
+	                	columnHeaders	: true},
+	            name: 'grid_<?php echo $idPage;?>_Livre', 
+	            columns: [                
+	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
+			            { field: 'titre_fr', caption: 'Titre fr.', size: '50%', sortable: true, resizable: true},
+			            { field: 'titre_en', caption: 'Titre en.', size: '50%', sortable: true, resizable: true}
+	            ],
+	    		},
+	    		gridCoordination : {
 	            header: 'Coordination',
 	            show: {toolbar		: true,
 	    				toolbarReload   : false,
@@ -253,18 +342,18 @@ function initAuteur() {
 	                	toolbarSave		: true,
 	                	header			: true, 
 	                	columnHeaders	: true},
-	            name: 'grid_<?php echo $idGrid;?>_Coordination', 
+	            name: 'grid_<?php echo $idPage;?>_Coordination', 
 	            columns: [                
 	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
 			            { field: 'titre', caption: 'Titre', size: '80%', sortable: true, resizable: true},
 			            { field: 'prime', caption: 'Prime', size: '20%', editable: { type: 'text' }, sortable: true, resizable: true}
 	            ],
 	            onAdd: function(event) {
-		            w2ui['layoutDetail_<?php echo $idGrid;?>'].hide('main', true);
-		            w2ui['layoutDetail_<?php echo $idGrid;?>'].toggle('right', true);
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('main', true);
+		            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('right', true);
 			    },
 				onSave: function(event) {
-				    var changes = w2ui['grid_<?php echo $idGrid;?>_Coordination'].getChanges();
+				    var changes = w2ui['grid_<?php echo $idPage;?>_Coordination'].getChanges();
 					var data = {'id_auteur':itemSelect.recid,'obj':'coordination'};
 				    changes.forEach(function(d, i){
 				    		data['id_collection'] = d.recid;
@@ -292,7 +381,7 @@ function initAuteur() {
 	    		},
 	    		formCoordination: { 
 			        header: 'Ajouter une coordination',
-			        name: 'form_<?php echo $idGrid;?>_coordination',
+			        name: 'form_<?php echo $idPage;?>_coordination',
 			        fields: [
 			            { name: 'collection', type: 'list', required: true
 				            	, html: { caption: 'Collection', attr: 'size="60" maxlength="60"' } 
@@ -302,14 +391,14 @@ function initAuteur() {
 			        ],
 			        actions: {
 			            Reset: function () {
-				            w2ui['layoutDetail_<?php echo $idGrid;?>'].toggle('main', true);
-				            w2ui['layoutDetail_<?php echo $idGrid;?>'].hide('right', true);
+				            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('main', true);
+				            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('right', true);
 			                this.clear();
 			            },
 			            Save: function () {
 			                var errors = this.validate();
 			                if (errors.length > 0) return;
-			                var g = w2ui['grid_<?php echo $idGrid;?>_Coordination'];
+			                var g = w2ui['grid_<?php echo $idPage;?>_Coordination'];
 			                var data = this.record;
 			                this.clear();		                
 				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
@@ -319,8 +408,8 @@ function initAuteur() {
 										g.add(js.rs);
 										g.selectNone();
 				            			}
-						            w2ui['layoutDetail_<?php echo $idGrid;?>'].toggle('main', true);
-						            w2ui['layoutDetail_<?php echo $idGrid;?>'].hide('right', true);
+						            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('main', true);
+						            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('right', true);
 						            w2alert(js.message);
 				           		},"json");
 			            }
@@ -337,17 +426,17 @@ function initAuteur() {
 		                	toolbarSave		: false,
 		                	header			: true, 
 		                	columnHeaders	: false},
-		            name: 'grid_<?php echo $idGrid;?>_Comite', 
+		            name: 'grid_<?php echo $idPage;?>_Comite', 
 		            columns: [                
 		  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
 				            { field: 'titre', caption: 'Titre', size: '80%', sortable: true, resizable: true},
 		            ],
 		            onAdd: function(event) {
-			            w2ui['layoutDetail_<?php echo $idGrid;?>'].hide('bottom', true);
-			            w2ui['layoutDetail_<?php echo $idGrid;?>'].toggle('left', true);
+			            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('bottom', true);
+			            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('left', true);
 				    },
 					onSave: function(event) {
-					    var changes = w2ui['grid_<?php echo $idGrid;?>_Comite'].getChanges();
+					    var changes = w2ui['grid_<?php echo $idPage;?>_Comite'].getChanges();
 						var data = {'id_auteur':itemSelect.recid,'obj':'comite'};
 					    changes.forEach(function(d, i){
 					    		data['id_comite'] = d.recid;
@@ -374,7 +463,7 @@ function initAuteur() {
 		    		},
 		    		formComite: { 
 				        header: 'Ajouter un comite',
-				        name: 'form_<?php echo $idGrid;?>_comite',
+				        name: 'form_<?php echo $idPage;?>_comite',
 				        fields: [
 				            { name: 'comite', type: 'list', required: true
 					            	, html: { caption: 'Comité', attr: 'size="60" maxlength="60"' } 
@@ -383,14 +472,14 @@ function initAuteur() {
 				        ],
 				        actions: {
 				            Reset: function () {
-					            w2ui['layoutDetail_<?php echo $idGrid;?>'].toggle('bottom', true);
-					            w2ui['layoutDetail_<?php echo $idGrid;?>'].hide('left', true);
+					            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('bottom', true);
+					            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('left', true);
 				                this.clear();
 				            },
 				            Save: function () {
 				                var errors = this.validate();
 				                if (errors.length > 0) return;
-				                var g = w2ui['grid_<?php echo $idGrid;?>_Comite'];
+				                var g = w2ui['grid_<?php echo $idPage;?>_Comite'];
 				                var data = this.record;
 				                this.clear();		                
 					            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
@@ -400,8 +489,8 @@ function initAuteur() {
 											g.add(js.rs);
 											g.selectNone();
 					            			}
-							            w2ui['layoutDetail_<?php echo $idGrid;?>'].toggle('bottom', true);
-							            w2ui['layoutDetail_<?php echo $idGrid;?>'].hide('left', true);
+							            w2ui['layoutDetail_<?php echo $idPage;?>'].toggle('bottom', true);
+							            w2ui['layoutDetail_<?php echo $idPage;?>'].hide('left', true);
 							            w2alert(js.message);
 					           		},"json");
 				            }
@@ -410,19 +499,24 @@ function initAuteur() {
 		};
 	
     // initialisation
-    $('#<?php echo $idGrid;?>').w2layout(config.layoutAuteur);
-    w2ui.layout_<?php echo $idGrid;?>.content('main', $().w2grid(config.gridAuteur));
-    w2ui.layout_<?php echo $idGrid;?>.content('left', $().w2form(config.formAuteur));
-    w2ui.layout_<?php echo $idGrid;?>.content('right', $().w2layout(config.layoutDetail));
-    w2ui.layoutDetail_<?php echo $idGrid;?>.content('top', $().w2grid(config.coor));    
-    w2ui.layoutDetail_<?php echo $idGrid;?>.content('main', $().w2grid(config.gridCoordination));    
-    w2ui.layoutDetail_<?php echo $idGrid;?>.content('bottom', $().w2grid(config.gridComite));
-    w2ui.layoutDetail_<?php echo $idGrid;?>.content('right', $().w2form(config.formCoordination));
-    w2ui.layoutDetail_<?php echo $idGrid;?>.content('left', $().w2form(config.formComite));
-        
-    //w2ui['layout_<?php echo $idGrid;?>'].hide('right', true);
-    w2ui['layoutDetail_<?php echo $idGrid;?>'].hide('right', true);
-    w2ui['layoutDetail_<?php echo $idGrid;?>'].hide('left', true);
+    $('#<?php echo $idPage;?>').w2layout(config.layoutAuteur);
+    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutAuteurDetail1));
+    w2ui.layout_<?php echo $idPage;?>.content('left', $().w2form(config.formAuteur));
+    w2ui.layout_<?php echo $idPage;?>.content('right', $().w2layout(config.layoutDetail));
+    w2ui.layout_<?php echo $idPage;?>.content('bottom', $().w2form(config.formCommentaire));
+    w2ui.layoutDetail_<?php echo $idPage;?>.content('top', $().w2grid(config.coor));    
+    w2ui.layoutDetail_<?php echo $idPage;?>.content('main', $().w2grid(config.gridCoordination));    
+    w2ui.layoutDetail_<?php echo $idPage;?>.content('bottom', $().w2grid(config.gridComite));
+    w2ui.layoutDetail_<?php echo $idPage;?>.content('right', $().w2form(config.formCoordination));
+    w2ui.layoutDetail_<?php echo $idPage;?>.content('left', $().w2form(config.formComite));
+
+    w2ui.layout_<?php echo $idPage;?>_Detail1.content('top', $().w2grid(config.gridAuteur));    
+    w2ui.layout_<?php echo $idPage;?>_Detail1.content('main', $().w2grid(config.gridLivre));    
+    
+    w2ui['layoutDetail_<?php echo $idPage;?>'].hide('right', true);
+    w2ui['layoutDetail_<?php echo $idPage;?>'].hide('left', true);
+
+    w2ui.layout_<?php echo $idPage;?>.lock('right', "Sélectionner un auteur", true);
     
 }
 </script>

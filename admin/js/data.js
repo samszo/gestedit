@@ -1,17 +1,28 @@
 
 var itemSelect;
 var arrListes = [];
-arrListes['civilites'] = ['Mr', 'Mme', 'Mlle', 'Docteur', 'Doctor', 'Professeur', 'Professor'];
-arrListes['type1'] = ['Edited', 'Author'];
-arrListes['type2'] = ['Set', 'Focus', 'Classic'];
-arrListes['contrat'] = ['GB','FR'];
-arrListes['langues'] = ['anglais','français'];
-arrListes['roles'] = ['auteur','coordinateur','préfacier'];
-arrListes['traduction'] = ['français -> anglais', 'anglais -> français','anglais <-> français'];
+//arrListes['civilites'] = ['Mr', 'Mme', 'Mlle', 'Docteur', 'Doctor', 'Professeur', 'Professor'];
+//arrListes['type1'] = ['Edited', 'Author'];
+//arrListes['type2'] = ['Set', 'Focus', 'Classic'];
+arrListes['contrat'] = {base:['GB','FR'],type:["auteur","coordinateur"],nom:["Contrat de traduction","Contrat de coordination"]};
+//arrListes['langues'] = ['anglais','français'];
+//arrListes['roles'] = ['auteur','coordinateur','préfacier'];
+//arrListes['traduction'] = ['français -> anglais', 'anglais -> français'];
 arrListes['alerte'] = ['1 semaine avant', '10 jours avant','2 jours avant','le jour même'];
-                      
+arrListes['boutique'] = ['Amazon', 'NBN', 'Elsevier','Wiley'];
+//var arrData = ['auteur','livre','traduction','production','vente'];
+arrListes['role_uti'] = ["agent","admin","direction","lecteur","gestion"]                      
+
 function initAll(fct){
 	//chargements AJAX
+	$.get(urlP+"Index/liste",{obj:'param'},function(js){
+		js.forEach(function(r){
+			if(!arrListes[r.type])arrListes[r.type]=[];		
+			arrListes[r.type].push(r);
+		})
+	},"json");                        				
+	
+	//w2popup.lock('Loading...', true);
 	$.get(urlP+"Index/liste",{obj:'institution'},function(js){
 		arrListes['institution']=js;
 		$.get(urlP+"Index/liste",{obj:'collection'},function(js){
@@ -28,8 +39,21 @@ function initAll(fct){
 								arrListes['uti']=js;
 								$.get(urlP+"Index/liste",{obj:'traducteur'},function(js){
 									arrListes['traducteur']=js;
-									//initialisation des configurations de layout
-									if(fct)fct();
+									$.get(urlP+"Index/liste",{obj:'livre'},function(js){
+										arrListes['livre']=js;
+										$.get(urlP+"Index/liste",{obj:'isbn'},function(js){
+											arrListes['isbn']=js;											
+											$.get(urlP+"Index/liste",{obj:'licence'},function(js){
+												arrListes['licence']=js;				
+												$.get(urlP+"Index/liste",{obj:'tache'},function(js){
+													arrListes['tache']=js;
+													
+													//initialisation des configurations de layout										
+													if(fct)fct();
+													},"json");                        				
+												},"json");                        				
+											},"json");                        				
+										},"json");                        				
 									},"json");                        				
 								},"json");                        				
 							},"json");                        				

@@ -53,7 +53,7 @@ class Model_DbTable_Iste_comitexlivre extends Zend_Db_Table_Abstract
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
-	    	}else return "existe";
+	    	};
 	    	if($rs)
 	    		return $this->findByLivreComite($data["id_livre"], $data["id_comite"]);
 	    	else
@@ -112,7 +112,21 @@ class Model_DbTable_Iste_comitexlivre extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray();
     }
 
-    
+	/**
+     * Recherche une entrée avec la valeur spécifiée
+     * et copie cette entrée
+     *
+     * @param int $newId
+     * @param int $oldId
+     *
+     */
+    public function copierComite($newId, $oldId)
+    {
+		$sql = "INSERT INTO iste_comitexlivre (id_comite, id_livre) 
+				SELECT ".$newId.", id_livre FROM iste_comitexlivre WHERE id_comite = ".$oldId; 	 
+	    $this->_db->query($sql);
+    }  
+          
     	/**
      * Recherche une entrée Iste_comitexlivre avec la valeur spécifiée
      * et retourne cette entrée.

@@ -47,14 +47,13 @@ class Model_DbTable_Iste_collection extends Zend_Db_Table_Abstract
      * @return integer
      */
     public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+	    	return $id;
     } 
            
     /**
@@ -85,19 +84,19 @@ class Model_DbTable_Iste_collection extends Zend_Db_Table_Abstract
     	$this->delete('iste_collection.id_collection = ' . $id);
     }
 
-    /**
-     * Recherche les entrées de Iste_collection avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
+	/**
+     * Renvoie la liste des entrée
      *
      * @return void
      */
-    public function removeLieu($idLieu)
+    public function getListe()
     {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
-    
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr, '/', titre_en)"))
+            ->order("titre_fr");        
+        return $this->fetchAll($query)->toArray();
+    		}    
     /**
      * Récupère toutes les entrées Iste_collection avec certains critères
      * de tri, intervalles

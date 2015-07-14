@@ -46,14 +46,13 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
      * @return integer
      */
     public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+	    	return $id;
     } 
            
     /**
@@ -84,19 +83,6 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
     	$this->delete('iste_contrat.id_contrat = ' . $id);
     }
 
-    /**
-     * Recherche les entrées de Iste_contrat avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
-    
     /**
      * Récupère toutes les entrées Iste_contrat avec certains critères
      * de tri, intervalles
@@ -169,6 +155,7 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
+    
     	/**
      * Recherche une entrée Iste_contrat avec la valeur spécifiée
      * et retourne cette entrée.
@@ -186,5 +173,64 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
-    
+	/**
+     * récupère tous les contrats
+     * 
+     * @param int 		$idAutCont
+     * @param string 	$type
+     *
+     * @return array
+     */
+    public function getAllContratAuteur($idAutCont=false,$type="")
+    {
+ 	$sql = "SELECT 
+		id_auteurxcontrat recid, date_signature, pc_papier, pc_ebook, ac.commentaire
+		, a.id_auteur, a.prenom, a.nom
+		, c.id_contrat, c.nom cnom, c.type ctype, c.url curl
+		, l.titre_en, l.titre_fr, l.type_1, l.type_2
+		, i.id_isbn, i.date_parution, i.num isbn 
+		, isbn_auteur
+	    , col.id_collection, col.titre_en col_en, col.titre_fr col_en
+		, s.id_serie, s.titre_en serie_en, s.titre_fr serie_en
+	FROM iste_auteurxcontrat ac
+		INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+		INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur 
+	    LEFT JOIN iste_livre l ON l.id_livre = ac.id_livre
+		LEFT JOIN iste_isbn i ON i.id_isbn = ac.id_isbn 
+		LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur 
+		LEFT JOIN iste_collection col ON col.id_collection = ac.id_collection 
+		LEFT JOIN iste_serie s ON s.id_serie = ac.id_serie";
+ 	if($idAutCont)$sql .= "  WHERE ac.id_auteurxcontrat=".$idAutCont;
+ 	if($type)$sql .= "  WHERE c.type='".$type."'";
+ 	//echo $sql."<br/>";
+	    	$db = $this->_db->query($sql);
+	    	return $db->fetchAll();
+    } 
+
+	/**
+     * récupère tous les contrats de traducteur
+     * 
+     * @param int $idTradCont
+     *
+     * @return array
+     */
+    public function getAllContratTraducteur($idTradCont=false)
+    {
+ 	$sql = "SELECT 
+		id_traducteurxcontrat recid, date_signature, tc.commentaire
+		, t.id_traducteur, t.prenom, t.nom
+		, c.id_contrat, c.nom cnom, c.type ctype, c.url curl
+		, l.titre_en, l.titre_fr, l.type_1, l.type_2
+		, i.id_isbn, i.date_parution, i.num isbn 
+	FROM iste_traducteurxcontrat tc
+		INNER JOIN iste_contrat c ON c.id_contrat = tc.id_contrat
+		INNER JOIN iste_traducteur t ON t.id_traducteur = tc.id_traducteur 
+	    LEFT JOIN iste_livre l ON l.id_livre = tc.id_livre
+		LEFT JOIN iste_isbn i ON i.id_isbn = tc.id_isbn 
+		LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur"; 
+ 	if($idTradCont)$sql .= "  WHERE tc.id_traducteurxcontrat=".$idTradCont;
+	    	//echo $sql."<br/>";
+	    	$db = $this->_db->query($sql);
+	    	return $db->fetchAll();
+    }     
 }

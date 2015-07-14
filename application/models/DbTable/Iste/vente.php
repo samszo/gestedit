@@ -48,12 +48,12 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
     public function ajouter($data, $existe=true)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+	    	return $id;
     } 
            
     /**
@@ -81,20 +81,30 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_vente.id_vente = ' . $id);
+    		//suprime les royalties associé à cette vente
+    		$n = array();
+    		$dbR = new Model_DbTable_Iste_royalty();
+    		$n["Model_DbTable_Iste_royalty"] = $dbR->removeVente($id);
+	    $n["Model_DbTable_Iste_vente"] = $this->delete('iste_vente.id_vente = ' . $id);
     }
 
     /**
-     * Recherche les entrées de Iste_vente avec la clef de lieu
-     * et supprime ces entrées.
+     * Recherche une entrée Iste_vente avec la clef primaire spécifiée
+     * et supprime cette entrée.
      *
-     * @param integer $idLieu
+     * @param integer $id
      *
      * @return void
      */
-    public function removeLieu($idLieu)
+    public function removeIsbn($id)
     {
-		$this->delete('id_lieu = ' . $idLieu);
+    		//suprime les royalties associé à cette vente
+    		$n = array();
+    		$rs = $this->findById_isbn($id);
+    		foreach ($rs as $r) {
+    			$n["Model_DbTable_Iste_vente_".$r['id_vente']] = $this->remove($r['id_vente']);
+    		}
+    		return $n;
     }
     
     /**
@@ -120,6 +130,17 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray();
     }
 
+	/**
+     * Récupère les date de vente
+     */
+    public function getDateVente()
+    {
+	    	$query = $this->select()
+        		->from( array("iste_vente" => "iste_vente"),array("dv"=>"DATE_FORMAT(date_vente, '%Y-%m-%d')"))
+        		->group(array("date_vente"));
+                    
+        return $this->fetchAll($query)->toArray();
+    }    
     
     	/**
      * Recherche une entrée Iste_vente avec la valeur spécifiée
@@ -153,6 +174,29 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
+    	/**
+     * Recherche une entrée Iste_vente avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idLivre
+     *
+     * @return array
+     */
+    public function findById_livre($idLivre)
+    {
+        $query = $this->select()
+			->from( array("v" => "iste_vente") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("vid" => "iste_vente"),
+                'vid.id_vente = v.id_vente', array("recid"=>"id_vente"))
+            ->joinInner(array("l" => "iste_licence"),
+                'l.id_licence = v.id_licence', array("id_licence","licence"=>"CONCAT(nom,' ',IFNULL(licence_unitaire,''),' ',IFNULL(licence_coef,'- '),'% ',IFNULL(licence_illimite,''),' ',IFNULL(mutiplicateur,''))"))
+            ->joinInner(array("i" => "iste_isbn"),
+                'v.id_isbn = i.id_isbn', array())
+			->where( "i.id_livre = ?", $idLivre);
+
+        return $this->fetchAll($query)->toArray(); 
+    }    
     	/**
      * Recherche une entrée Iste_vente avec la valeur spécifiée
      * et retourne cette entrée.
@@ -282,5 +326,42 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
+    	/**
+     * Calcule les totaux des ventes
+     *
+     * @param int $idLivre
+     *
+     * @return array
+     */
+    public function getTotaux($idLivre=false)
+    {
+        $query = $this->select()
+        		->from( array("v" => "iste_vente"), array("tot_e"=>"SUM(montant_euro)","tot_l"=>"SUM(montant_livre)","tot_d"=>"SUM(montant_dollar)"
+        			,"boutique", "nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))", "nb"=>"SUM(nombre)", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"
+        			,"nbA"=>"COUNT(DISTINCT(v.acheteur))"
+        			))
+        		->group("boutique");
+        	if($idLivre){
+        		$query->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+        			->joinInner(array("i" => "iste_isbn"),'v.id_isbn = i.id_isbn')
+				->where( "i.id_livre = ?", $idLivre);        		
+        	}
+
+        return $this->fetchAll($query)->toArray(); 
+    }
+    
+   	/**
+     * Récupère les ventes avec montant abascent
+     *
+     * @return array
+     */
+    public function findMontantAbscent()
+    {
+        $query = $this->select()
+        		->from( array("v" => "iste_vente"))
+        		->where("montant_livre is null OR montant_dollar is null OR montant_euro is null");
+        		
+        return $this->fetchAll($query)->toArray(); 
+    }
     
 }

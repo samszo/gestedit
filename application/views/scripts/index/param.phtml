@@ -1,0 +1,548 @@
+<?php 
+if(!$this->ajax){
+	echo '<!DOCTYPE html>
+<html>
+	<head>
+		<title>ISTE - Param</title>
+		<link rel="stylesheet" type="text/css" href="../css/gestedit.css" />
+		<link rel="stylesheet" type="text/css" href="../css/w2ui.css" />
+		<link rel="stylesheet" type="text/css" href="../fonts/font-awesome/font-awesome.css" />
+		<script type="text/javascript">
+			var urlP = "../";
+			var uti = '.$this->uti.';
+			var fctInit;			
+		</script>		
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/w2ui.js"></script>
+		<script type="text/javascript" src="../js/global.js"></script>
+		<script type="text/javascript" src="../js/data.js"></script>
+		<script type="text/javascript" src="../js/log.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				initAll(initParam); 
+	  			if(uti.id_uti!=0)
+					utiIsConnect();
+	  			else
+		    	  		diagLogin.showModal();				
+			});                       		
+		</script>		
+		</head>
+<body>
+	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
+	<div id="utiConnect"></div>
+	<dialog id="diagLogin" close> 
+		<label for="iptLogin">Login : </label>
+        <input type="text" name="iptLogin" id="iptLogin" required="required">
+        <label for="iptlogin">Mot de passe : </label>
+        <input type="password" name="iptMdp" id="iptMdp" required="required">
+	    <div class="boutons">
+			<button onclick="diagLogin.close()">Fermer</button> 
+			<button onclick="connecte()">Connexion</button> 
+		</div> 
+	</dialog> 
+';
+}
+$idPage = "Param";
+?>
+<div id="<?php echo $idPage;?>" style="width: 100%; height: 1000px;"></div>
+
+<script type="text/javascript">
+
+//widget configuration
+var pstyle = 'border: 0.5px solid #dfdfdf; padding: 2px;';
+var showToolGrid = {	header			: true,		
+        toolbar			: true,
+		toolbarReload   : false,
+		toolbarColumns  : false,
+        	toolbarSearch   : false,
+        	toolbarAdd      : true,
+        	toolbarDelete   : true,
+        	toolbarSave		: true,
+        	footer: false,
+        	columnHeaders	: true
+};
+
+var config;
+function initParam() {
+
+	config = {
+		    layoutParam: {
+		        name: 'layout_<?php echo $idPage;?>',
+		        padding: 4,
+		        panels: [
+					{ type: 'main', size: '690px', resizable:true, style: pstyle},
+					{ type: 'left', size: '0px', hidden:true, resizable: true, style: pstyle},
+					{ type: 'right', size: '470px', resizable: true, style: pstyle},
+		        ]
+		    },
+		    layoutParamAuteur: {
+		        name: 'layout_<?php echo $idPage;?>_Auteur',
+		        padding: 4, title: 'Paramètres pour les auteurs',
+		        panels: [
+		 		    { type: 'left', size: '50%', resizable:false, style: pstyle},
+					{ type: 'main', size: '50%', resizable:false, style: pstyle},
+					{ type: 'bottom', size: '70%', resizable:false, style: pstyle},
+		        ]
+		    },		    
+		    layoutParamLivre: {
+		        name: 'layout_<?php echo $idPage;?>_Livre',
+		        padding: 4,
+		        panels: [
+					{ type: 'main', size: '230px', resizable:true, style: pstyle},
+					{ type: 'top', size: '230px', resizable: true, style: pstyle},
+		        ]
+		    },
+		    layoutParamLivre1: {
+		        name: 'layout_<?php echo $idPage;?>_Livre1',
+		        padding: 4,
+		        panels: [
+					{ type: 'main', size: '230px', resizable:true, style: pstyle},
+					{ type: 'left', size: '230px', resizable: true, style: pstyle},
+					{ type: 'right', size: '700px', resizable: true, style: pstyle},
+		        ]
+		    },
+		    layoutParamLivre2: {
+		        name: 'layout_<?php echo $idPage;?>_Livre2',
+		        padding: 4,
+		        panels: [
+					{ type: 'main', size: '50%', resizable:true, style: pstyle},
+					{ type: 'left', size: '230px', resizable: true, style: pstyle},
+					//{ type: 'right', size: '230px', resizable: true, style: pstyle},
+					{ type: 'bottom', size: '500px', resizable: true, style: pstyle},
+		        ]
+		    },		    
+		    layoutParamLivre3: {
+		        name: 'layout_<?php echo $idPage;?>_Livre3',
+		        padding: 4,
+		        panels: [
+					{ type: 'main', size: '230px', resizable: true, style: pstyle},
+					{ type: 'left', size: '230px', resizable: true, style: pstyle},
+					{ type: 'right', size: '230px', resizable: true, style: pstyle},
+		        ]
+		    },		    
+		    layoutParamLivreCol: {
+		        name: 'layout_<?php echo $idPage;?>_LivreCol',
+		        padding: 4,
+		        panels: [
+					{ type: 'main', size: '50%', resizable:true, style: pstyle},
+					{ type: 'left', size: '50%', resizable: true, style: pstyle},
+		        ]
+		    },		    
+		    layoutParamVente: {
+		        name: 'layout_<?php echo $idPage;?>_Vente',
+		        padding: 4,
+		        panels: [
+					{ type: 'main', size: '100%', resizable:true, style: pstyle},
+					{ type: 'left', size: '100%', resizable: true, style: pstyle},
+					{ type: 'right', size: '100%', resizable: true, style: pstyle},
+		        ]
+		    },
+		    gridLicence:{ 
+		        name: 'grid_<?php echo $idPage;?>_licence', 
+				header: "Licence",		
+		        show: {	header			: true,		
+			            toolbar			: true,
+				    		toolbarReload   : false,
+				    		toolbarColumns  : true,
+			            	toolbarSearch   : true,
+			            	toolbarAdd      : true,
+			            	toolbarDelete   : true,
+			            	toolbarSave		: true,
+			            	footer: false,
+			            	columnHeaders	: true
+				    },
+		       columns: [  		  		        
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'nom', size: '240px', sortable: true, resizable: true
+		            		,editable: { type: 'text'}},
+		            { field: 'licence_unitaire', size: '100px', caption: 'Unitaire', sortable: true, resizable: true
+	            			,editable: { type: 'float'}},
+	            		{ field: 'licence_coef', size: '100px', caption: 'Coeficient', sortable: true, resizable: true
+		            		,editable: { type: 'float'}},
+	            		{ field: 'licence_illimite', size: '100px', caption: 'Illimité', sortable: true, resizable: true
+		            		,editable: { type: 'float'}},
+	            		{ field: 'mutiplicateur', size: '100px', caption: 'Multiplicateur', sortable: true, resizable: true
+		            		,editable: { type: 'float'}},
+		            ],
+			    records: arrListes["licence"],
+		        onClick: function (event) {
+		            itemSelect = this.get(event.recid);           		           
+		            itemSelect.type = "licence";           		           
+		        },	    
+		        onAdd: function(event) {
+			        	openPopupAjoutLicence();            
+			    },
+			    onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_licence'].getChanges();		            
+		            changes.forEach(function(c, i){
+			            c.obj = 'licence';
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(html){
+			        				if(changes.length==i+1)w2alert(html);
+			        			});                        
+		            });
+		        },			    
+		        onDelete: function(event) {            
+			        delParam(event,"licence");
+			    },		        
+		    },
+		    formLicence: { 
+		        name: 'form_<?php echo $idPage;?>_licence',
+		        fields: [
+		            {name: 'nom', type: 'text', required: true,  html: {caption: 'Nom'} },
+		            { name: 'licence_unitaire', type: 'float', html: { caption: 'Unitaire' } },
+		            { name: 'licence_coef', type: 'float', html: { caption: 'Coeficient' } },
+		            { name: 'licence_illimite', type: 'float', html: { caption: 'Illimité' } },
+		            { name: 'mutiplicateur', type: 'float', html: { caption: 'Multiplicateur' } },
+		        ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+			            data.obj = "licence";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+			            			if(js.rs){
+				            		    	arrListes[type].push(js.rs[0]);			                  
+					                var g = w2ui['grid_<?php echo $idPage;?>_licence'];
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },	
+		    gridUti:{ 
+		        name: 'grid_<?php echo $idPage;?>_uti', 
+				header: "Utilisateur",		
+		        show: {	header			: true,		
+			            toolbar			: true,
+				    		toolbarReload   : false,
+				    		toolbarColumns  : true,
+			            	toolbarSearch   : true,
+			            	toolbarAdd      : true,
+			            	toolbarDelete   : true,
+			            	toolbarSave		: true,
+			            	footer: false,
+			            	columnHeaders	: true
+				    },
+		       columns: [  		  		        
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'nom', size: '10%', caption: 'Nom', sortable: true, resizable: true
+		            		,editable: { type: 'text'}},
+		            { field: 'login', size: '100px', caption: 'Login', sortable: true, resizable: true
+	            			,editable: { type: 'text'}},
+	            		{ field: 'mdp', options:{format: 'password'}, size: '100px', caption: 'Mot de passe', sortable: true, resizable: true
+		            		,editable: { type: 'password'}},
+	            		{ field: 'role', size: '100px', caption: 'Role', sortable: true, resizable: true
+		            		,editable: { type: 'list', items: arrListes['role_uti'] , showAll: true , showAll: true },
+			                render: function (record, index, col_index) {
+			                    var html = this.getCellValue(index, col_index);
+			                    return html.text ? html.text : html;
+			                }},
+		            ],
+	            records  : arrListes["uti"],
+		        onClick: function (event) {
+		            itemSelect = this.get(event.recid);           		           
+		            itemSelect.type = "uti";           		           
+		        },	    
+		        onAdd: function(event) {
+			        	openPopupAjoutUti();            
+			    },
+			    onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_uti'].getChanges();		            
+		            changes.forEach(function(c, i){
+			            if(c.role)c.role=c.role.text;
+			            c.obj = 'uti';
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(html){
+			        				if(changes.length==i+1)w2alert(html);
+			        			});                        
+		            });
+		        },			    
+		        onDelete: function(event) {            
+			        delParam(event,"uti");
+			    },		        
+		    },		    
+		    formUti: { 
+		        name: 'form_<?php echo $idPage;?>_uti',
+		        fields: [
+		            {name: 'nom', type: 'text', required: true,  html: {caption: 'Nom'} },
+		            { name: 'login', type: 'text', required: true, html: { caption: 'Login' } },
+		            { name: 'mdp', type: 'password', required: true, html: { caption: 'Mot de passe' } },
+		            { name: 'role', type: 'list', required: true, html: { caption: 'Role'}
+		            		,options: { items: arrListes['role_uti'] }} , 
+		        ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.role = data.role.text;
+			            data.obj = "uti";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+			            			if(js.rs){
+				            		    	arrListes["uti"].push(js.rs[0]);			                  
+					                var g = w2ui['grid_<?php echo $idPage;?>_uti'];
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
+		};
+	
+    // initialisation
+    $('#<?php echo $idPage;?>').w2layout(config.layoutParam);
+    w2ui.layout_<?php echo $idPage;?>.content('right', $().w2layout(config.layoutParamAuteur));
+    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutParamLivre));
+    //w2ui.layout_<?php echo $idPage;?>.content('left', $().w2layout(config.layoutParamVente));
+
+    w2ui.layout_<?php echo $idPage;?>_Auteur.content('left', $().w2grid(getGridParam('civilites')));
+    w2ui.layout_<?php echo $idPage;?>_Auteur.content('main', $().w2grid(getGridParam('roles')));
+    w2ui.layout_<?php echo $idPage;?>_Auteur.content('bottom', $().w2grid(config.gridUti));
+        
+    w2ui.layout_<?php echo $idPage;?>_Livre.content('top', $().w2layout(config.layoutParamLivre1));
+    w2ui.layout_<?php echo $idPage;?>_Livre.content('main', $().w2layout(config.layoutParamLivre2));
+
+    w2ui.layout_<?php echo $idPage;?>_Livre1.content('main', $().w2grid(getGridParam('type1')));
+    w2ui.layout_<?php echo $idPage;?>_Livre1.content('left', $().w2grid(getGridParam('type2')));
+    w2ui.layout_<?php echo $idPage;?>_Livre1.content('right', $().w2layout(config.layoutParamLivre3));
+
+    w2ui.layout_<?php echo $idPage;?>_Livre2.content('main', $().w2grid(config.gridLicence));
+    w2ui.layout_<?php echo $idPage;?>_Livre2.content('left', $().w2grid(getGridParam('prix')));
+    w2ui.layout_<?php echo $idPage;?>_Livre2.content('bottom', $().w2layout(config.layoutParamLivreCol));
+
+    w2ui.layout_<?php echo $idPage;?>_Livre3.content('right', $().w2grid(getGridParam('langues')));
+    w2ui.layout_<?php echo $idPage;?>_Livre3.content('main', $().w2grid(getGridParam('traduction')));
+    w2ui.layout_<?php echo $idPage;?>_Livre3.content('left', $().w2grid(getGridParam('page')));
+
+    w2ui.layout_<?php echo $idPage;?>_LivreCol.content('left', $().w2grid(getGridCol('serie')));
+    w2ui.layout_<?php echo $idPage;?>_LivreCol.content('main', $().w2grid(getGridCol('comite')));
+    
+    
+}
+
+function getGridParam(type){
+	return { 
+        name: 'grid_<?php echo $idPage;?>_'+type, 
+		header: type,		
+        show: showToolGrid,
+       columns: [  		  		        
+            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+            { field: 'text', size: '240px', sortable: true, resizable: true
+            		,editable: { type: 'text'}}
+            ],
+	    records: arrListes[type],
+        onClick: function (event) {
+            itemSelect = this.get(event.recid);           		           
+        },	    
+        onAdd: function(event) {
+	        	addParam("param",type);			        
+	    },
+	    onSave: function(event) {
+            saveParam("param",type);
+        },			    
+        onDelete: function(event) {            
+	        delParam(event,"param",type);
+	    },
+        
+    }
+}
+
+function getGridCol(type){
+	return { 
+        name: 'grid_<?php echo $idPage;?>_'+type, 
+		header: type,		
+        show: {	header			: true,		
+            toolbar			: true,
+    			toolbarReload   : false,
+    			toolbarColumns  : false,
+            	toolbarSearch   : true,
+            	toolbarAdd      : true,
+            	toolbarDelete   : true,
+            	toolbarSave		: true,
+            	footer: false,
+            	columnHeaders	: true
+    		},
+       columns: [  		  		        
+            { field: 'recid', caption: 'ID',hidden:true},
+            { field: 'titre_fr', caption: 'Titre fr.', size: '50%', sortable: true, resizable: true
+            		,editable: { type: 'text'}},
+            { field: 'titre_en', caption: 'Titre en.', size: '50%', sortable: true, resizable: true
+            		,editable: { type: 'text'}}
+            ],
+	    records: arrListes[type],
+	    toolbar: {
+            items: [
+                { id: 'copier', type: 'button', caption: 'Copier', icon: 'fa-file' }
+            ],
+            onClick: function (event) {
+                if (event.target == 'copier') {
+	                	copierCol(type);
+                }
+            }
+        },	    
+        onClick: function (event) {
+            itemSelect = this.get(event.recid);
+            itemSelect.type = type;           		           
+        },	    
+        onAdd: function(event) {
+	        	addParam(type);			        
+	    },
+	    onSave: function(event) {
+            saveParam(type);
+        },			    
+        onDelete: function(event) {            
+	        delParam(event,type);
+	    },
+        
+    }
+}
+
+
+function addParam(obj, type){
+	var p
+	if(!type){
+		type=obj;
+	    p = {"obj":obj,"titre_fr":"nouvelle "+type,"titre_en":"new "+type}
+	}else
+	    p = {"type":type,"obj":obj,"nom":"new "+type}
+	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+		p,
+		function(js){
+	        	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
+    		    	arrListes[type].push(js.rs[0]);			                  
+			w2alert(js.message);
+		},"json");                        
+}
+
+function saveParam(type){
+
+    var changes = w2ui['grid_<?php echo $idPage;?>_'+type].getChanges();
+    changes.forEach(function(c, i){
+        var p = {"obj":'param',"recid":c.recid,"nom":c.text};
+	    	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+    			p,
+    			function(html){
+    				//remplace la valeur enregistrée
+    				arrListes[type].forEach(function(r){
+        				if(r.recid==p.recid)r.text=p.nom;
+    				})
+    				if(changes.length==i+1)w2alert(html);
+    			});                        
+    });	
+}
+
+function delParam(event, obj, type){
+	if(!type)type=obj;
+
+    if(itemSelect.type!=type){
+        w2alert("Veuillez sélectionner un paramètre.");
+        return false;
+    }
+	if(event.force){
+		var p = {id:itemSelect.recid, obj:obj};
+		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+			p,
+	    		function(js){
+				arrListes[type] = arrListes[type].filter(function(r){
+					return r.recid==p.id ? false : true;
+				})		
+				//TODO:afficher un message clair
+	    			w2alert(js.message);
+	   		},"json");
+	}
+	
+}
+
+function copierCol(type){
+    if(itemSelect.type!=type){
+        w2alert("Veuillez sélectionner un paramètre.");
+        return false;
+    }
+	var p = {id:itemSelect.recid, obj:type};
+	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/copier',
+		p,
+    		function(js){
+		    	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
+		    	arrListes[type].push(js.rs[0]);			                  
+			w2alert(js.message);
+   		},"json");
+	
+}
+
+function openPopupAjoutLicence() {
+    w2popup.open({
+        title   : 'Ajouter une licence',
+        width   : 400,
+        height  : 300,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>_licence'])w2ui['form_<?php echo $idPage;?>_licence'].destroy();
+                $('#w2ui-popup #main').w2form(config.formLicence)
+                w2ui['form_<?php echo $idPage;?>_licence'].clear();
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+}
+
+function openPopupAjoutUti() {
+    w2popup.open({
+        title   : 'Ajouter un utilisateur',
+        width   : 400,
+        height  : 240,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>_uti'])w2ui['form_<?php echo $idPage;?>_uti'].destroy();
+                $('#w2ui-popup #main').w2form(config.formUti)
+                w2ui['form_<?php echo $idPage;?>_uti'].clear();
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+}
+</script>
+
+<?php 
+if(!$this->ajax){
+	echo '</body>
+</html>';
+}else{
+	echo '<script type="text/javascript">
+			$(function () {initParam(); });                       		
+		</script>		
+		';	
+}
+
+?>

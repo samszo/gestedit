@@ -42,18 +42,23 @@ class Model_DbTable_Iste_prix extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    		if(!isset($data['maj']))$data['maj']= new Zend_Db_Expr('NOW()');	    		
+	    	 	$id = $this->insert($data);
+	    	}
+	    	if($rs)
+			return $this->findById_prix($id);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -81,21 +86,9 @@ class Model_DbTable_Iste_prix extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_prix.id_prix = ' . $id);
+  	  	$this->delete('iste_prix.id_prix = ' . $id);
     }
 
-    /**
-     * Recherche les entrées de Iste_prix avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
     
     /**
      * Récupère toutes les entrées Iste_prix avec certains critères
@@ -132,9 +125,12 @@ class Model_DbTable_Iste_prix extends Zend_Db_Table_Abstract
     public function findById_prix($id_prix)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_prix") )                           
-                    ->where( "i.id_prix = ?", $id_prix );
-
+            ->from( array("p" => "iste_prix"), array("recid"=>"id_prix","id_prix","id_isbn","pdf","prix_euro","prix_dollar","prix_livre","type","maj") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("i" => "iste_isbn"),
+                'i.id_isbn = p.id_isbn', array("id_livre","num"))
+            ->where("p.id_prix = ?", $id_prix);
+                    
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
@@ -154,6 +150,25 @@ class Model_DbTable_Iste_prix extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
+     * Recherche une entrée Iste_prix avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $id_livre
+     *
+     * @return array
+     */
+    public function findById_livre($id_livre)
+    {
+        $query = $this->select()
+            ->from( array("p" => "iste_prix"), array("recid"=>"id_prix","id_prix","id_isbn","pdf","prix_euro","prix_dollar","prix_livre","type","maj") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("i" => "iste_isbn"),
+                'i.id_isbn = p.id_isbn AND i.id_livre ='.$id_livre, array("id_livre","num"));
+                    
+        return $this->fetchAll($query)->toArray(); 
+    }
+    
+    /**
      * Recherche une entrée Iste_prix avec la valeur spécifiée
      * et retourne cette entrée.
      *

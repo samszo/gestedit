@@ -1,9 +1,0 @@
-a:11:{s:9:"squelette";s:37:"html_4322c8c2a8015edd74486d69de702ac2";s:6:"source";s:37:"../prive/squelettes/inclure/pied.html";s:11:"process_ins";s:4:"html";s:11:"invalideurs";a:2:{s:5:"cache";s:35:"3/pri-fr--ac44d70bfb0a5fdd5c15109e5";s:7:"session";s:8:"a3943a2d";}s:7:"entetes";a:1:{s:12:"X-Spip-Cache";s:5:"86400";}s:5:"duree";i:86400;s:5:"texte";s:719:"<div id='copyright'>
-	
-	<b>SPIP 3.0.17 [<a href='http://core.spip.org/trac/spip/changeset/21515' onclick="window.open(this.href); return false;">21515</a>]</b>  est un logiciel libre distribué <a href='http://localhost/iste/ecrire/?exec=aide&amp;aide=licence&amp;var_lang=fr' onclick="window.open(this.href, 'spip_aide', 'scrollbars=yes,resizable=yes,width=740,height=580'); return false;">sous licence GPL</a>.<br /> + écran de sécurité 1.1.9
-	
-	<p>Pour plus d’informations, voir le site <a href="http://www.spip.net/fr">http://www.spip.net/fr</a>.</p>
-</div>
-<noscript>
-<div style='display:none;'><img src='http://localhost/iste/ecrire/?exec=test_ajax&amp;js=-1' width='1' height='1' alt='' /></div></noscript>
-";s:5:"notes";s:0:"";s:8:"contexte";a:5:{s:4:"lang";s:2:"fr";s:4:"date";s:19:"2015-04-08 17:25:26";s:12:"date_default";b:1;s:10:"date_redac";s:19:"2015-04-08 17:25:26";s:18:"date_redac_default";b:1;}s:12:"lastmodified";i:1428506726;s:2:"gz";b:0;}

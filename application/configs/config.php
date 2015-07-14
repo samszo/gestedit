@@ -26,6 +26,10 @@ set_include_path(get_include_path().PATH_SEPARATOR.$www."/Zend/library");
 set_include_path(get_include_path().PATH_SEPARATOR.$www."/Zend/extras/library");
 
 require_once 'Zend/Application.php';
+require_once 'ExcelReader.php';
+require_once 'OLERead.php';
+require_once 'UploadHandler.php';
+require_once 'CustomUploadHandler.php';
 
 // Create application, bootstrap, and run
 $application = new Zend_Application(

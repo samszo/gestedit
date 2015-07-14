@@ -46,7 +46,7 @@ function utiIsConnect(){
 			var bSet = w2ui['mainTB'].refresh();
 			le set ne marche pas on recharge la page
 			*/
-			if(w2ui['mainTB'].items[7].caption != uti.login)location.reload(true);
+			if(w2ui['mainTB'].items[w2ui['mainTB'].items.length-2].caption != uti.login)location.reload(true);
 		}
 	}
 	

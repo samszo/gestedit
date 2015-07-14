@@ -1,16 +1,72 @@
 <?php
+//header('Content-Type: text/html; charset=utf-8');
 require_once( "../application/configs/config.php" );
-
 try {
 	$application->bootstrap();
-	$s = new Flux_Site();
-	$s->bTrace = true;		
+	$s = new Flux_Site(false,false);
 	$s->trace("DEBUT TEST");		
-	$arr = $s->csvToArray("../bdd/import/ISTEGlobal2015.csv");
+
+	
+	$bdA = new Model_DbTable_Iste_prevision();
+    	$rsA = $bdA->getAlerteLivre();
+    	for ($i = 0; $i < count($rsA); $i++) {
+    		if($rsA[$i]['nbJour']<7)$rsA[$i]['style']='background-color: red';
+    		if($rsA[$i]['nbJour']>7 && $rsA[$i]['nbJour']<14)$rsA[$i]['style']='background-color: orange';
+    		if($rsA[$i]['nbJour']>14 && $rsA[$i]['nbJour']<21)$rsA[$i]['style']='background-color: green';    			
+    		if($rsA[$i]['nbJour']>21)$rsA[$i]['style']='background-color: white';    			
+    	}
+    			
+	/*
+    	$oBdd = new Model_DbTable_Iste_serie();
+	$rs = $oBdd->copier(132);
+	*/
+	
+	/*
+	$dbL = new Model_DbTable_Iste_livre();
+	$arr = $dbL->remove(2);
+	*/
+	
+	/*
+	$dbR = new Model_DbTable_Iste_royalty();    		
+	$rs = $dbR->setForAuteur();	
+	*/
+
+	/*
+	$path = "/data/livre_1/";
+	$options = array('upload_dir' => ROOT_PATH.$path,'upload_url' => WEB_ROOT.$path);
+	@$_SERVER["REQUEST_METHOD"]="GET";
+	//$upload_handler = new UploadHandler($options);
+	$upload_handler = new CustomUploadHandler($options);
+	*/
+	/*
+	$w = new Flux_Wiley(false,true);
+	$w->importer('../bdd/import/146169_1409.XLS');
+	//$w->calculerVentes(3);
+	*/
+
+	/*
+	$nbn = new Flux_Nbn(false,true);
+	//$nbn->importer('../bdd/import/NBNEXPORT.CSV',"2015-03-30");
+	$nbn->calculerVentes(4);
+	*/
+	
+	//$dbFic = new Model_DbTable_Iste_importfic();
+	//supprime un fichier et ses données
+	//$dbFic->remove(43);
+	//$rsFic = $dbFic->findById_importfic(48);
+	/*calcul les colonnes 	
+    	$cols = json_decode($rsFic["coldesc"]);
+	*/
+	
+	/*
+    	$dbData = new Model_DbTable_Iste_importdata();
+    	$rs = $dbData->exportByIdFic(46);
+	*/
+	//$arr = $s->csvToArray("../bdd/import/ISTEGlobal2015.csv");
 	
 	/*
 	$dbProcess = new Model_DbTable_Iste_processus();
-	$dbProcess->setProcessusForLivre('Traduction livre', 1, 1); 
+	$dbProcess->setProcessusForLivre('Production livre', 1, 1); 
     	$dbProcess->getTraductionByLivre(1);
 	*/
 
@@ -26,4 +82,3 @@ try {
   <h3>Request Parameters:</h3>
   <pre>".var_export($e->request->getParams(), true)."</pre>";
 }
-	

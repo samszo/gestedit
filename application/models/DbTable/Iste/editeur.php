@@ -88,18 +88,19 @@ class Model_DbTable_Iste_editeur extends Zend_Db_Table_Abstract
     }
 
     /**
-     * Recherche les entrées de Iste_editeur avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
+     * Renvoie la liste des entrée
      *
      * @return void
      */
-    public function removeLieu($idLieu)
+    public function getListe()
     {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
-    
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("id"=>$this->_primary[1],"text"=>"nom"))
+            ->order("nom");        
+        return $this->fetchAll($query)->toArray();
+	} 
+	
     /**
      * Récupère toutes les entrées Iste_editeur avec certains critères
      * de tri, intervalles

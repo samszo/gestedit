@@ -17,6 +17,11 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
      * Clef primaire de la table.
      */
     public $_primary = 'id_serie';
+
+	protected $_dependentTables = array(
+       	"Model_DbTable_Iste_livrexserie"
+       );    
+    
     
     /**
      * Vérifie si une entrée Iste_serie existe.
@@ -30,7 +35,8 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_serie'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($k!="ref_racine")
+				$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_serie; else $id=false;
@@ -42,19 +48,22 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
-    } 
+    public function ajouter($data, $existe=true, $rs=true)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+	    	if($rs)
+			return $this->findById_serie($id);
+	    	else
+		    	return $id;
+	    	} 
            
     /**
      * Recherche une entrée Iste_serie avec la clef primaire spécifiée
@@ -66,9 +75,8 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_serie.id_serie = ' . $id);
+    {           	
+	    	$this->update($data, 'iste_serie.id_serie = ' . $id);
     }
     
     /**
@@ -81,22 +89,38 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_serie.id_serie = ' . $id);
+    		$n = array();
+    		$dt = $this->getDependentTables();
+        foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+	        $n[$t] = $dbT->delete('id_serie ='.$id);
+        }
+        //vérifie si des contrats sont associés
+        $dbAC = new Model_DbTable_Iste_auteurxcontrat();
+        $arr = $dbAC->findBySerie($id);
+        if(count($arr)==0)    	
+		    $n["Model_DbTable_Iste_serie"] = $this->delete('iste_serie.id_serie = ' . $id);
+		else
+		    $n["message"] = "La série est supprimée pour les livres.\Impossible de supprimer la série.\Des contrats lui sont liés.";
+		
+		return $n;
+	    		    	
     }
 
+    
     /**
-     * Recherche les entrées de Iste_serie avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
+     * Renvoie la liste des entrée
      *
      * @return void
      */
-    public function removeLieu($idLieu)
+    public function getListe()
     {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
-    
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en)","titre_fr", "titre_en"))
+            ->order(array("titre_fr","titre_en"));        
+        return $this->fetchAll($query)->toArray();
+	} 
     /**
      * Récupère toutes les entrées Iste_serie avec certains critères
      * de tri, intervalles
@@ -132,11 +156,35 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     public function findById_serie($id_serie)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_serie") )                           
+                    ->from( array("i" => "iste_serie")
+                    ,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en)","titre_fr", "titre_en"))                           
                     ->where( "i.id_serie = ?", $id_serie );
 
         return $this->fetchAll($query)->toArray(); 
     }
+    
+	/**
+     * Copier une entrée de la table
+     *
+     * @param int $id
+     *
+     * @return array
+     */
+    public function copier($id)
+    {
+    		//création de la copie
+		$sql = "INSERT INTO iste_serie (titre_fr, titre_en) 
+				SELECT CONCAT('copie ',titre_fr), CONCAT('copy ',titre_en) FROM iste_serie WHERE id_serie = ".$id; 	 
+	    $this->_db->query($sql);
+		$newId = $this->_db->lastInsertId();
+	    $dt = $this->getDependentTables();
+	    foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+			$dbT->copierSerie($newId, $id);
+        }
+        return $this->findById_serie($newId);
+    }    
+    
     	/**
      * Recherche une entrée Iste_serie avec la valeur spécifiée
      * et retourne cette entrée.

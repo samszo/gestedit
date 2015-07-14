@@ -16,7 +16,12 @@ class Model_DbTable_Iste_licence extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_licence';
+    public $_primary = 'id_licence';
+
+	protected $_dependentTables = array(
+       	"Model_DbTable_Iste_isbn"
+       	,"Model_DbTable_Iste_vente"
+       	);    
     
     /**
      * Vérifie si une entrée Iste_licence existe.
@@ -42,18 +47,22 @@ class Model_DbTable_Iste_licence extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=true)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+		if($rs)
+			return $this->findById_licence($id);
+	    	else
+		    	return $id;    
     } 
            
     /**
@@ -81,21 +90,30 @@ class Model_DbTable_Iste_licence extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_licence.id_licence = ' . $id);
+    		//met à jour les tables
+    		$dt = $this->getDependentTables();
+        foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+			$dbT->update(array("id_licence"=>null), 'id_licence = '.$id);
+        }
+    	
+	    	$this->delete('iste_licence.id_licence = ' . $id);
     }
 
+
     /**
-     * Recherche les entrées de Iste_licence avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
+     * Renvoie la liste des entrée
      *
      * @return void
      */
-    public function removeLieu($idLieu)
+    public function getListe()
     {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(nom, ' ', licence_unitaire, ' ',licence_coef)","licence_unitaire","licence_illimite","mutiplicateur","nom"))
+            ->order(array("nom","licence_unitaire","licence_illimite"));
+        return $this->fetchAll($query)->toArray();
+	} 
     
     /**
      * Récupère toutes les entrées Iste_licence avec certains critères
@@ -131,9 +149,10 @@ class Model_DbTable_Iste_licence extends Zend_Db_Table_Abstract
      */
     public function findById_licence($id_licence)
     {
-        $query = $this->select()
-                    ->from( array("i" => "iste_licence") )                           
-                    ->where( "i.id_licence = ?", $id_licence );
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(nom, ' ', licence_unitaire, ' ',licence_coef)","licence_unitaire","licence_illimite","mutiplicateur","nom"))
+          ->where( "l.id_licence = ?", $id_licence );
 
         return $this->fetchAll($query)->toArray(); 
     }

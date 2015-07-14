@@ -88,6 +88,20 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
 	    	$this->delete('iste_auteur.id_auteur = ' . $id);
     }
 
+
+    /**
+     * Renvoie la liste des entrée
+     *
+     * @return void
+     */
+    public function getListe()
+    {
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("id"=>$this->_primary[1],"text"=>"CONCAT(prenom, ' ', nom)"))
+            ->order(array("prenom", "nom"));        
+        return $this->fetchAll($query)->toArray();
+	} 
     
     /**
      * Récupère toutes les entrées Iste_auteur avec certains critères
@@ -171,6 +185,24 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
+	/**
+     * Recherche une entrée Iste_auteur avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param varchar $nom
+     * @param varchar $prenom
+     *
+     * @return array
+     */
+    public function findByNomPrenom($nom, $prenom)
+    {
+        $query = $this->select()
+                    ->from( array("i" => "iste_auteur") )                           
+                    ->where( "i.prenom = ?", $prenom )
+                    ->where( "i.nom = ?", $nom );
+		$rs = $this->fetchAll($query)->toArray(); 
+        return count($rs) ? $rs[0] : false;
+    }    
     	/**
      * Recherche une entrée Iste_auteur avec la valeur spécifiée
      * et retourne cette entrée.

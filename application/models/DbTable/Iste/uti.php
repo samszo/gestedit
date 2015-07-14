@@ -42,19 +42,22 @@ class Model_DbTable_Iste_uti extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
-    } 
+    public function ajouter($data, $existe=true,$rs=false)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+		if($rs)
+			return $this->findById_uti($id);
+	    	else
+		    	return $id;    
+	} 
            
     /**
      * Recherche une entrée Iste_uti avec la clef primaire spécifiée
@@ -84,18 +87,20 @@ class Model_DbTable_Iste_uti extends Zend_Db_Table_Abstract
     	$this->delete('iste_uti.id_uti = ' . $id);
     }
 
+
     /**
-     * Recherche les entrées de Iste_uti avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
+     * Renvoie la liste des entrée
      *
      * @return void
      */
-    public function removeLieu($idLieu)
+    public function getListe()
     {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"login","login","nom","mdp","role"))
+            ->order("login");        
+        return $this->fetchAll($query)->toArray();
+	} 
     
     /**
      * Récupère toutes les entrées Iste_uti avec certains critères
@@ -131,9 +136,10 @@ class Model_DbTable_Iste_uti extends Zend_Db_Table_Abstract
      */
     public function findById_uti($id_uti)
     {
-        $query = $this->select()
-                    ->from( array("i" => "iste_uti") )                           
-                    ->where( "i.id_uti = ?", $id_uti );
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"login","login","nom","mdp","role"))
+    			->where( "l.id_uti = ?", $id_uti );
 
         return $this->fetchAll($query)->toArray(); 
     }

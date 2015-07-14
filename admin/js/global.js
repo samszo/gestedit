@@ -1,4 +1,5 @@
 
+var fuVerif = false;
 
 function showChanged(id) {
     console.log(w2ui[id].getChanges()); 

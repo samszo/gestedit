@@ -16,8 +16,14 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_isbn';
+    public $_primary = 'id_isbn';
     
+	protected $_dependentTables = array(
+       "Model_DbTable_Iste_prix"
+       ,"Model_DbTable_Iste_auteurxcontrat"
+       ,"Model_DbTable_Iste_vente"
+       );    
+        
     /**
      * Vérifie si une entrée Iste_isbn existe.
      *
@@ -52,7 +58,7 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
-	    	}else return "existe";
+	    	}
 	    	if($rs)
 			return $this->findById_isbn($id);
 	    	else
@@ -70,8 +76,7 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
      */
     public function edit($id, $data)
     {        
-   	
-    	$this->update($data, 'iste_isbn.id_isbn = ' . $id);
+	    	$this->update($data, 'iste_isbn.id_isbn = ' . $id);
     }
     
     /**
@@ -84,21 +89,56 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_isbn.id_isbn = ' . $id);
+        $dt = $this->getDependentTables();
+        $n = array();
+        foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+	        	switch ($t) {
+	        		case "Model_DbTable_Iste_vente":
+	        			$n[$t] = $dbT->removeIsbn($id);
+	        		break;
+	        		default:
+	        			$n[$t] = $dbT->delete('id_isbn ='.$id);
+	        		break;
+	        	}			    
+        }
+    		$n["Model_DbTable_Iste_isbn"] = $this->delete('iste_isbn.id_isbn = ' . $id);
+    		return $n;
     }
 
-    /**
-     * Recherche les entrées de Iste_isbn avec la clef de lieu
-     * et supprime ces entrées.
+	/**
+     * Recherche les entrées avec la clef spécifiée
+     * et supprime ces entréeq.
      *
-     * @param integer $idLieu
+     * @param integer $id
      *
      * @return void
      */
-    public function removeLieu($idLieu)
+    public function removeLivre($id)
     {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
+    		//suprime les royalties associé à cette vente
+    		$rs = $this->findById_livre($id);
+    		$n = array();
+    		foreach ($rs as $r) {
+    			$n["removeLivre_".$r['id_livre']] = $this->remove($r['id_livre']);
+    		}
+    		return $n;
+    }    
+    
+    /**
+     * Renvoie la liste des entrée
+     *
+     * @return void
+     */
+    public function getListe()
+    {
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("id"=>$this->_primary[1],"text"=>"num","id_livre"))
+            	->where("length(num)>=13")
+            ->order("num");        
+        return $this->fetchAll($query)->toArray();
+	}     
     
     /**
      * Récupère toutes les entrées Iste_isbn avec certains critères
@@ -140,8 +180,11 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
             ->joinInner(array("iid" => "iste_isbn"),
                 'i.id_isbn = iid.id_isbn', array("recid"=>"id_isbn"))
             ->where( "i.id_isbn = ?", $id_isbn );
-			
-        return $this->fetchAll($query)->toArray(); 
+		$rs = $this->fetchAll($query)->toArray();
+        if(count($rs))	
+	        return $rs[0] ;
+	    else 
+	    		return false; 
     }
     	/**
      * Recherche une entrée Iste_isbn avec la valeur spécifiée
@@ -182,6 +225,48 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_isbn avec la valeur spécifiée
      * et retourne cette entrée.
      *
+     * @param varchar 	$titre
+     * @param int 		$idEditeur
+     * @param varchar 	$langue
+     *
+     * @return array
+     */
+    public function findByTitreEditeur($titre, $idEditeur, $langue="en")
+    {
+        $query = $this->select()
+			->from( array("i" => "iste_isbn"))
+				->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+	            ->joinInner(array("l" => "iste_livre"),
+	                'l.id_livre = i.id_livre', array("id_livre"))
+	        ->where( "i.id_editeur = ?", $idEditeur)
+	        ->where( "l.titre_".$langue." = ?", $titre);
+    
+        return $this->fetchAll($query)->toArray(); 
+    }
+	/**
+     * Recherche une entrée Iste_isbn avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param varchar 	$titre
+     * @param varchar 	$langue
+     *
+     * @return array
+     */
+    public function findByTitre($titre, $langue="en")
+    {
+        $query = $this->select()
+			->from( array("i" => "iste_isbn"))
+				->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+	            ->joinInner(array("l" => "iste_livre"),
+	                'l.id_livre = i.id_livre', array("id_livre"))
+	        ->where( "l.titre_".$langue." = ?", $titre);
+    
+        return $this->fetchAll($query)->toArray(); 
+    }    
+    /**
+     * Recherche une entrée Iste_isbn avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
      * @param int $id_licence
      *
      * @return array
@@ -207,8 +292,11 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
         $query = $this->select()
                     ->from( array("i" => "iste_isbn") )                           
                     ->where( "i.num = ?", $num );
-
-        return $this->fetchAll($query)->toArray(); 
+		$rs = $this->fetchAll($query)->toArray();
+        if(count($rs))	
+	        return $rs[0] ;
+	    else 
+	    		return false; 
     }
     	/**
      * Recherche une entrée Iste_isbn avec la valeur spécifiée

@@ -111,7 +111,21 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray();
     }
 
-    
+	/**
+     * Recherche une entrée avec la valeur spécifiée
+     * et copie cette entrée
+     *
+     * @param int $newId
+     * @param int $oldId
+     *
+     */
+    public function copierComite($newId, $oldId)
+    {
+		$sql = "INSERT INTO iste_comitexauteur (id_comite, id_auteur) 
+				SELECT ".$newId.", id_auteur FROM iste_comitexauteur WHERE id_comite = ".$oldId; 	 
+	    $this->_db->query($sql);
+    }  
+        
     	/**
      * Recherche une entrée Iste_comitexauteur avec la valeur spécifiée
      * et retourne cette entrée.
@@ -136,7 +150,7 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
      *
      * @return array
      */
-    public function findById_auteur($id_auteur)
+    public function findLivreById_auteur($id_auteur)
     {
         $query = $this->select()
         		->from( array("i" => "iste_comitexauteur") )                           

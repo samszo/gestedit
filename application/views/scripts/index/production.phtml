@@ -1,0 +1,458 @@
+<?php 
+if(!$this->ajax){
+	$inc = 0;
+	echo '<!DOCTYPE html>
+<html>
+	<head>
+		<title>ISTE - Production des livres</title>
+		<link rel="stylesheet" type="text/css" href="../css/gestedit.css" />
+		<link rel="stylesheet" type="text/css" href="../css/w2ui.css" />
+		<link rel="stylesheet" type="text/css" href="../fonts/font-awesome/font-awesome.css" />
+		<script type="text/javascript">
+			var urlP = "../";
+			var uti = '.$this->uti.';
+			var fctInit;			
+		</script>		
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/w2ui.js"></script>
+		<script type="text/javascript" src="../js/global.js"></script>
+		<script type="text/javascript" src="../js/data.js"></script>
+		<script type="text/javascript" src="../js/log.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				fctInit = initProd;			
+				initAll(); 
+	  			if(uti.id_uti!=0)
+					utiIsConnect();
+	  			else
+		    	  		diagLogin.showModal();				
+			});                       		
+		</script>		
+		</head>
+<body>
+	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
+	<div id="utiConnect"></div>
+	<dialog id="diagLogin" close> 
+		<label for="iptLogin">Login : </label>
+        <input type="text" name="iptLogin" id="iptLogin" required="required">
+        <label for="iptlogin">Mot de passe : </label>
+        <input type="password" name="iptMdp" id="iptMdp" required="required">
+	    <div class="boutons">
+			<button onclick="diagLogin.close()">Fermer</button> 
+			<button onclick="connecte()">Connexion</button> 
+		</div> 
+	</dialog> 
+';
+}else $inc = 1;
+
+$idPage = "ProdLivre";
+?>
+<div id="<?php echo $idPage;?>" style="width: 100%; height: 1000px;"></div>
+
+<script type="text/javascript">
+var rs = <?php echo $this->json; ?>;
+
+//widget configuration
+var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
+var pstyleDetail = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
+var config;
+
+function initProd() {
+
+	config = {
+		    layoutProduction: {
+		        name: 'layout_<?php echo $idPage;?>',
+		        padding: 4,
+		        panels: [
+		 		    { type: 'top', size: "50%", style: pstyle},
+					{ type: 'main', size: '50%', resizable: true, style: pstyleDetail},
+		            { type: 'right', size: '50%', hidden:false, resizable: true, style: pstyleDetail
+			    		    ,tabs: {
+			    		        name: 'tabs_<?php echo $idPage;?>_prod',
+			    		        active: 'tab',
+			    		        tabs: [{ id: 'tab', caption: "Commentaires" },{ id: 'tab0', caption: "Contextes" }
+			    		        		,{ id: 'tab1', caption: 'Table des matières' },{ id: 'tab2', caption: 'Biographies' }
+			    		        		,{ id: 'tab3', caption: 'Fichiers joints' }],
+			    		        onClick: function (event) {
+			    			        if(event.target=="tab"){
+			    			        		w2ui['form_<?php echo $idPage;?>_commentaire'].destroy();
+			    			            w2ui.layout_<?php echo $idPage;?>.content('right', $().w2form(config.formProdCommentaire));				    			            
+							        updateFormTab("commentaire");
+		    			        		}else if(event.target=="tab0"){
+			    			        		if(w2ui['form_<?php echo $idPage;?>_contexte'])w2ui['form_<?php echo $idPage;?>_contexte'].destroy();
+			    			            w2ui.layout_<?php echo $idPage;?>.content('right', $().w2form(config.formProdContexte));				    			            
+							        updateFormTab("contexte");
+			    			        }else if(event.target=="tab1"){
+			    			            if(w2ui['form_<?php echo $idPage;?>_tdm'])w2ui['form_<?php echo $idPage;?>_tdm'].destroy();
+			    			            w2ui.layout_<?php echo $idPage;?>.content('right', $().w2form(config.formProdTdM));						        	
+									updateFormTab("tdm");
+			    			        }else if(event.target=="tab2"){
+			    			            if(w2ui['form_<?php echo $idPage;?>_bio'])w2ui['form_<?php echo $idPage;?>_bio'].destroy();
+			    			            w2ui.layout_<?php echo $idPage;?>.content('right', $().w2form(config.formProdBio));
+			    			            updateFormTab("bio");
+			    			        }else{
+			    			            if(w2ui['layout_<?php echo $idPage;?>_fic'])w2ui['layout_<?php echo $idPage;?>_fic'].destroy();
+			    			            w2ui.layout_<?php echo $idPage;?>.content('right', $().w2layout(config.layoutProdFic));
+			    			            //w2ui.layout_<?php echo $idPage;?>_fic.content('left', $().w2sidebar(config.sbProdFic));
+			    			            w2ui.layout_<?php echo $idPage;?>_fic.load('main', urlP+'import?obj=livre&id='+itemSelect.recid+'&ajax=1&inc=<?php echo $inc;?>')
+			    			        }
+			    		        },
+			    		    },		    
+			    		},
+		        ]
+		    },
+		    gridProduction: { 
+		        name: 'grid_<?php echo $idPage;?>', 
+				header: 'Livres à produire',		
+		        show: { 
+					header			: true,		
+		            toolbar			: true,
+					toolbarReload   : true,
+					toolbarColumns  : true,
+		            	toolbarSearch   : true,
+		            	toolbarAdd      : false,
+		            	toolbarDelete   : false,
+		            	toolbarSave		: false,
+		            	footer: true,
+		        },
+		        columns: [         
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'date_parution', caption: 'Parution', size: '80px', sortable: true, resizable: true},
+		            { field: 'auteurs', caption: 'Auteurs', size: '10%', sortable: true, resizable: true},
+		            { field: 'titre_en', caption: 'Titre', size: '130px', sortable: true, resizable: true},
+		            { field: 'soustitre_en', caption: 'Sous titre', size: '100px', sortable: true, resizable: true},
+		            { field: 'isbn', caption: 'ISBN', size: '60px', sortable: true, resizable: true},
+		            { field: 'editeur', caption: 'Editeur', size: '80px', sortable: true, resizable: true},
+		            { field: 'type_2', caption: 'Type', size: '60px', sortable: true, resizable: true},		            		            
+		            { field: 'nb_page', caption: 'Nb. page', size: '60px', sortable: true, resizable: true},		            
+		            { field: 'traduction', caption: 'Traduction', size: '120px', sortable: true, resizable: true},		            
+		        ],
+		        toolbar: {
+		            items: [
+		            ],
+		            onClick: function (event) {
+		                if (event.target == 'export') {
+		                		open(urlP+'export?obj=production',"_blank")
+		                }
+		            }
+		        },
+		        records: rs,
+		        onClick: function (event) {
+		            itemSelect = this.get(event.recid);
+			        //récupère le processus de traduction des livres
+		            $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
+						{id:itemSelect.id_livre, process:'Production livre'},
+		            		function(js){
+				            var g = w2ui['grid_<?php echo $idPage;?>_process_livre'];
+				            g.clear();
+				          	//mise à jour de la grille responsable			        
+				            var g1 = w2ui['grid_<?php echo $idPage;?>_process_livre_resp'];
+				            g1.clear();
+		            			if(js.rs.length){
+			            			//mise à jour de la grille processus			        
+					            idPLU = js.rs[0].id_plu;
+					            g.add(js.rs);
+					            g1.add([{recid:js.rs[0].id_plu, id_uti:js.rs[0].id_uti}]);
+
+					            var a = w2ui['layout_<?php echo $idPage;?>_right_tabs'].active;
+					            if(a=="tab") updateFormTab("commentaire");
+					            if(a=="tab0") updateFormTab("contexte");
+					            if(a=="tab1") updateFormTab("tdm");
+					            if(a=="tab2") updateFormTab("bio");
+					            if(a=="tab3"){
+			    			            if(w2ui['layout_<?php echo $idPage;?>_fic'])w2ui['layout_<?php echo $idPage;?>_fic'].destroy();
+			    			            w2ui.layout_<?php echo $idPage;?>.content('right', $().w2layout(config.layoutProdFic));
+			    			            w2ui.layout_<?php echo $idPage;?>_fic.load('main', urlP+'import?obj=livre&id='+itemSelect.recid+'&ajax=1&inc=<?php echo $inc;?>')
+					            }
+				            						
+					            w2ui.layout_<?php echo $idPage;?>.unlock('main');
+					            w2ui.layout_<?php echo $idPage;?>.unlock('right');
+					            
+		            			}
+				    },"json");           		                    		           
+		        }	    
+		    },
+		    layoutProcessLivre : {
+		        name: 'layout_<?php echo $idPage;?>_process_livre',
+		        panels: [
+		 			{ type: 'top', size: '110px', style: pstyleDetail, resizable: true },
+		            	{ type: 'main', size: '200px', style: pstyleDetail, resizable: true },
+		        ]
+		    },
+		    gridProcessLivreResp: { 
+		        name: 'grid_<?php echo $idPage;?>_process_livre_resp',
+		        header: 'Responsable de la production',		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : false,
+	                	toolbarDelete   : false,
+	                	toolbarSave		: true,
+	                	header			: false, 
+	                	columnHeaders	: true},
+		        columns: [      		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'id_uti', caption: 'Responsable de la production', size: '100%', sortable: true, resizable: true
+			            	,editable: { type: 'list', items: arrListes['uti'] , showAll: true , showAll: true },
+		                render: function (record, index, col_index) {
+		                    var html = this.getCellValue(index, col_index);
+		                    return html.text ? html.text : html;
+		                }},
+		        ],
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_process_livre_resp'].getChanges();
+		            changes.forEach(function(c, i){
+			            c.obj = 'processusxlivre';
+			            if(c.id_uti) c.id_uti = c.id_uti.id;
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(html){
+			        				if(changes.length==i+1)w2alert(html);
+			        			});                        
+		            });
+		        }
+		    },		    		    
+		    gridProcessLivre: { 
+		        name: 'grid_<?php echo $idPage;?>_process_livre', 
+				header: 'Production du livre',		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : false,
+	                	toolbarDelete   : false,
+	                	toolbarSave		: true,
+	                	header			: true, 
+	                	columnHeaders	: true},
+		        columns: [      		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'tache', caption: 'Tâche', size: '118px', sortable: true, resizable: true},
+		            { field: 'debut', caption: 'Début', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'prevision', caption: 'Prévision', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'fin', caption: 'Fin', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'commentaire', caption: 'Commentaires', editable: { type: 'text'}, size: '200px', sortable: true, resizable: true},
+		            { field: 'alerte', caption: 'Alerte', size: '130px', sortable: true, resizable: true
+			            	,editable: { type: 'list', items: arrListes['alerte'] , showAll: true , showAll: true },
+		                render: function (record, index, col_index) {
+		                    var html = this.getCellValue(index, col_index);
+		                    return html.text ? html.text : html;
+		                }},
+		        ],
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_process_livre'].getChanges();
+		            changes.forEach(function(c, i){
+			            c.obj = 'prevision';
+			            if(c.debut) c.debut = w2utils.formatDate(c.debut, 'yyyy-mm-dd');
+			            if(c.prevision) c.prevision = w2utils.formatDate(c.prevision, 'yyyy-mm-dd');
+			            if(c.fin) c.fin = w2utils.formatDate(c.fin, 'yyyy-mm-dd');
+			            if(c.alerte) c.alerte = c.alerte.text;
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(html){
+			        				if(changes.length==i+1)w2alert(html);
+			        			});                        
+		            });
+		        }
+		    },		    	    		    		    	    		    
+		    formProdCommentaire: { 
+		        name: 'form_<?php echo $idPage;?>_commentaire',
+		        fields: [
+				    { name: 'recid', type:'int', required:true, hidden:true },
+		            { name: 'commentaire', type: 'textarea', required: false, html: { caption: 'Commentaires', attr: 'style="margin-left:0px;width: 100%; height: 360px; resize: none"'} },
+		        ],
+		        actions: {
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.obj = "livre";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+							data,
+			            		function(html){
+			            			//met à jour les données de base
+			            			itemSelect['commentaire']=data.commentaire;
+			            			//affiche le résultat
+					            w2alert(html);
+			           		});
+		            }
+		        }
+		    },
+		    formProdContexte: { 
+		        name: 'form_<?php echo $idPage;?>_contexte',
+		        fields: [
+				    { name: 'recid', type:'int', required:true, hidden:true },
+		            { name: 'contexte_fr', type: 'textarea', required: false, html: { caption: 'Contexte français', attr: 'style="width: 100%; height: 180px; resize: none"'} },
+		            { name: 'contexte_en', type: 'textarea', required: false, html: { caption: 'Contexte anglais', attr: 'style="width: 100%; height: 180px; resize: none"'} },		 		        
+		        ],
+		        actions: {
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.obj = "livre";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+							data,
+			            		function(html){
+			            			//met à jour les données de base
+			            			itemSelect['contexte_fr']=data.contexte_fr;
+			            			itemSelect['contexte_en']=data.contexte_en;
+			            			//affiche le résultat
+					            w2alert(html);
+			           		});
+		            }
+		        }
+		    },
+	    		formProdTdM: { 
+		        name: 'form_<?php echo $idPage;?>_tdm',
+		        fields: [
+				    { name: 'recid', type:'int', required:true, hidden:true },
+		            { name: 'tdm_fr', type: 'textarea', required: false, html: { caption: 'TdM français', attr: 'style="width: 100%; height: 180px; resize: none"'} },
+		            { name: 'tdm_en', type: 'textarea', required: false, html: { caption: 'TdM anglais', attr: 'style="width: 100%; height: 180px; resize: none"'} },		 		        
+		        ],
+		        actions: {
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.obj = "livre";
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+							data,
+			            		function(html){
+			            			//met à jour les données de base
+			            			itemSelect['tdm_fr']=data.tdm_fr;
+			            			itemSelect['tdm_en']=data.tdm_en;
+			            			//affiche le résultat
+					            w2alert(html);
+			           		});
+		            }
+		        }
+		    },
+		    formProdBio: { 
+		        name: 'form_<?php echo $idPage;?>_bio',
+		        fields: [
+				    { name: 'recid', type:'int', required:true, hidden:true },
+		            { name: 'bio_fr', type: 'textarea', required: false, html: { caption: 'Biographies français', attr: 'style="width: 100%; height: 180px; resize: none"'} },
+		            { name: 'bio_en', type: 'textarea', required: false, html: { caption: 'Biographies anglais', attr: 'style="width: 100%; height: 180px; resize: none"'} },		 		        
+		        ],
+		        actions: {
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.obj = "livre";
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+							data,
+			            		function(html){
+			            			//met à jour les données de base
+			            			itemSelect['bio_fr']=data.bio_fr;
+			            			itemSelect['bio_en']=data.bio_en;
+			            			//affiche le résultat
+					            w2alert(html);
+			           		});
+		            }
+		        }
+		    },
+		    layoutProdFic: {
+		        name: 'layout_<?php echo $idPage;?>_fic',
+		        padding: 4,
+		        panels: [
+				    { type: 'left', size: "200px", hidden:true, resizable: true, style: pstyleDetail},
+					{ type: 'main', size: "100%", resizable: true, style: pstyleDetail},
+		        ],
+		    },		        
+		    sbProdFic: {
+		        name: 'sb_<?php echo $idPage;?>_fic',
+		        nodes: [ 
+		            { id: 'general', text: 'Liste des fichiers', group: true, expanded: true, nodes: [
+		                { id: 'grid1', text: ' Couverture française', img: 'icon-cover', selected: true },
+		                { id: 'grid2', text: 'Couverture anglaise', img: 'icon-cover' },
+		                { id: 'html', text: 'Some HTML', img: 'icon-page' }
+		            ]}
+		        ],
+		        onClick: function (event) {
+		            switch (event.target) {
+		                case 'grid1':
+		                    w2ui.layout.content('main', w2ui.grid1);
+		                    break;
+		                case 'grid2':
+		                    w2ui.layout.content('main', w2ui.grid2);
+		                    break;
+		                case 'html':
+		                    w2ui.layout.content('main', '<div style="padding: 10px">Some HTML</div>');
+		                    $(w2ui.layout.el('main'))
+		                        .removeClass('w2ui-grid')
+		                        .css({ 
+		                            'border-left': '1px solid silver'
+		                        });
+		                    break;
+		            }
+		        }
+		    },
+		    formProdFic: { 
+		        name: 'form_<?php echo $idPage;?>_fic',
+		        fields: [
+				    { name: 'recid', type:'int', required:true, hidden:true },
+		            { name: 'file', type: 'file', required: false, html: { caption: 'Fichier', attr: 'style="width: 100%;"'} },
+		        ],
+		        actions: {
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.obj = "livre";
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+							data,
+			            		function(html){
+			            			//met à jour les données de base
+			            			itemSelect['bio_fr']=data.bio_fr;
+			            			itemSelect['bio_en']=data.bio_en;
+			            			//affiche le résultat
+					            w2alert(html);
+			           		});
+		            }
+		        }
+		    },		    
+	};
+	
+    // initialisation
+    $('#<?php echo $idPage;?>').w2layout(config.layoutProduction);
+    w2ui.layout_<?php echo $idPage;?>.content('top', $().w2grid(config.gridProduction));
+    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutProcessLivre)); 
+    w2ui.layout_<?php echo $idPage;?>.content('right', $().w2form(config.formProdCommentaire));
+       
+    w2ui.layout_<?php echo $idPage;?>_process_livre.content('top', $().w2grid(config.gridProcessLivreResp));
+    w2ui.layout_<?php echo $idPage;?>_process_livre.content('main', $().w2grid(config.gridProcessLivre));
+    
+    w2ui.layout_<?php echo $idPage;?>.lock('main', "Sélectionner un livre", true);
+    w2ui.layout_<?php echo $idPage;?>.lock('right', "Sélectionner un livre", true);
+    
+}
+function updateFormTab(a){
+    var g = w2ui['form_<?php echo $idPage;?>_'+a];
+    g.clear();
+	g.record.recid=itemSelect['id_livre'];
+	if(a=="commentaire")	g.record[a]=itemSelect[a];
+	else{
+		g.record[a+"_fr"]=itemSelect[a+"_fr"];
+		g.record[a+"_en"]=itemSelect[a+"_en"];
+	}
+	g.refresh();	
+}
+</script>
+
+<?php 
+if(!$this->ajax){
+	echo '</body>
+</html>';
+}else{
+	echo '<script type="text/javascript">
+			$(function () {initProd(); });                       		
+		</script>		
+		';	
+}
+
+?>

@@ -16,7 +16,7 @@ class Model_DbTable_Iste_traducteurxcontrat extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_traducteur';
+    protected $_primary = 'id_traducteurxcontrat';
     
     /**
      * Vérifie si une entrée Iste_traducteurxcontrat existe.
@@ -28,12 +28,12 @@ class Model_DbTable_Iste_traducteurxcontrat extends Zend_Db_Table_Abstract
     public function existe($data)
     {
 		$select = $this->select();
-		$select->from($this, array('id_traducteur'));
+		$select->from($this, array('id_traducteurxcontrat'));
 		foreach($data as $k=>$v){
 			$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
-	    if($rows->count()>0)$id=$rows[0]->id_traducteur; else $id=false;
+	    if($rows->count()>0)$id=$rows[0]->id_traducteurxcontrat; else $id=false;
         return $id;
     } 
         
@@ -68,7 +68,7 @@ class Model_DbTable_Iste_traducteurxcontrat extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
    	
-    	$this->update($data, 'iste_traducteurxcontrat.id_traducteur = ' . $id);
+    	$this->update($data, 'iste_traducteurxcontrat.id_traducteurxcontrat = ' . $id);
     }
     
     /**
@@ -81,21 +81,9 @@ class Model_DbTable_Iste_traducteurxcontrat extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_traducteurxcontrat.id_traducteur = ' . $id);
+    	$this->delete('iste_traducteurxcontrat.id_traducteurxcontrat = ' . $id);
     }
 
-    /**
-     * Recherche les entrées de Iste_traducteurxcontrat avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
     
     /**
      * Récupère toutes les entrées Iste_traducteurxcontrat avec certains critères

@@ -190,6 +190,25 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
 
+    	/**
+     * Recherche une entrée Iste_coordination avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $id_auteur
+     *
+     * @return array
+     */
+    public function findLivreById_auteur($id_auteur)
+    {
+        $query = $this->select()
+        		->from( array("la" => "iste_livrexauteur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("l" => "iste_livre"),
+                'l.id_livre = la.id_livre', array("titre_fr","titre_en", "recid"=>"id_livre"))
+        		->where( "la.id_auteur = ?", $id_auteur );
+
+        return $this->fetchAll($query)->toArray(); 
+    }    
 	/**
      * Recherche une entrée Iste_livrexauteur avec la valeur spécifiée
      * et retourne cette entrée.

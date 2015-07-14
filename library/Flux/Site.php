@@ -1,5 +1,11 @@
 <?php
-
+/**
+* Class pour gérer les propriétés et méthode d'une site Web
+*
+*
+* @author     Samuel Szoniecky <samuel.szoniecky@univ-paris8.fr>
+* @license    CC0 1.0 Universal (CC0 1.0) Public Domain Dedication http://creativecommons.org/publicdomain/zero/1.0/ 
+*/
 class Flux_Site{
     
     var $cache;
@@ -11,26 +17,24 @@ class Flux_Site{
 	var $db;
     //pour l'optimisation
     var $bTrace = false;
-    var $bTraceFlush = true;
+    var $bTraceFlush = false;//mettre false pour les traces de debuggage
     var $echoTrace = false;
     var $temps_debut;
     var $temps_inter;
     var $temps_nb=0;
     
-    function __construct($idBase=false){    	
+    function __construct($idBase=false, $bTrace=false){    	
     	
-    	/*
-    	$this->bTrace = $trace; // pour afficher les traces   	
-    	$this->temps_debut = microtime(true);
-		$this->trace("DEBUT ".__METHOD__);
-    	*/
-    	
+    		if($bTrace){
+			$this->bTrace = true;		
+    		}
+    	    	
     		$this->getDb($idBase);
     	
         $frontendOptions = array(
             'lifetime' => 30000000, // temps de vie du cache en seconde
             'automatic_serialization' => true,
-        	'caching' => true //active ou desactive le cache
+        		'caching' => true //active ou desactive le cache
         );  
         $backendOptions = array(
             // Répertoire où stocker les fichiers de cache
@@ -41,7 +45,7 @@ class Flux_Site{
                                      'File',
                                      $frontendOptions,
                                      $backendOptions); 
-    
+        
     }
 
 	/**
@@ -158,6 +162,7 @@ class Flux_Site{
 	    if (($handle = fopen($file, "rb")) !== FALSE) {
     		$this->trace("Traitement des lignes : ".ini_get("memory_limit"));     	
 	    	$i=0;
+	    	$csvarray = array();
     		while (($data = fgetcsv($handle, $tailleCol, $sep)) !== FALSE) {
     			$num = count($data);
  				$numTot = count($csvarray);
@@ -475,4 +480,26 @@ class Flux_Site{
         } 
         return $result; 
     } 	
+    /**
+     * This function takes the last comma or dot (if any) to make a clean float, 
+     * ignoring thousand separator, currency or any other letter
+     * http://php.net/manual/fr/function.floatval.php#114486
+     * @param string $num
+     * @return decimal
+     */    
+	function tofloat($num) {
+	    $dotPos = strrpos($num, '.');
+	    $commaPos = strrpos($num, ',');
+	    $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos : 
+	        ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+	   
+	    if (!$sep) {
+	        return floatval(preg_replace("/[^0-9]/", "", $num));
+	    } 
+	
+	    return floatval(
+	        preg_replace("/[^0-9]/", "", substr($num, 0, $sep)) . '.' .
+	        preg_replace("/[^0-9]/", "", substr($num, $sep+1, strlen($num)))
+	    );
+	}    
 }

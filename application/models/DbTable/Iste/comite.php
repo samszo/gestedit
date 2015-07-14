@@ -18,6 +18,11 @@ class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
      */
     public $_primary = 'id_comite';
     
+	protected $_dependentTables = array(
+       	"Model_DbTable_Iste_comitexauteur"
+       	,"Model_DbTable_Iste_comitexlivre"
+       	);    
+    
     /**
      * Vérifie si une entrée Iste_comite existe.
      *
@@ -42,18 +47,21 @@ class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
-    {
-    	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+    public function ajouter($data, $existe=true, $rs=false)
+    {    	
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+		if($rs)
+			return $this->findById_serie($id);
+	    	else
+		    	return $id;    
     } 
            
     /**
@@ -81,22 +89,52 @@ class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_comite.id_comite = ' . $id);
+		$n = array();
+    		$dt = $this->getDependentTables();
+        foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+	        $n[$t] = $dbT->delete('id_comite ='.$id);
+        }
+		$n["Model_DbTable_Iste_comite"] = $this->delete('iste_comite.id_comite = ' . $id);
+		return $n;    	
     }
 
     /**
-     * Recherche les entrées de Iste_comite avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
+     * Renvoie la liste des entrée
      *
      * @return void
      */
-    public function removeLieu($idLieu)
+    public function getListe()
     {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
-    
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr, ' / ', titre_en)","titre_fr", "titre_en"))
+            ->order(array("titre_fr","titre_en"));        
+        return $this->fetchAll($query)->toArray();
+	} 
+	
+	/**
+     * Copier une entrée de la table
+     *
+     * @param int $id
+     *
+     * @return array
+     */
+    public function copier($id)
+    {
+    		//création de la copie
+		$sql = "INSERT INTO iste_comite (titre_fr, titre_en) 
+				SELECT CONCAT('copie ',titre_fr), CONCAT('copy ',titre_en) FROM iste_comite WHERE id_comite = ".$id; 	 
+	    $this->_db->query($sql);
+		$newId = $this->_db->lastInsertId();
+	    $dt = $this->getDependentTables();
+	    foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+			$dbT->copierComite($newId, $id);
+        }
+        return $this->findById_comite($newId);
+    }    
+	
     /**
      * Récupère toutes les entrées Iste_comite avec certains critères
      * de tri, intervalles
@@ -132,7 +170,8 @@ class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
     public function findById_comite($id_comite)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_comite") )                           
+                    ->from( array("i" => "iste_comite")
+                    ,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en)","titre_fr", "titre_en") )                           
                     ->where( "i.id_comite = ?", $id_comite );
 
         return $this->fetchAll($query)->toArray(); 

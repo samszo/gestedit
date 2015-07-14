@@ -53,7 +53,7 @@ class Model_DbTable_Iste_coordination extends Zend_Db_Table_Abstract
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
-	    	}else return "existe";
+	    	}
 	    	if($rs)
 	    		return $this->findByAuteurCollection($data["id_auteur"], $data["id_collection"]);
 	    	else
@@ -150,7 +150,7 @@ class Model_DbTable_Iste_coordination extends Zend_Db_Table_Abstract
      *
      * @return array
      */
-    public function findById_auteur($id_auteur)
+    public function findLivreById_auteur($id_auteur)
     {
         $query = $this->select()
         		->from( array("i" => "iste_coordination") )                           

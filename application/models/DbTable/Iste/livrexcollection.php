@@ -52,7 +52,7 @@ class Model_DbTable_Iste_livrexcollection extends Zend_Db_Table_Abstract
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
-	    	}else return "existe";
+	    	};
 	    	if($rs)
 	    		return $this->findByLivreCollection($data["id_livre"], $data["id_collection"]);
 	    	else

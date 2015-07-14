@@ -169,6 +169,8 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
      */
     public function getProcessusByLivre($process, $idLivre)
     {
+    		if($process=="All")$where = "";
+    		else $where = " AND p.nom = '".$process."' ";
 	    	$sql = "SELECT 
 				p.nom, p.id_processus
 				, pl.date_creation, pl.id_plu
@@ -178,9 +180,9 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
 			FROM iste_processus p
 				INNER JOIN iste_processusxlivre pl ON pl.id_processus = p.id_processus
 				INNER JOIN iste_prevision pre ON pre.id_pxu = pl.id_plu AND pre.obj = 'livre'     
-				INNER JOIN iste_tache t ON t.id_tache = pre.id_tache 
 				INNER JOIN iste_uti u ON u.id_uti = pl.id_uti
-			WHERE pl.id_livre = ".$idLivre." AND p.nom = '".$process."'
+				INNER JOIN iste_tache t ON t.id_tache = pre.id_tache 
+			WHERE pl.id_livre = ".$idLivre.$where."
 			ORDER BY t.ordre";
 	 	//echo $sql."<br/>";
 	    $db = $this->_db->query($sql);
@@ -193,10 +195,11 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
      * @param varchar	$process
      * @param int 		$idLivre
      * @param int 		$idUti
+     * @param bool 		$rs
      * 
      * @return array
      */
-    public function setProcessusForLivre($process, $idLivre, $idUti)
+    public function setProcessusForLivre($process, $idLivre, $idUti, $rs=true)
     {
     	
     		$dbPrev = new Model_DbTable_Iste_prevision();
@@ -213,10 +216,10 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
 	        		$idPLU = $dbProcLiv->ajouter(array("id_livre"=>$idLivre, "id_processus"=>$t['id_processus'], "id_uti"=>$idUti));
 				$bFirst=false;        			
         		}        	
-	        	$idP = $dbPrev->ajouter(array("id_tache"=>$t['id_tache'], "id_pxu"=>$idPLU, "obj"=>"livre"));
+	        	$dbPrev->ajouter(array("id_tache"=>$t['id_tache'], "id_pxu"=>$idPLU, "obj"=>"livre"));
         }
     	
-        return $this->getProcessusByLivre($process, $idLivre);
+        return $rs ? $this->getProcessusByLivre($process, $idLivre) : false;
     } 
 
 	/**

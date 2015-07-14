@@ -9,6 +9,18 @@ class CrudController extends Zend_Controller_Action
     			$this->view->typeObj = $this->_getParam('typeObj');
     			
     }
+
+    public function copierAction()
+    {
+    		//récupère les paramètres
+    		$params = $this->_request->getParams();
+    		//création de l'objet BDD
+    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
+    		$oBdd = new $oName();    		
+	    	$this->view->rs = $oBdd->copier($this->_getParam('id'));
+	    	$this->view->message="Les données ont été copiées.";
+    		
+    }    
     
     public function insertAction()
     {
@@ -50,8 +62,43 @@ class CrudController extends Zend_Controller_Action
 				unset($params['resume_fr']);				
 				unset($params['resume_en']);				
 			break;			
+			case 'auteurxcontrat':
+				//création/récupération du contrat;
+				$dbCont = new Model_DbTable_Iste_contrat();
+				$idCont = $dbCont->ajouter(array("nom"=>$params["nom"],"type"=>$params["type"]));
+				$params['id_contrat'] = $idCont;			
+				//récupération de l'isbn
+				if($params['isbn']){
+					$dbI = new Model_DbTable_Iste_isbn();
+					$rIsbn = $dbI->findByNum($params['isbn']);
+					if($rIsbn)$params['id_isbn'] = $rIsbn['id_isbn'];	
+					else $mess = "ISBN non trouvé !";
+				}	
+				unset($params['nom']);				
+				unset($params['type']);				
+				unset($params['isbn']);				
+			break;
+			case 'vente':
+				$idLivre = $params['id_livre'];
+				unset($params['id_livre']);						
+			break;
+			case 'prevision':
+				//ajoute ou récupère la tache
+				$dbTache = new Model_DbTable_Iste_tache();
+				if($params['tache']){
+					$params['id_tache']=$dbTache->ajouter(array("nom"=>$params['id_tache'],"id_processus"=>$params['id_processus']));
+					unset($params['tache']);						
+				}
+				$params['obj']=$params["pxu_obj"];						
+				unset($params['pxu_obj']);						
+				unset($params['id_processus']);						
+			break;
+			case 'prix':
+		    		if($params['pdf'])$params['pdf']=="true" ? $params['pdf']=1 : $params['pdf']=0;  
+				
+			break;
 		}
-		
+		//print_r($params);
 		//ajout de la donnée
 		$result = $oBdd->ajouter($params,true,true);
     		
@@ -67,15 +114,19 @@ class CrudController extends Zend_Controller_Action
 				//création des prévisions
 				$dbProce = new Model_DbTable_Iste_processus();
 				$result = $dbProce->setProcessusForChapitre("Traduction chapitre",$idChap, $params["id_uti"]);
-			break;
-			
+			break;			
+			case 'vente':
+				//récupère les ventes
+				$dbL = new Model_DbTable_Iste_livre();
+				$result = $dbL->getIdLivreVente($idLivre);
+			break;			
 		}
 		
-		$this->view->message="Les données ont été ajoutées.";
+		$this->view->message="Les données ont été ajoutées.".$mess;
 		if(is_array($result))    		    		
 	    		$this->view->rs = $result;
 	    	else		
-			$this->view->message="Les données existent déjà.";
+			$this->view->message="Les données existent déjà.".$mess;
     }
 
     public function updateAction()
@@ -93,6 +144,8 @@ class CrudController extends Zend_Controller_Action
     		//et les paramètres de l'ajout
     		unset($params['obj']);
     		unset($params['recid']);
+    		//traitement des boolean
+    		if($params['pdf'])$params['pdf']=="true" ? $params['pdf']=1 : $params['pdf']=0;  
     		//traitement des données liées
     		if($params['instNom']){
 			$dbInst = new Model_DbTable_Iste_institution();
@@ -121,24 +174,27 @@ class CrudController extends Zend_Controller_Action
     		//traitement des supressions
 		switch ($this->_getParam('obj')) {
 			case 'coordination':
-				$oBdd->remove($this->_getParam("id_auteur"),$this->_getParam("id_collection"));
+				$r = $oBdd->remove($this->_getParam("id_auteur"),$this->_getParam("id_collection"));
 				break;			
 			case 'comitexauteur':
-				$oBdd->remove($this->_getParam("id_auteur"),$this->_getParam("id_comite"));
+				$r = $oBdd->remove($this->_getParam("id_auteur"),$this->_getParam("id_comite"));
 				break;			
 			case 'comitexlivre':
-				$oBdd->remove($this->_getParam("id_livre"),$this->_getParam("id_comite"));
+				$r = $oBdd->remove($this->_getParam("id_livre"),$this->_getParam("id_comite"));
 				break;			
 			case 'livrexcollection':
-				$oBdd->remove($this->_getParam("id_livre"),$this->_getParam("id_collection"));
+				$r = $oBdd->remove($this->_getParam("id_livre"),$this->_getParam("id_collection"));
 				break;			
 			case 'livrexserie':
-				$oBdd->remove($this->_getParam("id_livre"),$this->_getParam("id_serie"));
+				$r = $oBdd->remove($this->_getParam("id_livre"),$this->_getParam("id_serie"));
 				break;			
 			default:
-				$oBdd->remove($id);
+				$r = $oBdd->remove($id);
 				break;
-		}    		    		
+		}    		    	
+		$this->view->rs = $r;
+		if($r["message"])$this->view->message = $r["message"]; 
+		else $this->view->message = "Les données sont supprimées.";
     }    
 
 	public function auteurdataAction()
@@ -147,7 +203,7 @@ class CrudController extends Zend_Controller_Action
     		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
     		$oBdd = new $oName();
     	    //récupère les données
-    		$rs = $oBdd->findById_auteur($this->_getParam('id'));
+    		$rs = $oBdd->findLivreById_auteur($this->_getParam('id'));
 		$this->view->rs = $rs;
     }    
 	
@@ -161,7 +217,55 @@ class CrudController extends Zend_Controller_Action
 		$this->view->rs = $rs;
     }    
     
-    
+	public function ventedataAction()
+    {
+    		//création de l'objet BDD
+    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
+    		$oBdd = new $oName();
+    	    //récupère les données
+    		$rs = $oBdd->findById_livre($this->_getParam('id'));
+    		
+		//ajoute les résumés
+		$rsR = $oBdd->getTotaux($this->_getParam('id'));
+		if($this->_getParam('obj')=="vente"){
+			$i=1;
+			foreach ($rsR as $r) {
+				$rs[]= array(
+					"summary"=>true
+					,"recid"=>"S-".$i
+					,"devise"=>'<span style="float: right;">Dates de vente</span>'
+					,"licence"=>$r["dMin"]." / ".$r["dMax"]
+					,"date_vente"=>'<span style="float: right;">Boutique</span>'
+					,"boutique"=>$r["boutique"]
+					,"nombre"=>$r["nb"]
+					,"montant_euro"=>$r["tot_e"],"montant_livre"=>$r["tot_l"],"montant_dollar"=>$r["tot_d"]
+					,'avec_droit'=>""
+					,'prealable'=>'<span style="float: right;">Nb acheteur</span>'
+					,'acheteur'=>$r["nb_a"]
+					);
+				$i++;
+			}			
+		}else{
+			$i=1;
+			foreach ($rsR as $r) {
+				$rs[]= array(
+					"summary"=>true
+					,"recid"=>"S-".$i
+					,"id_vente"=>""
+					,"auteur"=>$r["auteur"]
+					,"date_vente"=>$r["dMin"]." / ".$r["dMax"]
+					,"montant_euro"=>$r["tot_e"],"montant_livre"=>$r["tot_l"],"montant_dollar"=>$r["tot_d"]
+					,'taxe_taux'=>""
+					,'taxe_deduction'=>''
+					,'pourcentage'=>''
+					);
+				$i++;
+			}			
+		}  
+		$this->view->json = json_encode($rs);		
+		$this->view->rs = $rs;
+    }        
+        
 }
 
 

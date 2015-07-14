@@ -16,7 +16,7 @@ class Model_DbTable_Iste_processusxlivre extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_processus';
+    protected $_primary = 'id_plu';
     
     /**
      * Vérifie si une entrée Iste_processusxlivre existe.

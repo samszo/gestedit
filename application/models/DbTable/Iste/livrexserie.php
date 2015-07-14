@@ -52,7 +52,7 @@ class Model_DbTable_Iste_livrexserie extends Zend_Db_Table_Abstract
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
-	    	}else return "existe";
+	    	};
 	    	if($rs)
 	    		return $this->findByLivreSerie($data["id_livre"], $data["id_serie"]);
 	    	else
@@ -147,6 +147,19 @@ class Model_DbTable_Iste_livrexserie extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
+	/**
+     * Recherche une entrée Iste_livrexserie avec la valeur spécifiée
+     * et copie cette entrée
+     *
+     * @param int $id_serie
+     *
+     */
+    public function copierSerie($newSerie, $oldSerie)
+    {
+		$sql = "INSERT INTO iste_livrexserie (id_serie, id_livre) 
+				SELECT ".$newSerie.", id_livre FROM iste_livrexserie WHERE id_serie = ".$oldSerie; 	 
+	    $this->_db->query($sql);
+    }    
 	/**
      * Recherche une entrée Iste_livrexserie avec la valeur spécifiée
      * et retourne cette entrée.

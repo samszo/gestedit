@@ -6,7 +6,7 @@ if(!$this->ajax){
 		<title>ISTE - Traduction</title>
 		<link rel="stylesheet" type="text/css" href="../css/gestedit.css" />
 		<link rel="stylesheet" type="text/css" href="../css/w2ui.css" />
-		<link rel="stylesheet" type="text/css" href="../font/font-awesome/font-awesome.css" />
+		<link rel="stylesheet" type="text/css" href="../fonts/font-awesome/font-awesome.css" />
 		<script type="text/javascript">
 			var urlP = "../";
 			var uti = '.$this->uti.';
@@ -45,7 +45,7 @@ if(!$this->ajax){
 }
 $idPage = "Traduction";
 ?>
-<div id="<?php echo $idPage;?>" style="width: 1200px; height: 700px;"></div>
+<div id="<?php echo $idPage;?>" style="width: 100%; height: 1000px;"></div>
 
 <script type="text/javascript">
 var rs = <?php echo $this->json; ?>;
@@ -62,9 +62,9 @@ function initTraduction() {
 		        name: 'layout_<?php echo $idPage;?>',
 		        padding: 4,
 		        panels: [
-		 		    { type: 'top', size: 200, style: pstyle},
+		 		    { type: 'top', size: "400px", style: pstyle},
 					{ type: 'main', size: '50%', resizable: true, style: pstyleDetail},
-		            { type: 'left', size: '582px', resizable: true, style: pstyleDetail},
+		            { type: 'left', size: '50%', resizable: true, style: pstyleDetail},
 		            { type: 'right', size: '50%', hidden:true, resizable: true, style: pstyleDetail},
 		        ]
 		    },
@@ -80,6 +80,7 @@ function initTraduction() {
 		            	toolbarAdd      : false,
 		            	toolbarDelete   : false,
 		            	toolbarSave		: false,
+		            	footer: true,
 		        },
 		        columns: [         
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -99,7 +100,7 @@ function initTraduction() {
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
-		                    w2ui.<?php echo $idPage;?>.add({ recid: w2ui.<?php echo $idPage;?>.records.length + 1 });
+		                		open(urlP+'export?obj=traduction',"_blank")
 		                }
 		            }
 		        },
@@ -107,7 +108,7 @@ function initTraduction() {
 		        onClick: function (event) {
 		            itemSelect = this.get(event.recid);
 			        //récupère le processus de traduction des livres
-		            $.get('<?php if(!$this->ajax) echo '../'; ?>traduction/getprocess',
+		            $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
 						{id:itemSelect.id_livre, process:'Traduction livre'},
 		            		function(js){
 				            var g = w2ui['grid_<?php echo $idPage;?>_trad_livre'];
@@ -123,7 +124,7 @@ function initTraduction() {
 		            			}
 				    },"json");           		           
 			        //récupère le processus de traduction des chapitre
-					$.get('<?php if(!$this->ajax) echo '../'; ?>traduction/getprocess',
+					$.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
 						{id:itemSelect.id_livre, process:'Traduction chapitre'},
 		            		function(js){
 				            g = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'];
@@ -132,6 +133,8 @@ function initTraduction() {
 			            			//mise à jour de la grille processus			        
 					            g.add(js.rs);
 		            			}
+				            w2ui.layout_<?php echo $idPage;?>.unlock('left');
+				            w2ui.layout_<?php echo $idPage;?>.unlock('main');
 				    },"json");           		           
 		        }	    
 		    },
@@ -197,15 +200,7 @@ function initTraduction() {
 		            { field: 'prevision', caption: 'Prévision', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'fin', caption: 'Fin', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'commentaire', caption: 'Commentaires', editable: { type: 'text'}, size: '200px', sortable: true, resizable: true},
-		            { field: 'alerte', caption: 'Alerte', size: '130px', sortable: true, resizable: true,
-			            	editable: { type: 'select', items: arrListes['alerte'] }, 
-		                render: function (record, index, col_index) {
-		                    var html = '';
-		                    for (var p in arrListes['alerte']) {
-		                        if (arrListes['alerte'][p].id == this.getCellValue(index, col_index)) html = arrListes['alerte'][p].text;
-		                    }
-		                    return html;
-		                }}
+		            { field: 'alerte', caption: 'Date alerte', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true}
 		        ],
 		        onSave: function(event) {
 		            var changes = w2ui['grid_<?php echo $idPage;?>_trad_livre'].getChanges();
@@ -214,6 +209,7 @@ function initTraduction() {
 			            if(c.debut) c.debut = w2utils.formatDate(c.debut, 'yyyy-mm-dd');
 			            if(c.prevision) c.prevision = w2utils.formatDate(c.prevision, 'yyyy-mm-dd');
 			            if(c.fin) c.fin = w2utils.formatDate(c.fin, 'yyyy-mm-dd');
+			            if(c.alerte) c.alerte = w2utils.formatDate(c.alerte, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
 			        			function(html){
@@ -340,7 +336,10 @@ function initTraduction() {
        
     w2ui.layout_<?php echo $idPage;?>_trad_livre.content('top', $().w2grid(config.gridTradLivreResp));
     w2ui.layout_<?php echo $idPage;?>_trad_livre.content('main', $().w2grid(config.gridTradLivre));
-	
+
+    w2ui.layout_<?php echo $idPage;?>.lock('left', "Sélectionner un livre", true);
+    w2ui.layout_<?php echo $idPage;?>.lock('main', "Sélectionner un livre", true);
+    
 }
 </script>
 

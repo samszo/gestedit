@@ -51,11 +51,26 @@ class Model_DbTable_Iste_tache extends Zend_Db_Table_Abstract
     	$id=false;
     	if($existe)$id = $this->existe($data);
     	if(!$id){
-    	 	$id = $this->insert($data);
+	    	if(!isset($data['ordre']))$data['ordre']= $this->getNextOrdre($data['id_processus']);
+    		$id = $this->insert($data);
     	}
     	return $id;
     } 
-           
+
+	/**
+     * Renvoie la liste des entrée
+     *
+     * @return void
+     */
+    public function getListe()
+    {
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("id"=>$this->_primary[1],"text"=>"nom","id_processus"))
+            ->order("nom");        
+        return $this->fetchAll($query)->toArray();
+	}     
+    
     /**
      * Recherche une entrée Iste_tache avec la clef primaire spécifiée
      * et modifie cette entrée avec les nouvelles données.
@@ -66,9 +81,8 @@ class Model_DbTable_Iste_tache extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_tache.id_tache = ' . $id);
+    {           	
+    		$this->update($data, 'iste_tache.id_tache = ' . $id);
     }
     
     /**
@@ -169,6 +183,24 @@ class Model_DbTable_Iste_tache extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    
+	/**
+     * Recherche le dernier numéro d'ordre
+     * et retourne cette entrée.
+     *
+     * @param int $idProcessus
+     *
+     * @return int
+     */
+    public function getNextOrdre($idProcessus)
+    {
+		$sql = "SELECT MAX(ordre)+1 o 
+			FROM iste_tache
+			WHERE id_processus = ".$idProcessus;
+	 	//echo $sql."<br/>";
+	    $db = $this->_db->query($sql);
+	    $rs = $db->fetchAll();
+		if(count($rs)) return $rs[0]["o"];
+		else return 1;
+    }    
     
 }

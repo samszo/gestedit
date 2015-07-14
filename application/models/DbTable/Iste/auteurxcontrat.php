@@ -16,7 +16,7 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
     /**
      * Clef primaire de la table.
      */
-    protected $_primary = 'id_auteur';
+    public $_primary = 'id_auteurxcontrat';
     
     /**
      * Vérifie si une entrée Iste_auteurxcontrat existe.
@@ -28,12 +28,12 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
     public function existe($data)
     {
 		$select = $this->select();
-		$select->from($this, array('id_auteur'));
+		$select->from($this, array('id_auteurxcontrat'));
 		foreach($data as $k=>$v){
 			$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
-	    if($rows->count()>0)$id=$rows[0]->id_auteur; else $id=false;
+	    if($rows->count()>0)$id=$rows[0]->id_auteurxcontrat; else $id=false;
         return $id;
     } 
         
@@ -42,10 +42,11 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {
     	
     	$id=false;
@@ -53,7 +54,11 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
     	if(!$id){
     	 	$id = $this->insert($data);
     	}
-    	return $id;
+    	if($rs){
+    		$dbC = new Model_DbTable_Iste_contrat();
+    		return $dbC->getAllContratAuteur($id);
+    	}else
+	    	return $id;
     } 
            
     /**
@@ -68,7 +73,7 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
    	
-    	$this->update($data, 'iste_auteurxcontrat.id_auteur = ' . $id);
+    	$this->update($data, 'iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
     }
     
     /**
@@ -81,21 +86,9 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_auteurxcontrat.id_auteur = ' . $id);
+    	$this->delete('iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
     }
 
-    /**
-     * Recherche les entrées de Iste_auteurxcontrat avec la clef de lieu
-     * et supprime ces entrées.
-     *
-     * @param integer $idLieu
-     *
-     * @return void
-     */
-    public function removeLieu($idLieu)
-    {
-		$this->delete('id_lieu = ' . $idLieu);
-    }
     
     /**
      * Récupère toutes les entrées Iste_auteurxcontrat avec certains critères
@@ -120,7 +113,6 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray();
     }
 
-    
     	/**
      * Recherche une entrée Iste_auteurxcontrat avec la valeur spécifiée
      * et retourne cette entrée.
@@ -138,6 +130,44 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     	/**
+     * Recherche une entrée Iste_auteurxcontrat avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idAut
+     * @param int $idCont
+     * @param int $idIsbn
+     * 
+     * @return array
+     */
+    public function findByIdAutIdContIdIsbn($idAut, $idCont, $idIsbn)
+    {
+        $query = $this->select()
+			->from( array("i" => "iste_auteurxcontrat") )                           
+            ->where( "i.id_auteur = ?", $idAut)
+            ->where( "i.id_contrat = ?", $idCont)
+            ->where( "i.id_isbn = ?", $idIsbn);
+		$rs = $this->fetchAll($query)->toArray(); 
+        return count($rs) ? $rs[0] : false;
+    }
+    
+	/**
+     * Recherche une entrée Iste_contrat avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param varchar $idSerie
+     *
+     * @return array
+     */
+    public function findBySerie($idSerie)
+    {
+        $query = $this->select()
+                    ->from( array("i" => "iste_auteurxcontrat") )                           
+                    ->where( "i.id_serie = ?", $idSerie);
+
+        return $this->fetchAll($query)->toArray(); 
+    }    
+    
+    /**
      * Recherche une entrée Iste_auteurxcontrat avec la valeur spécifiée
      * et retourne cette entrée.
      *

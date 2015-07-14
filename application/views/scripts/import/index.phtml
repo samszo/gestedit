@@ -1,0 +1,249 @@
+<?php 
+if($this->ajax)$urlP = "../";
+if($this->inc)$urlP = "";
+?>
+<!DOCTYPE HTML>
+<!--
+/*
+ * jQuery File Upload Plugin Demo 9.1.0
+ * https://github.com/blueimp/jQuery-File-Upload
+ *
+ * Copyright 2010, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ */
+-->
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>ISTE - importation des fichiers</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Generic page styles -->
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/jqfu.css">
+	<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/bootstrap.min.css">
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/blueimp-gallery.min.css">
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/jquery.fileupload.css">
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/jquery.fileupload-ui.css">
+<?php 
+if(!$this->ajax){
+	echo '
+		<link rel="stylesheet" type="text/css" href="'.$urlP.'css/gestedit.css" />
+		<script type="text/javascript">
+			function ok(){console.log("OK");};                       		
+			var uti = '.$this->uti.';
+			var fctInit = ok;			
+		</script>		
+		<script type="text/javascript" src="'.$urlP.'js/jquery.min.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/w2ui.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/global.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/data.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/log.js"></script>
+		<script type="text/javascript">
+			function init() {
+				initAll(); 
+				initFileUpload();				
+	  			if(uti.id_uti!=0)
+					utiIsConnect();
+	  			else
+		    	  		diagLogin.showModal();				
+			}
+		</script>';
+}
+?>
+	<script type="text/javascript">
+<?php 
+if($this->ajax)
+	echo 'var urlP = "../";';
+else
+	echo 'var urlP = "";';	
+if($this->inc)
+	echo 'urlP = "";';
+?>
+	</script>	
+</head>
+<body onload="init()" >
+	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
+	<div id="utiConnect"></div>
+	<dialog id="diagLogin" close> 
+		<label for="iptLogin">Login : </label>
+        <input type="text" name="iptLogin" id="iptLogin" required="required">
+        <label for="iptlogin">Mot de passe : </label>
+        <input type="password" name="iptMdp" id="iptMdp" required="required">
+	    <div class="boutons">
+			<button onclick="diagLogin.close()">Fermer</button> 
+			<button onclick="connecte()">Connexion</button> 
+		</div> 
+	</dialog> 
+<div class="container" >
+    <br>
+    <!-- The file upload form used as target for the file upload widget -->
+    <form id="fileupload" action="//jquery-file-upload.appspot.com/" method="POST" enctype="multipart/form-data">
+        <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+        <div class="row fileupload-buttonbar">
+            <div class="col-xs-2 fileupload-progress">
+                <!-- The fileinput-button span is used to style the file input field as button -->
+                <span class="btn btn-xs btn-success fileinput-button">
+                    <i class="glyphicon glyphicon-plus"></i>
+                    <span>Add files...</span>
+                    <input type="file" name="files[]" multiple>
+                </span>
+            </div>
+			<!-- The global progress state -->
+            <div class="col-xs-10 fileupload-progress fade">
+				<!-- The global file processing state -->
+            		<span class="fileupload-process"></span>
+            		<!-- The global progress bar -->
+                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                </div>
+                <!-- The extended global progress state -->
+                <div class="progress-extended">&nbsp;</div>
+            </div>
+        </div>
+        <!-- The table listing the files available for upload/download -->
+        <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
+    </form>
+</div>
+<!-- The blueimp Gallery widget -->
+<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-filter=":even">
+    <div class="slides"></div>
+    <h3 class="title"></h3>
+    <a class="prev">‹</a>
+    <a class="next">›</a>
+    <a class="close">×</a>
+    <a class="play-pause"></a>
+    <ol class="indicator"></ol>
+</div>
+<!-- The template to display files available for upload -->
+<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+        <td>
+            <span class="preview">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.url%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+			<input type="hidden" name="obj[]" value="<?php echo $this->obj; ?>"  />
+			<input type="hidden" name="idObj[]" value="<?php echo $this->idObj; ?>"  />
+            <p class="type">
+				<select name="type[]" >
+          			<option value="couverture fr.">Couverture fr.</option>
+          			<option value="couverture en.">Couverture en.</option>
+          			<option value="autre">Autre</option>
+				</select>
+            </p>
+        </td>
+        <td>
+            <p class="size">Processing...</p>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!i && !o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled>
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+            {% } %}
+            {% if (!i) { %}
+                <button class="btn btn-warning cancel">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+</script>
+<!-- The template to display files available for download -->
+<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+			<p class="id">{%=file.id||''%}</p>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+			<p class="type"><strong>{%=file.type||''%}</strong></p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+            {% if (file.deleteUrl) { %}
+                <button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+                    <i class="glyphicon glyphicon-trash"></i>
+                    <span>Delete</span>
+                </button>
+            {% } else { %}
+                <button class="btn btn-warning cancel">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+</script>
+
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="<?php echo $urlP;?>js/jquery.ui.widget.js"></script>
+<!-- The Templates plugin is included to render the upload/download listings -->
+<script src="<?php echo $urlP;?>js/tmpl.min.js"></script>
+<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+<script src="<?php echo $urlP;?>js/load-image.all.min.js"></script>
+<!-- The Canvas to Blob plugin is included for image resizing functionality -->
+<script src="<?php echo $urlP;?>js/canvas-to-blob.min.js"></script>
+<!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+<script src="<?php echo $urlP;?>js/bootstrap.min.js"></script>
+<!-- blueimp Gallery script -->
+<script src="<?php echo $urlP;?>js/jquery.blueimp-gallery.min.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload.js"></script>
+<!-- The File Upload processing plugin -->
+<script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload-process.js"></script>
+<!-- The File Upload image preview & resize plugin -->
+<script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload-image.js"></script>
+<!-- The File Upload audio preview plugin -->
+<script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload-audio.js"></script>
+<!-- The File Upload video preview plugin -->
+<script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload-video.js"></script>
+<!-- The File Upload validation plugin -->
+<script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload-validate.js"></script>
+<!-- The File Upload user interface plugin -->
+<script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload-ui.js"></script>
+<!-- The main application script -->
+<script src="<?php echo $urlP;?>js/jqfu/main.js"></script>
+<?php 
+if(!$this->ajax){
+	echo '</body>
+</html>';
+}else{
+	echo '<script type="text/javascript">
+			$(function () {
+				initFileUpload();
+			});                       		
+		</script>		
+		';	
+}
