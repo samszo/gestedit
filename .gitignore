@@ -27,29 +27,11 @@ application/configs/applicationGapai.ini
 
 application/configs/configGapai.php
 
-bdd/import/ISTEGlobal2015.csv
+bdd/import/
 
 bdd/iste.sql
 
 bdd/iste_bdd.sql
-
-bdd/import/146169_1409.XLS
-
-bdd/import/ISTEGlobal2015-DtsAuteursWiley.csv
-
-bdd/import/NBNEXPORT.CSV
-
-bdd/import/ISTEGlobal2015-ISTEedition.csv
-
-bdd/import/ISTEGlobal2015-ISTEeditiontest.csv
-
-bdd/import/ISTEGlobal2015-ISTEelsevier.csv
-
-bdd/import/ISTEGlobal2015-WileyBase.csv
-
-bdd/import/ISTEGlobal2015test.csv
-
-bdd/iste_bdd.mwb.bak
 
 bdd/iste_bdd.mwb.bak
 
@@ -57,18 +39,11 @@ bdd/iste.sql.zip
 
 bdd/isteDataTest.sql
 
-data/_/146169_1409.XLS
+data/
 
-data/_/NBNEXPORT (1).CSV
+tmp/
+bdd/isteDataTest.sql
 
-data/_/NBNEXPORT.CSV
+bdd/istePreHisto.sql
 
-data/_/papi-ISI.png
-
-data/_/thumbnail/papi-ISI.png
-
-data/import_0/146169_1409.XLS
-
-data/import_0/NBNEXPORT (1).CSV
-
-data/import_0/NBNEXPORT (2).CSV
+bdd/isteProcessus.sql
