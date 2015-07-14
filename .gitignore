@@ -39,11 +39,12 @@ bdd/iste.sql.zip
 
 bdd/isteDataTest.sql
 
-data/
-
-tmp/
-bdd/isteDataTest.sql
-
 bdd/istePreHisto.sql
 
 bdd/isteProcessus.sql
+
+bdd/isteDataTest.sql
+
+data/
+
+tmp/
