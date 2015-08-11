@@ -5,6 +5,8 @@ class ExportController extends Zend_Controller_Action
 
     public function indexAction()
     {
+    		$this->initInstance();
+    	
     		switch ($this->_getParam('obj')) {
     			case "contrat":
 		    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
@@ -28,6 +30,8 @@ class ExportController extends Zend_Controller_Action
     
     public function dataventeAction()
     {
+    		$this->initInstance();
+    	
     		$dbData = new Model_DbTable_Iste_importdata();
     		$rs = $dbData->exportByIdFic($this->_getParam('idFic'));
 		$this->_helper->viewRenderer->setNoRender(true);		
@@ -101,7 +105,23 @@ class ExportController extends Zend_Controller_Action
     exit(1);
   }
     
-    
+	function initInstance(){
+    		$auth = Zend_Auth::getInstance();
+		if ($auth->hasIdentity()) {						
+			// l'identité existe ; on la récupère
+		    $this->view->identite = $auth->getIdentity();
+		    $ssUti = new Zend_Session_Namespace('uti');
+		    $this->view->uti = json_encode($ssUti->uti);
+		}else{			
+		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
+		    $this->_redirect('/auth/login');		    
+		}
+		    	
+		$this->view->ajax = $this->_getParam('ajax');
+		$this->view->idObj = $this->_getParam('idObj');
+		$this->view->typeObj = $this->_getParam('typeObj');
+    }     
+  
 }
 
 

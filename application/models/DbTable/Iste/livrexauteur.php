@@ -55,7 +55,7 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
 	    	 	$id = $this->insert($data);
 	    	}else return "existe";
 	    	if($rs)
-	    		return $this->findByLivreAuteurRole($data["id_livrexauteur"]);
+	    		return $this->findByLivreAuteurRole($id);
 	    	else
 		    	return $id;
     } 

@@ -69,7 +69,7 @@ function initTraduction() {
 		        ]
 		    },
 		    gridTraduction: { 
-		        name: 'grid_<?php echo $idPage;?>_traduction', 
+		        name: 'grid_<?php echo $idPage;?>', 
 				header: 'Livres à traduire',		
 		        show: { 
 					header			: true,		
@@ -107,35 +107,7 @@ function initTraduction() {
 		        records: rs,
 		        onClick: function (event) {
 		            itemSelect = this.get(event.recid);
-			        //récupère le processus de traduction des livres
-		            $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
-						{id:itemSelect.id_livre, process:'Traduction livre'},
-		            		function(js){
-				            var g = w2ui['grid_<?php echo $idPage;?>_trad_livre'];
-				            g.clear();
-				          	//mise à jour de la grille responsable			        
-				            var g1 = w2ui['grid_<?php echo $idPage;?>_trad_livre_resp'];
-				            g1.clear();
-		            			if(js.rs.length){
-			            			//mise à jour de la grille processus			        
-					            idPLU = js.rs[0].id_plu;
-					            g.add(js.rs);
-					            g1.add([{recid:js.rs[0].id_plu, id_uti:js.rs[0].id_uti}]);
-		            			}
-				    },"json");           		           
-			        //récupère le processus de traduction des chapitre
-					$.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
-						{id:itemSelect.id_livre, process:'Traduction chapitre'},
-		            		function(js){
-				            g = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'];
-				            g.clear();		            		
-		            			if(js.rs.length){
-			            			//mise à jour de la grille processus			        
-					            g.add(js.rs);
-		            			}
-				            w2ui.layout_<?php echo $idPage;?>.unlock('left');
-				            w2ui.layout_<?php echo $idPage;?>.unlock('main');
-				    },"json");           		           
+		            showDataTraduction();
 		        }	    
 		    },
 		    layoutTradLivre : {
@@ -340,6 +312,39 @@ function initTraduction() {
     w2ui.layout_<?php echo $idPage;?>.lock('left', "Sélectionner un livre", true);
     w2ui.layout_<?php echo $idPage;?>.lock('main', "Sélectionner un livre", true);
     
+}
+
+function showDataTraduction(){
+    //récupère le processus de traduction des livres
+    $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
+		{id:itemSelect.id_livre, process:'Traduction livre'},
+    		function(js){
+            var g = w2ui['grid_<?php echo $idPage;?>_trad_livre'];
+            g.clear();
+          	//mise à jour de la grille responsable			        
+            var g1 = w2ui['grid_<?php echo $idPage;?>_trad_livre_resp'];
+            g1.clear();
+    			if(js.rs.length){
+        			//mise à jour de la grille processus			        
+	            idPLU = js.rs[0].id_plu;
+	            g.add(js.rs);
+	            g1.add([{recid:js.rs[0].id_plu, id_uti:js.rs[0].id_uti}]);
+    			}
+    },"json");           		           
+    //récupère le processus de traduction des chapitre
+	$.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
+		{id:itemSelect.id_livre, process:'Traduction chapitre'},
+    		function(js){
+            g = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'];
+            g.clear();		            		
+    			if(js.rs.length){
+        			//mise à jour de la grille processus			        
+	            g.add(js.rs);
+    			}
+            w2ui.layout_<?php echo $idPage;?>.unlock('left');
+            w2ui.layout_<?php echo $idPage;?>.unlock('main');
+    },"json");           		           
+	
 }
 </script>
 

@@ -97,7 +97,7 @@ class Model_DbTable_Iste_param extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("recid"=>$this->_primary[1],"text"=>"nom","type"))
+            		,array("id"=>"nom","recid"=>$this->_primary[1],"text"=>"nom","type"))
             ->order(array("type","nom"));        
         return $this->fetchAll($query)->toArray();
 	} 

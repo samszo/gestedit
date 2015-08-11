@@ -106,7 +106,8 @@ class IndexController extends Zend_Controller_Action
 		    $ssUti = new Zend_Session_Namespace('uti');
 		    $this->view->uti = json_encode($ssUti->uti);
 		}else{			
-		    $this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
+		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
+		    $this->_redirect('/auth/login');		    
 		}
 		    	
 		$this->view->ajax = $this->_getParam('ajax');
@@ -116,6 +117,7 @@ class IndexController extends Zend_Controller_Action
     
     public function institutionAction()
     {
+    		$this->initInstance();
     		$this->view->ajax = $this->_getParam('ajax');
 		$this->view->idObj = $this->_getParam('idObj');
 		$this->view->typeObj = $this->_getParam('typeObj');
@@ -130,11 +132,13 @@ class IndexController extends Zend_Controller_Action
     }
 	public function listeAction()
     {
-    	    	$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
+    		$this->initInstance();
+    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
     		$oBdd = new $oName();
 		$this->view->rs = $oBdd->getListe();		
     }    
-	public function testAction()
+
+    public function testAction()
     {
     }    
     

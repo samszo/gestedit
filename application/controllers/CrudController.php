@@ -5,13 +5,15 @@ class CrudController extends Zend_Controller_Action
 
     public function indexAction()
     {
-    			$this->view->idObj = $this->_getParam('idObj');
-    			$this->view->typeObj = $this->_getParam('typeObj');
+    		$this->initInstance();
+    		$this->view->idObj = $this->_getParam('idObj');
+    		$this->view->typeObj = $this->_getParam('typeObj');
     			
     }
 
     public function copierAction()
     {
+    		$this->initInstance();
     		//récupère les paramètres
     		$params = $this->_request->getParams();
     		//création de l'objet BDD
@@ -21,9 +23,23 @@ class CrudController extends Zend_Controller_Action
 	    	$this->view->message="Les données ont été copiées.";
     		
     }    
+
+    public function fusionAction()
+    {
+    		$this->initInstance();
+    		//récupère les paramètres
+    		$params = $this->_request->getParams();
+    		//création de l'objet BDD
+    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
+    		$oBdd = new $oName();    		
+	    	$this->view->rs = $oBdd->fusion($this->_getParam('ids'));
+	    	$this->view->message="Les données ont été fusionnées.";
+    		
+    }    
     
     public function insertAction()
     {
+    		$this->initInstance();
     		//récupère les paramètres
     		$params = $this->_request->getParams();
     		//création de l'objet BDD
@@ -131,6 +147,8 @@ class CrudController extends Zend_Controller_Action
 
     public function updateAction()
     {
+    		$this->initInstance();
+    	
     		//récupère les paramètres
     		$params = $this->_request->getParams();
     		$id = $this->_getParam('recid');
@@ -166,6 +184,8 @@ class CrudController extends Zend_Controller_Action
     
 	public function deleteAction()
     {
+    		$this->initInstance();
+    	
     		//récupère les paramètres
     		$id = $this->_getParam('id');
     		//création de l'objet BDD
@@ -174,7 +194,7 @@ class CrudController extends Zend_Controller_Action
     		//traitement des supressions
 		switch ($this->_getParam('obj')) {
 			case 'coordination':
-				$r = $oBdd->remove($this->_getParam("id_auteur"),$this->_getParam("id_collection"));
+				$r = $oBdd->remove($this->_getParam("id_auteur"),$this->_getParam("id_serie"));
 				break;			
 			case 'comitexauteur':
 				$r = $oBdd->remove($this->_getParam("id_auteur"),$this->_getParam("id_comite"));
@@ -199,6 +219,8 @@ class CrudController extends Zend_Controller_Action
 
 	public function auteurdataAction()
     {
+    		$this->initInstance();
+    	
     		//création de l'objet BDD
     		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
     		$oBdd = new $oName();
@@ -209,6 +231,8 @@ class CrudController extends Zend_Controller_Action
 	
     public function livredataAction()
     {
+    		$this->initInstance();
+    	
     		//création de l'objet BDD
     		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
     		$oBdd = new $oName();
@@ -217,8 +241,22 @@ class CrudController extends Zend_Controller_Action
 		$this->view->rs = $rs;
     }    
     
-	public function ventedataAction()
+    public function finduserAction()
     {
+    		$this->initInstance();
+    	
+    		//création de l'objet BDD
+    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
+    		$oBdd = new $oName();
+    	    //récupère les données
+    		$rs = $oBdd->findUser($this->_getParam('id'));
+		$this->view->rs = $rs;
+    }    
+    
+    public function ventedataAction()
+    {
+    		$this->initInstance();
+    	
     		//création de l'objet BDD
     		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
     		$oBdd = new $oName();
@@ -265,7 +303,24 @@ class CrudController extends Zend_Controller_Action
 		$this->view->json = json_encode($rs);		
 		$this->view->rs = $rs;
     }        
-        
+
+	function initInstance(){
+    		$auth = Zend_Auth::getInstance();
+		if ($auth->hasIdentity()) {						
+			// l'identité existe ; on la récupère
+		    $this->view->identite = $auth->getIdentity();
+		    $ssUti = new Zend_Session_Namespace('uti');
+		    $this->view->uti = json_encode($ssUti->uti);
+		}else{			
+		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
+		    $this->_redirect('/auth/login');		    
+		}
+		    	
+		$this->view->ajax = $this->_getParam('ajax');
+		$this->view->idObj = $this->_getParam('idObj');
+		$this->view->typeObj = $this->_getParam('typeObj');
+    }     
+    
 }
 
 

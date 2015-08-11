@@ -137,6 +137,14 @@ function initParam() {
 					{ type: 'right', size: '100%', resizable: true, style: pstyle},
 		        ]
 		    },
+		    layoutUserCol: {
+		        name: 'layout_<?php echo $idPage;?>_UserCol',
+		        padding: 4,
+		        panels: [
+					{ type: 'main', size: '100%', resizable:true, style: pstyle},
+					{ type: 'left', size: '100%', resizable:true, hidden:true, style: pstyle},
+		        ]
+		    },
 		    gridLicence:{ 
 		        name: 'grid_<?php echo $idPage;?>_licence', 
 				header: "Licence",		
@@ -307,6 +315,80 @@ function initParam() {
 		            }
 		        }
 		    },
+		    gridUserCol:{ 
+		        name: 'grid_<?php echo $idPage;?>_usercol', 
+				header: "Liste des participants",		
+		        show: {	header			: true,		
+			            toolbar			: true,
+				    		toolbarReload   : false,
+				    		toolbarColumns  : true,
+			            	toolbarSearch   : true,
+			            	toolbarAdd      : true,
+			            	toolbarDelete   : true,
+			            	toolbarSave		: false,
+			            	footer: false,
+			            	columnHeaders	: true
+				    },
+		       columns: [  		  		        
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'nom', size: '10%', caption: 'Nom', sortable: true, resizable: true},
+		            ],
+	            records  : [],
+		        onAdd: function(event) {
+		            w2ui['layout_<?php echo $idPage;?>_UserCol'].hide('main', true);
+		            w2ui['layout_<?php echo $idPage;?>_UserCol'].toggle('left', true);
+			    },
+		        onDelete: function(event) {
+					var p;
+	                if(itemSelect.type=="serie")
+		                p = {"id_serie":itemSelect.recid,"obj":"coordination"};
+	                if(itemSelect.type=="comite")
+		                p = {"id_comite":itemSelect.recid,"obj":"comitexauteur"};
+					if(event.force){
+						var s = w2ui[event.target].get(w2ui[event.target].getSelection()[0]);
+						p.id_auteur = s.id_auteur;
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+								p,
+				            		function(js){
+				            			w2alert(js.message);
+				           		},"json");
+					}
+			    },		        
+		    },	
+		    formUserCol: { 
+		        name: 'form_<?php echo $idPage;?>_usercol',
+		        fields: [
+		            {name: 'nom', type: 'list', required: true, html: { caption: 'Participant'}
+		            		,options: { items: arrListes['auteur'] }} ,
+		        ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+			            w2ui['layout_<?php echo $idPage;?>_UserCol'].toggle('main', true);
+			            w2ui['layout_<?php echo $idPage;?>_UserCol'].hide('left', true);
+		            },
+		            Save: function () {
+		                var p, errors = this.validate();
+		                if (errors.length > 0) return;
+		                if(itemSelect.type=="serie")
+			                p = {"id_auteur":this.record.nom.id,"id_serie":itemSelect.recid,"obj":"coordination"};
+		                if(itemSelect.type=="comite")
+			                p = {"id_auteur":this.record.nom.id,"id_comite":itemSelect.recid,"obj":"comitexauteur"};
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							p,
+			            		function(js){
+			            			if(js.rs){
+					                var g = w2ui['grid_<?php echo $idPage;?>_usercol'];
+									g.add(js.rs);
+									g.selectNone();
+						            w2ui['layout_<?php echo $idPage;?>_UserCol'].toggle('main', true);
+						            w2ui['layout_<?php echo $idPage;?>_UserCol'].hide('left', true);									
+			            			}
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
 		};
 	
     // initialisation
@@ -373,14 +455,15 @@ function getGridCol(type){
 		header: type,		
         show: {	header			: true,		
             toolbar			: true,
-    			toolbarReload   : false,
-    			toolbarColumns  : false,
-            	toolbarSearch   : true,
-            	toolbarAdd      : true,
-            	toolbarDelete   : true,
+    			toolbarReload   	: false,
+    			toolbarColumns  	: false,
+            	toolbarSearch   	: true,
+            	toolbarAdd      	: true,
+            	toolbarDelete   	: true,
             	toolbarSave		: true,
-            	footer: false,
-            	columnHeaders	: true
+            	footer			: false,
+            	columnHeaders	: true,
+            selectColumn		: true
     		},
        columns: [  		  		        
             { field: 'recid', caption: 'ID',hidden:true},
@@ -392,12 +475,24 @@ function getGridCol(type){
 	    records: arrListes[type],
 	    toolbar: {
             items: [
-                { id: 'copier', type: 'button', caption: 'Copier', icon: 'fa-file' }
+                { id: 'copier', type: 'button', caption: 'Copier', icon: 'fa-files-o' },
+                { id: 'fusion', type: 'button', caption: 'Fusionner', icon: 'fa-compress' },
+                { id: 'users', type: 'button', caption: 'Participants', icon: 'fa-users' },                
             ],
             onClick: function (event) {
                 if (event.target == 'copier') {
 	                	copierCol(type);
                 }
+                if (event.target == 'fusion') {
+	                	fusionCol(type);
+	            }
+	            if(event.target == 'users'){
+	                if(!itemSelect){
+	                    w2alert("Veuillez sélectionner un item.");
+	                    return false;
+	                }		            
+		            	openPopupColUser(type, itemSelect);
+	            }                
             }
         },	    
         onClick: function (event) {
@@ -483,8 +578,27 @@ function copierCol(type){
 		p,
     		function(js){
 		    	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
+		    	arrListes[type].push(js.rs[0]);
+		    	selectRowInGrid(js.rs[0].recid, 'grid_<?php echo $idPage;?>_'+type)			                  
+			w2alert(js.message);			
+   		},"json");
+	
+}
+
+function fusionCol(type){
+	var items = w2ui['grid_<?php echo $idPage;?>_'+type].getSelection();
+    if(items.length < 2){
+        w2alert("Veuillez sélectionner au moins 2 "+type+"s.");
+        return false;
+    }
+	var p = {ids:items, obj:type};
+	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/fusion',
+		p,
+    		function(js){
+		    	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
 		    	arrListes[type].push(js.rs[0]);			                  
 			w2alert(js.message);
+		    	selectRowInGrid(js.rs[0].recid, 'grid_<?php echo $idPage;?>_'+type)			                  
    		},"json");
 	
 }
@@ -532,6 +646,46 @@ function openPopupAjoutUti() {
         }
     });
 }
+
+function openPopupColUser(type) {
+
+	var p = {id:itemSelect.recid, obj:type};
+	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/finduser',
+		p,
+    		function(js){
+
+		    w2popup.open({
+		        title   : itemSelect.titre_fr+' / '+itemSelect.titre_en,
+		        width   : 600,
+		        height  : 400,
+		        showMax : true,
+		        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+		        onOpen  : function (event) {
+		            event.onComplete = function () {
+		            	 	if(w2ui['layout_<?php echo $idPage;?>_UserCol']){
+			            	 	w2ui['layout_<?php echo $idPage;?>_UserCol'].destroy();
+			            	 	w2ui['grid_<?php echo $idPage;?>_usercol'].destroy();
+			            	 	w2ui['form_<?php echo $idPage;?>_usercol'].destroy();
+		            	 	}
+		            	 	config.gridUserCol.records = js.rs;
+		                $('#w2ui-popup #main').w2layout(config.layoutUserCol);
+		            	    w2ui.layout_<?php echo $idPage;?>_UserCol.content('left', $().w2form(config.formUserCol));
+		            	    w2ui.layout_<?php echo $idPage;?>_UserCol.content('main', $().w2grid(config.gridUserCol));		                
+		            };
+		        },
+		        onToggle: function (event) { 
+		            event.onComplete = function () {
+		                w2ui.layout.resize();
+		            }
+		        }
+		    });
+
+	},"json");
+
+	
+}
+
+
 </script>
 
 <?php 

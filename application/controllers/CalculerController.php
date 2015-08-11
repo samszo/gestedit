@@ -5,11 +5,13 @@ class CalculerController extends Zend_Controller_Action
 
     public function indexAction()
     {
+    		$this->initInstance();
     }
     
     public function prixventeAction()
     {
-		$this->updateTauxDevise(false);    		
+    		$this->initInstance();
+    		$this->updateTauxDevise(false);    		
     		$dbD = new Model_DbTable_Iste_devise();
 		$dbD->setMontantSansDevise();
 		$this->view->message = "Les prix sont actualisés.";		
@@ -19,6 +21,8 @@ class CalculerController extends Zend_Controller_Action
 
     public function royaltiesAction()
     {
+    		$this->initInstance();
+    		
     		//récupère les ventes
     		$dbR = new Model_DbTable_Iste_royalty();    		
 		$this->view->rs = $dbR->setForAuteur();	
@@ -32,12 +36,15 @@ class CalculerController extends Zend_Controller_Action
     
     public function tauxdeviseAction()
     {
-		$this->updateTauxDevise(true);    		
+    		$this->initInstance();
+    		$this->updateTauxDevise(true);    		
     }
 
     public function updateTauxDevise($trace)
     {
-		$s = new Flux_Site(false,$trace);
+    		$this->initInstance();
+    		
+    		$s = new Flux_Site(false,$trace);
     		$dbD = new Model_DbTable_Iste_devise();
     		
 		//récupère les dates de ventes    		
@@ -65,6 +72,23 @@ class CalculerController extends Zend_Controller_Action
 	    		$dbD->ajouter($data);	    			    				
     		}    		    		
     		
+    }    
+
+	function initInstance(){
+    		$auth = Zend_Auth::getInstance();
+		if ($auth->hasIdentity()) {						
+			// l'identité existe ; on la récupère
+		    $this->view->identite = $auth->getIdentity();
+		    $ssUti = new Zend_Session_Namespace('uti');
+		    $this->view->uti = json_encode($ssUti->uti);
+		}else{			
+		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
+		    $this->_redirect('/auth/login');		    
+		}
+		    	
+		$this->view->ajax = $this->_getParam('ajax');
+		$this->view->idObj = $this->_getParam('idObj');
+		$this->view->typeObj = $this->_getParam('typeObj');
     }    
     
 }

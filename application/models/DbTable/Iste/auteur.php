@@ -316,5 +316,30 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
+    	/**
+     * Recherche les informations liées à l'auteur
+     * et retourne ces informations.
+     *
+     * @param varchar $idAuteur
+     *
+     * @return array
+     */
+    public function findInfos($idAuteur)
+    {
+		$sql = "SELECT a.id_auteur
+		, c.id_comite, c.titre_en caen, c.titre_fr cafr
+		, s.id_serie, s.titre_en sen, s.titre_fr sfr
+		, la.id_livre
+		FROM iste_auteur a
+			LEFT JOIN iste_comitexauteur ca ON ca.id_auteur = a.id_auteur
+			LEFT JOIN iste_comite c ON c.id_comite = ca.id_comite
+			LEFT JOIN iste_coordination co ON co.id_auteur = a.id_auteur 
+			LEFT JOIN iste_serie s ON s.id_serie = co.id_serie
+			LEFT JOIN iste_livrexauteur la ON la.id_auteur = a.id_auteur
+		WHERE a.id_auteur = ".$idAuteur."
+		ORDER BY c.id_comite, s.id_serie, la.id_livre";            
+	    	$db = $this->_db->query($sql);
+	    	return $db->fetchAll();
+    }
     
 }

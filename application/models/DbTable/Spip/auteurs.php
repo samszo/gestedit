@@ -62,7 +62,8 @@ class Model_DbTable_Spip_auteurs extends Zend_Db_Table_Abstract
     	$id=false;
     	if($existe)$id = $this->existe($data);
     	if(!$id){
-    	 	$id = $this->insert($data);
+    		if(!isset($data["maj"])) $data["maj"] = new Zend_Db_Expr('NOW()');
+    		$id = $this->insert($data);
     	}
     	return $id;
     } 

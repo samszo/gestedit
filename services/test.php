@@ -6,7 +6,7 @@ try {
 	$s = new Flux_Site(false,false);
 	$s->trace("DEBUT TEST");		
 
-	
+	/*
 	$bdA = new Model_DbTable_Iste_prevision();
     	$rsA = $bdA->getAlerteLivre();
     	for ($i = 0; $i < count($rsA); $i++) {
@@ -15,7 +15,7 @@ try {
     		if($rsA[$i]['nbJour']>14 && $rsA[$i]['nbJour']<21)$rsA[$i]['style']='background-color: green';    			
     		if($rsA[$i]['nbJour']>21)$rsA[$i]['style']='background-color: white';    			
     	}
-    			
+    	*/		
 	/*
     	$oBdd = new Model_DbTable_Iste_serie();
 	$rs = $oBdd->copier(132);
@@ -62,7 +62,7 @@ try {
     	$dbData = new Model_DbTable_Iste_importdata();
     	$rs = $dbData->exportByIdFic(46);
 	*/
-	//$arr = $s->csvToArray("../bdd/import/ISTEGlobal2015.csv");
+	$arr = $s->csvToArray("../bdd/import/ISTEGlobal2015SAMbd.csv");
 	
 	/*
 	$dbProcess = new Model_DbTable_Iste_processus();

@@ -160,10 +160,11 @@ class Model_DbTable_Iste_prix extends Zend_Db_Table_Abstract
     public function findById_livre($id_livre)
     {
         $query = $this->select()
-            ->from( array("p" => "iste_prix"), array("recid"=>"id_prix","id_prix","id_isbn","pdf","prix_euro","prix_dollar","prix_livre","type","maj") )                           
+            ->from( array("p" => "iste_prix"), array("recid"=>"id_prix","id_prix","id_isbn","pdf","prix_euro","prix_dollar","prix_livre","type_prix"=>"type","maj") )                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("i" => "iste_isbn"),
-                'i.id_isbn = p.id_isbn AND i.id_livre ='.$id_livre, array("id_livre","num"));
+                'i.id_isbn = p.id_isbn AND i.id_livre ='.$id_livre, array("id_livre","num", "type_isbn"=>"type"))
+            ->order("num");
                     
         return $this->fetchAll($query)->toArray(); 
     }

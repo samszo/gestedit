@@ -383,9 +383,9 @@ function initAuteur() {
 			        header: 'Ajouter une coordination',
 			        name: 'form_<?php echo $idPage;?>_coordination',
 			        fields: [
-			            { name: 'collection', type: 'list', required: true
-				            	, html: { caption: 'Collection', attr: 'size="60" maxlength="60"' } 
-			            		, options: { items: arrListes['collection'] }
+			            { name: 'serie', type: 'list', required: true
+				            	, html: { caption: 'Série', attr: 'size="60" maxlength="60"' } 
+			            		, options: { items: arrListes['serie'] }
 			           	},
 			            { name: 'prime', type: 'float', html: { caption: 'Prime', attr: 'size="40" maxlength="40"' } }
 			        ],
@@ -402,7 +402,7 @@ function initAuteur() {
 			                var data = this.record;
 			                this.clear();		                
 				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
-								{obj:"coordination",id_auteur:itemSelect["id_auteur"],id_collection:data.collection.id,prime:data.prime},
+								{obj:"coordination",id_auteur:itemSelect["id_auteur"],id_serie:data.serie.id,prime:data.prime},
 				            		function(js){
 				            			if(js.rs){					            			
 										g.add(js.rs);

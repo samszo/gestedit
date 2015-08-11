@@ -65,18 +65,6 @@ if($this->inc)
 	</script>	
 </head>
 <body onload="init()" >
-	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
-	<div id="utiConnect"></div>
-	<dialog id="diagLogin" close> 
-		<label for="iptLogin">Login : </label>
-        <input type="text" name="iptLogin" id="iptLogin" required="required">
-        <label for="iptlogin">Mot de passe : </label>
-        <input type="password" name="iptMdp" id="iptMdp" required="required">
-	    <div class="boutons">
-			<button onclick="diagLogin.close()">Fermer</button> 
-			<button onclick="connecte()">Connexion</button> 
-		</div> 
-	</dialog> 
 <div class="container" >
     <br>
     <!-- The file upload form used as target for the file upload widget -->
@@ -131,7 +119,7 @@ if($this->inc)
         <td>
             <p class="name">{%=file.name%}</p>
             <strong class="error text-danger"></strong>
-			<input type="hidden" name="obj[]" value="<?php echo $this->obj; ?>"  />
+			<input type="hidden" name="obj[]" value="<?php echo $this->typeObj; ?>"  />
 			<input type="hidden" name="idObj[]" value="<?php echo $this->idObj; ?>"  />
             <p class="type">
 				<select name="type[]" >

@@ -317,15 +317,15 @@ function initVente() {
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'id_isbn', caption: 'id_isbn', size: '50px', hidden:true, sortable: true, resizable: true},
 		            { field: 'num', caption: 'ISBN', size: '120px', sortable: true, resizable: true},
-		            { field: 'pdf', caption: 'E-book', size: '80px', sortable: true, resizable: true, editable:{type:'checkbox'}},
-		            { field: 'prix_euro', caption: 'Prix &euro;', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
-		            { field: 'prix_livre', caption: 'Prix &pound;', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
-		            { field: 'prix_dollar', caption: 'Prix $', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
-		            { field: 'type', caption: 'Type', size: '10%', sortable: true, resizable: true,editable: { type: 'list', items: arrListes['prix'], showAll: true },
+		            { field: 'type_isbn', caption: "Type d'ISBN", size: '10%', sortable: true, resizable: true},
+		            { field: 'type_prix', caption: 'Type de prix', size: '10%', sortable: true, resizable: true,editable: { type: 'list', items: arrListes['prix'], showAll: true },
 		                render: function (record, index, col_index) {
 		                    var html = this.getCellValue(index, col_index);
 		                    return html.text ? html.text : html;
 		                }},
+		            { field: 'prix_euro', caption: 'Prix &euro;', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
+		            { field: 'prix_livre', caption: 'Prix &pound;', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
+		            { field: 'prix_dollar', caption: 'Prix $', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
 		            { field: 'maj', caption: 'Date', size: '200px', sortable: true, resizable: true, editable: { type: 'date'}},
 		        ],
 		        onSave: function(event) {
@@ -367,7 +367,6 @@ function initVente() {
 		            { name: 'prix_euro', type: 'float', html: { caption: 'Prix &euro;' } },
 		            { name: 'prix_livre', type: 'float', html: { caption: 'Prix &pound;' } },
 		            { name: 'prix_dollar', type: 'float', html: { caption: 'Prix $' } },
-		            { name: 'pdf', type: 'checkbox', html: { caption: 'E-book' } },
 		            {required: true, name: 'type', type: 'list', options: { items: arrListes['prix'] }
 		            		, html: { caption: 'type', attr: 'size="20"' } 
 		            		},

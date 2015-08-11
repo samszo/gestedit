@@ -487,8 +487,12 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 				case "num":
 					$sql .= "INNER JOIN iste_isbn i ON i.id_livre = l.id_livre AND ".$op;
 				break;
+				default:
+					$sql .= " WHERE ".$op;
+				break;
 			}
 		}
+		
 		//echo $sql;
 	    	$db = $this->_db->query($sql);
 	    return $db->fetchAll();
@@ -527,19 +531,54 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
  	$sql = "SELECT 
 			i.id_isbn recid, i.date_parution, i.num isbn, i.nb_page 
 			, GROUP_CONCAT(DISTINCT CONCAT(a.prenom, ' ', a.nom)) auteurs
-			, l.titre_en, l.soustitre_en, l.type_2, l.id_livre
-		    , CONCAT(p.langue, ' -> ', p.traduction) traduction
+			, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.type_2, l.id_livre
+		    , p.traduction, p.langue
 		    , GROUP_CONCAT(DISTINCT e.nom) editeur
 		FROM iste_livre l
-			INNER JOIN iste_isbn i ON i.id_livre = l.id_livre 
-			INNER JOIN iste_proposition p ON p.id_livre = l.id_livre     
 			INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.role = 'auteur'
 			INNER JOIN iste_auteur a ON a.id_auteur = la.id_auteur 
-			INNER JOIN iste_editeur e ON e.id_editeur = i.id_editeur 
-		WHERE i.date_parution is null OR i.date_parution < now()
+			LEFT JOIN iste_isbn i ON i.id_livre = l.id_livre 
+			LEFT JOIN iste_proposition p ON p.id_livre = l.id_livre     
+			LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur 
 		GROUP BY i.id_livre";
+ 		//aucun filtre sur les livres
+		//WHERE i.date_parution is null OR i.date_parution < now()
 	    	//echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
 	    	return $db->fetchAll();
     }    
+
+	/**
+     * récupère les informations d'un livre
+     * 
+     * @param	int	$id
+     *
+     * @return array
+     */
+    public function findInfos($id)
+    {
+ 	$sql = "SELECT 
+		l.* 
+		, GROUP_CONCAT(DISTINCT a.prenom, ' ',a.nom, ':', la.role) auteurs
+		, i.id_isbn, i.num, i.type, i.date_parution
+		, e.id_editeur, e.nom
+		, p.prix_dollar, p.prix_euro, p.prix_livre
+		, GROUP_CONCAT(DISTINCT ls.id_serie) idsSerie
+		, GROUP_CONCAT(DISTINCT cl.id_comite) idsComite
+		FROM iste_livre l
+		INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre
+		INNER JOIN iste_auteur a ON a.id_auteur = la.id_auteur
+		INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
+		INNER JOIN iste_editeur e ON e.id_editeur = i.id_editeur
+		INNER JOIN iste_prix p ON p.id_isbn = i.id_isbn AND p.type = 'prix catalogue'
+		INNER JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
+		INNER JOIN iste_comitexlivre cl ON cl.id_livre = l.id_livre
+		WHERE l.id_livre = ".$id;
+	    	//echo $sql."<br/>";
+	    	$db = $this->_db->query($sql);
+	    	return $db->fetchAll();
+    }    
+    
+
+    
 }

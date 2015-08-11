@@ -178,7 +178,9 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("c" => "iste_comite"),
                 'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_comite"))
-        		->where( "i.id_comite = ?", $idComite )
+            ->joinInner(array("a" => "iste_auteur"),
+                'a.id_auteur = i.id_auteur', array("nom"=>"CONCAT(a.prenom,' ',a.nom)", "id_auteur"))
+            ->where( "i.id_comite = ?", $idComite )
             ->where( "i.id_auteur = ?", $idAuteur );
         		
         return $this->fetchAll($query)->toArray(); 

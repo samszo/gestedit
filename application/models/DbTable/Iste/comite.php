@@ -59,7 +59,7 @@ class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
 	    	 	$id = $this->insert($data);
 	    	}
 		if($rs)
-			return $this->findById_serie($id);
+			return $this->findById_comite($id);
 	    	else
 		    	return $id;    
     } 
@@ -135,6 +135,32 @@ class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
         return $this->findById_comite($newId);
     }    
 	
+	/**
+     * Fusionner une entrée de la table
+     *
+     * @param string $ids
+     *
+     * @return array
+     */
+    public function fusion($ids)
+    {
+    		//création de la copie
+		$sql = "INSERT INTO iste_comite (titre_fr, titre_en) 
+				SELECT CONCAT('fusion : ',GROUP_CONCAT(DISTINCT titre_fr ORDER BY titre_fr DESC SEPARATOR ' - '))
+					, CONCAT('fusion : ',GROUP_CONCAT(DISTINCT titre_en ORDER BY titre_en DESC SEPARATOR ' - ')) 
+				FROM iste_comite WHERE id_comite IN (".implode(",", $ids).")"; 	 
+	    $this->_db->query($sql);
+		$newId = $this->_db->lastInsertId();
+	    $dt = $this->getDependentTables();
+	    foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+	        	foreach ($ids as $id) {
+				$dbT->copierComite($newId, $id);
+	        	}
+        }
+        return $this->findById_comite($newId);
+    }    
+    
     /**
      * Récupère toutes les entrées Iste_comite avec certains critères
      * de tri, intervalles
@@ -241,5 +267,24 @@ class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
+    	/**
+     * Recherche une entrée Iste_comite avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $id
+     *
+     * @return array
+     */
+    public function findUser($id)
+    {
+        $query = $this->select()
+			->from( array("ca" => "iste_comitexauteur"), array("recid"=>"CONCAT(ca.id_comite, '_', ca.id_auteur)")  )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("a" => "iste_auteur"),
+                'a.id_auteur = ca.id_auteur', array("nom"=>"CONCAT(prenom, ' ', nom)"))
+			->where( "ca.id_comite = ?", $id);
+            
+        return $this->fetchAll($query)->toArray(); 
+    }
     
 }

@@ -184,6 +184,32 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
         }
         return $this->findById_serie($newId);
     }    
+
+	/**
+     * Fusionner une entrée de la table
+     *
+     * @param string $ids
+     *
+     * @return array
+     */
+    public function fusion($ids)
+    {
+    		//création de la copie
+		$sql = "INSERT INTO iste_serie (titre_fr, titre_en) 
+				SELECT CONCAT('fusion : ',GROUP_CONCAT(DISTINCT titre_fr ORDER BY titre_fr DESC SEPARATOR ' - '))
+					, CONCAT('fusion : ',GROUP_CONCAT(DISTINCT titre_en ORDER BY titre_en DESC SEPARATOR ' - ')) 
+				FROM iste_serie WHERE id_serie IN (".implode(",", $ids).")"; 	 
+	    $this->_db->query($sql);
+		$newId = $this->_db->lastInsertId();
+	    $dt = $this->getDependentTables();
+	    foreach($dt as $t){
+	        	$dbT = new $t($this->_db);
+	        	foreach ($ids as $id) {
+				$dbT->copierSerie($newId, $id);
+	        	}
+        }
+        return $this->findById_serie($newId);
+    }    
     
     	/**
      * Recherche une entrée Iste_serie avec la valeur spécifiée
@@ -217,6 +243,25 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    
-    
+
+	/**
+     * Recherche une entrée Iste_serie avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $id
+     *
+     * @return array
+     */
+    public function findUser($id)
+    {
+        $query = $this->select()
+			->from( array("c" => "iste_coordination"), array("id_coordination","recid"=>"id_coordination") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("a" => "iste_auteur"),
+                'a.id_auteur = c.id_auteur', array("nom"=>"CONCAT(prenom, ' ', nom)"))
+			->where( "c.id_serie = ?", $id);
+            
+        return $this->fetchAll($query)->toArray(); 
+        
+    }    
 }

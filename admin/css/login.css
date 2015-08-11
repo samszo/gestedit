@@ -1,0 +1,23 @@
+@CHARSET "UTF-8";
+body,html {
+    margin: 0 5px;
+    font-family: Verdana,sans-serif;
+	background-color:black;
+	color:white; 
+}
+/* style form */
+form dt {
+    width: 100%;
+    display: block;
+    float: left;
+    clear: left;
+}
+
+form dd {
+    margin-left: 0;
+    float: left;
+}
+
+form #submitbutton {
+    margin-left: 100px;
+}

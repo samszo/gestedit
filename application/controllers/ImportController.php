@@ -6,31 +6,32 @@ class ImportController extends Zend_Controller_Action
 	var $arrMois = array("janvier"=>"01","février"=>"02","mars"=>"03","avril"=>"04","mai"=>"05","juin"=>"06",
 		"juillet"=>"07","août"=>"08","septembre"=>"09","octobre"=>"10","novembre"=>"11","décembre"=>"12");
 	
-    function initInstance(){
+	function initInstance(){
     		$auth = Zend_Auth::getInstance();
 		if ($auth->hasIdentity()) {						
 			// l'identité existe ; on la récupère
 		    $this->view->identite = $auth->getIdentity();
 		    $ssUti = new Zend_Session_Namespace('uti');
 		    $this->view->uti = json_encode($ssUti->uti);
-
-			$ssUpload = new Zend_Session_Namespace('upload');
-			$ssUpload->obj = $this->_getParam('obj',"");
-			$ssUpload->id = $this->_getParam('id',"");
-			$this->view->ajax = $this->_getParam('ajax');
-			$this->view->inc = $this->_getParam('inc');
-			$this->view->obj = $this->_getParam('obj',"");
-			$this->view->idObj = $this->_getParam('id',"");
-			
 		}else{			
-		    $this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
-		}    	
-    }
+		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
+		    $this->_redirect('/auth/login');		    
+		}
+		    	
+		$this->view->inc = $this->_getParam('inc');
+		$this->view->ajax = $this->_getParam('ajax');
+		$this->view->idObj = $this->_getParam('idObj');
+		$this->view->typeObj = $this->_getParam('typeObj');
+	}     
 	
 	
     public function indexAction()
     {
     		$this->initInstance();        						
+		$ssUpload = new Zend_Session_Namespace('upload');
+		$ssUpload->idObj = $this->view->idObj;
+		$ssUpload->typeObj = $this->view->typeObj;
+    		
     }
     
     public function venteAction()
@@ -102,13 +103,17 @@ class ImportController extends Zend_Controller_Action
     		
     		$this->view->json = json_encode(array("col"=>$arrC,"rs"=>$arrV));
     }    
+    
     public function resultAction()
     {	
+    		$this->initInstance();
     	
     }
     
     public function uploadAction()
-    {	
+    {
+    		$this->initInstance();
+    	
 		if (($stream = fopen('php://delete', "r")) !== FALSE)
     			var_dump(stream_get_contents($stream));
         	
@@ -118,7 +123,7 @@ class ImportController extends Zend_Controller_Action
 			$dbFic = new Model_DbTable_Iste_importfic();						
 			$ssUpload = new Zend_Session_Namespace('upload');
 			
-			$path = "/data/".$ssUpload->obj."_".$ssUpload->id."/";
+			$path = "/data/".$ssUpload->typeObj."_".$ssUpload->idObj."/";
 			$options = array('upload_dir' => ROOT_PATH.$path,'upload_url' => WEB_ROOT.$path
 				,'print_response'=>false);
 			//$upload_handler = new UploadHandler($options);
@@ -174,9 +179,11 @@ class ImportController extends Zend_Controller_Action
     
     public function historiqueAction()
     {
+    		$this->initInstance();
+    	
 		$this->s = new Flux_Site();
 		$this->s->bTrace = true;		
-		$this->s->bTraceFlush = true;		
+		$this->s->bTraceFlush = false;		
 		$this->s->trace("DEBUT ".__METHOD__);		
 		
 		$this->dbA = new Model_DbTable_Iste_auteur();
@@ -198,21 +205,22 @@ class ImportController extends Zend_Controller_Action
 		$this->dbAutCont = new Model_DbTable_Iste_auteurxcontrat();
 		
 		/**TODO:
-		 * comment attribuer à un isbn le type "papier" ou "pdb" ?
+		 * comment attribuer à un isbn le type "papier" ou "pdf" ?
 		 * 
 		 */
 		
 		
 		$arrType = array(0, 1, 2, 3, 4);
-		$arrType = array(4);
+		$arrType = array(3);
 		foreach ($arrType as $type) {
 			$this->s->trace("TYPE ".$type);		
-			if($type==0)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015.csv");
-			if($type==1)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015-WileyBase.csv");
-			if($type==2)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015-ISTEedition.csv");
-			if($type==3)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015-ISTEelsevier.csv");
+			if($type==0)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015SAMbd.csv");
+			if($type==1)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015SAMWileyBase.csv");
+			if($type==2)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015SAMIsteed.csv");
+			if($type==3)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015SAMelsevier.csv");
 			if($type==4)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015-DtsAuteursWiley.csv");			
 			$i = 1;
+			$this->s->trace("nb Ligne ".count($arr));		
 			foreach ($arr as $r) {
 				if($type==0)$this->importGlobalBD($r, $i);
 				if($type==1)$this->importGlobalWileyBase($r, $i);
@@ -371,10 +379,10 @@ class ImportController extends Zend_Controller_Action
 		//traitement des références sans titre
     		if(!$r[2] && $id==0){
 			$idLivre = $this->dbLivre->ajouter(array("titre_en"=>"ISBN papier ISTE Edition sans titre","soustitre_en"=>$r[0]));
-			$idIsbn = $this->dbIsbn->ajouter(array("id_livre"=>$idLivre,"id_editeur"=>1,"num"=>$r[0]));				
+			$idIsbn = $this->dbIsbn->ajouter(array("id_livre"=>$idLivre,"id_editeur"=>1,"num"=>$r[0], "type"=>"Papier FR"));				
 	    		$this->s->trace($i." ajoute les références sans titre : ".$r[0]." = ".$idIsbn);			
 			$idLivre = $this->dbLivre->ajouter(array("titre_en"=>"ISBN e-book ISTE Edition sans titre","soustitre_en"=>$r[1]));
-			$idIsbn = $this->dbIsbn->ajouter(array("id_livre"=>$idLivre,"id_editeur"=>1,"num"=>$r[1]));				
+			$idIsbn = $this->dbIsbn->ajouter(array("id_livre"=>$idLivre,"id_editeur"=>1,"num"=>$r[1], "type"=>"E-Book FR"));				
 	    		$this->s->trace($i." ajoute les références sans titre : ".$r[1]." = ".$idIsbn);				    		
     		}else{
 	    		//recherche les références
@@ -385,10 +393,10 @@ class ImportController extends Zend_Controller_Action
 	    			foreach ($rsIsbn as $rIsbn) {
 		    			$this->s->trace($i." référence isbn trouvée par titre éditeur : ".$r[3]." = ".$rIsbn["id_isbn"]." - ".$rIsbn["id_livre"]);
 		    			if($id==0){
-			    			$this->dbIsbn->edit($rIsbn["id_isbn"],array("num"=>$r[$id],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
+			    			$this->dbIsbn->edit($rIsbn["id_isbn"],array("type"=>"Papier FR","num"=>$r[$id],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
 				    		$this->s->trace($i." ISBN modifié : ".$rIsbn["id_isbn"]);	
 		    			}else{
-		    				$rIsbn = $this->dbIsbn->ajouter(array("id_editeur"=>1,"num"=>$r[$id],"id_livre"=>$rIsbn["id_livre"],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
+		    				$rIsbn = $this->dbIsbn->ajouter(array("type"=>"E-Book FR","id_editeur"=>1,"num"=>$r[$id],"id_livre"=>$rIsbn["id_livre"],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
 				    		$this->s->trace($i." ISBN créé : ".$rIsbn["id_isbn"]);			    				
 		    			}
 		    			$idLivre = $rIsbn["id_livre"];						
@@ -398,10 +406,10 @@ class ImportController extends Zend_Controller_Action
 		    			foreach ($rsIsbn as $rIsbn) {
 			    			$this->s->trace($i." référence isbn trouvée par titre : ".$r[3]." = ".$rIsbn["id_isbn"]." - ".$rIsbn["id_livre"]);
 			    			if($id==0){
-				    			$this->dbIsbn->edit($rIsbn["id_isbn"],array("id_editeur"=>1,"num"=>$r[$id],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
+				    			$this->dbIsbn->edit($rIsbn["id_isbn"],array("type"=>"Papier FR","id_editeur"=>1,"num"=>$r[$id],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
 					    		$this->s->trace($i." ISBN modifié : ".$rIsbn["id_isbn"]);	
 			    			}else{
-			    				$rIsbn = $this->dbIsbn->ajouter(array("num"=>$r[$id],"id_livre"=>$rIsbn["id_livre"],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
+			    				$rIsbn = $this->dbIsbn->ajouter(array("type"=>"E-Book FR","num"=>$r[$id],"id_livre"=>$rIsbn["id_livre"],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
 					    		$this->s->trace($i." ISBN créé : ".$rIsbn["id_isbn"]);			    				
 			    			}
 				    		$idLivre = $rIsbn["id_livre"];										    		
@@ -410,7 +418,7 @@ class ImportController extends Zend_Controller_Action
 		    				$rsLivre = $this->dbLivre->findByTitre_fr($r[3]);
 		    				foreach ($rsLivre as $rLivre) {
 					    		$this->s->trace($i." livre trouvé par titre : ".$rLivre["titre_fr"]." = ".$rLivre["id_livre"]);								    				
-			    				$rIsbn = $this->dbIsbn->ajouter(array("num"=>$r[$id],"id_livre"=>$rLivre["id_livre"],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
+			    				$rIsbn = $this->dbIsbn->ajouter(array("type"=>"Papier FR","num"=>$r[$id],"id_livre"=>$rLivre["id_livre"],"nb_page"=>$r[12],"date_parution"=>$this->formatDateExcelToSql($r[11],"m")));				
 					    		$this->s->trace($i." ISBN créé : ".$rIsbn["id_isbn"]);
 					    		$idLivre = $rLivre["id_livre"];											    		
 		    				}
@@ -467,8 +475,8 @@ class ImportController extends Zend_Controller_Action
 					$this->dbLiAut->ajouter(array("id_auteur"=>$idA, "id_livre"=>$idLivre, "role"=>"coordinateur"));
 				}
 	    		}
+	    		if($id==0) $this->importGlobalIsteEdition($r, $i, 1);	    	  		
     		}
-	    	if($id==0) $this->importGlobalIsteEdition($r, $i, 1);	    	  		
 		$this->s->trace("FIN ".__METHOD__);		
 	}    
     
@@ -576,17 +584,17 @@ class ImportController extends Zend_Controller_Action
 				,"num_vol"=>$r[6])
     			));
 		$idLivre = $arrId[0];
-		$idCol = $arrId[2];
+		$idSerie = $arrId[1];
 		
 		$this->s->trace($i."//import des directeurs de collection");			
 			$arrIdAut = $this->ajoutAuteur($r[7]);
 			//ajout des coordinations
 			foreach ($arrIdAut as $id) {
-				$this->dbLiAut->ajouter(array("id_auteur"=>$id, "id_livre"=>$idLivre, "role"=>"coordinateur"));
-				$idCoor = $this->dbCoor->ajouter(array("id_collection"=>$idCol, "id_auteur"=>$id));
+				$this->dbLiAut->ajouter(array("id_auteur"=>$id, "id_livre"=>$idLivre, "role"=>"directeur"));
+				$idCoor = $this->dbCoor->ajouter(array("id_serie"=>$idSerie, "id_auteur"=>$id));
 				if($r[3]){
 					$idCont = $this->dbCont->ajouter(array("nom"=>"Contrat de coordination","type"=>"coordination"));			
-					$this->dbAutCont->ajouter(array("id_auteur"=>$id, "id_collection"=>$idCol, "id_contrat"=>$idCont, "date_signature"=>$this->formatDateExcelToSql($r[3])));
+					$this->dbAutCont->ajouter(array("id_auteur"=>$id, "id_serie"=>$idSerie, "id_contrat"=>$idCont, "date_signature"=>$this->formatDateExcelToSql($r[3])));
 				}				
 			}
 				
@@ -636,6 +644,7 @@ class ImportController extends Zend_Controller_Action
 			if($r[28]){//'ISTE Editions'
 				$dataIsbn["id_editeur"]=1;
 				$dataIsbn["num"]=$r[28];
+				$dataIsbn["type"]="Papier FR";
 				$idIsbn = $this->dbIsbn->ajouter($dataIsbn);				
 			}
 			
@@ -656,7 +665,7 @@ class ImportController extends Zend_Controller_Action
 			if(substr($r[16], 0, 3)=="ENV")$dataProp['date_contrat']=$this->formatDateExcelToSql(substr($r[16], 4));
 			elseif ($r[16])$dataProp['date_contrat']=$this->formatDateExcelToSql($r[16]);
 			
-			if($r[22])$dataProp['traduction']="anglais";
+			if($r[22])$dataProp['traduction']="français -> anglais";
 
 			if($r[24])$dataProp['date_manuscrit']=$this->formatDateExcelToSql($r[24]);
 
@@ -685,8 +694,8 @@ class ImportController extends Zend_Controller_Action
 		$idLivre = $this->dbLivre->ajouter($data["livre"]);
     		
 		if($data["serie"]){
-			$idSerie = $this->dbSerie->ajouter($data["serie"]);
-			$this->s->trace($i."//import des séries");
+			$idSerie = $this->dbSerie->ajouter($data["serie"],true,false);
+			$this->s->trace($i."//import des séries : ".$idSerie." ".$idLivre);
 			$this->dbLiSer->ajouter(array("id_serie"=>$idSerie, "id_livre"=>$idLivre));
 		}
 			

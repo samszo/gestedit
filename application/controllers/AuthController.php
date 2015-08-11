@@ -9,32 +9,42 @@ class AuthController extends Zend_Controller_Action
 		
 		if($this->_getParam('redir', 0)){
 			$ssExi->redir='/'.$this->_getParam('redir', 0);
-		}
+		}else{
+			$ssExi->redir='../admin';			
+		}		
 		
     		// Obtention d'une référence de l'instance du Singleton de Zend_Auth
 		$auth = Zend_Auth::getInstance();
 		$auth->clearIdentity();
 
-		$dbAdapter = Zend_Db_Table::getDefaultAdapter();
-		$adapter = new Zend_Auth_Adapter_DbTable(
-                $dbAdapter,
-                'iste_uti',
-                'login',
-                'mdp'
-                );		                
-        $adapter->setIdentity($this->_getParam('login'));
-        $adapter->setCredential($this->_getParam('mdp'));
-        $login = $this->_getParam('login');
-        if($login)$result = $auth->authenticate($adapter);			
-    			
+		if ($this->_getParam('login')) {
+
+	    		$adapter = new Zend_Auth_Adapter_DbTable(
+	                null,
+	                'iste_uti',
+	                'login',
+	                'mdp'
+	                );		                
+	        $login = $this->_getParam('login');
+	        $adapter->setIdentity($login);
+	        $adapter->setCredential($this->_getParam('mdp'));
+	        // Tentative d'authentification et stockage du résultat
+			$result = $auth->authenticate($adapter);
+    		}else{
+    			return;
+    		}    					
+			
     		if ($result->isValid()) {		            	
 			//met en sessions les informations de l'existence
 			$dbUti = new Model_DbTable_Iste_uti();
 			$rs = $dbUti->findByLogin($login);
     			$ssExi->uti = $rs;
-			$ssUti->idUti = $rs["uti_id"];		            	
-	        	
+			$ssUti->idUti = $rs["uti_id"];		            		        	
 			$this->view->rs = $ssExi->uti;
+			
+	    		$this->_redirect($ssExi->redir);
+	    		return;
+			
 	    }else{
 	    		switch ($result->getCode()) {
             		case 0:
@@ -46,7 +56,7 @@ class AuthController extends Zend_Controller_Action
             		case -2:
 						$this->view->erreur = "Le login est ambigue.";		            	
 	            		break;		            		
-            		case -2:
+            		case -3:
 						$this->view->erreur = "Le login et/ou le mot de passe ne sont pas bons.";		            	
 	            		break;		            		
             	}
