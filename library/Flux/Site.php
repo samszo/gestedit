@@ -51,10 +51,11 @@ class Flux_Site{
 	/**
 	* fonction pour tracer l'éxécution du code
 	*
-    * @param string $message
+    * @param string 	$message
+    * @param array 	$data
     * 
     */
-	public function trace($message){
+	public function trace($message, $data=false){
 		if($this->bTrace){
 			$temps_fin = microtime(true);
 			$tG = str_replace(".",",",round($temps_fin - $this->temps_debut, 4));
@@ -64,6 +65,7 @@ class Flux_Site{
 				$this->echoTrace .= $mess;
 			else{
 				echo $mess;
+				if($data){print_r($data); echo "<br/>";}
 				if($this->bTraceFlush){
 					ob_flush();
 			        flush();				

@@ -33,6 +33,31 @@ class CalculerController extends Zend_Controller_Action
 		$this->view->message = "Les royalties sont calculés.";		
 		
     }
+
+    public function paiementAction()
+    {
+    		$this->initInstance();
+    		$dbRoy = new Model_DbTable_Iste_royalty();
+    		$dbRap = new Model_DbTable_Iste_rapport();
+    		$rapport = new Flux_Rapport();    		
+    		$result = array();
+    		
+    		$type = $this->_getParam('type');
+    		switch ($type) {
+    			case "livre":
+    				$rs = $dbRoy->paiementLivre(implode(",", $this->_getParam('ids')));
+				foreach ($rs as $r) {
+			    		$rapport->creaPaiement($this->_getParam('idMod'),$r);
+				}
+				$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+    				break;
+    		}
+    				
+		$this->view->rs = $result;
+    		$this->view->message = "Les paiements sont édités.";		
+		
+    }
+    
     
     public function tauxdeviseAction()
     {

@@ -3,7 +3,7 @@ if(!$this->ajax){
 	echo '<!DOCTYPE html>
 <html>
 	<head>
-		<title>ISTE - Auteurs</title>
+		<title>ISTE - Auteur/Directeur</title>
 		<link rel="stylesheet" type="text/css" href="../css/gestedit.css" />
 		<link rel="stylesheet" type="text/css" href="../css/w2ui.css" />
 		<link rel="stylesheet" type="text/css" href="../fonts/font-awesome/font-awesome.css" />
@@ -29,18 +29,6 @@ if(!$this->ajax){
 		</script>		
 		</head>
 <body>
-	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
-	<div id="utiConnect"></div>
-	<dialog id="diagLogin" close> 
-		<label for="iptLogin">Login : </label>
-        <input type="text" name="iptLogin" id="iptLogin" required="required">
-        <label for="iptlogin">Mot de passe : </label>
-        <input type="password" name="iptMdp" id="iptMdp" required="required">
-	    <div class="boutons">
-			<button onclick="diagLogin.close()">Fermer</button> 
-			<button onclick="connecte()">Connexion</button> 
-		</div> 
-	</dialog> 
 ';
 }
 $idPage = "Auteur";
@@ -101,7 +89,7 @@ function initAuteur() {
 		    },
 		    gridAuteur: { 
 		        name: 'grid_<?php echo $idPage;?>', 
-				header: 'Auteurs',		
+				header: 'Auteur/Directeur',		
 		        show: { 
 					header			: true,		
 		            toolbar			: true,

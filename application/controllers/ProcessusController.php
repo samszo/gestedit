@@ -14,7 +14,7 @@ class ProcessusController extends Zend_Controller_Action
     		//echo __METHOD__;
     		$dbProcess = new Model_DbTable_Iste_processus();
     		switch ($this->_getParam('process')) {
-    			case 'Traduction livre' || 'Production livre':
+    			case 'Traduction livre' || 'Projet livre':
 		    		$this->view->rs = $dbProcess->getProcessusByLivre($this->_getParam('process'), $this->_getParam('id'));
 		    		//vérifie que le processus est créé
 		    		if(!count($this->view->rs)){

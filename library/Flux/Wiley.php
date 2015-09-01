@@ -11,7 +11,7 @@ class Flux_Wiley extends Flux_Site{
     function __construct($idBase=false,$idTrace=false){    	
     	    	
     		parent::__construct($idBase,$idTrace);
-    	    
+    		
     }
 
 	/**
@@ -21,11 +21,22 @@ class Flux_Wiley extends Flux_Site{
     * 
     */
 	public function calculerVentes($idFic){
+		$this->bTraceFlush = false;		
 		$this->trace("DEB ".__METHOD__);
 		$dbData = new Model_DbTable_Iste_importdata();
 		$dbVente = new Model_DbTable_Iste_vente();
 		$dbLic = new Model_DbTable_Iste_licence();
 		$dbRoy = new Model_DbTable_Iste_royalty();
+		$dbBout = new Model_DbTable_Iste_boutique();
+		$dbPrix = new Model_DbTable_Iste_prix();
+		$dbA = new Model_DbTable_Iste_auteur();
+		$dbC = new Model_DbTable_Iste_contrat();
+		$dbAC = new Model_DbTable_Iste_auteurxcontrat();
+		
+		//récupération des références
+		$idAuteurISTE = $dbA->ajouter(array("nom"=>"ISTE"));
+		$idContratISTEWiley = $dbC->ajouter(array("nom"=>"Wiley - ISTE","type"=>"distribution"));
+		$idBout = $dbBout->ajouter(array("nom"=>"Wiley"));
 		
 		$this->trace("//charge les données du fichier");
 		$rs = $dbData->findWileySalesByIdFic($idFic);
@@ -65,23 +76,28 @@ class Flux_Wiley extends Flux_Site{
 					$prixVente = $this->tofloat($r["col3"]); 
 					$nbVente = $r["col2"];					
 					//ajout licence
-					$idLic = $dbLic->ajouter(array("licence_unitaire"=>$prixUni, "licence_coef"=>$r["col4"], "nom"=>$type));
+					$idLic = $dbLic->ajouter(array("licence_unitaire"=>$prixUni, "licence_coef"=>$r["col4"], "nom"=>$type), true, false);
 					$this->trace("ajout licence : ".$idLic."=".$prixUni." ".$type." ".$r["col4"]);
 					//ajout vente
 					if($nbRetour){
 						$prixRetour = "-".substr($prixRetour, 0, -1);
 						$nbRetour = "-".substr($r["col2"], 0, -1);
-						$idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"], "date_vente"=>$r["periode_fin"], "boutique"=>"Wiley"
+						$idPrix = $dbPrix->ajouter(array("prix_dollar"=>$prixRetour, "id_isbn"=>$r["id_isbn"], "type"=>"Wiley ".$type));
+						$idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"]
+							, "date_vente"=>$r["periode_fin"], "id_boutique"=>$idBout, "id_prix"=>$idPrix
 							, "nombre"=>$nbRetour, "montant_dollar"=>$prixRetour, "id_licence"=>$idLic));					
 						$this->trace("ajout retour : ".$idVente."=".$nbRetour." ".$type." => ".$prixRetour);
 					}
 					if($nbVente){
-						$idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"], "date_vente"=>$r["periode_fin"], "boutique"=>"Wiley"
+						$idPrix = $dbPrix->ajouter(array("prix_dollar"=>$prixVente, "id_isbn"=>$r["id_isbn"], "type"=>"Wiley ".$type));
+						$idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"]
+							, "date_vente"=>$r["periode_fin"], "id_boutique"=>$idBout, "id_prix"=>$idPrix
 							, "nombre"=>$nbVente, "montant_dollar"=>$prixVente, "id_licence"=>$idLic));					
 						$this->trace("ajout vente : ".$idVente."=".$nbVente." ".$type." => ".$prixVente);
 						//ajout royaltie à ISTE
 						$prixRoy = $this->tofloat($r["col5"]); 
-						$dbRoy->ajouter(array("id_vente"=>$idVente,"id_auteur"=>-1,"montant_dollar"=>$prixRoy, "pourcentage"=>$r["col4"]));					
+						$idAC = $dbAC->ajouter(array("id_auteur"=>$idAuteurISTE, "id_contrat"=>$idContratISTEWiley, "id_isbn"=>$r["id_isbn"], "id_livre"=>$r["id_livre"], "pc_papier"=>$r["col4"]));
+						$dbRoy->ajouter(array("id_vente"=>$idVente,"id_auteurxcontrat"=>$idAC,"montant_dollar"=>$prixRoy, "pourcentage"=>$r["col4"]));					
 					}
 				break;
 			}

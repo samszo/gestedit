@@ -18,6 +18,10 @@ class ExportController extends Zend_Controller_Action
 				$bdd = new Model_DbTable_Iste_livre();
 				$rs = $bdd->getTraductionLivre();
     				break;    			
+    			case "tresor":
+				$bdd = new Model_DbTable_Iste_livre();
+				$rs = $bdd->getTresorie();
+    				break;    			
     			default:
 		    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
 		    		$oBdd = new $oName();
@@ -38,6 +42,108 @@ class ExportController extends Zend_Controller_Action
 		$this->printExcel($rs, "gestedit");
     }
     
+    public function royaltyAction()
+    {
+	
+		$this->bTrace = false;
+		$this->temps_debut = microtime(true);
+				
+		//initialisation des objets	
+		$dbR = new Model_DbTable_Iste_royalty();
+				
+		//récupère l'auteur
+		$this->idExi = $idExi; 
+		$this->arrExi = $this->dbE->findById_exi($idExi);
+				
+		//récupère le Modele
+		$rm = $this->dbDoc->findByIdDoc($idModele);
+		//vérifie le type de rapport
+		$typeRapport = $rm['branche'];
+		$this->trace("typeRapport=".$typeRapport);
+		
+		//récupère les mots clefs
+		$this->arrMC = $this->dbMC->getAll();
+		
+		//charge le modèle
+		//pour le debugage
+		if($this->pathDebug)$ps = str_replace("/home/gevu/www", $this->pathDebug, $rm['path_source']);
+		else $ps = $rm['path_source'];
+		$this->trace($ps);
+		$config = array(
+    	'ZIP_PROXY' => 'PclZipProxy',
+    	'DELIMITER_LEFT' => '{',
+    	'DELIMITER_RIGHT' => '}',
+		'PATH_TO_TMP' => ROOT_PATH.'/tmp'
+   		);
+		$this->odf = new odf($ps, $config);		
+		/*dégugage du contenu xml
+		header("Content-Type:text/xml");
+		echo $this->odf->getContentXml();
+		return;
+		*/
+		
+		//récupération de l'état des lieux
+		$this->arrEtatLieux = $this->oDiag->getNodeRelatedData($idLieu, $idExi, $idBase);
+		
+		//récupère le fil d'ariane du lieu
+		$this->arrAriane = $this->arrEtatLieux["ariane"];
+		$this->ariane = "";
+		foreach ($this->arrAriane as $l) {
+			$this->ariane .= $l['lib']." - ";			
+		}
+		$this->trace($this->ariane);
+		
+		/*
+		[{"id_type_doc": 8,"lib": "Rapport bâtiment"}, {"id_type_doc": 9,"lib": "Rapport espace"}, {"id_type_doc": 10,"lib": "Rapport niveau"}
+		, {"id_type_doc": 11,"lib": "Rapport objet"}, {"id_type_doc": 12,"lib": "Fiche logement"}, {"id_type_doc": 13,"lib": "Rapport logement"}];
+		*/
+		switch ($typeRapport) {
+			case 8:
+				$this->creaRapportBat();
+				break;			
+			case 9:
+				$this->creaRapportEspace();
+				break;			
+			case 10:
+				$this->creaRapportNiv();
+				break;			
+			case 11:
+				$this->creaRapportEspace();
+				break;			
+			case 12:
+				$this->creaFicheLog();
+				break;			
+			case 13:
+				$this->creaRapportLog();
+				break;			
+			default:
+				$this->creaRapportDefaut();
+				break;
+		}
+				
+		//on enregistre le fichier
+		$idInst = $this->dbInst->ajouter(array("id_exi"=>$idExi,"nom"=>"Création rapport"));
+		
+		$nomFic = preg_replace('/[^a-zA-Z0-9-_\.]/','', $nomEtab);
+		$nomFic = $idModele."_".$idLieu."_".$nomFic."_".$idInst.".odt";
+		//copie le fichier dans le répertoire data
+		$newfile = ROOT_PATH."/data/rapports/documents/".$nomFic;
+		copy($this->odf->tmpfile, $newfile);
+		
+		//on enregistre le doc dans la base
+		$idDoc = $this->dbDoc->ajouter(array("id_instant"=>$idInst,"url"=>WEB_ROOT."/data/rapports/documents/".$nomFic,"titre"=>$nomFic,"path_source"=>$newfile,"content_type"=>"application/vnd.oasis.opendocument.text"));
+		$this->trace("idDoc =".$idDoc);
+		$idRap = $this->dbRapport->ajouter(array("id_lieu"=>$idLieu, "id_exi"=>$idExi, "lib"=>$nomFic));
+		$this->trace("idRap =".$idRap);
+		$this->dbDocRapport->ajouter(array("id_doc"=>$idDoc,"id_rapport"=>$idRap));
+		$this->trace("Association du doc et du rapport");
+		
+		$this->trace("on propose de télécharger le rapport : ".$nomFic);
+		$this->odf->exportAsAttachedFile($nomFic);
+		
+		$this->trace("FIN");
+		    	
+    }
     
 	/**
    * array via fputcsv() zu csv

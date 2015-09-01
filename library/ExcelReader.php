@@ -258,7 +258,7 @@ class ExcelReader
      */ 
     function ExcelReader()
     {
-        $this->_ole =& new OLERead();
+        $this->_ole = new OLERead();
         $this->setUTFEncoder('iconv');
     }
 

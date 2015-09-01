@@ -74,7 +74,10 @@ class Model_DbTable_Spip_articles extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_article'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($v)
+				$select->where($k.' = ?', $v);
+			else 
+				unset($this->data[$k]);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_article; else $id=false;
@@ -93,10 +96,11 @@ class Model_DbTable_Spip_articles extends Zend_Db_Table_Abstract
     {
     	
     	$id=false;
+    	$this->data = $data;
     	if($existe)$id = $this->existe($data);
     	if(!$id){
-    		if(!isset($data["date"])) $data["date"] = new Zend_Db_Expr('NOW()');
-    		$id = $this->insert($data);
+    		if(!isset($this->data["date"])) $this->data["date"] = new Zend_Db_Expr('NOW()');
+    		$id = $this->insert($this->data);
     	}
     	return $id;
     } 

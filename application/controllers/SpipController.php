@@ -26,20 +26,7 @@ class SpipController extends Zend_Controller_Action
 		//initialisation des objets
 		if($this->_getParam('idBase')) $this->dbNom = $this->_getParam('idBase');
 		
-		$s = new Flux_Site($this->dbNom);
-		$dbAut = new Model_DbTable_Iste_auteur();
-		$dbLivre = new Model_DbTable_Iste_livre();
-		$dbSpip = new Model_DbTable_Iste_spip();
-		
-		$dbArt = new Model_DbTable_Spip_articles($s->db);
-		$dbAutS = new Model_DbTable_Spip_auteurs($s->db);
-		$dbR = new Model_DbTable_Spip_rubriques($s->db);
-		$dbM = new Model_DbTable_Spip_mots($s->db);
-		$dbAutR = new Model_DbTable_Spip_auteursrubriques($s->db);
-		$dbML = new Model_DbTable_Spip_motsliens($s->db);
-		
-		$arrRub = array("Liste"=>15,"Comite"=>16,"Catalog"=>18);
-		$arrMC = array("Serie"=>1,"Comite"=>2, "Role"=>3);
+		$s = new Flux_Spip($this->dbNom);
 		
 		//charge la liste des auteurs
 		if($this->_getParam('idAuteur')) $arrAuteur = $dbAut->findById_auteur($this->_getParam('idAuteur'));
@@ -48,52 +35,8 @@ class SpipController extends Zend_Controller_Action
 		$nbM = count($arrAuteur);
 		for ($i = 0; $i < $nbM; $i++) {
 				
-			//construction du numéro d'ordre
-			$num = $i."00";
+			$s->creaAuteurFromIste($arrAuteur[$i]["id_auteur"]);
 
-			//vérifie si la rubrique de l'auteur existe
-			$titreRubAuteur = $num.". ".$arrAuteur[$i]["prenom"]." ".$arrAuteur[$i]["nom"];
-			$arrRubAut = $dbArt->findByTitre($titreRubAuteur);
-			$idRubAuteur = count($arrRubAut) ? $arrRubAut[0]["id_rubrique"] : 0;
-			if($idRubAuteur==0){
-				//création de l'auteur
-				$idAutS = $dbAutS->ajouter(array("nom"=>$arrAuteur[$i]["prenom"]." ".$arrAuteur[$i]["nom"], "email"=>$arrAuteur[$i]["mail1"],"statut"=>"1comite","source"=>"flux"));
-				$dbSpip->ajouter(array("id_spip"=>$idAutS,"id_iste"=>$arrAuteur[$i]["id_auteur"],"obj_spip"=>"auteurs","obj_iste"=>"auteur"));
-				//création de l'article de l'auteur
-				$idArtAuteur = $dbArt->ajouter(array("id_rubrique"=>$arrRub["Liste"], "texte"=>utf8_encode("A compléter..."), "titre"=>$titreRubAuteur, "statut"=>'publie'));				
-				$dbSpip->ajouter(array("id_spip"=>$idArtAuteur,"id_iste"=>$arrAuteur[$i]["id_auteur"],"obj_spip"=>"articles","obj_iste"=>"auteur"));
-				//création des mots clefs
-				$infoAut = $dbAut->findInfos($arrAuteur[$i]["id_auteur"]);
-				$oComite = "";
-				$oSerie = "";
-				$oLivre = "";
-				foreach ($infoAut as $info) {
-					if($oComite!=$info["id_comite"]){
-						$idMC = $dbM->ajouter(array("titre"=>"<multi>[fr]".$info["cafr"]."[en]".$info["caen"]."</multi>","id_groupe"=>$arrMC["Comite"]));
-						$dbSpip->ajouter(array("id_spip"=>$idMC,"id_iste"=>$info["id_comite"],"obj_spip"=>"mots","obj_iste"=>"comite"));
-						$dbML->ajouter(array("objet"=>"auteur","id_objet"=>$idAutS,"id_mot"=>$idMC));
-						$oComite=$info["id_comite"];
-					}
-					if($oSerie!=$info["id_serie"]){
-						$idMC = $dbM->ajouter(array("titre"=>"<multi>[fr]".$info["sfr"]."[en]".$info["sen"]."</multi>","id_groupe"=>$arrMC["Serie"]));
-						$dbSpip->ajouter(array("id_spip"=>$idMC,"id_iste"=>$info["id_serie"],"obj_spip"=>"mots","obj_iste"=>"serie"));
-						$dbML->ajouter(array("objet"=>"auteur","id_objet"=>$idAutS,"id_mot"=>$idMC));
-						$oSerie=$info["id_serie"];
-					}
-					if($oLivre!=$info["id_livre"]){
-						$infoLivre = $dbLivre->findInfos($info["id_livre"]);
-						//vérifi
-						if($infoLivre["titre_fr"]){
-							$idArtLivreFr = $dbArt->ajouter(array("id_rubrique"=>$arrRub["Catalog"]
-								, "texte"=>$infoLivre["titre_fr"], "titre"=>$titreRubAuteur, "statut"=>'publie'));				
-							
-						}
-						$dbSpip->ajouter(array("id_spip"=>$idArtLivre,"id_iste"=>$info["id_livre"],"obj_spip"=>"articles","obj_iste"=>"livre"));
-						$oLivre=$info["id_livre"];
-					}
-				}
-				
-			}
 		}
 		
 		$this->view->data = $membres;

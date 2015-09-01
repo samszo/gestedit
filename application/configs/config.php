@@ -30,6 +30,7 @@ require_once 'ExcelReader.php';
 require_once 'OLERead.php';
 require_once 'UploadHandler.php';
 require_once 'CustomUploadHandler.php';
+require_once 'odtphp/odf.php';
 
 // Create application, bootstrap, and run
 $application = new Zend_Application(

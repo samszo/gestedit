@@ -61,14 +61,28 @@ try {
 	/*
     	$dbData = new Model_DbTable_Iste_importdata();
     	$rs = $dbData->exportByIdFic(46);
-	*/
 	$arr = $s->csvToArray("../bdd/import/ISTEGlobal2015SAMbd.csv");
+	*/
 	
 	/*
 	$dbProcess = new Model_DbTable_Iste_processus();
 	$dbProcess->setProcessusForLivre('Production livre', 1, 1); 
     	$dbProcess->getTraductionByLivre(1);
 	*/
+	
+	/*
+	$s = new Flux_Spip("spip_iste");
+	$s->creaAuteurFromIste();
+	*/
+	
+	$result = array();
+    	$dbR = new Model_DbTable_Iste_royalty();
+	$rs = $dbR->paiementLivre("1249");
+    	$rapport = new Flux_Rapport();    		
+	foreach ($rs as $r) {
+    		$result[] = $rapport->creaPaiement($r);
+	}
+	
 
 	$s->trace("FIN TEST");		
 	

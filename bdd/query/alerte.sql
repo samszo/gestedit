@@ -10,5 +10,5 @@ INNER JOIN iste_tache t ON t.id_tache = pre.id_tache
 INNER JOIN iste_processus pro ON pro.id_processus = t.id_processus
 INNER JOIN iste_processusxlivre pl ON pl.id_plu = pre.id_pxu
 INNER JOIN iste_livre l ON l.id_livre = pl.id_livre
-WHERE pre.alerte is not null AND pre.fin is null AND pre.obj = "livre"
+WHERE pre.alerte is not null AND pre.prevision is not null AND pre.fin is null AND pre.obj = "livre"
 ORDER BY nbJour

@@ -29,18 +29,6 @@ if(!$this->ajax){
 		</script>		
 		</head>
 <body>
-	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
-	<div id="utiConnect"></div>
-	<dialog id="diagLogin" close> 
-		<label for="iptLogin">Login : </label>
-        <input type="text" name="iptLogin" id="iptLogin" required="required">
-        <label for="iptlogin">Mot de passe : </label>
-        <input type="password" name="iptMdp" id="iptMdp" required="required">
-	    <div class="boutons">
-			<button onclick="diagLogin.close()">Fermer</button> 
-			<button onclick="connecte()">Connexion</button> 
-		</div> 
-	</dialog> 
 ';
 }
 $idPage = "Traduction";
@@ -168,7 +156,7 @@ function initTraduction() {
 		        columns: [      		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'tache', caption: 'Tâche', size: '118px', sortable: true, resizable: true},
-		            { field: 'debut', caption: 'Début', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'debut', caption: 'Origine', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'prevision', caption: 'Prévision', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'fin', caption: 'Fin', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'commentaire', caption: 'Commentaires', editable: { type: 'text'}, size: '200px', sortable: true, resizable: true},

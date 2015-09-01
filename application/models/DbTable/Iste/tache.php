@@ -42,32 +42,42 @@ class Model_DbTable_Iste_tache extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=true)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-	    	if(!isset($data['ordre']))$data['ordre']= $this->getNextOrdre($data['id_processus']);
-    		$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+		    	if(!isset($data['ordre']))$data['ordre']= $this->getNextOrdre($data['id_processus']);
+	    		$id = $this->insert($data);
+	    	}
+	    	if($rs)
+			return $this->getListe($id);
+	    	else
+		    	return $id;
     } 
 
 	/**
      * Renvoie la liste des entrée
+     * 
+     * @param int	$id
      *
      * @return void
      */
-    public function getListe()
+    public function getListe($id=false)
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("id"=>$this->_primary[1],"text"=>"nom","id_processus"))
-            ->order("nom");        
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"nom","id_processus","nom","ordre"))
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("p" => "iste_processus"),
+                'p.id_processus = l.id_processus', array("processus"=>"nom"))            		
+            ->order(array("p.nom","l.ordre"));
+        if($id)$query->where( "l.id_tache = ?", $id);        
         return $this->fetchAll($query)->toArray();
 	}     
     
@@ -95,7 +105,10 @@ class Model_DbTable_Iste_tache extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_tache.id_tache = ' . $id);
+    		//suprime toute les prévisions avec cette tache
+    		$dbPrev = new Model_DbTable_Iste_prevision();
+    		$dbPrev->removeTache($id);
+	    	$this->delete('iste_tache.id_tache = ' . $id);
     }
 
     /**

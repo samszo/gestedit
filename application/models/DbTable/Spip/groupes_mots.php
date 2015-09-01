@@ -62,7 +62,11 @@ class Models_DbTable_Spip_groupes_mots extends Zend_Db_Table_Abstract
     	$id=false;
     	if($existe)$id = $this->existe($data);
     	if(!$id){
-    	 	$id = $this->insert($data);
+    		if(!isset($data["maj"])) $data["maj"] = new Zend_Db_Expr('NOW()');
+    		if(!isset($data["comite"])) $data["comite"] = "oui";
+    		if(!isset($data["minirezo"])) $data["minirezo"] = "oui";
+    		if(!isset($data["tables_liees"])) $data["tables_liees"] = "articles,auteurs,rubriques";
+    		$id = $this->insert($data);
     	}
     	return $id;
     } 

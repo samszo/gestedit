@@ -73,6 +73,21 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
     {          	
 	    	$this->update($data, 'iste_prevision.id_prevision = ' . $id);
     }
+
+    /**
+     * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
+     * et modifie cette entrée avec les nouvelles données.
+     *
+     * @param integer $idPxu
+     * @param integer $idTache
+     * @param array $data
+     *
+     * @return void
+     */
+    public function editLivreTache($idPxu, $idTache, $data)
+    {          	
+	    	$this->update($data, 'id_tache = '.$idTache.' AND id_pxu='.$idPxu.' AND obj="livre"' );
+    }
     
     /**
      * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
@@ -85,6 +100,19 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
     public function remove($id)
     {
     		return $this->delete('iste_prevision.id_prevision = ' . $id);
+    }
+
+    /**
+     * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
+     * et supprime cette entrée.
+     *
+     * @param integer $id
+     *
+     * @return void
+     */
+    public function removeTache($id)
+    {
+    		return $this->delete('iste_prevision.id_tache = ' . $id);
     }
     
     /**

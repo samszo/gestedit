@@ -61,15 +61,18 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_royalty avec la clef primaire spécifiée
      * et modifie cette entrée avec les nouvelles données.
      *
-     * @param integer $id
-     * @param array $data
+     * @param integer 	$id
+     * @param array 		$data
+     * @param string 	$ids
      *
      * @return void
      */
-    public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_royalty.id_royalty = ' . $id);
+    public function edit($id, $data, $ids=false)
+    {   
+    		if($ids)        	
+	    		$this->update($data, 'iste_royalty.id_royalty IN ('.$ids.')');
+	    	else
+	    		$this->update($data, 'iste_royalty.id_royalty = ' . $id);
     }
     
     /**
@@ -141,8 +144,10 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 'v.id_vente = r.id_vente', array("date_vente"))
 			->joinInner(array("i" => "iste_isbn"),
                 'v.id_isbn = i.id_isbn', array())
+			->joinInner(array("ac" => "iste_auteurxcontrat"),
+                'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
 			->joinInner(array("a" => "iste_auteur"),
-                'a.id_auteur = r.id_auteur', array("auteur"=>"CONCAT(IFNULL(nom,''),' ',IFNULL(prenom,''))"))
+                'a.id_auteur = ac.id_auteur', array("auteur"=>"CONCAT(IFNULL(nom,''),' ',IFNULL(prenom,''))"))
 			->where( "r.id_royalty = ?", $id_royalty);
 
         $rs = $this->fetchAll($query)->toArray(); 
@@ -297,9 +302,14 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 'v.id_vente = r.id_vente', array("date_vente"))
 			->joinInner(array("i" => "iste_isbn"),
                 'v.id_isbn = i.id_isbn', array())
+			->joinInner(array("ac" => "iste_auteurxcontrat"),
+                'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
+			->joinInner(array("c" => "iste_contrat"),
+                'c.id_contrat = ac.id_contrat', array("type_contrat"=>"type"))
 			->joinInner(array("a" => "iste_auteur"),
-                'a.id_auteur = r.id_auteur', array("auteur"=>"CONCAT(IFNULL(nom,''),' ',IFNULL(prenom,''))"))
-			->where( "i.id_livre = ?", $idLivre);
+                'a.id_auteur = ac.id_auteur', array("auteur"=>"CONCAT(IFNULL(a.nom,''),' ',IFNULL(prenom,''))"))
+			->where( "i.id_livre = ?", $idLivre)
+			->group("r.id_royalty");
 
         return $this->fetchAll($query)->toArray(); 
     }     
@@ -320,8 +330,10 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             ->joinInner(array("v" => "iste_vente"),
                 'v.id_vente = r.id_vente', array("nb"=>"SUM(nombre)", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"))
         		->joinInner(array("i" => "iste_isbn"),'v.id_isbn = i.id_isbn',array("nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))"))
-			->joinInner(array("a" => "iste_auteur"),
-                'a.id_auteur = r.id_auteur', array("auteur"=>"CONCAT(IFNULL(nom,''),' ',IFNULL(prenom,''))"))
+			->joinInner(array("ac" => "iste_auteurxcontrat"),
+                'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
+        		->joinInner(array("a" => "iste_auteur"),
+                'a.id_auteur = ac.id_auteur', array("auteur"=>"CONCAT(IFNULL(nom,''),' ',IFNULL(prenom,''))"))
         		->group("auteur");
         	if($idLivre){
 				$query->where( "i.id_livre = ?", $idLivre);        		
@@ -337,44 +349,107 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      */
     public function setForAuteur()
     {
-    	//récupère les vente qui n'ont pas de royalty
-    	$sql = "SELECT 
-			GROUP_CONCAT(DISTINCT ac.id_auteur) idsA,
-		    COUNT(DISTINCT ac.id_auteur) nbA,
-		    ac.id_isbn, ac.pc_papier, ac.pc_ebook
-		 , v.id_vente, v.date_vente, v.montant_euro, v.boutique
+	    	//récupère les vente qui n'ont pas de royalty
+	    	$sql = "SELECT 
+		ac.id_auteurxcontrat
+		, ac.id_isbn, ac.pc_papier, ac.pc_ebook
+		 , v.id_vente, v.date_vente, v.montant_euro, v.id_boutique
 		 , i.id_editeur, i.type
 		 , d.id_devise, d.taux_euro_dollar, d.taux_euro_livre
 		FROM iste_auteurxcontrat ac
+		 INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
 		 INNER JOIN iste_vente v ON v.id_isbn = ac.id_isbn
 		 INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
-		 INNER JOIN iste_livrexauteur la ON la.id_livre = i.id_livre AND la.id_auteur = ac.id_auteur AND la.role = 'auteur'
+		 INNER JOIN iste_livrexauteur la ON la.id_livre = i.id_livre AND la.id_auteur = ac.id_auteur AND la.role = c.type
 		 INNER JOIN iste_devise d on
 				    DATE_FORMAT(date_taux, '%d-%m-%Y') = DATE_FORMAT(date_vente, '%d-%m-%Y')
-		 LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteur = ac.id_auteur
+		 LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
 		WHERE pc_papier is not null AND pc_ebook is not null AND pc_papier != 0 AND pc_ebook != 0
 			AND v.montant_euro > 0
-		    AND r.id_royalty is null
-		GROUP BY v.id_vente";
+		    AND r.id_royalty is null";
 
     		$stmt = $this->_db->query($sql);
     		$rs = $stmt->fetchAll(); 
     		$arrResult = array();
     		foreach ($rs as $r) {
-    			//récupère les auteurs
-    			$arrA = explode(",", $r["idsA"]);
-    			foreach ($arrA as $a) {
-    				//calcule les royalties
-    				$mtE = floatval($r["montant_euro"]) / intval($r["nbA"]);
-    				$mtE *= floatval($r["pc_papier"])/100;
-    				$mtD = $mtE*floatval($r["taux_euro_dollar"]);
-    				$mtL = $mtE*floatval($r["taux_euro_livre"]);
-    				//ajoute les royalties pour l'auteur et la vente
-	    			$arrResult[]= $this->ajouter(array("pourcentage"=>$r["pc_papier"],"id_devise"=>$r["id_devise"],"id_vente"=>$r["id_vente"],"id_auteur"=>$a,"montant_euro"=>$mtE,"montant_livre"=>$mtL,"montant_dollar"=>$mtD),true,true);
-    			}
+			//calcule les royalties
+    			//$mtE = floatval($r["montant_euro"]) / intval($r["nbA"]);
+    			//$mtE *= floatval($r["pc_papier"])/100;
+    			if(substr($r["type"], 0, 6)=="E-Book")$pc = $r["pc_ebook"];
+    			else $pc = $r["pc_papier"];
+    			$mtE = floatval($r["montant_euro"])*floatval($pc)/100;
+    			$mtD = $mtE*floatval($r["taux_euro_dollar"]);
+    			$mtL = $mtE*floatval($r["taux_euro_livre"]);
+    			//ajoute les royalties pour l'auteur et la vente
+	    		$arrResult[]= $this->ajouter(array("pourcentage"=>$pc,"id_devise"=>$r["id_devise"],"id_vente"=>$r["id_vente"]
+	    			,"id_auteurxcontrat"=>$r["id_auteurxcontrat"],"montant_euro"=>$mtE,"montant_livre"=>$mtL,"montant_dollar"=>$mtD),true,true);
     		}
     		
     		return $arrResult;
     }
+    
+	/**
+     * Calcule les paiements et lance les éditions
+     *
+     * @param string		$idsLivre
+     * 
+     * @return array
+     */
+    function paiementLivre($idsLivre){
+    		
+    		//récupère les royalty pour les livres sélectionnés
+	    	$sql = "SELECT 
+			GROUP_CONCAT(DISTINCT r.id_royalty) idsRoyalty
+		    , SUM(v.nombre) vNb, SUM(v.montant_livre) vMtLivre, MIN(v.date_vente) minDateVente, MAX(v.date_vente) maxDateVente
+		    , a.id_auteur, a.nom autNom, a.prenom, a.adresse_1, a.adresse_2, a.civilite, a.code_postal, a.ville, a.pays
+		    , ac.pc_papier, ac.pc_ebook
+		    , c.nom contNom
+            , MIN(i.date_parution) parution
+		    , l.id_livre, l.titre_en, l.titre_fr
+		FROM iste_royalty r 
+			INNER JOIN iste_vente v ON v.id_vente = r.id_vente
+		    INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+		    INNER JOIN iste_livre l ON l.id_livre = i.id_livre AND i.id_livre IN (".$idsLivre.")
+		    INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat
+		    INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+		    INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.role = c.type
+		    INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
+		WHERE r.date_paiement IS NULL
+		GROUP BY ac.id_auteur, l.id_livre";
+		//echo $sql;
+    		$stmt = $this->_db->query($sql);
+    		
+    		return $stmt->fetchAll(); 
+    		
+    }
+    
+	/**
+     * Récupère le détail des royalty
+     *
+     * @param string		$idsRoy
+     * 
+     * @return array
+     */
+    function getDetails($idsRoy){
+    		
+    		//récupère les royalty pour les livres sélectionnés
+	    	$sql = "SELECT 
+			COUNT(DISTINCT r.id_royalty) nbRoy
+		    ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit
+	    	    ,SUM(r.montant_livre) rMtRoy
+			,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
+			,i.id_isbn, i.date_parution, i.type
+		FROM iste_royalty r 
+			INNER JOIN iste_vente v ON v.id_vente = r.id_vente
+			INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+		WHERE r.id_royalty IN (".$idsRoy.")
+		GROUP BY i.id_isbn";
+		//echo $sql;
+    		$stmt = $this->_db->query($sql);
+    		
+    		return $stmt->fetchAll(); 
+    		
+    }    
+    
     
 }

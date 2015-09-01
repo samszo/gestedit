@@ -16,9 +16,37 @@ class ChercheController extends Zend_Controller_Action
     		$rs = $dbLivre->findId($this->_getParam('searchData'));
     		//$this->view->rs = $dbLivre->getAll(null,0,0,'l.id_livre IN ('.$rs[0]["ids"].')');
     		$this->view->rs = explode(",", $rs[0]["ids"]);
-    		$this->view->message = count($this->view->rs)." livre(s) ont été trouvé(s)";
+    		if(!count($rs[0]["ids"]))$nb=0;
+    		else $nb = count($this->view->rs);
+    		if($nb > 1)
+	    		$this->view->message = $nb." livre a été trouvé";
+	    	else
+	    		$this->view->message = $nb." livres ont été trouvés";
     }
 
+    public function venteAction()
+    {
+    		$this->initInstance();
+    		
+    		//echo __METHOD__;
+    		$dbVente = new Model_DbTable_Iste_vente();
+    		$rs = $dbVente->findId($this->_getParam('searchData'),$this->_getParam('bLivre'));
+    		$this->view->rs = explode(",", $rs[0]["ids"]);
+    		if(!count($rs[0]["ids"]))$nb=0;
+    		else $nb = count($this->view->rs);    		    		
+    		if($this->_getParam('bLivre')){
+	    		if($nb > 1)
+		    		$this->view->message = $nb." livre a été trouvé";
+		    	else
+		    		$this->view->message = $nb." livres ont été trouvés";
+    		}else{
+	    		if($nb > 1)
+		    		$this->view->message = $nb." vente a été trouvée";
+		    	else
+		    		$this->view->message = $nb." ventes ont été trouvées";
+    		}
+    }
+    
 	function initInstance(){
     		$auth = Zend_Auth::getInstance();
 		if ($auth->hasIdentity()) {						

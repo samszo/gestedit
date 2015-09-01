@@ -95,7 +95,9 @@ class IndexController extends Zend_Controller_Action
 		$bdd = new Model_DbTable_Iste_livre();
 		$rs = $bdd->getAllVente();
 		$this->view->json = json_encode($rs);		
-    		
+		$dbI = new Model_DbTable_Iste_importfic();
+		$this->view->rsMod = json_encode($dbI->findByType('paiement royalty livre'));		
+		
     }    
     
     function initInstance(){

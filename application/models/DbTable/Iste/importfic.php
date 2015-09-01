@@ -88,7 +88,26 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
         if(count($rs))return $rs[0];
         else return false; 
     }           
+
     	/**
+     * Recherche une entrée avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param string $type
+     *
+     * @return array
+     */
+    public function findByType($type)
+    {
+        $query = $this->select()
+            ->from( array("i" => "iste_importfic") )                           
+            ->where( "i.type = ?", $type);
+		$rs = $this->fetchAll($query)->toArray();
+        if(count($rs))return $rs[0];
+        else return false; 
+    }           
+    
+    /**
      * Recherche une entrée avec la valeur spécifiée
      * et retourne cette entrée.
      *

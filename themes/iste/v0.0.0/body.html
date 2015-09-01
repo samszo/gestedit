@@ -1,0 +1,46 @@
+<div id="container" [(#PLUGIN{squelette_leadescent}|non) class="nsquelette"]>
+	<div id="header-wrap">
+		<div id="header">		
+			<div class="masthead">
+				<INCLURE{fond=inclure/entete,env}>				
+			</div>
+			
+			<div class="widget widget_search">
+			#FORMULAIRE_RECHERCHE
+			</div>
+			
+			<div id="menubar" class="mainmenu">
+				<h3 class="title">Main Menu</h3>
+				<INCLURE{fond=inclure/barre-nav, env, identifiant=barrenav}>
+			</div>
+			<div class="clear"></div>		
+		</div>	
+	</div>
+	
+	<div id="middle-wrap">
+		<div id="middle">	
+			<div class="content-area loop loop-index">
+					<INCLURE{fond=contenu/#ENV{type},env}>
+			</div>
+			
+			<div id="navigation">
+				<INCLURE{fond=navigation/#ENV{type},env}>
+				<INCLURE{fond=extra/#ENV{type},env}>
+			      <div style="float:right;border-style:none;">
+				[(#MODELE{rubrique_cycle,id_rubrique=13,liens_individuels=article,next=.cycle-next,prev=.cycle-prev})]
+			      </div>
+			</div>
+
+			<div class="clear"></div>
+		</div>
+	</div>
+	
+	<div id="footer-wrap">
+		<div id="footer">
+			<INCLURE{fond=inclure/pied,env}>
+			<div id="copy-left">
+				<INCLURE{fond=inc-theme-copyleft}>
+			</div>
+		</div>
+	</div>
+</div>

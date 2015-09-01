@@ -37,7 +37,8 @@ function utiIsConnect(){
 	if(fctInit){
 		fctInit();
 		//affichage des infos de l'utilisateur
-		document.getElementById("utiConnect").innerHTML = uti.login;
+		var uc = document.getElementById("utiConnect")
+		if(uc)uc.innerHTML = uti.login;
 	}else{
 		//affichage des infos de l'utilisateur
 		if(w2ui['mainTB']){

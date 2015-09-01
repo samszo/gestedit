@@ -28,18 +28,6 @@ if(!$this->ajax){
 		</script>		
 		</head>
 <body>
-	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
-	<div id="utiConnect"></div>
-	<dialog id="diagLogin" close> 
-		<label for="iptLogin">Login : </label>
-        <input type="text" name="iptLogin" id="iptLogin" required="required">
-        <label for="iptlogin">Mot de passe : </label>
-        <input type="password" name="iptMdp" id="iptMdp" required="required">
-	    <div class="boutons">
-			<button onclick="diagLogin.close()">Fermer</button> 
-			<button onclick="connecte()">Connexion</button> 
-		</div> 
-	</dialog> 
 ';
 }
 $idPage = "Param";
@@ -79,9 +67,10 @@ function initParam() {
 		        name: 'layout_<?php echo $idPage;?>_Auteur',
 		        padding: 4, title: 'Paramètres pour les auteurs',
 		        panels: [
+				 	{ type: 'top', size: '492px', resizable:false, style: pstyle},
 		 		    { type: 'left', size: '50%', resizable:false, style: pstyle},
 					{ type: 'main', size: '50%', resizable:false, style: pstyle},
-					{ type: 'bottom', size: '70%', resizable:false, style: pstyle},
+					{ type: 'bottom', size: '30%', resizable:false, style: pstyle},
 		        ]
 		    },		    
 		    layoutParamLivre: {
@@ -105,9 +94,9 @@ function initParam() {
 		        name: 'layout_<?php echo $idPage;?>_Livre2',
 		        padding: 4,
 		        panels: [
-					{ type: 'main', size: '50%', resizable:true, style: pstyle},
+					{ type: 'main', size: '700px', resizable:true, style: pstyle},
 					{ type: 'left', size: '230px', resizable: true, style: pstyle},
-					//{ type: 'right', size: '230px', resizable: true, style: pstyle},
+					{ type: 'right', size: '450px', resizable: true, style: pstyle},
 					{ type: 'bottom', size: '500px', resizable: true, style: pstyle},
 		        ]
 		    },		    
@@ -228,6 +217,81 @@ function initParam() {
 		            }
 		        }
 		    },	
+		    gridBoutique:{ 
+		        name: 'grid_<?php echo $idPage;?>_boutique', 
+				header: "Boutique",		
+		        show: {	header			: true,		
+			            toolbar			: true,
+				    		toolbarReload   : false,
+				    		toolbarColumns  : true,
+			            	toolbarSearch   : true,
+			            	toolbarAdd      : true,
+			            	toolbarDelete   : true,
+			            	toolbarSave		: true,
+			            	footer: false,
+			            	columnHeaders	: true
+				    },
+		       columns: [  		  		        
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'nom', size: '200px', caption: '', sortable: true, resizable: true
+		            		,editable: { type: 'text'}},
+		            { field: 'coef', size: '100px', caption: 'Coefficient', sortable: true, resizable: true
+	            			,editable: { type: 'float'}},
+		            ],
+			    records: arrListes["boutique"],
+		        onClick: function (event) {
+		            itemSelect = this.get(event.recid);           		           
+		            itemSelect.type = "boutique";           		           
+		        },	    
+		        onAdd: function(event) {
+			        	openPopupAjoutBoutique();            
+			    },
+			    onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_licence'].getChanges();		            
+		            changes.forEach(function(c, i){
+			            c.obj = 'boutique';
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(html){
+			        				if(changes.length==i+1)w2alert(html);
+			        			});                        
+		            });
+		        },			    
+		        onDelete: function(event) {            
+			        delParam(event,"boutique");			        
+			    },		        
+		    },
+		    formBoutique: { 
+		        name: 'form_<?php echo $idPage;?>_boutique',
+		        fields: [
+		            {name: 'nom', type: 'text', required: true,  html: {caption: 'Nom'} },
+		            { name: 'coef', type: 'float', html: { caption: 'Coeficient' } },
+		        ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+			            data.obj = "boutique";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+			            			if(js.rs){
+				            		    	arrListes["boutique"].push(js.rs[0]);			                  
+					                var g = w2ui['grid_<?php echo $idPage;?>_boutique'];
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },	
+		    
 		    gridUti:{ 
 		        name: 'grid_<?php echo $idPage;?>_uti', 
 				header: "Utilisateur",		
@@ -389,7 +453,90 @@ function initParam() {
 		            }
 		        }
 		    },
-		};
+		    gridTache:{ 
+		        name: 'grid_<?php echo $idPage;?>_tache', 
+				header: "Liste des tâches",		
+		        show: {	header			: true,		
+			            toolbar			: true,
+				    		toolbarReload   : false,
+				    		toolbarColumns  : true,
+			            	toolbarSearch   : true,
+			            	toolbarAdd      : true,
+			            	toolbarDelete   : true,
+			            	toolbarSave		: true,
+			            	footer: false,
+			            	columnHeaders	: true
+				    },
+		       columns: [  		  		        
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'processus', caption: 'Processus', size: '40%', sortable: true, resizable: true },
+		            { field: 'nom', size: '50%', caption: 'Nom', sortable: true, resizable: true
+	            			,editable: { type: 'text'}},
+		            { field: 'ordre', size: '10%', caption: 'Ordre', sortable: true, resizable: true
+		            			,editable: { type: 'int'}},
+		            ],
+	            records  : arrListes["tache"],
+		        onAdd: function(event) {
+			        	openPopupAjoutTache();            
+			    },
+		        onDelete: function(event) {
+					var p = {"obj":"tache"};
+					if(event.force){
+						var s = w2ui[event.target].get(w2ui[event.target].getSelection()[0]);
+						p.id = s.recid;
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+								p,
+				            		function(js){
+				            			w2alert(js.message);
+				           		},"json");
+					}
+			    },		        
+			    onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_tache'].getChanges();		            
+		            changes.forEach(function(c, i){
+			            c.obj = 'tache';
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(html){
+			        				if(changes.length==i+1)w2alert(html);
+			        			});                        
+		            });
+		        },			    
+		    },	
+		    formTache: { 
+		        name: 'form_<?php echo $idPage;?>_tache',
+		        fields: [
+		            { name: 'id_processus', required: true, type: 'list', options: { items: arrListes['processus'] }
+		            		, html: { caption: 'Nom du processus', attr: 'size="20"' } 
+	            		},
+		            { name: 'nom', required: true, type: 'text', html: { caption: 'Nom de la Tâche', attr: 'size="20"' }},
+		        ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.id_processus = data.id_processus.recid;
+		                data.obj = "tache";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+			            			if(js.rs){					            			
+				            		    	arrListes['tache'].push(js.rs[0]);			                  
+						            var g = w2ui['grid_<?php echo $idPage;?>_tache'];
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+					            w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
+	};
 	
     // initialisation
     $('#<?php echo $idPage;?>').w2layout(config.layoutParam);
@@ -397,6 +544,7 @@ function initParam() {
     w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutParamLivre));
     //w2ui.layout_<?php echo $idPage;?>.content('left', $().w2layout(config.layoutParamVente));
 
+    w2ui.layout_<?php echo $idPage;?>_Auteur.content('top', $().w2grid(config.gridTache));
     w2ui.layout_<?php echo $idPage;?>_Auteur.content('left', $().w2grid(getGridParam('civilites')));
     w2ui.layout_<?php echo $idPage;?>_Auteur.content('main', $().w2grid(getGridParam('roles')));
     w2ui.layout_<?php echo $idPage;?>_Auteur.content('bottom', $().w2grid(config.gridUti));
@@ -410,6 +558,7 @@ function initParam() {
 
     w2ui.layout_<?php echo $idPage;?>_Livre2.content('main', $().w2grid(config.gridLicence));
     w2ui.layout_<?php echo $idPage;?>_Livre2.content('left', $().w2grid(getGridParam('prix')));
+    w2ui.layout_<?php echo $idPage;?>_Livre2.content('right', $().w2grid(config.gridBoutique));
     w2ui.layout_<?php echo $idPage;?>_Livre2.content('bottom', $().w2layout(config.layoutParamLivreCol));
 
     w2ui.layout_<?php echo $idPage;?>_Livre3.content('right', $().w2grid(getGridParam('langues')));
@@ -422,28 +571,28 @@ function initParam() {
     
 }
 
-function getGridParam(type){
+function getGridParam(typeP){
 	return { 
-        name: 'grid_<?php echo $idPage;?>_'+type, 
-		header: type,		
+        name: 'grid_<?php echo $idPage;?>_'+typeP, 
+		header: typeP,		
         show: showToolGrid,
        columns: [  		  		        
             { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
             { field: 'text', size: '240px', sortable: true, resizable: true
             		,editable: { type: 'text'}}
             ],
-	    records: arrListes[type],
+	    records: arrListes[typeP],
         onClick: function (event) {
             itemSelect = this.get(event.recid);           		           
         },	    
         onAdd: function(event) {
-	        	addParam("param",type);			        
+	        	addParam("param",typeP);			        
 	    },
 	    onSave: function(event) {
-            saveParam("param",type);
+            saveParam("param",typeP);
         },			    
         onDelete: function(event) {            
-	        delParam(event,"param",type);
+	        delParam(event,"param",typeP);
 	    },
         
     }
@@ -506,7 +655,7 @@ function getGridCol(type){
             saveParam(type);
         },			    
         onDelete: function(event) {            
-	        delParam(event,type);
+	        delParam(event,"param",type);
 	    },
         
     }
@@ -529,16 +678,16 @@ function addParam(obj, type){
 		},"json");                        
 }
 
-function saveParam(type){
+function saveParam(obj, typeP){
 
-    var changes = w2ui['grid_<?php echo $idPage;?>_'+type].getChanges();
+    var changes = w2ui['grid_<?php echo $idPage;?>_'+typeP].getChanges();
     changes.forEach(function(c, i){
-        var p = {"obj":'param',"recid":c.recid,"nom":c.text};
+        var p = {"obj":obj,"recid":c.recid,"nom":c.text};
 	    	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
     			p,
     			function(html){
     				//remplace la valeur enregistrée
-    				arrListes[type].forEach(function(r){
+    				arrListes[typeP].forEach(function(r){
         				if(r.recid==p.recid)r.text=p.nom;
     				})
     				if(changes.length==i+1)w2alert(html);
@@ -684,7 +833,48 @@ function openPopupColUser(type) {
 
 	
 }
-
+function openPopupAjoutTache() {
+    w2popup.open({
+        title   : 'Ajouter une tâche',
+        width   : 400,
+        height  : 200,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>_tache'])w2ui['form_<?php echo $idPage;?>_tache'].destroy();
+                $('#w2ui-popup #main').w2form(config.formTache)
+                w2ui['form_<?php echo $idPage;?>_tache'].clear();
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+}
+function openPopupAjoutBoutique() {
+    w2popup.open({
+        title   : 'Ajouter une Boutique',
+        width   : 400,
+        height  : 200,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>_boutique'])w2ui['form_<?php echo $idPage;?>_boutique'].destroy();
+                $('#w2ui-popup #main').w2form(config.formBoutique)
+                w2ui['form_<?php echo $idPage;?>_boutique'].clear();
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+}
 
 </script>
 

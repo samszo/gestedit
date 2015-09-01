@@ -189,10 +189,14 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("vid" => "iste_vente"),
                 'vid.id_vente = v.id_vente', array("recid"=>"id_vente"))
-            ->joinInner(array("l" => "iste_licence"),
-                'l.id_licence = v.id_licence', array("id_licence","licence"=>"CONCAT(nom,' ',IFNULL(licence_unitaire,''),' ',IFNULL(licence_coef,'- '),'% ',IFNULL(licence_illimite,''),' ',IFNULL(mutiplicateur,''))"))
             ->joinInner(array("i" => "iste_isbn"),
                 'v.id_isbn = i.id_isbn', array())
+            ->joinInner(array("b" => "iste_boutique"),
+                'b.id_boutique = v.id_boutique', array("boutique"=>"b.nom"))
+            ->joinLeft(array("l" => "iste_licence"),
+                'l.id_licence = v.id_licence', array("id_licence","licence"=>"CONCAT(l.nom,' ',IFNULL(licence_unitaire,''),' ',IFNULL(licence_coef,'- '),'% ',IFNULL(licence_illimite,''),' ',IFNULL(mutiplicateur,''))"))
+            ->joinLeft(array("p" => "iste_prix"),
+                'p.id_prix = v.id_prix', array("prix_euro","prix_livre","prix_dollar"))
 			->where( "i.id_livre = ?", $idLivre);
 
         return $this->fetchAll($query)->toArray(); 
@@ -336,15 +340,21 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
     public function getTotaux($idLivre=false)
     {
         $query = $this->select()
-        		->from( array("v" => "iste_vente"), array("tot_e"=>"SUM(montant_euro)","tot_l"=>"SUM(montant_livre)","tot_d"=>"SUM(montant_dollar)"
-        			,"boutique", "nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))", "nb"=>"SUM(nombre)", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"
-        			,"nbA"=>"COUNT(DISTINCT(v.acheteur))"
+        		->from( array("v" => "iste_vente"), array("tot_e"=>"SUM(v.montant_euro)","tot_l"=>"SUM(v.montant_livre)","tot_d"=>"SUM(v.montant_dollar)"
+        			,"id_boutique", "nbLivre"=>"COUNT(DISTINCT(i.id_livre))", "nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))", "nb"=>"SUM(nombre)", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"
+        			,"nbA"=>"COUNT(DISTINCT(v.acheteur))","nbV"=>"COUNT(DISTINCT(v.id_vente))"
         			))
-        		->group("boutique");
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+        		->joinInner(array("i" => "iste_isbn"),'v.id_isbn = i.id_isbn')
+			->joinInner(array("b" => "iste_boutique"),       
+                'v.id_boutique = b.id_boutique', array("boutique"=>"nom"))
+			->joinLeft(array("p" => "iste_prix"),       
+                'p.id_prix = v.id_prix', array("prix_e"=>"SUM(p.prix_euro)","prix_l"=>"SUM(p.prix_livre)","prix_d"=>"SUM(p.prix_dollar)"))
+			->joinLeft(array("r" => "iste_royalty"),       
+                'r.id_vente = v.id_vente', array("r_livre"=>"SUM(r.montant_livre)"))
+            ->group("id_boutique");
         	if($idLivre){
-        		$query->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
-        			->joinInner(array("i" => "iste_isbn"),'v.id_isbn = i.id_isbn')
-				->where( "i.id_livre = ?", $idLivre);        		
+        		$query->where( "i.id_livre = ?", $idLivre);        		
         	}
 
         return $this->fetchAll($query)->toArray(); 
@@ -363,5 +373,87 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
         		
         return $this->fetchAll($query)->toArray(); 
     }
-    
+
+	/**
+     * Recherche une entrée Iste_livre avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param array 		$arrWhere
+     * @param boolean	$bLivre
+     *
+     * @return array
+     */
+    public function findId($arrWhere, $bLivre=false)
+    {
+    		if(!$bLivre)
+			$sql = "SELECT GROUP_CONCAT(DISTINCT v.id_vente) ids ";
+		else
+			$sql = "SELECT GROUP_CONCAT(DISTINCT l.id_livre) ids ";
+		$sql .= " FROM iste_vente v 
+					INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+					INNER JOIN iste_livre l ON l.id_livre = i.id_livre ";
+		
+	    	foreach ($arrWhere as $w) {
+	    		//création de l'opérateur
+	    		//print_r($w);
+	    		//vérification de la valeur
+	    		if($w["field"]=="date_vente"){
+	    			if($w["operator"]=="between") {
+		    			$dt = new DateTime($w["value"][0]);
+		    			$w["value"][0] = $dt->format('Y-m-d');
+		    			$dt = new DateTime($w["value"][1]);
+		    			$w["value"][1] = $dt->format('Y-m-d');
+	    			}else{
+		    			$dt = new DateTime($w["value"]);
+		    			$w["value"] = $dt->format('Y-m-d');
+	    			}
+	    		}	    		
+	    		
+	    		switch ($w["operator"]) {
+	    			case "is":
+	    				$op = $w["field"]." ='".$w["value"]."' ";
+	    			break;
+	    			case "begins":
+	    				$op = $w["field"]." LIKE '".$w["value"]."%' ";
+	    			break;
+	    			case "ends":
+	    				$op = $w["field"]." LIKE '%".$w["value"]."' ";
+	    			break;
+	    			case "contains":
+	    				$op = $w["field"]." LIKE '%".$w["value"]."%' ";
+	    			break;
+	    			case "less":
+	    				$op = $w["field"]." < '".$w["value"]."' ";
+	    			break;
+	    			case "more":
+	    				$op = $w["field"]." > '".$w["value"]."' ";
+	    			break;
+	    			case "between":
+	    				$op = $w["field"]." BETWEEN '".$w["value"][0]."' AND '".$w["value"][1]."' ";
+	    			break;	    			
+	    		}
+	    		//modification de la requête
+			switch ($w["field"]) {
+				case "titre":
+					$nop = str_replace("titre", "l.titre_fr", $op)." OR ".str_replace("titre", "l.titre_en", $op);
+					$sql .= " WHERE ".$nop; 
+				break;
+				case "nom":
+					$sql .= " INNER JOIN iste_livrexauteur lan ON lan.id_livre = l.id_livre
+					INNER JOIN iste_auteur a ON a.id_auteur = lan.id_auteur AND a.".$op;
+				break;
+				case "sum_mt_e_r":
+					$nop = str_replace("sum_mt_e_r", "r.montant_euro", $op);
+					$sql .= "INNER JOIN iste_royalty r ON r.id_vente = v.id_vente AND ".$nop;
+				break;
+				default:
+					$sql .= " WHERE ".$op;
+				break;
+			}
+		}
+		
+		//echo $sql;
+	    	$db = $this->_db->query($sql);
+	    return $db->fetchAll();
+    }    
 }

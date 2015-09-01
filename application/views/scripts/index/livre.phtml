@@ -29,18 +29,6 @@ if(!$this->ajax){
 		</script>		
 		</head>
 <body>
-	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
-	<div id="utiConnect"></div>
-	<dialog id="diagLogin" close> 
-		<label for="iptLogin">Login : </label>
-        <input type="text" name="iptLogin" id="iptLogin" required="required">
-        <label for="iptlogin">Mot de passe : </label>
-        <input type="password" name="iptMdp" id="iptMdp" required="required">
-	    <div class="boutons">
-			<button onclick="diagLogin.close()">Fermer</button> 
-			<button onclick="connecte()">Connexion</button> 
-		</div> 
-	</dialog> 
 ';
 }
 $idPage = "Livre";
@@ -135,6 +123,11 @@ function initLivre() {
 		            { field: 'num', caption: 'ISBN', type: 'text' },
 		            { field: 'id_comite', caption: 'Comité', type: 'combo', options: { items: arrListes['comite']} },
 		            { field: 'id_serie', caption: 'Série', type: 'combo', options: { items: arrListes['serie']} },
+		            { field: 'tache-15-prevision', caption: 'Arrivée prévue du manuscrit', type: 'date'},
+		            { field: 'tache-16-prevision', caption: 'Arrivée prévue remise de traduction', type: 'date'},
+		            { field: 'tache-18-prevision', caption: 'Parution FR prévue', type: 'date'},
+		            { field: 'tache-17-prevision', caption: 'Parution GB prévue', type: 'date'},
+		            { field: 'date_parution', caption: 'Parution définitive', type: 'date'},
 		        ],
 		        columns: [                
 		            { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
@@ -177,11 +170,15 @@ function initLivre() {
 		        ],
 		        toolbar: {
 		            items: [
-		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' },
+		                { id: 'export_tresor', type: 'button', caption: 'Exporter trésorie', icon: 'fa-file-excel-o' }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
 		                		open(urlP+'export?obj=livre',"_blank")
+		                }
+		                if (event.target == 'export_tresor') {
+		                		open(urlP+'export?obj=tresor',"_blank")
 		                }
 		            }
 		        },
@@ -258,10 +255,10 @@ function initLivre() {
 		        name: 'form_<?php echo $idPage;?>',
 		        fields: [
 		            { name: 'reference', type: 'int', required: false, html: { caption: 'Référence', attr: 'size="40" maxlength="40"' } },
-		            { name: 'titre_fr', type: 'text', required: false, html: { caption: 'Titre français', attr: 'size="200" ' } },
 		            { name: 'titre_en', type: 'text', required: false, html: { caption: 'Titre anglais', attr: 'size="200" ' } },
-		            { name: 'soustitre_fr', type: 'text', html: { caption: 'Sous titre français', attr: 'size="200"' } },
 		            { name: 'soustitre_en', type: 'text', html: { caption: 'Sous titre anglais', attr: 'size="200"' } },
+		            { name: 'titre_fr', type: 'text', required: false, html: { caption: 'Titre français', attr: 'size="200" ' } },
+		            { name: 'soustitre_fr', type: 'text', html: { caption: 'Sous titre français', attr: 'size="200"' } },
 		            { name: 'num_vol', type: 'int', html: { caption: 'N° vol.', attr: 'size="10"' } },
 		            { name: 'type_1', type: 'list', options: { items: arrListes['type1'] }
 		            		, html: { caption: 'Type 1', attr: 'size="20"' } 
@@ -290,10 +287,12 @@ function initLivre() {
 			            		function(js){
 				                var g = w2ui['grid_<?php echo $idPage;?>'];
 								g.add(js.rs.rsLivre);
-								g.selectNone();
+					        		selectRowInGrid(js.rs.rsLivre[0].id_livre,'grid_<?php echo $idPage;?>');
 				                g = w2ui['form_<?php echo $idPage;?>'];
 								g.clear();
-		                        	w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
+				                g = w2ui['grid_<?php echo $idPage;?>_process_livre'];
+								g.add(js.rs.rsProcess);
+								w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
 		                        	w2ui['layout_<?php echo $idPage;?>'].toggle('main', true);
 		    		                w2ui['layout_<?php echo $idPage;?>'].toggle('right', true);
 			            			w2alert(js.message);
@@ -310,7 +309,7 @@ function initLivre() {
 			            { name: 'base_contrat', type: 'list', required: false, html: { caption: 'Base contrat'}
 			            		,options: { items: arrListes['contrat'].base }} , 
 			            //{ name: 'date_manuscrit', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date du manuscrit' } },
-			            { name: 'langue', type: 'list', html: { caption: 'Langue'}
+			            { name: 'langue', type: 'list', html: { caption: 'langue du manuscrit'}
 			            		,options: { items: arrListes['langues'] }} , 
 				        { name: 'traduction', type: 'list', html: { caption: 'Traduction'}
 						    ,options: { items: arrListes['traduction'] }},
@@ -344,7 +343,7 @@ function initLivre() {
 		    				toolbarReload   : false,
 		    				toolbarColumns  : false,
 		                	toolbarSearch   : false,
-		                	toolbarAdd      : true,
+		                	toolbarAdd      : false,
 		                	toolbarDelete   : true,
 		                	toolbarSave		: true,
 		                	header			: true, 
@@ -352,7 +351,7 @@ function initLivre() {
 			        columns: [      		  		           
 			            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 			            { field: 'tache', caption: 'Tâche', size: '175px', sortable: true, resizable: true},
-			            { field: 'debut', caption: 'Début', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+			            { field: 'debut', caption: 'Origine', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 			            { field: 'prevision', caption: 'Prévision', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 			            { field: 'fin', caption: 'Fin', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 			            { field: 'commentaire', caption: 'Commentaires', editable: { type: 'text'}, size: '200px', sortable: true, resizable: true},
@@ -772,10 +771,12 @@ function initLivre() {
 			                    }
 			                    return html;
 			                }},
+			            /*
 			            { field: 'tirage', caption: 'Tirage', size: '60px', sortable: true, resizable: true, render: 'int',
 			                    editable: { type: 'int', min: 0}},
 			            { field: 'nb_page', caption: 'Nb. page', size: '70px', sortable: true, resizable: true, render: 'int',
 			                        editable: { type: 'int', min: 0}},
+			            */
 			            { field: 'type', caption: 'Type', size: '40%', sortable: true, resizable: true,
 			            		editable: { type: 'list', items: arrListes['typeISBN'], showAll: true },
 				                render: function (record, index, col_index) {
@@ -823,8 +824,8 @@ function initLivre() {
 		            		, html: { caption: 'Editeur', attr: 'size="20"' } 
 		            		},
 				    { name: 'date_parution', type: 'date', options:{format: 'yyyy-mm-dd'}, html: {caption: 'Date de parution'} },
-		            { name: 'tirage', type: 'int', html: { caption: 'Tirage', attr: 'size="20px"' } },
-		            { name: 'nb_page', type: 'int', html: { caption: 'Nb. page', attr: 'size="20px"' } },
+		            //{ name: 'tirage', type: 'int', html: { caption: 'Tirage', attr: 'size="20px"' } },
+		            //{ name: 'nb_page', type: 'int', html: { caption: 'Nb. page', attr: 'size="20px"' } },
 		            { name: 'type', required: true, type: 'list', options: { items: arrListes['typeISBN'] }
 	            			, html: { caption: 'Type', attr: 'size="20"' } 
 	            		},
@@ -1262,7 +1263,7 @@ function showDataLivre(){
        		},"json");
     //récupère le planning du livre
     $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
-		{id:itemSelect.id_livre, process:'Production livre'},
+		{id:itemSelect.id_livre, process:'Projet livre'},
     		function(js){
             var gPL = w2ui['grid_<?php echo $idPage;?>_process_livre'];
             gPL.clear();

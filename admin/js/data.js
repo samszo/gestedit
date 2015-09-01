@@ -9,7 +9,7 @@ arrListes['contrat'] = {base:['GB','FR'],type:["auteur","coordinateur"],nom:["Co
 //arrListes['roles'] = ['auteur','coordinateur','préfacier'];
 //arrListes['traduction'] = ['français -> anglais', 'anglais -> français'];
 arrListes['alerte'] = ['1 semaine avant', '10 jours avant','2 jours avant','le jour même'];
-arrListes['boutique'] = ['Amazon', 'NBN', 'Elsevier','Wiley'];
+//arrListes['boutique'] = ['Amazon', 'NBN', 'Elsevier','Wiley'];
 //var arrData = ['auteur','livre','traduction','production','vente'];
 arrListes['role_uti'] = ["agent","admin","direction","lecteur","gestion"]                      
 
@@ -47,9 +47,14 @@ function initAll(fct){
 												arrListes['licence']=js;				
 												$.get(urlP+"Index/liste",{obj:'tache'},function(js){
 													arrListes['tache']=js;
-													
-													//initialisation des configurations de layout										
-													if(fct)fct();
+													$.get(urlP+"Index/liste",{obj:'processus'},function(js){
+														arrListes['processus']=js;														
+														$.get(urlP+"Index/liste",{obj:'boutique'},function(js){
+															arrListes['boutique']=js;														
+															//initialisation des configurations de layout										
+															if(fct)fct();
+															},"json");                        				
+														},"json");                        				
 													},"json");                        				
 												},"json");                        				
 											},"json");                        				

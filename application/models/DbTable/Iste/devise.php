@@ -306,7 +306,29 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     }    
     
     
-    
+	/**
+     * Récupère le taux de devise pour une période
+     *
+     * @param date		$deb
+     * @param date		$fin
+     * 
+     * @return array
+     */
+    function getTauxPeriode($deb, $fin){
+    		
+    		//récupère les royalty pour les livres sélectionnés
+	    	$sql = "SELECT 
+		    SUM(d.taux_livre_euro) tle, SUM(d.taux_livre_dollar) tld, SUM(taux_euro_livre) tel
+		    , SUM(d.taux_dollar_livre) tdl, SUM(d.taux_euro_dollar) ted, SUM(taux_dollar_euro) tde 
+	    	    , COUNT(d.id_devise) nb
+		FROM iste_devise d 
+		WHERE d.date_taux BETWEEN '".$deb."' AND '".$fin."'";
+		//echo $sql;
+    		$stmt = $this->_db->query($sql);
+    		$rs = $stmt->fetchAll();
+    		return $rs[0]; 
+    		
+    }        
     
 }
 

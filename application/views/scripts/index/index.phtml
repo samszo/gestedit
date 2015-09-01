@@ -29,18 +29,6 @@
 	</script>		
 </head>
 <body onload="init()">
-	<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
-	<div id="utiConnect"></div>
-	<dialog id="diagLogin" close> 
-		<label for="iptLogin">Login : </label>
-        <input type="text" name="iptLogin" id="iptLogin" required="required">
-        <label for="iptlogin">Mot de passe : </label>
-        <input type="password" name="iptMdp" id="iptMdp" required="required">
-	    <div class="boutons">
-			<button onclick="connecte()">Connexion</button> 
-		</div> 
-	</dialog> 
-
 <div id="layout" style="width: 100%; height: 1050px;"></div>
 
 <script type="text/javascript">
@@ -233,6 +221,7 @@ function chargeLayout(idLayout){
             w2ui['layout_Contrat'].destroy();
             if(w2ui['grid_Contrat_auteur'])w2ui['grid_Contrat_auteur'].destroy();
             if(w2ui['grid_Contrat_coor'])w2ui['grid_Contrat_coor'].destroy();
+            if(w2ui['grid_Contrat_dir'])w2ui['grid_Contrat_dir'].destroy();
             if(w2ui['grid_Contrat_trad'])w2ui['grid_Contrat_trad'].destroy();	            
             if(w2ui['form_Contrat_traducteur'])w2ui['form_Contrat_traducteur'].destroy();
             if(w2ui['form_Contrat_auteur'])w2ui['form_Contrat_auteur'].destroy();
@@ -251,6 +240,7 @@ function chargeLayout(idLayout){
             if(w2ui['grid_Vente_royalties'])w2ui['grid_Vente_royalties'].destroy();
             if(w2ui['grid_Vente_prix'])w2ui['grid_Vente_prix'].destroy();
             if(w2ui['form_Vente_prix'])w2ui['grid_Vente_prix'].destroy();
+            if(w2ui['grid_Vente_rapport'])w2ui['grid_Vente_rapport'].destroy();
         }
         	w2ui['layout'].load('main', 'Index/vente?ajax=1',null,function () {
         		w2ui.layout.unlock('main');
@@ -291,21 +281,27 @@ function chargeLayout(idLayout){
 	        	w2ui['layout_Param_Livre2'].destroy();
 	        	w2ui['layout_Param_Livre3'].destroy();
 	        	w2ui['layout_Param_LivreCol'].destroy();
-	        	w2ui['layout_Param_UserCol'].destroy();	        
+	        	if(w2ui['layout_Param_UserCol'])w2ui['layout_Param_UserCol'].destroy();	        
 	        	w2ui['grid_Param_civilites'].destroy();
 	        	w2ui['grid_Param_roles'].destroy();
 	        	w2ui['grid_Param_uti'].destroy();
 	        	w2ui['grid_Param_type1'].destroy();
 	        	w2ui['grid_Param_type2'].destroy();
 	        	w2ui['grid_Param_licence'].destroy();
+    	        if(w2ui['form_Param_licence'])	w2ui['form_Param_licence'].destroy();
 	        	w2ui['grid_Param_prix'].destroy();
 	        	w2ui['grid_Param_langues'].destroy();
 	        	w2ui['grid_Param_traduction'].destroy();
 	        	w2ui['grid_Param_page'].destroy();
 	        	w2ui['grid_Param_serie'].destroy();
 	        	w2ui['grid_Param_comite'].destroy();
-	        	w2ui['grid_Param_usercol'].destroy();
-	        	w2ui['form_Param_usercol'].destroy();
+	        if(w2ui['grid_Param_usercol'])	w2ui['grid_Param_usercol'].destroy();
+	        if(w2ui['form_Param_usercol'])	w2ui['form_Param_usercol'].destroy();
+	        	w2ui['grid_Param_tache'].destroy();
+	        if(w2ui['form_Param_tache'])	w2ui['form_Param_tache'].destroy();
+        		w2ui['grid_Param_boutique'].destroy();
+    	        if(w2ui['form_Param_boutique'])	w2ui['form_Param_boutique'].destroy();
+	        	
         }     
 	    
         	w2ui['layout'].load('main', 'Index/param?ajax=1',null,function () {

@@ -14,7 +14,6 @@
  * @copyright  2014 Samuel Szoniecky
  * @license    "New" BSD License
  */
-//ATTENTION le "s" de Models est nécessaire pour une compatibilité entre application et serveur
 class Model_DbTable_Spip_auteurs extends Zend_Db_Table_Abstract
 {
     
@@ -41,7 +40,8 @@ class Model_DbTable_Spip_auteurs extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_auteur'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($v)
+				$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_auteur; else $id=false;

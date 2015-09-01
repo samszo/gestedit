@@ -30,7 +30,7 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_auteurxcontrat'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($v)$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_auteurxcontrat; else $id=false;
@@ -43,16 +43,19 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
      * @param array $data
      * @param boolean $existe
      * @param boolean $rs
+     * @param boolean $edit
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true, $rs=false)
+    public function ajouter($data, $existe=true, $rs=false, $edit=false)
     {
     	
     	$id=false;
     	if($existe)$id = $this->existe($data);
     	if(!$id){
     	 	$id = $this->insert($data);
+    	}elseif ($edit){
+    		$this->edit($id, $data);
     	}
     	if($rs){
     		$dbC = new Model_DbTable_Iste_contrat();

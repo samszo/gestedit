@@ -190,7 +190,7 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
 		, l.titre_en, l.titre_fr, l.type_1, l.type_2
 		, i.id_isbn, i.date_parution, i.num isbn 
 		, isbn_auteur
-	    , col.id_collection, col.titre_en col_en, col.titre_fr col_en
+	    , com.id_comite, com.titre_en com_en, com.titre_fr com_en
 		, s.id_serie, s.titre_en serie_en, s.titre_fr serie_en
 	FROM iste_auteurxcontrat ac
 		INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
@@ -198,7 +198,7 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
 	    LEFT JOIN iste_livre l ON l.id_livre = ac.id_livre
 		LEFT JOIN iste_isbn i ON i.id_isbn = ac.id_isbn 
 		LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur 
-		LEFT JOIN iste_collection col ON col.id_collection = ac.id_collection 
+		LEFT JOIN iste_comite com ON com.id_comite = ac.id_comite 
 		LEFT JOIN iste_serie s ON s.id_serie = ac.id_serie";
  	if($idAutCont)$sql .= "  WHERE ac.id_auteurxcontrat=".$idAutCont;
  	if($type)$sql .= "  WHERE c.type='".$type."'";

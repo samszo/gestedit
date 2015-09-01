@@ -1,0 +1,39 @@
+<paquet
+	prefix="compositions"
+	categorie="outil"
+	version="3.3.13"
+	etat="stable"
+	compatibilite="[3.0.0;3.1.*]"
+	logo="prive/themes/spip/images/composition-32.png"
+	schema="0.5.0"
+	documentation="http://contrib.spip.net/?article3777"
+>
+
+	<nom>Compositions</nom>
+	<!-- Varier les mises en page selon les rubriques, les articles... -->
+
+	<auteur lien="http://www.yterium.com">Cedric Morin</auteur>
+
+	<copyright>2007-2013</copyright>
+
+	<licence lien="http://www.gnu.org/licenses/gpl-3.0.html">GPL 3</licence>
+
+	<traduire module="compositions" reference="fr" gestionnaire="salvatore" />
+
+	<pipeline nom="declarer_tables_objets_sql" inclure="compositions_pipeline.php" />
+	<pipeline nom="affiche_milieu" inclure="compositions_pipeline.php" />
+	<pipeline nom="autoriser" inclure="compositions_pipeline.php" />
+	<pipeline nom="styliser" inclure="compositions_pipeline.php" />
+	<pipeline nom="compositions_lister_disponibles" action="" />
+	<pipeline nom="compositions_declarer_heritage" action="" />
+	<pipeline nom="ieconfig_metas" inclure="compositions_ieconfig.php" />
+	<pipeline nom="compositions_declarer_heritage"  inclure="compositions_pipeline.php" />
+
+	<utilise nom="Z" compatibilite="[1.7.10;[" />
+	<utilise nom="Zcore" compatibilite="[2.0.0;[" />
+	<utilise nom="Zpip" compatibilite="[2.0.0;[" />
+	
+	<necessite nom="spip_bonux" compatibilite="[3.0.7;[" />
+
+	<menu nom="compositions" titre="compositions:compositions" parent="menu_squelette" icone="images/composition-16.png" action="compositions" />
+</paquet>

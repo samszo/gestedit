@@ -199,7 +199,7 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
      * 
      * @return array
      */
-    public function setProcessusForLivre($process, $idLivre, $idUti, $rs=true)
+    public function setProcessusForLivre($process, $idLivre, $idUti=1, $rs=true)
     {
     	
     		$dbPrev = new Model_DbTable_Iste_prevision();
@@ -219,7 +219,7 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
 	        	$dbPrev->ajouter(array("id_tache"=>$t['id_tache'], "id_pxu"=>$idPLU, "obj"=>"livre"));
         }
     	
-        return $rs ? $this->getProcessusByLivre($process, $idLivre) : false;
+        return $rs ? $this->getProcessusByLivre($process, $idLivre) : $idPLU;
     } 
 
 	/**
@@ -324,4 +324,40 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
 	    $db = $this->_db->query($sql);
 	    return $db->fetchAll();
     }         
+    
+    /**
+     * Renvoie la liste des entrée
+     *
+     * @return void
+     */
+    public function getListe()
+    {
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"nom","nom"))
+            ->order(array("nom"));
+        return $this->fetchAll($query)->toArray();
+	} 
+
+	
+	/**
+     * ajoute une tache à toutes les prévisions 
+     *
+     * @param int 		$idTache
+     * @param bool 		$rs
+     * 
+     * @return array
+     */
+    public function setProcessusForTache($idTache)
+    {
+    	
+    		$sql = "INSERT INTO iste_prevision (id_tache, id_pxu, obj)
+		SELECT t.id_tache, pl.id_plu, 'livre'
+		FROM iste_tache t
+		INNER JOIN iste_processusxlivre pl ON pl.id_processus = t.id_processus
+		LEFT JOIN iste_prevision p ON p.id_tache = t.id_tache AND p.id_pxu = pl.id_plu AND p.obj = 'livre' 
+		WHERE t.id_tache = ".$idTache." AND p.id_prevision IS NULL";
+	    $this->_db->query($sql);
+    		
+    } 	
 }

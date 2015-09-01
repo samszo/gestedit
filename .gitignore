@@ -75,4 +75,45 @@ local/cache-css
 
 local/cache-gd2
 
+local/cache-code
 
+
+application/configs/applicationInfomaniak.ini
+
+application/configs/configInfomaniak.php
+
+bdd/iste_prevision.sql
+
+bdd/isteImportFinal1.sql
+
+bdd/istePreImport.sql
+
+bdd/isteTest2.sql
+
+library/odtphp/.svn/all-wcprops
+
+library/odtphp/.svn/entries
+
+library/odtphp/.svn/format
+
+library/odtphp/.svn/text-base/odf.php.svn-base
+
+library/odtphp/.svn/text-base/Segment.php.svn-base
+
+library/odtphp/.svn/text-base/SegmentIterator.php.svn-base
+
+library/odtphp/zip/.svn/entries
+
+library/odtphp/zip/.svn/format
+
+library/odtphp/zip/.svn/text-base/PclZipProxy.php.svn-base
+
+library/odtphp/zip/.svn/text-base/PhpZipProxy.php.svn-base
+
+*.svn-base
+
+library/odtphp/zip/pclzip/.svn/all-wcprops
+
+library/odtphp/zip/pclzip/.svn/entries
+
+library/odtphp/zip/pclzip/.svn/format

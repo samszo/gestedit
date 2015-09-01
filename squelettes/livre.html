@@ -1,0 +1,11 @@
+<BOUCLE_livre(iste:ISTE_LIVRE){id_livre=#ID_LIVRE}{par titre_fr}>
+#TITRE_FR
+#TITRE_EN
+</BOUCLE_livre>
+<BOUCLE_IsteSpip(iste:ISTE_SPIP){id_iste=#ID_LIVRE}>
+	#ID_ISTE<br/>
+	<BOUCLE_IsteLivre(iste:ISTE_LIVRE){id_livre=#ID_ISTE}>		
+	#TITRE_FR<br/>
+	#TITRE_EN<br/>
+	</BOUCLE_IsteLivre>	
+</BOUCLE_IsteSpip>

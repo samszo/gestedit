@@ -15136,15 +15136,29 @@ Plugin développé dans le cadre du gestionnaire de projets [SPIPMINE->http://co
 <archive id="cookiebar_3_0.zip" dtd="paquet">
 <zip>
 	<file>cookiebar_3_0.zip</file>
-	<size>20285</size>
-	<date>1435065306</date>
+	<size>22145</size>
+	<date>1439301604</date>
 	<source>_plugins_/cookiebar/trunk</source>
-	<last_commit>2015-06-23 15:15:05</last_commit>
+	<last_commit>2015-08-11 16:00:02</last_commit>
 </zip>
 <traductions>
-<traduction module="cookiebar" reference="fr">
-	<langue code="en" />
-	<langue code="es" />
+<traduction module="cookiebar" gestionnaire="salvatore" url="http://trad.spip.net" source="svn://zone.spip.org/spip-zone/_plugins_/cookiebar/trunk/lang/" reference="fr">
+	<langue code="ar" url="http://trad.spip.net/tradlang_module/cookiebar?lang_cible=ar" total="38" traduits="4" relire="0" modifs="0" nouveaux="34" pourcent="10.53">
+		<traducteur nom="kent1" lien="http://trad.spip.net/auteur/kent1" />
+	</langue>
+	<langue code="en" url="http://trad.spip.net/tradlang_module/cookiebar?lang_cible=en" total="38" traduits="19" relire="0" modifs="0" nouveaux="19" pourcent="50.00">
+		<traducteur nom="kent1" lien="http://trad.spip.net/auteur/kent1" />
+	</langue>
+	<langue code="es" url="http://trad.spip.net/tradlang_module/cookiebar?lang_cible=es" total="38" traduits="20" relire="0" modifs="0" nouveaux="18" pourcent="52.63">
+	</langue>
+	<langue code="fr" url="http://trad.spip.net/tradlang_module/cookiebar?lang_cible=fr" total="38" traduits="38" relire="0" modifs="0" nouveaux="0" pourcent="100.00">
+	</langue>
+</traduction>
+<traduction module="paquet-cookiebar" gestionnaire="salvatore" url="http://trad.spip.net" source="svn://zone.spip.org/spip-zone/_plugins_/cookiebar/trunk/lang/" reference="fr">
+	<langue code="en" url="http://trad.spip.net/tradlang_module/paquet-cookiebar?lang_cible=en" total="3" traduits="3" relire="0" modifs="0" nouveaux="0" pourcent="100.00">
+	</langue>
+	<langue code="fr" url="http://trad.spip.net/tradlang_module/paquet-cookiebar?lang_cible=fr" total="3" traduits="3" relire="0" modifs="0" nouveaux="0" pourcent="100.00">
+	</langue>
 </traduction>
 </traductions>
 
@@ -15175,13 +15189,13 @@ Plugin développé dans le cadre du gestionnaire de projets [SPIPMINE->http://co
 <slogan>
 <multi>
 [en]Display a warning about the use of cookies
-[fr]Affiche un avertissement à l'utilisation des cookies
+[fr]Affiche un avertissement à l’utilisation des cookies
 </multi>
 </slogan>
 <description>
 <multi>
 [en]
-[fr]Demande le consentement à l'internaute à l'utilisation des cookies.
+[fr]Demande le consentement à l’internaute à l’utilisation des cookies.
 </multi>
 </description>
 </multis>
@@ -22330,16 +22344,16 @@ _ En plus d'avoir ses cours en ligne, on peut donc faire des tests not&#233;s, v
 <archive id="elfinder.zip" dtd="paquet">
 <zip>
 	<file>elfinder.zip</file>
-	<size>22411</size>
-	<date>1431961204</date>
+	<size>23452</size>
+	<date>1439290804</date>
 	<source>_plugins_/elfinder/trunk</source>
-	<last_commit>2015-05-18 17:00:02</last_commit>
+	<last_commit>2015-08-11 13:00:02</last_commit>
 </zip>
 
 <paquet 
 		prefix="elfinder"
 		categorie="maintenance"
-		version="0.2.5"
+		version="0.2.6"
 		etat="dev"
 		compatibilite="[3.0.0;3.0.*]"
 		logo="images/elfinder_48.png"
@@ -22350,7 +22364,7 @@ _ En plus d'avoir ses cours en ligne, on peut donc faire des tests not&#233;s, v
 	<auteur lien="http://www.declic3000.com">GuillaumeW</auteur>
 	<licence>GNU-GPL</licence>
 
-	<lib nom="elfinder" lien="http://nao-pon.github.io/elFinder-nightly/latests/elfinder-2.1.zip" />
+	<lib nom="elfinder-2.0-rc1" lien="https://github.com/downloads/Studio-42/elFinder/elfinder-2.0-rc1.tar.gz" />
 
 	<menu nom="elfinder" titre="elfinder:elfinder" parent="menu_administration" icone="images/elfinder_16.png" />
 
@@ -25387,17 +25401,17 @@ cache rapide. En-dehors de ce cas, si  un squelette doit afficher quelque chose 
 <archive id="ffedata.zip" dtd="paquet">
 <zip>
 	<file>ffedata.zip</file>
-	<size>29147</size>
-	<date>1438714802</date>
+	<size>30376</size>
+	<date>1439233202</date>
 	<source>_plugins_/ffedata</source>
-	<last_commit>2015-08-04 21:00:01</last_commit>
+	<last_commit>2015-08-10 21:00:01</last_commit>
 </zip>
 <traductions>
 <traduction module="ffedata" reference="fr">
 </traduction>
 </traductions>
 
-<paquet	prefix="ffedata"	categorie="divers"	version="0.3.2"	etat="dev"	compatibilite="[3.0.0;3.1.*]"	logo="prive/themes/spip/images/ffedata-64.png"	documentation="http://ressources.jack31.org/"	schema="1.0.0" >	<nom>Data FFE</nom>	<!-- Récupérer les infos du webservice de la FF Echecs -->	<auteur lien="http://contrib.spip.net/Jacques">Jacques Bouthier</auteur>	<credit lien="http://dataetic.fr/">Nicolas Dorigny</credit>	<credit>Pascal Raynaud</credit>	<licence>GNU/GPL</licence>	<necessite nom="mailcrypt" />	<necessite nom="saisies" /></paquet>
+<paquet	prefix="ffedata"	categorie="divers"	version="0.3.3"	etat="dev"	compatibilite="[3.0.0;3.1.*]"	logo="prive/themes/spip/images/ffedata-64.png"	documentation="http://ressources.jack31.org/"	schema="1.0.0" >	<nom>Data FFE</nom>	<!-- Récupérer les infos du webservice de la FF Echecs -->	<auteur lien="http://contrib.spip.net/Jacques">Jacques Bouthier</auteur>	<credit lien="http://dataetic.fr/">Nicolas Dorigny</credit>	<credit>Pascal Raynaud</credit>	<licence>GNU/GPL</licence>	<necessite nom="mailcrypt" />	<necessite nom="saisies" /></paquet>
 <multis>
 <nom>
 <multi>
@@ -29727,10 +29741,10 @@ _ [->http://getid3.sourceforge.net/]
 <archive id="getID3_3.zip" dtd="paquet">
 <zip>
 	<file>getID3_3.zip</file>
-	<size>402563</size>
-	<date>1384023674</date>
+	<size>402611</size>
+	<date>1439474406</date>
 	<source>_plugins_/getID3/trunk</source>
-	<last_commit>2013-11-09 19:51:00</last_commit>
+	<last_commit>2015-08-13 16:00:05</last_commit>
 </zip>
 <traductions>
 <traduction module="getid3" gestionnaire="salvatore" url="http://trad.spip.net" source="svn://zone.spip.org/spip-zone/_plugins_/getID3/trunk/lang/" reference="fr">
@@ -29766,7 +29780,7 @@ _ [->http://getid3.sourceforge.net/]
 <paquet
 	prefix="getid3"
 	categorie="multimedia"
-	version="1.3.5"
+	version="1.3.6"
 	etat="stable"
 	compatibilite="[3.0.2;3.0.*]"
 	logo="images/id3v2.png"
@@ -30199,10 +30213,10 @@ _ Icon from [mattrich->http://mattrich.deviantart.com/art/Picnic-101256405] unde
 <archive id="gis4.zip" dtd="paquet">
 <zip>
 	<file>gis4.zip</file>
-	<size>254429</size>
-	<date>1438344006</date>
+	<size>254415</size>
+	<date>1439485202</date>
 	<source>_plugins_/gis/trunk</source>
-	<last_commit>2015-07-31 14:00:05</last_commit>
+	<last_commit>2015-08-13 19:00:01</last_commit>
 </zip>
 <traductions>
 <traduction module="gis" gestionnaire="salvatore" url="http://trad.spip.net" source="svn://zone.spip.org/spip-zone/_plugins_/gis/trunk/lang/" reference="fr">
@@ -36530,10 +36544,10 @@ This meta plugin takes care to properly manage the inclusion of the jQuery UI li
 <archive id="langonet_v0.zip" dtd="plugin">
 <zip>
 	<file>langonet_v0.zip</file>
-	<size>75072</size>
-	<date>1434859202</date>
+	<size>75303</size>
+	<date>1439352002</date>
 	<source>_plugins_/langonet/branches/v0</source>
-	<last_commit>2015-06-21 06:00:02</last_commit>
+	<last_commit>2015-08-12 06:00:01</last_commit>
 </zip>
 <traductions>
 <traduction module="langonet" gestionnaire="salvatore" url="http://trad.spip.net" source="svn://zone.spip.org/spip-zone/_plugins_/langonet/branches/v0/lang/" reference="fr">
@@ -36546,7 +36560,7 @@ This meta plugin takes care to properly manage the inclusion of the jQuery UI li
 	</langue>
 	<langue code="fr" url="http://trad.spip.net/tradlang_module/langonet?lang_cible=fr" total="137" traduits="137" relire="0" modifs="0" nouveaux="0" pourcent="100.00">
 	</langue>
-	<langue code="oc_ni_mis" url="http://trad.spip.net/tradlang_module/langonet?lang_cible=oc_ni_mis" total="137" traduits="112" relire="0" modifs="0" nouveaux="25" pourcent="81.75">
+	<langue code="oc_ni_mis" url="http://trad.spip.net/tradlang_module/langonet?lang_cible=oc_ni_mis" total="137" traduits="118" relire="0" modifs="0" nouveaux="19" pourcent="86.13">
 		<traducteur nom="sylvain" lien="http://trad.spip.net/auteur/sylvain" />
 	</langue>
 	<langue code="sk" url="http://trad.spip.net/tradlang_module/langonet?lang_cible=sk" total="137" traduits="137" relire="0" modifs="0" nouveaux="0" pourcent="100.00">
@@ -37739,10 +37753,10 @@ Ic&#244;ne issue de la collection [Farm-Fresh Web Icons->http://www.fatcow.com/f
 <archive id="linkcheck.zip" dtd="paquet">
 <zip>
 	<file>linkcheck.zip</file>
-	<size>42717</size>
-	<date>1423491306</date>
+	<size>42721</size>
+	<date>1439306102</date>
 	<source>_plugins_/linkcheck/trunk</source>
-	<last_commit>2015-02-09 15:15:05</last_commit>
+	<last_commit>2015-08-11 17:15:01</last_commit>
 </zip>
 <traductions>
 <traduction module="linkcheck" reference="fr">
@@ -37752,9 +37766,9 @@ Ic&#244;ne issue de la collection [Farm-Fresh Web Icons->http://www.fatcow.com/f
 <paquet
 	prefix="linkcheck"
 	categorie="maintenance"
-	version="1.0.0"
+	version="1.0.1"
 	etat="dev"
-	compatibilite="[3.0.5;3.0.*]"
+	compatibilite="[3.0.5;3.1.*]"
 	logo="prive/themes/spip/images/linkcheck-64.png"
 	documentation=""
 	schema="1.0.0" 
@@ -44993,10 +45007,10 @@ Once the necessary plugins are activated, simply determine the language of the s
 <archive id="newsletters-v1.zip" dtd="paquet">
 <zip>
 	<file>newsletters-v1.zip</file>
-	<size>140538</size>
-	<date>1437055202</date>
+	<size>140528</size>
+	<date>1439103604</date>
 	<source>_plugins_/newsletters/trunk</source>
-	<last_commit>2015-07-16 16:00:02</last_commit>
+	<last_commit>2015-08-09 09:00:02</last_commit>
 </zip>
 <traductions>
 <traduction module="newsletter" reference="fr">
@@ -45024,7 +45038,7 @@ Once the necessary plugins are activated, simply determine the language of the s
 <paquet
 	prefix="newsletters"
 	categorie="communication"
-	version="1.3.11"
+	version="1.3.12"
 	etat="stable"
 	compatibilite="[3.0.5;3.1.*]"
 	logo="prive/themes/spip/images/newsletters-64.png"
@@ -46865,10 +46879,10 @@ Varios modelos disponibles:
 <archive id="oembed.zip" dtd="paquet">
 <zip>
 	<file>oembed.zip</file>
-	<size>49074</size>
-	<date>1434945604</date>
+	<size>49072</size>
+	<date>1439370002</date>
 	<source>_plugins_/oembed</source>
-	<last_commit>2015-06-22 06:00:03</last_commit>
+	<last_commit>2015-08-12 11:00:01</last_commit>
 </zip>
 <traductions>
 <traduction module="oembed" gestionnaire="salvatore" url="http://trad.spip.net" source="svn://zone.spip.org/spip-zone/_plugins_/oembed/lang/" reference="fr">
@@ -46932,7 +46946,7 @@ Varios modelos disponibles:
 	<pipeline nom="formulaire_charger" inclure="oembed_pipelines.php" />
 	<pipeline nom="recuperer_fond" inclure="oembed_pipelines.php" />
 	<pipeline nom="oembed_lister_providers" action="" />
-	<pipeline nom="oembed_liste_arguments" action="" /> 
+	<pipeline nom="oembed_liste_arguments" action="" />
 
 	<menu nom="configurer_oembed" titre="oembed:titre_oembed" parent="bando_configuration" icone="images/oembed-16.png" />
 	<necessite nom="medias" compatibilite="[2.7.27;]" />
@@ -53249,10 +53263,10 @@ Cette documentation est disponible, si le plugin est actif sur votre site, sur l
 <archive id="qrcode_v1.zip" dtd="paquet">
 <zip>
 	<file>qrcode_v1.zip</file>
-	<size>32015</size>
-	<date>1433703610</date>
+	<size>32056</size>
+	<date>1439229602</date>
 	<source>_plugins_/qrcode/trunk</source>
-	<last_commit>2015-06-07 21:00:10</last_commit>
+	<last_commit>2015-08-10 20:00:02</last_commit>
 </zip>
 <traductions>
 <traduction module="qrcode" reference="fr">
@@ -53262,7 +53276,7 @@ Cette documentation est disponible, si le plugin est actif sur votre site, sur l
 <paquet
 	prefix="qrcode"
 	categorie="communication"
-	version="1.0.3"
+	version="1.0.4"
 	etat="dev"
 	compatibilite="[3.0.15;3.1.*]"
 	logo="prive/themes/spip/images/qrcode-64.png"
@@ -70216,10 +70230,10 @@ Par exemple, <code>"1er mars"</code> devient <code>"1er&nbsp;mars"</code>.
 <archive id="urls_numero.zip" dtd="paquet">
 <zip>
 	<file>urls_numero.zip</file>
-	<size>5025</size>
-	<date>1433099704</date>
+	<size>5149</size>
+	<date>1439298006</date>
 	<source>_plugins_/urls_par_numero/trunk</source>
-	<last_commit>2015-05-31 21:15:03</last_commit>
+	<last_commit>2015-08-11 15:00:06</last_commit>
 </zip>
 <traductions>
 <traduction module="paquet-urls_par_numero" gestionnaire="salvatore" url="http://trad.spip.net" source="svn://zone.spip.org/spip-zone/_plugins_/urls_par_numero/trunk/lang/" reference="fr">
@@ -70231,7 +70245,7 @@ Par exemple, <code>"1er mars"</code> devient <code>"1er&nbsp;mars"</code>.
 <paquet
 	prefix="urls_par_numero"
 	categorie="statistique"
-	version="1.1.6"
+	version="1.2.0"
 	etat="test"
 	compatibilite="[3.0.17;3.1.*]"
 	logo="img/urls_par_numero.png"
@@ -70242,13 +70256,13 @@ Par exemple, <code>"1er mars"</code> devient <code>"1er&nbsp;mars"</code>.
 	<credit lien="http://thenounproject.com/term/calculate/36764/">Logo : Mister Pixel</credit>
 	<licence lien="https://www.gnu.org/licenses/gpl-3.0.html">GPL3</licence>
 	<auteur lien='http://www.maieul.net'>Maïeul Rouquette</auteur>
-	
-	<traduire module="paquet-urls_par_numero" reference="fr" />
-	
-	<necessite nom="urls" compatibilite="[1.4.23;1.*.*]" />
-	
-	<pipeline nom="propres_creer_chaine_url" inclure="urls_par_numero_pipelines.php" />
 
+	<traduire module="paquet-urls_par_numero" reference="fr" />
+
+	<necessite nom="urls" compatibilite="[1.4.23;1.*.*]" />
+
+	<pipeline nom="propres_creer_chaine_url" inclure="urls_par_numero_pipelines.php" />
+	<pipeline nom="arbo_creer_chaine_url" inclure="urls_par_numero_pipelines.php" />
 
 </paquet>
 <multis>
@@ -77540,21 +77554,21 @@ Pour disposer d'un site SPIP incluant des fonctions g&#233;n&#233;riques, largem
 <archive id="soyezcreateurs_rebirth_4.zip" dtd="paquet">
 <zip>
 	<file>soyezcreateurs_rebirth_4.zip</file>
-	<size>2265500</size>
-	<date>1439056802</date>
+	<size>2264968</size>
+	<date>1439352004</date>
 	<source>_squelettes_/soyezcreateurs_net/trunk/plugins/soyezcreateurs</source>
-	<last_commit>2015-08-08 20:00:02</last_commit>
+	<last_commit>2015-08-12 06:00:03</last_commit>
 </zip>
 <traductions>
 <traduction module="soyezcreateurs" gestionnaire="salvatore" url="http://trad.spip.net" source="svn://zone.spip.org/spip-zone/_squelettes_/soyezcreateurs_net/trunk/plugins/soyezcreateurs/lang/" reference="fr">
-	<langue code="ca" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=ca" total="450" traduits="371" relire="0" modifs="21" nouveaux="58" pourcent="82.44">
+	<langue code="ca" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=ca" total="449" traduits="370" relire="0" modifs="21" nouveaux="58" pourcent="82.41">
 		<traducteur nom="merce" lien="http://trad.spip.net/auteur/merce" />
 	</langue>
-	<langue code="de" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=de" total="450" traduits="391" relire="0" modifs="2" nouveaux="57" pourcent="86.89">
+	<langue code="de" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=de" total="449" traduits="390" relire="0" modifs="2" nouveaux="57" pourcent="86.86">
 		<traducteur nom="kennethkeen" lien="http://trad.spip.net/auteur/kennethkeen" />
 		<traducteur nom="RealET" lien="http://trad.spip.net/auteur/realet" />
 	</langue>
-	<langue code="en" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=en" total="450" traduits="427" relire="0" modifs="2" nouveaux="21" pourcent="94.89">
+	<langue code="en" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=en" total="449" traduits="426" relire="0" modifs="2" nouveaux="21" pourcent="94.88">
 		<traducteur nom="Benitron" lien="http://trad.spip.net/auteur/benitron" />
 		<traducteur nom="EScott" lien="http://trad.spip.net/auteur/escott" />
 		<traducteur nom="JohnLonie" lien="http://trad.spip.net/auteur/johnlonie-6942" />
@@ -77563,22 +77577,22 @@ Pour disposer d'un site SPIP incluant des fonctions g&#233;n&#233;riques, largem
 		<traducteur nom="pgiron" lien="http://trad.spip.net/auteur/pgiron" />
 		<traducteur nom="RealET" lien="http://trad.spip.net/auteur/realet" />
 	</langue>
-	<langue code="es" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=es" total="450" traduits="1" relire="0" modifs="0" nouveaux="449" pourcent="0.22">
+	<langue code="es" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=es" total="449" traduits="1" relire="0" modifs="0" nouveaux="448" pourcent="0.22">
 		<traducteur nom="JohnLonie" lien="http://trad.spip.net/auteur/johnlonie-6942" />
 		<traducteur nom="merce" lien="http://trad.spip.net/auteur/merce" />
 	</langue>
-	<langue code="fr" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=fr" total="450" traduits="450" relire="0" modifs="0" nouveaux="0" pourcent="100.00">
+	<langue code="fr" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=fr" total="449" traduits="449" relire="0" modifs="0" nouveaux="0" pourcent="100.00">
 	</langue>
-	<langue code="it" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=it" total="450" traduits="1" relire="0" modifs="0" nouveaux="449" pourcent="0.22">
+	<langue code="it" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=it" total="449" traduits="1" relire="0" modifs="0" nouveaux="448" pourcent="0.22">
 		<traducteur nom="JohnLonie" lien="http://trad.spip.net/auteur/johnlonie-6942" />
 	</langue>
-	<langue code="nl" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=nl" total="450" traduits="84" relire="0" modifs="3" nouveaux="363" pourcent="18.67">
+	<langue code="nl" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=nl" total="449" traduits="83" relire="0" modifs="3" nouveaux="363" pourcent="18.49">
 	</langue>
-	<langue code="sk" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=sk" total="450" traduits="427" relire="0" modifs="8" nouveaux="15" pourcent="94.89">
+	<langue code="sk" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=sk" total="449" traduits="426" relire="0" modifs="8" nouveaux="15" pourcent="94.88">
 		<traducteur nom="jaro" lien="http://trad.spip.net/auteur/jaro" />
 		<traducteur nom="RealET" lien="http://trad.spip.net/auteur/realet" />
 	</langue>
-	<langue code="uk" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=uk" total="450" traduits="313" relire="0" modifs="18" nouveaux="119" pourcent="69.56">
+	<langue code="uk" url="http://trad.spip.net/tradlang_module/soyezcreateurs?lang_cible=uk" total="449" traduits="312" relire="0" modifs="18" nouveaux="119" pourcent="69.49">
 		<traducteur nom="RealET" lien="http://trad.spip.net/auteur/realet" />
 		<traducteur nom="Retenodus" lien="http://trad.spip.net/auteur/retenodus" />
 	</langue>
@@ -77596,11 +77610,11 @@ Pour disposer d'un site SPIP incluant des fonctions g&#233;n&#233;riques, largem
 <paquet
 	prefix="soyezcreateurs"
 	categorie="squelette"
-	version="4.0.28"
+	version="4.0.29"
 	etat="test"
 	compatibilite="[3.0.20;3.1.*]"
 	logo="img_pack/soyezcreateurs_48.png"
-	schema="3.0.41"
+	schema="3.0.42"
 	documentation="http://contrib.spip.net/SoyezCreateurs,1237?tri_articles=titre"
 >	
 
@@ -77750,10 +77764,10 @@ Pour disposer d'un site SPIP incluant des fonctions génériques, largement conf
 <archive id="spipr_dist.zip" dtd="paquet">
 <zip>
 	<file>spipr_dist.zip</file>
-	<size>148221</size>
-	<date>1436292002</date>
+	<size>149371</size>
+	<date>1439215206</date>
 	<source>_squelettes_/spipr-dist/trunk</source>
-	<last_commit>2015-07-07 20:00:02</last_commit>
+	<last_commit>2015-08-10 16:00:05</last_commit>
 </zip>
 
 <paquet
@@ -82082,6 +82096,436 @@ Adaptation libre pour le squelette Sarka-SPIP du th&#232;me Arclite. Il est pr&#
 	<prefix>theme_sarka_automn</prefix>
 	<necessite id="SPIP" version="[2.0.0;3.0.99]" />
 	<utilise id="SarkaSpip" name="Sarka-SPIP 3" version="[3.0.2;)" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="amelia.zip" dtd="plugin">
+<zip>
+	<file>amelia.zip</file>
+	<size>17498</size>
+	<date>1384128008</date>
+	<source>_themes_/spipr/v1/amelia</source>
+	<last_commit>2013-11-11 00:05:58</last_commit>
+</zip>
+
+<plugin>
+	<nom>Amelia</nom>
+	<version>2.1.1</version>
+	<etat>test</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsamelia</prefix>
+	<description>Sweet and cheery</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="beige.zip" dtd="plugin">
+<zip>
+	<file>beige.zip</file>
+	<size>91075</size>
+	<date>1381939216</date>
+	<source>_themes_/spipr/v1/beige</source>
+	<last_commit>2013-10-16 18:00:12</last_commit>
+</zip>
+
+<plugin>
+	<nom>Beige</nom>
+	<version>1.1.6</version>
+	<etat>stable</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsblog</prefix>
+	<description>Blog simple, 2 colonnes, responsive, aux couleurs douces.</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="bootplus.zip" dtd="plugin">
+<zip>
+	<file>bootplus.zip</file>
+	<size>306112</size>
+	<date>1395332110</date>
+	<source>_themes_/spipr/v1/bootplus</source>
+	<last_commit>2014-03-20 17:00:22</last_commit>
+</zip>
+
+<plugin>
+	<nom>Bootplus</nom>
+	<version>2.3.2</version>
+	<etat>test</etat>
+	<auteur>MIL</auteur>
+	<auteur>Marcello Palmitessa</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsbootplus</prefix>
+	<description>GooglePlus Style</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="cerulean.zip" dtd="plugin">
+<zip>
+	<file>cerulean.zip</file>
+	<size>13003</size>
+	<date>1395331284</date>
+	<source>_themes_/spipr/v1/cerulean</source>
+	<last_commit>2014-03-20 17:01:23</last_commit>
+</zip>
+
+<plugin>
+	<nom>Cerulean</nom>
+	<version>2.2.3</version>
+	<etat>stable</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bscerulean</prefix>
+	<description>A calm, blue sky</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="cosmo.zip" dtd="plugin">
+<zip>
+	<file>cosmo.zip</file>
+	<size>34951</size>
+	<date>1384257630</date>
+	<source>_themes_/spipr/v1/cosmo</source>
+	<last_commit>2013-11-12 12:31:11</last_commit>
+</zip>
+
+<plugin>
+	<nom>Cosmo</nom>
+	<version>2.3.2</version>
+	<etat>stable</etat>
+	<auteur>MIL</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bscosmo</prefix>
+	<description>An ode to Metro</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="cyborg.zip" dtd="plugin">
+<zip>
+	<file>cyborg.zip</file>
+	<size>16631</size>
+	<date>1415264408</date>
+	<source>_themes_/spipr/v1/cyborg</source>
+	<last_commit>2014-11-06 10:00:06</last_commit>
+</zip>
+
+<plugin>
+	<nom>Cyborg</nom>
+	<version>2.2.2</version>
+	<etat>stable</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bscyborg</prefix>
+	<description>Jet black and electric blue</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="flatly.zip" dtd="plugin">
+<zip>
+	<file>flatly.zip</file>
+	<size>35638</size>
+	<date>1384123066</date>
+	<source>_themes_/spipr/v1/flatly</source>
+	<last_commit>2013-11-10 23:37:46</last_commit>
+</zip>
+
+<plugin>
+	<nom>Flatly</nom>
+	<version>2.3.2</version>
+	<etat>stable</etat>
+	<auteur>MIL</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsflatly</prefix>
+	<description>Flat an modern</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="journal.zip" dtd="plugin">
+<zip>
+	<file>journal.zip</file>
+	<size>10919</size>
+	<date>1360141214</date>
+	<source>_themes_/spipr/v1/journal</source>
+	<last_commit>2013-02-06 10:00:03</last_commit>
+</zip>
+
+<plugin>
+	<nom>Journal</nom>
+	<version>2.1.1</version>
+	<etat>stable</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsjournal</prefix>
+	<description>Crisp like a new sheet of paper</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="marguerite.zip" dtd="plugin">
+<zip>
+	<file>marguerite.zip</file>
+	<size>85426</size>
+	<date>1435842006</date>
+	<source>_themes_/spipr/v1/marguerite</source>
+	<last_commit>2015-07-02 15:00:05</last_commit>
+</zip>
+
+<plugin>
+	<nom>Marguerite</nom>
+	<version>1.0.1</version>
+	<etat>stable</etat>
+	<auteur>Marcimat</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_marguerite</prefix>
+	<description>Du vert et du jaune-orange.</description>
+	<icon>vignette.png</icon>
+	<!-- nom d'affichage pour zen-garden -->
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<!-- surcharger ces plugins, si activé depuis SVP -->
+	<utilise id="spipr_dist" version="[0.2.0-dev;]" />
+	<utilise id="bootstrap" version="[1.0.0;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="readable.zip" dtd="plugin">
+<zip>
+	<file>readable.zip</file>
+	<size>22215</size>
+	<date>1395331306</date>
+	<source>_themes_/spipr/v1/readable</source>
+	<last_commit>2014-03-20 16:55:44</last_commit>
+</zip>
+
+<plugin>
+	<nom>Readable</nom>
+	<version>2.2.3</version>
+	<etat>stable</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsreadable</prefix>
+	<description>Optimized for legibility</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="rosa.zip" dtd="plugin">
+<zip>
+	<file>rosa.zip</file>
+	<size>16985</size>
+	<date>1400248844</date>
+	<source>_themes_/spipr/v1/rosa</source>
+	<last_commit>2014-05-16 16:00:43</last_commit>
+</zip>
+
+<plugin>
+	<nom>Rosa</nom>
+	<version>1.0.4</version>
+	<etat>stable</etat>
+	<auteur>Nursit</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsrosa</prefix>
+	<description>Rosa chinensis</description>
+	<icon>vignette.jpg</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="simplex.zip" dtd="plugin">
+<zip>
+	<file>simplex.zip</file>
+	<size>11610</size>
+	<date>1360062022</date>
+	<source>_themes_/spipr/v1/simplex</source>
+	<last_commit>2013-02-05 12:00:10</last_commit>
+</zip>
+
+<plugin>
+	<nom>Simplex</nom>
+	<version>2.2.2</version>
+	<etat>stable</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bssimplex</prefix>
+	<description>Mini and minimalist</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="slate.zip" dtd="plugin">
+<zip>
+	<file>slate.zip</file>
+	<size>13455</size>
+	<date>1360141216</date>
+	<source>_themes_/spipr/v1/slate</source>
+	<last_commit>2013-02-06 10:00:03</last_commit>
+</zip>
+
+<plugin>
+	<nom>Slate</nom>
+	<version>2.1.1</version>
+	<etat>test</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsslate</prefix>
+	<description>Shades of gunmetal gray</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="spacelab.zip" dtd="plugin">
+<zip>
+	<file>spacelab.zip</file>
+	<size>11897</size>
+	<date>1360141218</date>
+	<source>_themes_/spipr/v1/spacelab</source>
+	<last_commit>2013-02-06 10:00:03</last_commit>
+</zip>
+
+<plugin>
+	<nom>Spacelab</nom>
+	<version>2.1.1</version>
+	<etat>stable</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsspacelab</prefix>
+	<description>Silvery and sleek</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="spruce.zip" dtd="plugin">
+<zip>
+	<file>spruce.zip</file>
+	<size>12938</size>
+	<date>1360141220</date>
+	<source>_themes_/spipr/v1/spruce</source>
+	<last_commit>2013-02-06 10:00:03</last_commit>
+</zip>
+
+<plugin>
+	<nom>Spruce</nom>
+	<version>2.1.1</version>
+	<etat>test</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsspruce</prefix>
+	<description>Camping in the woods</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="superhero.zip" dtd="plugin">
+<zip>
+	<file>superhero.zip</file>
+	<size>14340</size>
+	<date>1360141224</date>
+	<source>_themes_/spipr/v1/superhero</source>
+	<last_commit>2013-02-06 10:00:03</last_commit>
+</zip>
+
+<plugin>
+	<nom>Superhero</nom>
+	<version>2.1.1</version>
+	<etat>test</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bssuperhero</prefix>
+	<description>Batman meets... Aquaman?</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
+	<categorie>theme</categorie>
+</plugin>
+
+
+</archive>
+
+<archive id="united.zip" dtd="plugin">
+<zip>
+	<file>united.zip</file>
+	<size>11232</size>
+	<date>1360141228</date>
+	<source>_themes_/spipr/v1/united</source>
+	<last_commit>2013-02-06 10:00:03</last_commit>
+</zip>
+
+<plugin>
+	<nom>United</nom>
+	<version>2.2.2</version>
+	<etat>stable</etat>
+	<auteur>Cedric</auteur>
+	<licence>GPL</licence>
+	<prefix>theme_bsunited</prefix>
+	<description>Ubuntu orange and unique font.</description>
+	<icon>vignette.png</icon>
+	<utilise id="spipr" version="[0.1.0-dev;]" />
 	<categorie>theme</categorie>
 </plugin>
 

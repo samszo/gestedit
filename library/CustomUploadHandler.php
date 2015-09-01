@@ -7,7 +7,8 @@ class CustomUploadHandler extends UploadHandler {
     }
 
     protected function handle_form_data($file, $index) {
-        $file->idObj = @$_REQUEST['idObj'][$index];
+        //$file->name = @$_REQUEST['nameObj'][$index];
+    		$file->idObj = @$_REQUEST['idObj'][$index];
         $file->obj = @$_REQUEST['obj'][$index];
         $file->type = @$_REQUEST['type'][$index];
         $file->dateFin = @$_REQUEST['date_fin'][$index];
@@ -31,7 +32,8 @@ class CustomUploadHandler extends UploadHandler {
        	if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 	    		$rs = $this->db->findByUrl($file->url,array("periode_fin DESC"));
 			$file->id = $rs["id_importfic"];
-            $file->type = $rs["type"];
+			//$file->name = $rs["nom"];
+			$file->type = $rs["type"];
             $file->obj = $rs["obj"];
             $file->idObj = $rs["id_obj"];
             $file->dateFin = $rs["periode_fin"];

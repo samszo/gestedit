@@ -30,7 +30,7 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_auteur'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($v)$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_auteur; else $id=false;
@@ -70,9 +70,8 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_auteur.id_auteur = ' . $id);
+    {           	
+	    	$this->update($data, 'iste_auteur.id_auteur = ' . $id);
     }
     
     /**
@@ -151,7 +150,8 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
                 'i.id_institution = a.id_institution', array("instNom"=>"nom"))
         ->where( "a.id_auteur = ?", $id_auteur );
 
-        return $this->fetchAll($query)->toArray(); 
+		$rs = $this->fetchAll($query)->toArray(); 
+        return count($rs) ? $rs[0] : false;
     }
     	/**
      * Recherche une entrée Iste_auteur avec la valeur spécifiée
@@ -326,18 +326,18 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
      */
     public function findInfos($idAuteur)
     {
-		$sql = "SELECT a.id_auteur
-		, c.id_comite, c.titre_en caen, c.titre_fr cafr
-		, s.id_serie, s.titre_en sen, s.titre_fr sfr
-		, la.id_livre
+		$sql = 'SELECT a.id_auteur
+		, GROUP_CONCAT(DISTINCT c.id_comite, ",", c.titre_en, ",", c.titre_fr SEPARATOR ":") comites
+		, GROUP_CONCAT(DISTINCT s.id_serie, ",", s.titre_en, ",", s.titre_fr SEPARATOR ":") series
+		, GROUP_CONCAT(DISTINCT la.id_livre) livres
 		FROM iste_auteur a
-			LEFT JOIN iste_comitexauteur ca ON ca.id_auteur = a.id_auteur
-			LEFT JOIN iste_comite c ON c.id_comite = ca.id_comite
-			LEFT JOIN iste_coordination co ON co.id_auteur = a.id_auteur 
-			LEFT JOIN iste_serie s ON s.id_serie = co.id_serie
-			LEFT JOIN iste_livrexauteur la ON la.id_auteur = a.id_auteur
-		WHERE a.id_auteur = ".$idAuteur."
-		ORDER BY c.id_comite, s.id_serie, la.id_livre";            
+		LEFT JOIN iste_comitexauteur ca ON ca.id_auteur = a.id_auteur
+		LEFT JOIN iste_comite c ON c.id_comite = ca.id_comite
+		LEFT JOIN iste_coordination co ON co.id_auteur = a.id_auteur 
+		LEFT JOIN iste_serie s ON s.id_serie = co.id_serie
+		LEFT JOIN iste_livrexauteur la ON la.id_auteur = a.id_auteur
+		WHERE a.id_auteur ='.$idAuteur;     
+		       
 	    	$db = $this->_db->query($sql);
 	    	return $db->fetchAll();
     }

@@ -97,6 +97,15 @@ class CrudController extends Zend_Controller_Action
 			case 'vente':
 				$idLivre = $params['id_livre'];
 				unset($params['id_livre']);						
+				//ajoute le prix
+				if($params['prix_euro'] || $params['prix_livre'] || $params['prix_dollar']){
+					$dbPrix = new Model_DbTable_Iste_prix();
+					$params['id_prix'] = $dbPrix->ajouter(array("type"=>"Prix de vente","id_isbn"=>$params['id_isbn']
+						,'prix_euro'=>$params['prix_euro'], 'prix_livre'=>$params['prix_livre'], 'prix_dollar'=>$params['prix_dollar']));
+				}
+				unset($params['prix_euro']);						
+				unset($params['prix_livre']);						
+				unset($params['prix_dollar']);										
 			break;
 			case 'prevision':
 				//ajoute ou récupère la tache
@@ -124,8 +133,14 @@ class CrudController extends Zend_Controller_Action
 				//création de la proposition
 				$dbPropo = new Model_DbTable_Iste_proposition();
 				$rsPropo = $dbPropo->ajouter(array("id_livre"=>$result[0]["id_livre"]),false,true);
-				$result = array("rsLivre"=>$result,"rsPropo"=>$rsPropo);
-			break;
+				//création du processus
+				$dbProce = new Model_DbTable_Iste_processus();
+				$rsProcess = $dbProce->setProcessusForLivre('Projet livre', $result[0]["id_livre"]);
+				$result = array("rsLivre"=>$result,"rsPropo"=>$rsPropo,"rsProcess"=>$rsProcess);
+				//création de l'isbn
+				$dbIsbn = new Model_DbTable_Iste_isbn();
+				$dbIsbn->ajouter(array("id_livre"=> $result[0]["id_livre"]));
+				break;
 			case 'processusxchapitre':
 				//création des prévisions
 				$dbProce = new Model_DbTable_Iste_processus();
@@ -135,6 +150,11 @@ class CrudController extends Zend_Controller_Action
 				//récupère les ventes
 				$dbL = new Model_DbTable_Iste_livre();
 				$result = $dbL->getIdLivreVente($idLivre);
+			break;			
+			case 'tache':
+				//création des prévisions supplémentaires
+				$dbProce = new Model_DbTable_Iste_processus();
+				$dbProce->setProcessusForTache($result[0]["recid"]);
 			break;			
 		}
 		
@@ -240,6 +260,17 @@ class CrudController extends Zend_Controller_Action
     		$rs = $oBdd->findById_livre($this->_getParam('id'));
 		$this->view->rs = $rs;
     }    
+
+    public function rapportdataAction()
+    {
+    		$this->initInstance();
+    	
+    		//création de l'objet BDD
+    		$oBdd = new Model_DbTable_Iste_rapport();
+    	    //récupère les données
+    		$rs = $oBdd->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));
+		$this->view->rs = $rs;
+    }    
     
     public function finduserAction()
     {
@@ -272,14 +303,15 @@ class CrudController extends Zend_Controller_Action
 					"summary"=>true
 					,"recid"=>"S-".$i
 					,"devise"=>'<span style="float: right;">Dates de vente</span>'
-					,"licence"=>$r["dMin"]." / ".$r["dMax"]
+					,"licence"=>$r["dMin"]." -> ".$r["dMax"]
 					,"date_vente"=>'<span style="float: right;">Boutique</span>'
 					,"boutique"=>$r["boutique"]
+					,"prix_euro"=>$r["prix_e"]/$r["nbV"],"prix_livre"=>$r["prix_l"]/$r["nbV"],"prix_dollar"=>$r["prix_d"]/$r["nbV"]
 					,"nombre"=>$r["nb"]
 					,"montant_euro"=>$r["tot_e"],"montant_livre"=>$r["tot_l"],"montant_dollar"=>$r["tot_d"]
 					,'avec_droit'=>""
 					,'prealable'=>'<span style="float: right;">Nb acheteur</span>'
-					,'acheteur'=>$r["nb_a"]
+					,'acheteur'=>$r["nbA"]
 					);
 				$i++;
 			}			
