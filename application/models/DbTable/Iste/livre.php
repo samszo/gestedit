@@ -548,7 +548,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 						INNER JOIN iste_prevision p ON p.id_pxu = pc.id_plu AND p.id_tache =".$arrTache[1]." AND ".$op;
 				break;
 				case "date_parution":
-					$sql .= "INNER JOIN iste_isbn i ON i.id_livre = l.id_livre AND ".$op;
+					$sql .= "INNER JOIN iste_isbn i ON i.id_livre = l.id_livre AND i.date_parution != '0000-00-00' AND ".$op;
 				break;
 				default:
 					$sql .= " WHERE ".$op;
@@ -615,13 +615,26 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 	/**
      * récupère les informations d'un livre
      * 
-     * @param	int	$id
+     * @param	int			$id
+     * @param	boolean		$min
      *
      * @return array
      */
-    public function findInfos($id)
+    public function findInfos($id, $min=false)
     {
-	 	$sql = "SELECT 
+	 	if($min)
+		 	$sql = "SELECT 
+			l.* 
+			, GROUP_CONCAT(DISTINCT s.id_serie, ',', s.titre_fr, ',', s.titre_en SEPARATOR ':') series
+			, GROUP_CONCAT(DISTINCT c.id_comite, ',', c.titre_fr, ',', c.titre_en SEPARATOR ':') comites
+			FROM iste_livre l
+			LEFT JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
+			LEFT JOIN iste_serie s ON s.id_serie = ls.id_serie
+			LEFT JOIN iste_comitexlivre cl ON cl.id_livre = l.id_livre
+			LEFT JOIN iste_comite c ON c.id_comite = cl.id_comite
+			WHERE l.id_livre =".$id;
+    		else
+		 	$sql = "SELECT 
 		l.* 
 		, GROUP_CONCAT(DISTINCT a.prenom, ' ',a.nom, ':', la.role) auteurs
 		, GROUP_CONCAT(i.id_isbn, ',', i.num, ',', i.type, ',', i.date_parution, ',', i.nb_page SEPARATOR ':') isbns
@@ -633,7 +646,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 		FROM iste_livre l
 		INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre
 		INNER JOIN iste_auteur a ON a.id_auteur = la.id_auteur
-		LEFT JOIN iste_isbn i ON i.id_livre = l.id_livre
+		INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
 		LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur
 		LEFT JOIN iste_prix p ON p.id_isbn = i.id_isbn AND p.type = 'prix catalogue'
 		LEFT JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
@@ -642,7 +655,8 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 		LEFT JOIN iste_comite c ON c.id_comite = cl.id_comite
 		LEFT JOIN iste_importfic fic ON fic.obj = 'livre' AND fic.id_obj = l.id_livre 
 		WHERE l.id_livre =".$id;
- 	
+
+	 	
 	    	//echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
 	    	$arr = $db->fetchAll();

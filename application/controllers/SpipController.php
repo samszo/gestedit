@@ -24,22 +24,27 @@ class SpipController extends Zend_Controller_Action
 	 */
 	public function creaauteurAction() {
 		//initialisation des objets
-		if($this->_getParam('idBase')) $this->dbNom = $this->_getParam('idBase');
-		
-		$s = new Flux_Spip($this->dbNom);
+		if($this->_getParam('idBase')) $this->dbNom = $this->_getParam('idBase');		
+		$s = new Flux_Spip($this->dbNom,true);
+		$s->bTraceFlush = true;		
+		$s->trace("DEBUT ".__METHOD__);		
+		$dbAut = new Model_DbTable_Iste_auteur();
 		
 		//charge la liste des auteurs
-		if($this->_getParam('idAuteur')) $arrAuteur = $dbAut->findById_auteur($this->_getParam('idAuteur'));
-		else $arrAuteur = $dbAut->getAll();
+		if($this->_getParam('idAuteur')) $arrAuteur[0] = $dbAut->findById_auteur($this->_getParam('idAuteur'));
+		else $arrAuteur = $dbAut->getAll("a.id_auteur");
 		
 		$nbM = count($arrAuteur);
 		for ($i = 0; $i < $nbM; $i++) {
-				
-			$s->creaAuteurFromIste($arrAuteur[$i]["id_auteur"]);
-
+			if($arrAuteur[$i]["id_auteur"] == 200){
+				$s->trace($i." ".$arrAuteur[$i]["id_auteur"]);					
+				$s->creaAuteurFromIste($arrAuteur[$i]);
+			}
+			//if($i > 1)break;
 		}
 		
-		$this->view->data = $membres;
+		$s->trace("FIN ".__METHOD__);		
+		//$this->view->data = $membres;
 					
 	}
 	

@@ -71,6 +71,8 @@ class IndexController extends Zend_Controller_Action
 		$bdd = new Model_DbTable_Iste_livre();
 		$rs = $bdd->getTraductionLivre();
 		$this->view->json = json_encode($rs);		
+		$dbTrad = new Model_DbTable_Iste_traducteur();
+		$this->view->rsTrad = json_encode($dbTrad->getAll(),JSON_NUMERIC_CHECK);
     }
     
     public function contratAction()

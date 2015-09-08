@@ -204,7 +204,11 @@ function chargeLayout(idLayout){
     	    //supprime les objets si déjà présent
         if(w2ui['layout_Traduction']){            	
             w2ui['layout_Traduction'].destroy();
+            w2ui['layout_Traduction_top'].destroy();
+            w2ui['layout_Traducteur'].destroy();
             w2ui['grid_Traduction'].destroy();
+            w2ui['layout_Traduction_Traducteur'].destroy();
+            w2ui['grid_Traduction_Traducteur'].destroy();
             w2ui['layout_Traduction_trad_livre'].destroy();
             w2ui['grid_Traduction_trad_livre_resp'].destroy();
             w2ui['grid_Traduction_trad_livre'].destroy();
@@ -266,6 +270,8 @@ function chargeLayout(idLayout){
             if(w2ui['form_ProdLivre_commentaire'])w2ui['form_ProdLivre_commentaire'].destroy();
             if(w2ui['grid_ProdLivre_process_livre_resp'])w2ui['grid_ProdLivre_process_livre_resp'].destroy();
             if(w2ui['grid_ProdLivre_process_livre'])w2ui['grid_ProdLivre_process_livre'].destroy();
+            if(w2ui['grid_ProdLivre_web'])w2ui['grid_ProdLivre_web'].destroy();
+            if(w2ui['layout_Prod_web'])w2ui['layout_Prod_web'].destroy();
 	    }
         	w2ui['layout'].load('main', 'Index/production?ajax=1',null,function () {
         		w2ui.layout.unlock('main');

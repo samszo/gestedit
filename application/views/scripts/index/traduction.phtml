@@ -19,8 +19,7 @@ if(!$this->ajax){
 		<script type="text/javascript" src="../js/log.js"></script>
 		<script type="text/javascript">
 			$(function () {
-				fctInit = initTraduction;			
-				initAll(); 
+				initAll(initTraduction); 
 	  			if(uti)
 					utiIsConnect();
 	  			else
@@ -37,6 +36,7 @@ $idPage = "Traduction";
 
 <script type="text/javascript">
 var rs = <?php echo $this->json; ?>;
+var rsTrad = <?php echo $this->rsTrad; ?>;
 
 //widget configuration
 var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
@@ -50,10 +50,33 @@ function initTraduction() {
 		        name: 'layout_<?php echo $idPage;?>',
 		        padding: 4,
 		        panels: [
-		 		    { type: 'top', size: "400px", style: pstyle},
+		 		    { type: 'top', size: "550px", style: pstyle},
 					{ type: 'main', size: '50%', resizable: true, style: pstyleDetail},
 		            { type: 'left', size: '50%', resizable: true, style: pstyleDetail},
 		            { type: 'right', size: '50%', hidden:true, resizable: true, style: pstyleDetail},
+		        ]
+		    },
+		    layoutTradTop: {
+		        name: 'layout_<?php echo $idPage;?>_Top',
+		        padding: 2,
+		        panels: [
+					{ type: 'main', size: '70%', resizable: true, style: pstyleDetail},
+		            { type: 'right', size: '430px', resizable: true, style: pstyleDetail},
+		        ]
+		    },
+		    layoutTraducteur: {
+		        name: 'layout_Traducteur',
+		        padding: 2,
+		        panels: [
+		            { type: 'top', size: '55%', resizable: true, style: pstyleDetail},
+					{ type: 'main', size: '45%', resizable: true, style: pstyleDetail},
+		        ]
+		    },
+		    layoutTradLivre : {
+		        name: 'layout_<?php echo $idPage;?>_trad_livre',
+		        panels: [
+		 			{ type: 'top', size: '110px', style: pstyleDetail, resizable: true },
+		            	{ type: 'main', size: '200px', style: pstyleDetail, resizable: true },
 		        ]
 		    },
 		    gridTraduction: { 
@@ -97,13 +120,6 @@ function initTraduction() {
 		            itemSelect = this.get(event.recid);
 		            showDataTraduction();
 		        }	    
-		    },
-		    layoutTradLivre : {
-		        name: 'layout_<?php echo $idPage;?>_trad_livre',
-		        panels: [
-		 			{ type: 'top', size: '110px', style: pstyleDetail, resizable: true },
-		            	{ type: 'main', size: '200px', style: pstyleDetail, resizable: true },
-		        ]
 		    },
 		    gridTradLivreResp: { 
 		        name: 'grid_<?php echo $idPage;?>_trad_livre_resp',
@@ -285,15 +301,122 @@ function initTraduction() {
 		            }
 		        }
 		    },
+		    gridTraducteur: { 
+		        name: 'grid_<?php echo $idPage;?>_traducteur', 
+				header: 'Traducteur',		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : false,
+	                	toolbarSave		: true,
+	                	header			: true, 
+	                	columnHeaders	: true},
+				records: rsTrad,
+	    		    columns: [      		  		           
+			            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+			            { field: 'civilite', caption: 'Civilité', size: '80px', sortable: true, resizable: true},
+			            { field: 'nom', caption: 'Nom', size: '40%', sortable: true, resizable: true},
+			            { field: 'prenom', caption: 'Prenom', size: '40%', sortable: true, resizable: true},
+		            ],
+	            onAdd: function(event) {
+		            w2ui['layout_Traducteur'].hide('top', true);
+		            w2ui['form_<?php echo $idPage;?>_traducteur'].header = "Ajout d'un traducteur";
+		            
+			    },
+			    onClick: function (event) {
+		            var tradSelect = this.get(event.recid);
+			        //gestion des détails
+		            var g = w2ui['form_<?php echo $idPage;?>_traducteur'];
+		            g.clear();
+					g.record = tradSelect;
+					g.refresh();
+			    }		            			
+		    },		    	    		    
+	    		formTraducteur: { 
+		        header: "Détails traducteur",
+		        name: 'form_<?php echo $idPage;?>_traducteur',
+		        fields: [
+				        { name: 'recid', type: 'int', required: false, hidden:true},
+			            { name: 'civilite', type: 'list'
+		            			, options: { items: arrListes['civilites'] }
+		        				, html: { caption: 'Civilité', attr: 'size="10"' }
+		           		},
+			            { name: 'prenom', type: 'text', required: false, html: { caption: 'Prénom', attr: 'size="40" maxlength="40"' } },
+			            { name: 'nom', type: 'text', required: false, html: { caption: 'Nom', attr: 'size="40"' } },
+			            { name: 'telephone', type: 'text', html: { caption: 'Téléphone', attr: 'size="30"' } },
+			            { name: 'mail', type: 'email', html: { caption: 'E-mail', attr: 'size="30"' } },
+			            { name: 'adresse', type: 'text', html: { caption: 'Adresse', attr: 'size="40"' } },
+			            { name: 'code_postal', type: 'text', html: { caption: 'Code Postal', attr: 'size="10"' } },
+			            { name: 'ville', type: 'text', html: { caption: 'Ville', attr: 'size="40"' } },
+			            { name: 'pays', type: 'text', html: { caption: 'Pays', attr: 'size="30"' } },
+			            { name: 'background', type: 'textarea', html: { caption: 'background', attr: 'style="width: 100%; height: 100px; resize: none"' } },
+			            { name: 'nationalite', type: 'text', html: { caption: 'nationalité', attr: 'size="30"' } },
+			            { name: 'word', type: 'checkbox', html: { caption: 'Word'} },
+			            { name: 'latex', type: 'checkbox', html: { caption: 'Latex'} },
+			            { name: 'mac', type: 'checkbox', html: { caption: 'Mac' } },
+			            { name: 'traduction', type: 'text', html: { caption: 'Traduction', attr: 'size="40"' } },
+		        ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                if(this.header=="Ajout d'un traducteur"){
+		    		            w2ui['layout_Traducteur'].toggle('top', true);		            
+		    		            w2ui['form_<?php echo $idPage;?>_traducteur'].header = "Détails traducteur";
+		                }
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                data.obj = "traducteur";
+		                if(data.civilite.id)data.civilite=data.civilite.id;			                
+		                var g = w2ui['grid_<?php echo $idPage;?>_traducteur'];
+		                
+		                if(this.header=="Détails traducteur"){
+			                	if(!data.recid){
+					            w2alert("Aucun traducteur sélectionné.");
+					            return;
+			                	}
+			                	delete data.expanded;
+			                	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+								data,
+				            		function(mess){
+				                		g.set(data.recid, data);
+						            w2alert(mess);
+				           		});
+		                }else{
+			                	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+								data,
+				            		function(js){
+				            			if(js.rs){					            			
+										g.add(js.rs);
+							        		selectRowInGrid(js.rs[0]["recid"],'grid_<?php echo $idPage;?>_traducteur');
+				            			}
+				    		            w2ui['layout_Traducteur'].toggle('top', true);		            
+				    		            w2ui['form_<?php echo $idPage;?>_traducteur'].header = "Détails traducteur";
+						            w2alert(js.message);
+				           		},"json");
+		                }
+		            }
+		        }
+		    },
+		    
 		};
 	
     // initialisation
     $('#<?php echo $idPage;?>').w2layout(config.layoutTraduction);
-    w2ui.layout_<?php echo $idPage;?>.content('top', $().w2grid(config.gridTraduction));
+    w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutTradTop));
     w2ui.layout_<?php echo $idPage;?>.content('left', $().w2layout(config.layoutTradLivre)); 
     w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridTradChapitre)); 
     w2ui.layout_<?php echo $idPage;?>.content('right', $().w2form(config.formTradChapitre));
-       
+
+    w2ui.layout_<?php echo $idPage;?>_Top.content('main', $().w2grid(config.gridTraduction));
+    w2ui.layout_<?php echo $idPage;?>_Top.content('right', $().w2layout(config.layoutTraducteur));
+    w2ui.layout_Traducteur.content('top', $().w2grid(config.gridTraducteur));
+    w2ui.layout_Traducteur.content('main', $().w2form(config.formTraducteur));
+        
     w2ui.layout_<?php echo $idPage;?>_trad_livre.content('top', $().w2grid(config.gridTradLivreResp));
     w2ui.layout_<?php echo $idPage;?>_trad_livre.content('main', $().w2grid(config.gridTradLivre));
 

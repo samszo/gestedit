@@ -136,6 +136,227 @@ class ImportController extends Zend_Controller_Action
     			      
     }
     
+    public function oldsiteAction()
+    {
+    		$this->initInstance();
+    	
+		$this->s = new Flux_Site();
+		$this->s->bTrace = true;		
+		$this->s->bTraceFlush = true;		
+		$this->s->trace("DEBUT ".__METHOD__);		
+		
+		$this->dbLivre = new Model_DbTable_Iste_livre();
+		$this->dbIsbn = new Model_DbTable_Iste_isbn();
+		$this->dbWeb = new Model_DbTable_Iste_web();
+		
+		require_once '../bdd/hrm_books.php';
+		$oldPath	 = "http://www.iste.co.uk/data/";
+
+		$stop = false;
+		$supRep = false;
+		foreach ($hrm_books as $book) {
+			$this->s->trace(" isbn ".$book["isbn"]);		
+	    		$rIsbn = $this->dbIsbn->findByNum($book["isbn"]);
+	    		$arrDoc = array();
+	    		if($rIsbn){
+				$this->s->trace(" isbn trouvé id_livre =".$rIsbn["id_livre"]);		
+	    			//mis à jour des informations du livre
+	    			$ct = str_replace(array("\r\n","\n"),'<br />',$book["description_EN"]);				
+	    			$tdm = str_replace(array("\r\n","\n"),'<br />',$book["content"]);
+	    			$bio = str_replace(array("\r\n","\n"),'<br />',$book["authorsbio"]);					    							
+	    			$this->dbLivre->edit($rIsbn["id_livre"]
+	    				, array("contexte_en"=>$ct,"tdm_en"=>$tdm,"bio_en"=>$bio));
+	    			//supprime le répertoire
+	    			if($supRep)$this->s->removeRep(ROOT_PATH."/data/livre_".$rIsbn["id_livre"]);
+	    			//enregistre les documents
+				//$arrDoc['nom'] = pathinfo($url, PATHINFO_FILENAME);
+		  		$arrDoc['obj'] = 'livre';
+		  		$arrDoc['id_obj'] = $rIsbn["id_livre"];
+		  		$arrDoc['type'] = "Couverture en.";
+		  		if($book["thumbnailbase"])
+		  			$idFic = $this->sauveImage($arrDoc, $oldPath.$book["thumbnailbase"], ROOT_PATH."/data/livre_".$rIsbn["id_livre"]);
+
+		  		$arrDoc['type'] = "Couverture en. petite";
+		  		if($book["thumbnailsmall"] && $book["thumbnailsmall"]!="_small.")
+		  			$idFic = $this->sauveImage($arrDoc, $oldPath.$book["thumbnailsmall"], ROOT_PATH."/data/livre_".$rIsbn["id_livre"]);
+
+		  		$arrDoc['type'] = "Couverture en. medium";
+		  		if($book["thumbnailmedium"] && $book["thumbnailmedium"]!="_medium.")
+		  			$idFic = $this->sauveImage($arrDoc, $oldPath.$book["thumbnailmedium"], ROOT_PATH."/data/livre_".$rIsbn["id_livre"]);
+
+		  		$arrDoc['type'] = $book["binary1title"];
+		  		if($book["binary1file"])
+		  			$idFic = $this->sauveImage($arrDoc, $oldPath.$book["binary1file"], ROOT_PATH."/data/livre_".$rIsbn["id_livre"]);
+
+		  		$arrDoc['type'] = $book["binary2title"];
+		  		if($book["binary2file"])
+		  			$idFic = $this->sauveImage($arrDoc, $oldPath.$book["binary2file"], ROOT_PATH."/data/livre_".$rIsbn["id_livre"]);
+
+		  		$arrDoc['type'] = $book["binary3title"];
+		  		if($book["binary3file"])
+		  			$idFic = $this->sauveImage($arrDoc, $oldPath.$book["binary3file"], ROOT_PATH."/data/livre_".$rIsbn["id_livre"]);
+  			    			
+		  		//enregistre les liens web	
+		  		for ($i = 0; $i < 6; $i++) {
+			  		if($book["ebook_".$i])$this->dbWeb->ajouter(array("id_livre"=>$rIsbn["id_livre"],"type"=>"ebook_".$i,"url"=>$book["ebook_".$i]));		  			
+		  		}
+		  		
+	    		}else $this->s->trace("isbn ABSCENT ");
+	    		if($stop)break;
+		}
+
+		$this->s->trace("FIN ".__METHOD__);		
+    }    
+    
+	public function shopifyAction()
+    {
+    		$this->initInstance();
+    	
+		$this->s = new Flux_Site();
+		$this->s->bTrace = true;		
+		$this->s->bTraceFlush = true;		
+		$this->s->trace("DEBUT ".__METHOD__);		
+		
+		$this->dbLivre = new Model_DbTable_Iste_livre();
+		$this->dbIsbn = new Model_DbTable_Iste_isbn();
+		$this->dbWeb = new Model_DbTable_Iste_web();
+		
+		$arr = $this->s->csvToArray("../bdd/import/products_export.csv",0,",");
+		$arrIsbn = array(16=>"9781784050795",25=>"9781784050757",26=>"9781784050764",26=>"9781784050740");
+		//,92=>"9781784050009");
+		$nb = count($arr);
+		$nbKO = 0;
+		$nbOK = 0;
+		
+		for ($i = 10; $i < $nb; $i++) {
+			$p = $arr[$i];
+			$this->s->trace($i." PRODUIT : ".$p[0]);		
+
+			//vérifie si l'isbn est explicite
+			if($arrIsbn[$i]){
+		    		$rIsbn = $this->dbIsbn->findByNum($arrIsbn[$i]);
+		    		if($rIsbn){
+					$this->s->trace(" isbn TROUVé id_livre =".$rIsbn["id_livre"]);		
+		    		}else{
+					$this->s->trace(" isbn ABSCENT DE LA BASE ". $arrIsbn[$i]);				    									
+		    		} 				
+			}else{
+				//charge le document
+				$dom = new Zend_Dom_Query($p[2]);
+				$arrISBNQuery = array('//span[2]','//p[2]/text()[3]','//p[3]/text()[3]');
+				foreach ($arrISBNQuery as $q) {
+					//récupère l'isbn
+					$results = $dom->query($q);			
+					foreach ($results as $r) {
+						$nv = $r->nodeValue;
+						$this->s->trace("//recherche l'isbn papier '".$r->nodeValue."'");							
+						//cas = 'ISBN : 978-1-78405-024-5 (papier)' 
+						if(substr($nv, 0, 7)=='ISBN : ')$nv = substr($nv, 7, 17);
+						//cas = 'ISBN:Â 978-1-78405-071-9 (print)'
+						if(substr($nv, 0, 7)=='ISBN:Â ')$nv = substr($nv, 7, 17);
+						//cas = 'ISBN: 978-1-78405-071-9 (print)'
+						if(substr($nv, 0, 6)=='ISBN: ')$nv = substr($nv, 6, 17);
+						$nv = str_replace("-", "", $nv);
+				    		$rIsbn = $this->dbIsbn->findByNum($nv);
+						break;	
+					}
+				    	if($rIsbn)break;				
+				}
+			}
+			if(!$rIsbn){
+				//$this->s->trace("PAS ISBN ".$p[2]);
+				$nbKO ++;
+				$this->s->trace(" isbn ABSCENT '". $nv."'<br/>".$p[2]);				    									
+				//return false;
+			}else{
+				$this->s->trace(" isbn TROUVé id_livre =".$rIsbn["id_livre"]);		
+				$nbOK ++;
+				//ajoute le site web
+			  	$this->dbWeb->ajouter(array("id_livre"=>$rIsbn["id_livre"],"type"=>"Page Shopify","url"=>"http://iste-editions.fr/products/".$p[0]));		  			
+				//mis à jour du contexte
+				$this->dbLivre->edit($rIsbn["id_livre"], array("contexte_fr"=>$p[2]));
+				//enregistre l'image
+		  		$arrDoc = array();
+				$arrDoc['obj'] = 'livre';
+		  		$arrDoc['id_obj'] = $rIsbn["id_livre"];
+		  		$arrDoc['type'] = "Couverture fr.";	
+		  		$fic = substr($p[24], 0, - (strlen($p[24]) - strrpos($p[24], "?")));
+		  		$fic = str_replace("https", "http", $fic);			
+		  		$idFic = $this->sauveImage($arrDoc, $fic, ROOT_PATH."/data/livre_".$rIsbn["id_livre"]);
+				
+			} 
+			
+			
+			/*
+			$isbn = $this->dbIsbn->findIsbn($p[2]);
+			$this->s->trace("//recherche l'isbn ".$isbn);		
+			*/
+			
+	    		//if($i>0)break;
+		}
+
+		$this->s->trace("FIN ".__METHOD__." OK=".$nbOK." KO=".$nbKO );		
+    }      
+    
+	/**
+     * sauveImage
+     *
+     * enregistre l'image du document
+     * 
+     * @param int $idLivre
+     * @param string $url
+     * @param string $titre
+     * @param string $chemin
+     * 
+     * @return int
+     */
+	function sauveImage($arrDoc, $url, $chemin){
+
+		$this->s->trace("DEBUT ".__METHOD__);		
+		$this->dbImpFic = new Model_DbTable_Iste_importfic();
+		
+	    	//création du répertoire de stockage de l'image
+		if(!is_dir($chemin)) @mkdir($chemin,0775,true);
+    			
+	    	//ajoute le document
+	    	if(!$arrDoc['nom'])$arrDoc['nom']=$arrDoc['type'];
+	    	$idFic = $this->dbImpFic->ajouter($arrDoc);
+		
+	    	$extension = pathinfo($url, PATHINFO_EXTENSION);	    	
+		//$path = $chemin."/".preg_replace("#^[a-z0-9]+\.[a-z]+$#", "-", $arrDoc["type"])."_".$idFic.".".$extension;
+		$path = $chemin."/".$idFic.".".$extension;
+		$urlLocal = str_replace(ROOT_PATH, WEB_ROOT, $path);     	
+		
+		if(!is_file($path)){
+    		//enregistre l'image sur le disque local
+			if(!$img = file_get_contents($url)) { 
+			  $this->s->trace( 'pas de fichier : "'.$url.'"<br/>');
+			}else{
+				if(!$f = fopen($path, 'w')) { 
+				  $this->s->trace( 'Ouverture du fichier impossible '.$path."<br/>");
+				}elseif (fwrite($f, $img) === FALSE) { 
+				  $this->s->trace( 'Ecriture impossible '.$path."<br/>");
+				}else{
+					$this->s->trace( 'Image '.$arrDoc["nom"].' enregistrée : <a href="'.$urlLocal.'">local</a> -> <a href="'.$url.'">En ligne</a><br/>');
+					//création de la vignette
+					if(!is_dir($chemin."/thumbnail")) @mkdir($chemin."/thumbnail",0775,true);
+					$image = new ImageResize($urlLocal);
+					if($image){
+						$image->scale(50);
+						$image->save($chemin."/thumbnail/".$idFic.".".$extension);
+					}
+				} 				
+			}				
+		}else{
+			$this->s->trace( 'Image '.$arrDoc["nom"].' déjà enregistrée : <a href="'.$urlLocal.'">local</a> -> <a href="'.$url.'">En ligne</a><br/>');
+		} 	    
+		$this->dbImpFic->edit($idFic, array("url"=>$urlLocal,"size"=>filesize($path)));					
+		
+		$this->s->trace("FIN ".__METHOD__);		
+		return $idFic;   	
+	}    
+    
+    
     public function historiqueAction()
     {
     		$this->initInstance();
@@ -170,8 +391,8 @@ class ImportController extends Zend_Controller_Action
 		 */
 		
 		
-		$arrType = array(0, 1, 2, 3, 4);
-		$arrType = array(6);
+		$arrType = array(0, 1, 2, 3, 4, 5, 6);
+		$arrType = array(0);
 		foreach ($arrType as $type) {
 			$this->s->trace("TYPE ".$type);		
 			if($type==0)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015BD.csv");
@@ -185,7 +406,8 @@ class ImportController extends Zend_Controller_Action
 			$i = 1;
 			$this->s->trace("nb Ligne ".count($arr));		
 			foreach ($arr as $r) {
-				if($type==0)$this->importGlobalBD($r, $i);
+				//if($type==0)$this->importGlobalBD($r, $i);
+				if($type==0)$this->updateGlobalBD($r, $i);				
 				if($type==1)$this->importGlobalWileyBase($r, $i);
 				if($type==2)$this->importGlobalIsteEdition($r, $i, 0);
 				if($type==3)$this->importGlobalElsevier($r, $i);
@@ -193,7 +415,7 @@ class ImportController extends Zend_Controller_Action
 				if($type==5)$this->importAuteurs($r, $i);
 				if($type==6)$this->importDroitsAuteurs($r, $i);
 				$i++;
-				//if($i>20)return;
+				//if($i>1)break;
 			}
 		}
 
@@ -491,7 +713,7 @@ class ImportController extends Zend_Controller_Action
     function importGlobalBD($r, $i){
 		$this->s->trace("DEBUT ".__METHOD__);		
 		//gestion des lignes vides
-		if(!$r[0]){$this->s->trace($i." ligne vide");return;}
+		if(!$r[1]){$this->s->trace($i." ligne vide");return;}
 		
     		$arrId = $this->ajoutLivre(array(
     			"serie"=>array("ref_racine"=>$r[0],"titre_en"=>$r[4],"titre_fr"=>$r[5])
@@ -586,7 +808,7 @@ class ImportController extends Zend_Controller_Action
 			
 			if($r[15]=="reçu")$dataProp['date_debut']=new Zend_Db_Expr('NOW()');
 			elseif ($r[15])$dataProp['date_debut']=$this->formatDateExcelToSql($r[15]);
-			
+			                                 
 			if(substr($r[16], 0, 3)=="ENV")$dataProp['date_contrat']=$this->formatDateExcelToSql(substr($r[16], 4));
 			elseif ($r[16])$dataProp['date_contrat']=$this->formatDateExcelToSql($r[16]);
 			
@@ -622,6 +844,50 @@ class ImportController extends Zend_Controller_Action
 		$this->s->trace("FIN ".__METHOD__);					
     }
 
+    function updateGlobalBD($r, $i){
+		$this->s->trace("DEBUT ".__METHOD__);		
+		//gestion des lignes vides
+		if(!$r[1]){$this->s->trace($i." ligne vide");return;}
+			    
+		if($r[26]){//'Wiley'
+    			$rIsbn = $this->dbIsbn->findByNum($r[26]);
+			$this->s->trace($i." WILEY = ".$r[26]);	
+		}
+		if($r[27] && !$rIsbn){//'Elsevier'
+    			$rIsbn = $this->dbIsbn->findByNum($r[27]);
+			$this->s->trace($i." Elsevier = ".$r[27]);	
+		}
+		if($r[28] && !$rIsbn){//'Elsevier'
+    			$rIsbn = $this->dbIsbn->findByNum($r[28]);
+			$this->s->trace($i." ISTE = ".$r[28]);	
+		}
+		
+		//vérifie si l'isbn est créé
+		if($rIsbn){
+			$idPlu = $this->dbProc->setProcessusForLivre('Projet livre', $rIsbn["id_livre"], 1, false);
+			
+			$this->s->trace($i." mise à jour des processus de production = ".$idPlu);	
+			/*			
+			$iste_tache = array(
+			  array('id_tache' => '15','id_processus' => '3','nom' => 'Réception manuscrit','ordre' => '1'),
+			  array('id_tache' => '16','id_processus' => '3','nom' => 'Réception traduction anglaise','ordre' => '2'),
+			  array('id_tache' => '17','id_processus' => '3','nom' => 'Prévision parution GB','ordre' => '3'),
+			  array('id_tache' => '18','id_processus' => '3','nom' => 'Prévision parution FR','ordre' => '4'),
+			  array('id_tache' => '23','id_processus' => '3','nom' => 'vérification orthographe','ordre' => '5'),
+			  array('id_tache' => '24','id_processus' => '3','nom' => 'vérification état civil','ordre' => '6'),
+			  array('id_tache' => '25','id_processus' => '3','nom' => 'Envoi proposal','ordre' => '7'),
+			  array('id_tache' => '26','id_processus' => '3','nom' => 'reception proposal','ordre' => '8')
+			);
+			*/						
+			if($r[24])$this->dbPrev->editLivreTache($idPlu, 15, array("prevision"=>$this->formatDateExcelToSql($r[24])));
+			if($r[29])$this->dbPrev->editLivreTache($idPlu, 15, array("fin"=>$this->formatDateExcelToSql($r[29])));
+			if($r[30])$this->dbPrev->editLivreTache($idPlu, 16, array("fin"=>$this->formatDateExcelToSql($r[30])));
+			if($r[31])$this->dbPrev->editLivreTache($idPlu, 17, array("prevision"=>$this->formatDateExcelToSql($r[31])));
+			if($r[32])$this->dbPrev->editLivreTache($idPlu, 18, array("prevision"=>$this->formatDateExcelToSql($r[32])));			
+			
+		}
+		$this->s->trace("FIN ".__METHOD__);					
+    }    
     function ajoutLivre($data){
 
 		$this->s->trace($i."//import des livres");			

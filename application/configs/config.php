@@ -2,7 +2,7 @@
 date_default_timezone_set('Europe/Paris');
 setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
 ini_set("memory_limit",'1600M');
-set_time_limit(60);
+set_time_limit(36000);
 
 $www = "/Applications/XAMPP/xamppfiles/htdocs";
 define ("WEB_ROOT","http://localhost/gestedit");
@@ -31,6 +31,7 @@ require_once 'OLERead.php';
 require_once 'UploadHandler.php';
 require_once 'CustomUploadHandler.php';
 require_once 'odtphp/odf.php';
+require_once 'ImageResize.php';
 
 // Create application, bootstrap, and run
 $application = new Zend_Application(

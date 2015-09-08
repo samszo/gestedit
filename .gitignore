@@ -49,6 +49,8 @@ data/
 
 tmp/
 
+local/
+
 bdd/infosAuteur.sql
 
 bdd/isteImport1.sql
@@ -117,3 +119,19 @@ library/odtphp/zip/pclzip/.svn/all-wcprops
 library/odtphp/zip/pclzip/.svn/entries
 
 library/odtphp/zip/pclzip/.svn/format
+
+bdd/hrm_books.php
+
+bdd/iste_prod1.sql
+
+bdd/isteImportFinal2.sql
+
+bdd/isteImportFinal3.sql
+
+bdd/lyor_iste_admin_dump_sql_1441520780.sql.gz
+
+bdd/nexlinkISTE.sql
+
+bdd/spip_istePreImport.sql
+
+IMG/pdf/table_of_contents_2706.pdf

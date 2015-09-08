@@ -680,15 +680,18 @@ function addParam(obj, type){
 
 function saveParam(obj, typeP){
 
+	if(!typeP)typeP=obj
     var changes = w2ui['grid_<?php echo $idPage;?>_'+typeP].getChanges();
     changes.forEach(function(c, i){
-        var p = {"obj":obj,"recid":c.recid,"nom":c.text};
+        c.obj = obj;
+        if(typeP)
+        		c = {"obj":obj,"recid":c.recid,"nom":c.text};
 	    	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
-    			p,
+    			c,
     			function(html){
     				//remplace la valeur enregistrée
     				arrListes[typeP].forEach(function(r){
-        				if(r.recid==p.recid)r.text=p.nom;
+        				if(r.recid==c.recid)r.text=c.nom;
     				})
     				if(changes.length==i+1)w2alert(html);
     			});                        
@@ -718,20 +721,22 @@ function delParam(event, obj, type){
 }
 
 function copierCol(type){
-    if(itemSelect.type!=type){
+	var items = w2ui['grid_<?php echo $idPage;?>_'+type].getSelection();	
+    if(items.length == 0){
         w2alert("Veuillez sélectionner un paramètre.");
         return false;
     }
-	var p = {id:itemSelect.recid, obj:type};
-	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/copier',
-		p,
-    		function(js){
-		    	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
-		    	arrListes[type].push(js.rs[0]);
-		    	selectRowInGrid(js.rs[0].recid, 'grid_<?php echo $idPage;?>_'+type)			                  
-			w2alert(js.message);			
-   		},"json");
-	
+    items.forEach(function(i){
+		var p = {id:i, obj:type};
+		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/copier',
+			p,
+	    		function(js){
+			    	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
+			    	arrListes[type].push(js.rs[0]);
+			    	selectRowInGrid(js.rs[0].recid, 'grid_<?php echo $idPage;?>_'+type)			                  
+				w2alert(js.message);			
+	   		},"json");
+    });
 }
 
 function fusionCol(type){

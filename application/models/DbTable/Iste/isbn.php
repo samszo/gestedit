@@ -427,5 +427,117 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
-    
+    	/**
+     * Recherche un isbn dans une chaine
+     *
+     * @param varchar $str
+     *
+     * @return int
+     */
+    function findIsbn($str)
+	{
+		//http://stackoverflow.com/questions/14095778/regex-differentiating-between-isbn-10-and-isbn-13
+	    $regex = '/\b(?:ISBN(?:: ?| ))?((?:97[89])?\d{9}[\dx])\b/i';
+	    //http://regexlib.com/Search.aspx?k=isbn
+	    //$regex = '(ISBN[-]*(1[03])*[ ]*(: ){0,1})*(([0-9Xx][- ]*){13}|([0-9Xx][- ]*){10})';
+		$regex = '^\d{9}[\d|X]$';
+		$regex = "/\bisbn\b/i";
+		
+	    if (preg_match($regex, $str, $matches)) {
+	        print_r($matches);
+	    }
+	    /*
+	    if (preg_match($regex, str_replace('-', '', $str), $matches)) {
+	        return (10 === strlen($matches[1]))
+	            ? 1   // ISBN-10
+	            : 2;  // ISBN-13
+	    }
+	    */
+	    return "NO ISBN";
+	}    
+	
+    	/**
+     * Valide un isbn 10
+     *
+     * @param varchar $str
+     *
+     * @return int
+     */
+	function isValidIsbn10($isbn)
+	{
+	    $check = 0;
+	
+	    for ($i = 0; $i < 10; $i++) {
+	        if ('x' === strtolower($isbn[$i])) {
+	            $check += 10 * (10 - $i);
+	        } elseif (is_numeric($isbn[$i])) {
+	            $check += (int)$isbn[$i] * (10 - $i);
+	        } else {
+	            return false;
+	        }
+	    }
+	
+	    return (0 === ($check % 11)) ? 1 : false;
+	}
+
+    	/**
+     * Valide un isbn 13
+     *
+     * @param varchar $str
+     *
+     * @return int
+     */
+	function isValidIsbn13($isbn)
+	{
+	    $check = 0;
+	
+	    for ($i = 0; $i < 13; $i += 2) {
+	        $check += (int)$isbn[$i];
+	    }
+	
+	    for ($i = 1; $i < 12; $i += 2) {
+	        $check += 3 * $isbn[$i];
+	    }
+	
+	    return (0 === ($check % 10)) ? 2 : false;
+	}	
+	
+    	/**
+     * recherche google book avec isbn
+     *
+     * @param varchar $isbn
+     * http://code18.blogspot.fr/2011/06/recuperer-des-informations-dun-livre.html
+     * 
+     * @return array
+     */
+	function findGoogleBookIsbn($isbn)
+	{
+		// ou si vous préférez hardcodé  
+		// $isbn = '0061234001';  
+		  
+		$request = 'https://www.googleapis.com/books/v1/volumes?q=isbn:' . $isbn;  
+		$response = file_get_contents($request);  
+		$results = json_decode($response);  
+		  
+		if($results->totalItems > 0){  
+		   // avec de la chance, ce sera le 1er trouvé  
+		   $book = $results->items[0];  
+		  
+		   $infos['isbn'] = $book->volumeInfo->industryIdentifiers[0]->identifier;  
+		   $infos['titre'] = $book->volumeInfo->title;  
+		   $infos['auteur'] = $book->volumeInfo->authors[0];  
+		   $infos['langue'] = $book->volumeInfo->language;  
+		   $infos['publication'] = $book->volumeInfo->publishedDate;  
+		   $infos['pages'] = $book->volumeInfo->pageCount;  
+		  
+		   if( isset($book->volumeInfo->imageLinks) ){  
+		       $infos['image'] = str_replace('&edge=curl', '', $book->volumeInfo->imageLinks->thumbnail);  
+		   }  
+		  
+		   return $infos;  
+		}  
+		else{  
+		   return false;  
+		} 	
+	}	
 }

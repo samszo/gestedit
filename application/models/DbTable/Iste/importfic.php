@@ -93,6 +93,24 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
      * Recherche une entrée avec la valeur spécifiée
      * et retourne cette entrée.
      *
+     * @param string 	$obj
+     * @param int 		$id
+     *
+     * @return array
+     */
+    public function findByObj($obj, $id)
+    {
+        $query = $this->select()
+            ->from( array("i" => "iste_importfic") )                           
+            ->where( "i.id_obj = ?", $id)
+            ->where( "i.obj = ?", $obj);
+		return $this->fetchAll($query)->toArray();
+    }           
+    
+    	/**
+     * Recherche une entrée avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
      * @param string $type
      *
      * @return array

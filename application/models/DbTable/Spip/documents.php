@@ -40,7 +40,7 @@ class Model_DbTable_Spip_documents extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_document'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($v)$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_document; else $id=false;
@@ -58,12 +58,13 @@ class Model_DbTable_Spip_documents extends Zend_Db_Table_Abstract
     public function ajouter($data, $existe=true)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    		if(!isset($data['maj']))$data['maj']= new Zend_Db_Expr('NOW()');	    		
+	    	 	$id = $this->insert($data);
+	    	}
+	    	return $id;
     } 
            
     /**

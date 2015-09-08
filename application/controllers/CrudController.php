@@ -21,7 +21,10 @@ class CrudController extends Zend_Controller_Action
     		$oBdd = new $oName();    		
 	    	$this->view->rs = $oBdd->copier($this->_getParam('id'));
 	    	$this->view->message="Les données ont été copiées.";
-    		
+	    	
+		$dbHM = new Model_DbTable_Iste_histomodif();
+		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$this->_getParam('id')));   		
+	    	
     }    
 
     public function fusionAction()
@@ -34,7 +37,10 @@ class CrudController extends Zend_Controller_Action
     		$oBdd = new $oName();    		
 	    	$this->view->rs = $oBdd->fusion($this->_getParam('ids'));
 	    	$this->view->message="Les données ont été fusionnées.";
-    		
+
+		$dbHM = new Model_DbTable_Iste_histomodif();
+		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"data"=>json_encode($this->_getParam('ids'))));   		
+	    	
     }    
     
     public function insertAction()
@@ -163,6 +169,10 @@ class CrudController extends Zend_Controller_Action
 	    		$this->view->rs = $result;
 	    	else		
 			$this->view->message="Les données existent déjà.".$mess;
+			
+		$dbHM = new Model_DbTable_Iste_histomodif();
+		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"data"=>json_encode($params)));   		
+			
     }
 
     public function updateAction()
@@ -172,8 +182,9 @@ class CrudController extends Zend_Controller_Action
     		//récupère les paramètres
     		$params = $this->_request->getParams();
     		$id = $this->_getParam('recid');
+    		$obj = $this->_getParam('obj');
     		//création de l'objet BDD
-    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
+    		$oName = "Model_DbTable_Iste_".$obj;
     		$oBdd = new $oName();
     		//enlève les paramètres Zend
     		unset($params['controller']);
@@ -199,7 +210,9 @@ class CrudController extends Zend_Controller_Action
 			default:
 				$oBdd->edit($id,$params);
 			break;
-		}    		
+		} 
+		$dbHM = new Model_DbTable_Iste_histomodif();
+		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id,"data"=>json_encode($params)));   		
     }
     
 	public function deleteAction()
@@ -235,6 +248,9 @@ class CrudController extends Zend_Controller_Action
 		$this->view->rs = $r;
 		if($r["message"])$this->view->message = $r["message"]; 
 		else $this->view->message = "Les données sont supprimées.";
+		$dbHM = new Model_DbTable_Iste_histomodif();
+		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id));   		
+		
     }    
 
 	public function auteurdataAction()

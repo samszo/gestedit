@@ -30,7 +30,7 @@ class Model_DbTable_Iste_traducteur extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_traducteur'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($v)$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_traducteur; else $id=false;
@@ -42,18 +42,22 @@ class Model_DbTable_Iste_traducteur extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {
     	
-    	$id=false;
-    	if($existe)$id = $this->existe($data);
-    	if(!$id){
-    	 	$id = $this->insert($data);
-    	}
-    	return $id;
+	    	$id=false;
+	    	if($existe)$id = $this->existe($data);
+	    	if(!$id){
+	    	 	$id = $this->insert($data);
+	    	}
+	    	if($rs)
+			return $this->findById_traducteur($id);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -93,7 +97,7 @@ class Model_DbTable_Iste_traducteur extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("id"=>$this->_primary[1],"text"=>"nom"))
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(prenom, ' ', nom)"))
             ->order("nom");        
         return $this->fetchAll($query)->toArray();
 	} 
@@ -105,8 +109,11 @@ class Model_DbTable_Iste_traducteur extends Zend_Db_Table_Abstract
     public function getAll($order=null, $limit=0, $from=0)
     {
    	
-    	$query = $this->select()
-                    ->from( array("iste_traducteur" => "iste_traducteur") );
+    		$query = $this->select()
+            ->from( array("t" => "iste_traducteur") )
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("tid" => "iste_traducteur"),
+                't.id_traducteur = tid.id_traducteur', array("recid"=>"id_traducteur"));
                     
         if($order != null)
         {
@@ -133,8 +140,11 @@ class Model_DbTable_Iste_traducteur extends Zend_Db_Table_Abstract
     public function findById_traducteur($id_traducteur)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_traducteur") )                           
-                    ->where( "i.id_traducteur = ?", $id_traducteur );
+	        ->from( array("t" => "iste_traducteur") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("tid" => "iste_traducteur"),
+                't.id_traducteur = tid.id_traducteur', array("recid"=>"id_traducteur"))
+            ->where( "t.id_traducteur = ?", $id_traducteur );
 
         return $this->fetchAll($query)->toArray(); 
     }

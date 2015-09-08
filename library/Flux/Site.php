@@ -176,7 +176,7 @@ class Flux_Site{
 	        fclose($handle);
 	    }
     	
-    	$this->trace("FIN ".__METHOD__);     	
+    	$this->trace("FIN ".__METHOD__." nb=".count($csvarray));     	
 		return $csvarray;		
 	}	
 	

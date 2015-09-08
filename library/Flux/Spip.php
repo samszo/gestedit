@@ -8,6 +8,7 @@
 */
 class Flux_Spip extends Flux_Site{
         
+	var $statueDocument = "publie";
 	var $statueArticle = "publie";
 	var $statueAuteur = "1comite";
 	
@@ -15,8 +16,9 @@ class Flux_Spip extends Flux_Site{
     	    	
     		parent::__construct($idBase,$idTrace);
     	    
-    		$this->arrRub = array("Liste"=>15,"Comite"=>16,"Catalog"=>18);
+    		$this->arrRub = array("en"=>array("Liste"=>15,"Comite"=>16,"Catalog"=>18),"fr"=>array("Liste"=>27,"Comite"=>28,"Catalog"=>23));
 		$this->arrMC = array("serie"=>1,"comite"=>2, "role"=>3);
+    		$this->arrLangue = array("en","fr");
     		
 		//initialisation des objets		
 		$this->dbAut = new Model_DbTable_Iste_auteur();
@@ -24,13 +26,16 @@ class Flux_Spip extends Flux_Site{
 		$this->dbSpip = new Model_DbTable_Iste_spip();
 		$this->dbComite = new Model_DbTable_Iste_comite();
 		$this->dbSerie = new Model_DbTable_Iste_serie();
+		$this->dbImpFic = new Model_DbTable_Iste_importfic();
 		
 		$this->dbArt = new Model_DbTable_Spip_articles($this->db);
 		$this->dbAutS = new Model_DbTable_Spip_auteurs($this->db);
 		$this->dbR = new Model_DbTable_Spip_rubriques($this->db);
 		$this->dbM = new Model_DbTable_Spip_mots($this->db);
-		$this->dbAutR = new Model_DbTable_Spip_auteursrubriques($this->db);
+		$this->dbAutL = new Model_DbTable_Spip_auteursliens($this->db);
 		$this->dbML = new Model_DbTable_Spip_motsliens($this->db);
+		$this->dbD = new Model_DbTable_Spip_documents($this->db);
+		$this->dbDL = new Model_DbTable_Spip_documentsliens($this->db);
 		
 		
     }
@@ -38,38 +43,41 @@ class Flux_Spip extends Flux_Site{
 	/**
 	 * création automatique des rubrique et article d'auteur
 	 * 
-	 * @param	int		$idAuteur
+	 * @param	array	$arrAuteur
 	 * 
 	 * @return array
 	 */
-	public function creaAuteurFromIste($idAuteur=false) {
+	public function creaAuteurFromIste($arrAuteur) {
 				
-		//charge la liste des auteurs
-		if($idAuteur) $arrAuteur = $this->dbAut->findById_auteur($idAuteur);
-		else $arrAuteur = $this->dbAut->getAll();
-		
-		$nbM = count($arrAuteur);
-		for ($i = 0; $i < $nbM; $i++) {
-				
+		$this->trace("DEBUT ".__METHOD__);		
+		$this->trace("auteur ".$arrAuteur["prenom"]." ".$arrAuteur["nom"]);		
+						
 			//construction du numéro d'ordre
 			$num = "";//$i."00. ";
 
 			//vérifie si la rubrique de l'auteur existe
-			$titreArtAuteur = $num.$arrAuteur[$i]["prenom"]." ".$arrAuteur[$i]["nom"];
+			$titreArtAuteur = $num.$arrAuteur["prenom"]." ".$arrAuteur["nom"];
 
 			//création de l'auteur
-			$idAutS = $this->dbAutS->ajouter(array("nom"=>$arrAuteur[$i]["prenom"]." ".$arrAuteur[$i]["nom"],"statut"=>$this->statueAuteur,"source"=>"flux"));
-			$this->dbSpip->ajouter(array("id_spip"=>$idAutS,"id_iste"=>$arrAuteur[$i]["id_auteur"],"obj_spip"=>"auteurs","obj_iste"=>"auteur"));
-			//création de l'article de l'auteur
-			$idArtAuteur = $this->dbArt->ajouter(array("id_rubrique"=>$this->arrRub["Liste"], "texte"=>"A compléter...", "titre"=>$titreArtAuteur, "statut"=>$this->statueArticle));				
-			$this->dbSpip->ajouter(array("id_spip"=>$idArtAuteur,"id_iste"=>$arrAuteur[$i]["id_auteur"],"obj_spip"=>"articles","obj_iste"=>"auteur"));
+			$idAutS = $this->dbAutS->ajouter(array("nom"=>$arrAuteur["prenom"]." ".$arrAuteur["nom"],"statut"=>$this->statueAuteur,"source"=>"flux"));			
+			$this->dbSpip->ajouter(array("id_spip"=>$idAutS,"id_iste"=>$arrAuteur["id_auteur"],"obj_spip"=>"auteurs","obj_iste"=>"auteur"));
+			
+			//création des articles de l'auteur
+			$arrIds = $this->creaArticleMultilingue(array("texte"=>"A compléter...", "titre"=>$titreArtAuteur
+				,"statut"=>$this->statueArticle), $arrAuteur["id_auteur"], $idAutS, "Liste");
+
 			//création des mots clefs
-			$infoAut = $this->dbAut->findInfos($arrAuteur[$i]["id_auteur"]);
+			$infoAut = $this->dbAut->findInfos($arrAuteur["id_auteur"]);
 			//création des comités de l'auteur
 			if($infoAut[0]["comites"]){
 				$comites = explode(":",$infoAut[0]["comites"]);
 				foreach ($comites as $sC) {
+					//ajout du lien vers l'auteur
 					$this->creaMCFromIste(explode(",", $sC), "comite", "auteur", $idAutS);
+					//ajout des liens vers les articles de l'auteur
+					foreach ($arrIds as $idA) {
+						$this->creaMCFromIste(explode(",", $sC), "comite", "article", $idA);
+					}
 				}
 			}
 			//création des séries de l'auteur
@@ -77,6 +85,10 @@ class Flux_Spip extends Flux_Site{
 				$series = explode(":",$infoAut[0]["series"]);
 				foreach ($series as $sS) {
 					$this->creaMCFromIste(explode(",", $sS), "serie", "auteur", $idAutS);
+					//ajout des liens vers les articles de l'auteur
+					foreach ($arrIds as $idA) {
+						$this->creaMCFromIste(explode(",", $sS), "serie", "article", $idA);
+					}
 				}
 			}
 			//création des livres de l'auteur
@@ -85,23 +97,89 @@ class Flux_Spip extends Flux_Site{
 				foreach ($livres as $l) {
 					$idArtFr = false;
 					$idArtEn = false;
-					$infoLivre = $this->dbLivre->findInfos($l);
+					//on prend la infos minimum pour le livre
+					$infoLivre = $this->dbLivre->findInfos($l,true);
 					//vérifier la langue
 					if($infoLivre["titre_fr"]){
 						$idArtFr = $this->creaArticleFromIste("fr", $infoLivre);
+						$this->trace("article français crée ".$idArtFr);							
+						//ajoute l'auteur
+						$this->dbAutL->ajouter(array("id_auteur"=>$idAutS,"id_objet"=>$idArtFr,"objet"=>"article"));
 					}
 					if($infoLivre["titre_en"]){
 						$idArtEn = $this->creaArticleFromIste("en", $infoLivre);
+						$this->trace("article anglais crée ".$idArtEn);							
+						//ajoute l'auteur
+						$this->dbAutL->ajouter(array("id_auteur"=>$idAutS,"id_objet"=>$idArtEn,"objet"=>"article"));
 					}
 					//vérifie s'il faut marquer la traduction
 					if($idArtFr && $idArtEn){
-						$this->dbArt->edit($idArtEn, array("id_trad"=>$idArtFr));						
+						$this->dbArt->edit($idArtEn, array("id_trad"=>$idArtEn));						
+						$this->dbArt->edit($idArtFr, array("id_trad"=>$idArtEn));						
 					}
+					//ajout des documents
+					$arrFics = $this->dbImpFic->findByObj("livre", $infoLivre["id_livre"]);
+					foreach ($arrFics as $f) {
+						//création du document
+						$dataDoc = array("extension"=>pathinfo($f["url"], PATHINFO_EXTENSION),"titre"=>$f["nom"],"fichier"=>$f["url"]
+							,"descriptif"=>$f["type"], "distant"=>"oui", "mode"=>"document", "statut"=>$this->statueDocument, "taille"=>$f["size"]);
+						$size = getimagesize($f["url"]);
+						if ($size) {
+						    $dataDoc["media"]="image";
+						    $dataDoc["largeur"]=$size[0];
+						    $dataDoc["hauteur"]=$size[1];
+						}												
+						$idDoc = $this->dbD->ajouter($dataDoc);	
+						$this->dbSpip->ajouter(array("id_spip"=>$idDoc,"id_iste"=>$f["id_importfic"],"obj_spip"=>"documents","obj_iste"=>"importfic"));
+						$this->trace("document ajouté ".$f["id_importfic"]." ".$f["type"]." = ".$idDoc);	
+						//lie le document aux articles
+						if($idArtFr)$this->dbDL->ajouter(array("id_document"=>$idDoc,"id_objet"=>$idArtFr,"objet"=>"article"));
+						if($idArtEn)$this->dbDL->ajouter(array("id_document"=>$idDoc,"id_objet"=>$idArtEn,"objet"=>"article"));			
+					}
+					
 				}
 			}
-		}				
+		
+		$this->trace("FIN ".__METHOD__);		
+		
 	}
 
+	/**
+	 * création d'un article multilingue
+	 * 
+	 * @param	array		$data
+	 * @param	int			$idBdRef
+	 * @param	int			$idAutS
+	 * @param	string		$typeRub
+	 * 
+	 * @return array
+	 */
+	public function creaArticleMultilingue($data, $idBdRef, $idAutS, $typeRub=false) {
+		
+		$i=0;
+		$ids = array();
+		foreach ($this->arrLangue as $l) {
+			if($typeRub) $data["id_rubrique"]=$this->arrRub[$l]["Liste"]; 
+			
+			if($i==0){
+				$data["lang"]=$l;
+				$idArtRef = $this->dbArt->ajouter($data);				
+				$this->dbArt->edit($idArtRef, array("id_trad"=>$idArtRef));
+				$idArt=$idArtRef;
+			}else{
+				$data["lang"]=$l;
+				$data["id_trad"]=$idArtRef;
+				$idArt = $this->dbArt->ajouter($data);								
+			}
+			$ids[]=$idArt;
+			$this->dbSpip->ajouter(array("id_spip"=>$idArt,"id_iste"=>$idBdRef,"obj_spip"=>"articles","obj_iste"=>"auteur"));
+			//ajoute l'auteur
+			$this->dbAutL->ajouter(array("id_auteur"=>$idAutS,"id_objet"=>$idArt,"objet"=>"article"));
+			$i ++;
+		}		
+		return $ids;	
+	}
+	
 	/**
 	 * création d'un article 
 	 * 
@@ -112,9 +190,15 @@ class Flux_Spip extends Flux_Site{
 	 */
 	public function creaArticleFromIste($lang, $infoLivre) {
 				
+		$this->trace("DEBUT ".__METHOD__);		
+		$this->trace($lang);		
+		$this->trace("livre ".$infoLivre["id_livre"]." - ".$infoLivre["titre_fr"]." - ".$infoLivre["titre_en"]);		
+		
 		$first = true;
 		$chapo = "";
 		//création du chapo
+		//plus nécessaire car on passe par une table extérieure SPIP
+		/*
 		if($infoLivre["isbns"]){
 			$isbns = explode(":", $infoLivre["isbns"]);
 			$prix = explode(":", $infoLivre["prix"]);
@@ -146,9 +230,10 @@ class Flux_Spip extends Flux_Site{
 				$first = false;
 			}			
 		}
-
+		*/
+		$chapo = "";
 		//ajout de l'article
-		$idArt = $this->dbArt->ajouter(array("id_rubrique"=>$this->arrRub["Catalog"]
+		$idArt = $this->dbArt->ajouter(array("id_rubrique"=>$this->arrRub[$lang]["Catalog"]
 			, "chapo"=>$chapo, "titre"=>$infoLivre["titre_".$lang], "soustitre"=>$infoLivre["soustitre_".$lang]
 			, "descriptif"=>$infoLivre["contexte_".$lang], "ps"=>$infoLivre["bio_".$lang], "texte"=>$infoLivre["tdm_".$lang]
 			, "lang"=>$lang, "langue_choisie"=>"oui"
@@ -156,18 +241,6 @@ class Flux_Spip extends Flux_Site{
 			));				
 		$this->dbSpip->ajouter(array("id_spip"=>$idArt,"id_iste"=>$infoLivre["id_livre"],"obj_spip"=>"articles","obj_iste"=>"livre"));
 		
-		//ajout des documents
-		if($infoLivre["fics"]){
-			$fics = explode(":", $infoLivre["fics"]);
-			foreach ($fics as $fic) {
-				$arrFic = explode(",", $fic);
-				if(substr($arrFic[1], -3)=="fr."){
-					$idD = $this->dbD->ajouter(array("titre"=>substr($arrFic[1], 0, -3),"fichier"=>$arrFic[2],"distant"=>"oui","statut"=>$this->statueArticle));
-					$this->dbSpip->ajouter(array("id_spip"=>$idD,"id_iste"=>$arrFic[0],"obj_spip"=>"documents","obj_iste"=>"ficimport"));
-					$this->dbDL->ajouter(array("objet"=>"article","id_objet"=>$idArt,"id_document"=>$idD));
-				}
-			}
-		}
 		//ajout des mots clefs
 		if($infoLivre["series"]){
 			$series = explode(":", $infoLivre["series"]);
@@ -181,6 +254,8 @@ class Flux_Spip extends Flux_Site{
 				$this->creaMCFromIste(explode(",", $c), "comite", "article", $idArt);
 			}
 		}
+		
+		$this->trace("FIN ".__METHOD__);		
 		
 		return $idArt;
 	}
@@ -196,6 +271,8 @@ class Flux_Spip extends Flux_Site{
 	public function creaMCFromIste($mc, $type, $obj, $id) {
 
 		if(!$mc[2] && !$mc[1]) return;
+		if(!$mc[1])$mc[1]=$mc[2];
+		if(!$mc[2])$mc[2]=$mc[1];
 		
 		$idMC = $this->dbM->ajouter(array("titre"=>"<multi>[fr]".$mc[2]."[en]".$mc[1]."</multi>","id_groupe"=>$this->arrMC[$type]));
 		$this->dbSpip->ajouter(array("id_spip"=>$idMC,"id_iste"=>$mc[0],"obj_spip"=>"mots","obj_iste"=>$type));

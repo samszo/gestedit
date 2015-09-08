@@ -8,6 +8,9 @@
 
 	<div class="cartouche">
 		[(#LOGO_ARTICLE|image_reduire{200,200})]
+		<BOUCLE_couverture(DOCUMENTS){id_article}{extension==jpg|png|gif}{titre="Couverture en."}{doublons}>
+			[<a href="#URL_DOCUMENT">(#FICHIER|image_reduire{500}) </a>]
+		</BOUCLE_couverture>				
 				[<p class="#EDIT{surtitre} surtitre">(#SURTITRE)</p>]
 				<h1 class="h1 #EDIT{titre}">#TITRE_EN</h1>
 				[<p class="#EDIT{soustitre} soustitre">(#SOUSTITRE_EN)</p>]
@@ -24,11 +27,12 @@
 						</BOUCLE_IsteAuteur>				
 					</BOUCLE_IsteLivreAuteur>				
 				</p>
-
 	</div>
 
 	<div class="surlignable">
-		[<div class="#EDIT{chapo} chapo">(#CONTEXTE_EN)</div>]
+		<h2 class="h2">Description</h2>
+		[<div class="#EDIT{texte} texte">(#CONTEXTE_EN)</div>]
+		<h2 class="h2">Content</h2>
 		[<div class="#EDIT{texte} texte">(#TDM_EN)</div>]
 	</div>
 
@@ -45,6 +49,13 @@
 	[(#REM) Inclure le modele des liens de traductions ]
 	#MODELE{article_traductions}
 
+<B_articles_lies>
+<ul>
+<BOUCLE_articles_lies(ARTICLES){id_article IN #ARTICLES_LIES}>
+<li><a href="[(#URL_ARTICLE)]">#TITRE</a></li>
+</BOUCLE_articles_lies>
+<ul>
+</B_articles_lies>
 
 [(#REM) Gestion du portfolio et des documents ]
 [(#INCLURE{fond=inclure/documents}{id_article})]
