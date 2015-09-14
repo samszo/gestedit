@@ -59,7 +59,6 @@ p {
 }
 img {
     background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #CCCCCC;
     padding: 4px;
 }
 a{
@@ -690,8 +689,13 @@ table#wp-calendar td.pad {
 }
 .loop-index ul li {
     display: block;
-    list-style-type: none;
+	list-style-type: none;
+    margin: 6px;
 }
+.item {
+    display: flex;
+}
+
 .loop-index ul li img {
     /*background: url("img/bg-thumbnail.png") no-repeat scroll left top transparent;*/
     border: 0 none;
@@ -1009,15 +1013,26 @@ div#slogan_site_spip{
 ul.liste-items{
 	padding-left:0px;
 }
+.liste-items-text{
+	float:left;
+    margin-left: 6px;
+}
+
 ul.liste-items li h3, .cartouche h1, #comments .h2{
     font: 24px/28px 'Lora',serif;
 }
+
 ul.liste-items li h3 a, .cartouche h1, #comments .h2{
 	color: #000000;
     text-decoration: none;
     font: 26px/29px 'Lucida Grande','Lucida Sans',sans-serif;
     text-transform: uppercase;
 }
+
+ul.liste-items li h3 a{
+    font: 18px/20px 'Lucida Grande','Lucida Sans',sans-serif;
+}
+
 .sommaire .spip_logos {float: left;}
 .sommaire h2 { display: none; }
 .hentry{
