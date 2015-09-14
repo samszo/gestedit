@@ -655,7 +655,7 @@ function getGridCol(type){
             saveParam(type);
         },			    
         onDelete: function(event) {            
-	        delParam(event,"param",type);
+	        delParam(event,type);
 	    },
         
     }
@@ -684,7 +684,7 @@ function saveParam(obj, typeP){
     var changes = w2ui['grid_<?php echo $idPage;?>_'+typeP].getChanges();
     changes.forEach(function(c, i){
         c.obj = obj;
-        if(typeP)
+        if(typeP!=obj)
         		c = {"obj":obj,"recid":c.recid,"nom":c.text};
 	    	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
     			c,
@@ -706,7 +706,11 @@ function delParam(event, obj, type){
         return false;
     }
 	if(event.force){
-		var p = {id:itemSelect.recid, obj:obj};
+		var p = {id:itemSelect.recid};
+		if(type==obj)
+	        	p.obj=type;		
+		else
+	        	p.obj=obj;		
 		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 			p,
 	    		function(js){

@@ -205,7 +205,8 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("l" => "iste_livre"),
                 'l.id_livre = la.id_livre', array("titre_fr","titre_en", "recid"=>"id_livre"))
-        		->where( "la.id_auteur = ?", $id_auteur );
+        		->where( "la.id_auteur = ?", $id_auteur )
+        		->group(array("la.id_livre","la.role"));
 
         return $this->fetchAll($query)->toArray(); 
     }    

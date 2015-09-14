@@ -142,6 +142,8 @@ class CrudController extends Zend_Controller_Action
 				//création du processus
 				$dbProce = new Model_DbTable_Iste_processus();
 				$rsProcess = $dbProce->setProcessusForLivre('Projet livre', $result[0]["id_livre"]);
+				$dbProce->setProcessusForLivre('Traduction livre', $result[0]["id_livre"]);
+				$dbProce->setProcessusForLivre('Fabrication livre', $result[0]["id_livre"]);
 				$result = array("rsLivre"=>$result,"rsPropo"=>$rsPropo,"rsProcess"=>$rsProcess);
 				//création de l'isbn
 				$dbIsbn = new Model_DbTable_Iste_isbn();

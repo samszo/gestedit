@@ -18,6 +18,10 @@ class ExportController extends Zend_Controller_Action
 				$bdd = new Model_DbTable_Iste_livre();
 				$rs = $bdd->getTraductionLivre();
     				break;    			
+    			case "keshifLivre":
+				$bdd = new Model_DbTable_Iste_livre();
+				$rs = $bdd->getKeshif();
+    				break;    			
     			case "tresor":
 				$bdd = new Model_DbTable_Iste_livre();
 				$rs = $bdd->getTresorie();
@@ -28,8 +32,12 @@ class ExportController extends Zend_Controller_Action
     				$rs = $oBdd->getAll();
     	    			break;
     		}
-		$this->_helper->viewRenderer->setNoRender(true);		
-		$this->printExcel($rs, "gestedit-".$this->_getParam('obj'));
+    		if($this->_getParam('json')){
+    			$this->view->rs = $rs;
+    		}else{
+			$this->_helper->viewRenderer->setNoRender(true);		
+			$this->printExcel($rs, "gestedit-".$this->_getParam('obj'));
+    		}
     }
     
     public function dataventeAction()

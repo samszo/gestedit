@@ -20,7 +20,8 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
 
 	protected $_dependentTables = array(
        	"Model_DbTable_Iste_livrexserie"
-       );    
+       	,"Model_DbTable_Iste_coordination"
+       	);    
     
     
     /**

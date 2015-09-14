@@ -23,7 +23,7 @@ SELECT
         INNER JOIN iste_prevision pre2 ON pre2.id_pxu = pl.id_plu AND pre2.id_tache = 16
         INNER JOIN iste_prevision pre3 ON pre3.id_pxu = pl.id_plu AND pre3.id_tache = 17
         INNER JOIN iste_prevision pre4 ON pre4.id_pxu = pl.id_plu AND pre4.id_tache = 18
-		LEFT JOIN iste_isbn i ON i.id_livre = l.id_livre
+		INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
 		LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur
         LEFT JOIN iste_page pGB ON pGB.id_livre = l.id_livre AND
 			pGB.maj = (SELECT MAX(pGBm.maj) FROM iste_page pGBm WHERE pGBm.id_livre = pGB.id_livre AND pGBm.type = 'prévu GB')

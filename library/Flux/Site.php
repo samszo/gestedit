@@ -60,7 +60,7 @@ class Flux_Site{
 			$temps_fin = microtime(true);
 			$tG = str_replace(".",",",round($temps_fin - $this->temps_debut, 4));
 			$tI = str_replace(".",",",round($temps_fin - $this->temps_inter, 4));
-			$mess = $this->temps_nb." | ".$message." |".$tG."|".$tI."<br/>";
+			$mess = $this->temps_nb." | ".$message." | ".$tG." | ".$tI."<br/>";
 			if($this->echoTrace)
 				$this->echoTrace .= $mess;
 			else{

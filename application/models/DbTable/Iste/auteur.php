@@ -153,6 +153,30 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
 		$rs = $this->fetchAll($query)->toArray(); 
         return count($rs) ? $rs[0] : false;
     }
+    
+	/**
+     * récupère les livres avec coordination et direction
+     *
+     * @return array
+     */
+    public function findRoleCoorDir()
+    {
+ 		$sql = "SELECT 
+		l.id_livre, l.titre_en, l.titre_fr
+		, la.id_auteur, la.role
+		, ls.id_serie
+		, cl.id_comite
+		FROM iste_livre l
+		 INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre
+		 INNER JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
+		 INNER JOIN iste_comitexlivre cl ON cl.id_livre = l.id_livre
+		WHERE la.role != 'auteur'
+		ORDER BY l.id_livre 	";
+	    	//echo $sql."<br/>";
+	    	$db = $this->_db->query($sql);
+	    	return $db->fetchAll();
+    }     
+    
     	/**
      * Recherche une entrée Iste_auteur avec la valeur spécifiée
      * et retourne cette entrée.

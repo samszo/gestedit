@@ -117,18 +117,63 @@ class Model_DbTable_Iste_spip extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_spip avec la valeur spécifiée
      * et retourne cette entrée.
      *
-     * @param int $id_iste_spip
+     * @param int $id_spip
      *
      * @return array
      */
-    public function findById_spip($id_iste_spip)
+    public function findById_spip($id_spip)
     {
         $query = $this->select()
             ->from( array("p" => "iste_spip"))                           
-            ->where("p.id_iste_spip = ?", $id_iste_spip);
+            ->where("p.id_spip = ?", $id_spip);
                     
         return $this->fetchAll($query)->toArray(); 
     }
 
+    	/**
+     * Recherche une entrée Iste_spip avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idIste
+     * @param string $objIste
+     * @param string $objSpip
+     *
+     * @return array
+     */
+    public function findIdSpip($idIste, $objIste, $objSpip)
+    {
+        $query = $this->select()
+            ->from( array("p" => "iste_spip"),"id_spip")                           
+            ->where("p.id_iste = ?", $idIste)
+            ->where("p.obj_iste = ?", $objIste)
+            ->where("p.obj_spip = ?", $objSpip);
+        return $this->fetchAll($query)->toArray(); 
+    }
+    
+    	/**
+     * Recherche une entrée Iste_spip avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idIste
+     * @param string $objIste
+     * @param string $objSpip
+     * @param string $idBase
+     *
+     * @return array
+     */
+    public function findArtSpip($idIste, $objIste, $objSpip, $idBase)
+    {
+        $query = $this->select()
+            ->from( array("p" => "iste_spip"),"id_spip")                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("a" => $idBase.".spip_articles"),
+                'a.id_article = p.id_spip', array("id_article","surtitre","titre","soustitre"
+            		,"id_rubrique","descriptif","chapo","texte","ps","date","statut","id_secteur"
+            		,"maj","date_redac","lang","id_trad"))
+            ->where("p.id_iste = ?", $idIste)
+            ->where("p.obj_iste = ?", $objIste)
+            ->where("p.obj_spip = ?", $objSpip);
+        return $this->fetchAll($query)->toArray(); 
+    }
     
 }

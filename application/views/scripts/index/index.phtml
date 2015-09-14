@@ -204,7 +204,7 @@ function chargeLayout(idLayout){
     	    //supprime les objets si déjà présent
         if(w2ui['layout_Traduction']){            	
             w2ui['layout_Traduction'].destroy();
-            w2ui['layout_Traduction_top'].destroy();
+            if(w2ui['layout_Traduction_top'])w2ui['layout_Traduction_top'].destroy();
             w2ui['layout_Traducteur'].destroy();
             w2ui['grid_Traduction'].destroy();
             w2ui['layout_Traduction_Traducteur'].destroy();

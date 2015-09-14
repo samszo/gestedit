@@ -14,12 +14,17 @@
 				[<p class="#EDIT{surtitre} surtitre">(#SURTITRE)</p>]
 				<h1 class="h1 #EDIT{titre}">#TITRE_EN</h1>
 				[<p class="#EDIT{soustitre} soustitre">(#SOUSTITRE_EN)</p>]
-				<p class="info-publi">
-					Publication Date : <abbr class="published" title="[(#DATE|date_iso)]">[(#DATE|affdate_mois_annee)]</abbr>
+				<p class="info-publi">				
+					<span class="categorie">Publication Date : </span><abbr class="published" title="[(#DATE|date_iso)]">[(#DATE|affdate_mois_annee)]</abbr>
 					<br/>
 					<BOUCLE_IsteLivreAuteur(iste:ISTE_LIVREXAUTEUR){id_livre=#ID_ISTE}>
 						<BOUCLE_IsteAuteur(iste:ISTE_AUTEUR){id_auteur=#ID_AUTEUR}>
-							<span class="auteurs">#ROLE : #PRENOM #NOM</span>	
+							<span class="categorie">#ROLE :</span>
+							<span class="vcard author">
+								<BOUCLE_IsteAuteurSPIP(iste:ISTE_SPIP){id_iste=#ID_AUTEUR}{obj_iste='auteur'}{obj_spip='auteurs'}>							
+								<a class="url fn spip_in" href="spip.php?page=auteur&id_auteur=#ID_SPIP"></BOUCLE_IsteAuteurSPIP>
+								#PRENOM #NOM</a>															
+							</span>
 							<BOUCLE_IsteInstitution(iste:ISTE_INSTITUTION){id_institution=#ID_INSTITUTION}>
 								<span class="institution"> - #NOM</span>	
 							</BOUCLE_IsteInstitution>
@@ -27,6 +32,11 @@
 						</BOUCLE_IsteAuteur>				
 					</BOUCLE_IsteLivreAuteur>				
 				</p>
+		<BOUCLE_arttrad(ARTICLES){id_article}>
+		[(#REM) Inclure le modele des liens de traductions ]
+		#MODELE{article_traductions}
+		</BOUCLE_arttrad>				
+				
 	</div>
 
 	<div class="surlignable">

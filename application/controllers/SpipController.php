@@ -35,19 +35,49 @@ class SpipController extends Zend_Controller_Action
 		else $arrAuteur = $dbAut->getAll("a.id_auteur");
 		
 		$nbM = count($arrAuteur);
+		$s->trace("Nombre d'auteur = ".$nbM);					
 		for ($i = 0; $i < $nbM; $i++) {
-			if($arrAuteur[$i]["id_auteur"] == 200){
-				$s->trace($i." ".$arrAuteur[$i]["id_auteur"]);					
+			//if($arrAuteur[$i]["id_auteur"] == 1213){
+				//$s->trace($i." ".$arrAuteur[$i]["id_auteur"]);					
 				$s->creaAuteurFromIste($arrAuteur[$i]);
-			}
-			//if($i > 1)break;
+			//}
+			//if($i > 0)break;
 		}
 		
 		$s->trace("FIN ".__METHOD__);		
 		//$this->view->data = $membres;
 					
 	}
-	
+
+	/**
+	 * controle pour la mis à jour automatique des articles en rapport au livre
+	 */
+	public function modifartAction() {
+		//initialisation des objets
+		if($this->_getParam('idBase')) $this->dbNom = $this->_getParam('idBase');		
+		$s = new Flux_Spip($this->dbNom,true);
+		$s->bTraceFlush = true;		
+		$s->trace("DEBUT ".__METHOD__);		
+		
+		//charge la liste des livres
+		if($this->_getParam('idLivre')) $arrLivre[0] = array("id_livre"=>$this->_getParam('idLivre'));
+		else $arrLivre = $s->dbLivre->getAllId();
+		
+		$nbM = count($arrLivre);
+		$s->trace(" Nb de livre ".$nbM);					
+		for ($i = 0; $i < $nbM; $i++) {
+			//if($i > 180+1243){
+				//$s->trace($i." ".$arrAuteur[$i]["id_auteur"]);					
+				$s->modifArticleFromIste($arrLivre[$i]["id_livre"]);
+			//}
+			if($i > 1)break;
+		}
+		
+		$s->trace("FIN ".__METHOD__);		
+		//$this->view->data = $membres;
+					
+	}
+		
 	/**
 	 * controle pour pour l'envoie des mails de connection
 	 */

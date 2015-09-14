@@ -118,6 +118,7 @@ function initLivre() {
 		        searches: [
 				    { field: 'titre_fr', caption: 'Titre FR', type: 'text' },
 				    { field: 'titre_en', caption: 'Titre EN', type: 'text' },
+		            { field: 'auteurs', caption: 'Auteurs', type: 'text', hidden:true },
 		            { field: 'prenom', caption: 'Prénom auteur', type: 'text' },
 		            { field: 'nom', caption: 'Nom auteur', type: 'text' },
 		            { field: 'num', caption: 'ISBN', type: 'text' },
@@ -133,7 +134,8 @@ function initLivre() {
 		            { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
 		            { field: 'reference', caption: 'Référence', size: '80px', sortable: true, resizable: true, 
 		                editable: { type: 'int'}
-		            },
+		            },		            
+		            { field: 'auteurs', caption: 'Auteurs', size: '20%', sortable: true, resizable: true},
 		            { field: 'titre_fr', caption: 'Titre français', size: '20%', sortable: true, resizable: true, 
 		                editable: { type: 'text' }
 		            },
@@ -164,7 +166,6 @@ function initLivre() {
 		                }
 		            },
 		            /*		            
-		            { field: 'auteurs', caption: 'Auteur', size: '200px', sortable: true, resizable: true},		            
 		            { field: 'isbns', caption: 'ISBNS', size: '200px', sortable: true, resizable: true},		            
 		            */
 		        ],
@@ -205,6 +206,12 @@ function initLivre() {
 		                }
 		            }else{
 			            	grid.localSearch();		            
+		            		event.onComplete = function () {
+	                        grid.last.searchIds = grid.last.searchIds;
+	                        grid.total      = grid.last.searchIds.length; 
+	                        grid.buffered   = grid.total; 
+	                        grid.refresh();
+		            		}			            	
 		            }
 		        },		        
 		        onRender: function(event) {

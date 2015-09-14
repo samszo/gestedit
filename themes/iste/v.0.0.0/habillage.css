@@ -49,7 +49,7 @@ iframe {
 }
 h1, h2, h3, h4, h5, h6 {
     display: block;
-    margin: 0 0 1em;
+    margin: 1em 0 1em;
     padding: 0;
 }
 p {
@@ -962,8 +962,8 @@ div.pagination span.current, div.pagination a:hover, div.pagination a:active {
 	display: none;
 }
 #header .formulaire_recherche {
-	float: right;
-	clear: right;
+	float: left;
+	clear: left;
 	display: block;
 }
 .formulaire_recherche form {
@@ -996,10 +996,15 @@ div#navigation{
     width: 280px;
 }
 div#slogan_site_spip, div#formulaire_menu_lang{
+    float: right;
     color: #000000;
     text-decoration: none;
     font: 26px/29px 'Lucida Grande','Lucida Sans',sans-serif;
     text-transform: uppercase;
+}
+div#slogan_site_spip{
+    margin-top: 71px;
+    margin-left: 30px;
 }
 ul.liste-items{
 	padding-left:0px;
@@ -1046,7 +1051,7 @@ div.rubriques ul li ul li, div.forums ul li ul li, div.syndic_articles ul li ul 
 	border:none;
 }
 .formulaire_spip{
-	border:1px solid #DCDFE5;
+	#border:1px solid #DCDFE5;
 	padding:10px;
 }
 .widget_search .formulaire_spip{
@@ -1220,4 +1225,7 @@ li.on ul li.on a{
 }
 div.meta-publi{
 	float: left;
+}
+.categorie{
+      font-variant: small-caps;
 }

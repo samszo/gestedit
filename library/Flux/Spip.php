@@ -10,8 +10,8 @@ class Flux_Spip extends Flux_Site{
         
 	var $statueDocument = "publie";
 	var $statueArticle = "publie";
-	var $statueAuteur = "1comite";
-	
+	var $statueAuteur = "1comite";	
+	var $extImg = array("jpg", "png", "gif", "jpeg");	
     function __construct($idBase=false,$idTrace=false){    	
     	    	
     		parent::__construct($idBase,$idTrace);
@@ -50,7 +50,7 @@ class Flux_Spip extends Flux_Site{
 	public function creaAuteurFromIste($arrAuteur) {
 				
 		$this->trace("DEBUT ".__METHOD__);		
-		$this->trace("auteur ".$arrAuteur["prenom"]." ".$arrAuteur["nom"]);		
+		$this->trace("auteur ".$arrAuteur["id_auteur"]." ".$arrAuteur["prenom"]." ".$arrAuteur["nom"]);		
 						
 			//construction du numéro d'ordre
 			$num = "";//$i."00. ";
@@ -64,7 +64,7 @@ class Flux_Spip extends Flux_Site{
 			
 			//création des articles de l'auteur
 			$arrIds = $this->creaArticleMultilingue(array("texte"=>"A compléter...", "titre"=>$titreArtAuteur
-				,"statut"=>$this->statueArticle), $arrAuteur["id_auteur"], $idAutS, "Liste");
+				,"statut"=>"prepa"), $arrAuteur["id_auteur"], $idAutS, "Liste");
 
 			//création des mots clefs
 			$infoAut = $this->dbAut->findInfos($arrAuteur["id_auteur"]);
@@ -99,6 +99,7 @@ class Flux_Spip extends Flux_Site{
 					$idArtEn = false;
 					//on prend la infos minimum pour le livre
 					$infoLivre = $this->dbLivre->findInfos($l,true);
+					$this->trace("infos du livre :".$l." ".$infoLivre["titre_fr"]." ".$infoLivre["titre_en"]);							
 					//vérifier la langue
 					if($infoLivre["titre_fr"]){
 						$idArtFr = $this->creaArticleFromIste("fr", $infoLivre);
@@ -121,14 +122,15 @@ class Flux_Spip extends Flux_Site{
 					$arrFics = $this->dbImpFic->findByObj("livre", $infoLivre["id_livre"]);
 					foreach ($arrFics as $f) {
 						//création du document
-						$dataDoc = array("extension"=>pathinfo($f["url"], PATHINFO_EXTENSION),"titre"=>$f["nom"],"fichier"=>$f["url"]
+						$ext = pathinfo($f["url"], PATHINFO_EXTENSION);
+						$dataDoc = array("extension"=>$ext,"titre"=>$f["nom"],"fichier"=>$f["url"]
 							,"descriptif"=>$f["type"], "distant"=>"oui", "mode"=>"document", "statut"=>$this->statueDocument, "taille"=>$f["size"]);
-						$size = getimagesize($f["url"]);
-						if ($size) {
+						if (in_array($ext,$this->extImg)) {
+							$size = getimagesize($f["url"]);
 						    $dataDoc["media"]="image";
 						    $dataDoc["largeur"]=$size[0];
 						    $dataDoc["hauteur"]=$size[1];
-						}												
+						}
 						$idDoc = $this->dbD->ajouter($dataDoc);	
 						$this->dbSpip->ajouter(array("id_spip"=>$idDoc,"id_iste"=>$f["id_importfic"],"obj_spip"=>"documents","obj_iste"=>"importfic"));
 						$this->trace("document ajouté ".$f["id_importfic"]." ".$f["type"]." = ".$idDoc);	
@@ -172,7 +174,7 @@ class Flux_Spip extends Flux_Site{
 				$idArt = $this->dbArt->ajouter($data);								
 			}
 			$ids[]=$idArt;
-			$this->dbSpip->ajouter(array("id_spip"=>$idArt,"id_iste"=>$idBdRef,"obj_spip"=>"articles","obj_iste"=>"auteur"));
+			$this->dbSpip->ajouter(array("id_spip"=>$idArt,"id_iste"=>$idBdRef,"obj_spip"=>"articles","obj_iste"=>"auteur","lang"=>$l));
 			//ajoute l'auteur
 			$this->dbAutL->ajouter(array("id_auteur"=>$idAutS,"id_objet"=>$idArt,"objet"=>"article"));
 			$i ++;
@@ -191,7 +193,6 @@ class Flux_Spip extends Flux_Site{
 	public function creaArticleFromIste($lang, $infoLivre) {
 				
 		$this->trace("DEBUT ".__METHOD__);		
-		$this->trace($lang);		
 		$this->trace("livre ".$infoLivre["id_livre"]." - ".$infoLivre["titre_fr"]." - ".$infoLivre["titre_en"]);		
 		
 		$first = true;
@@ -232,14 +233,28 @@ class Flux_Spip extends Flux_Site{
 		}
 		*/
 		$chapo = "";
-		//ajout de l'article
-		$idArt = $this->dbArt->ajouter(array("id_rubrique"=>$this->arrRub[$lang]["Catalog"]
+		
+		//récupère la date de parution
+		$arrDate = explode(",", $infoLivre["date_parution"]);
+		$dateParution=false;
+		foreach ($arrDate as $d) {
+			if($d!="0000-00-00" || $d==null)$dateParution=$d;
+		}
+		$dataArt = array("id_rubrique"=>$this->arrRub[$lang]["Catalog"]
 			, "chapo"=>$chapo, "titre"=>$infoLivre["titre_".$lang], "soustitre"=>$infoLivre["soustitre_".$lang]
 			, "descriptif"=>$infoLivre["contexte_".$lang], "ps"=>$infoLivre["bio_".$lang], "texte"=>$infoLivre["tdm_".$lang]
 			, "lang"=>$lang, "langue_choisie"=>"oui"
-			, "statut"=>$this->statueArticle
-			));				
-		$this->dbSpip->ajouter(array("id_spip"=>$idArt,"id_iste"=>$infoLivre["id_livre"],"obj_spip"=>"articles","obj_iste"=>"livre"));
+			);
+		if($dateParution){
+			$dataArt["statut"] = "publie"; 	
+			$dataArt["date"] = $dateParution; 	
+		}else $dataArt["statut"] = "prepa";			
+		if($infoLivre["contexte_".$lang]=="")$dataArt["statut"] = "prepa";	
+		
+		//ajout de l'article
+		$idArt = $this->dbArt->ajouter($dataArt);				
+			
+		$this->dbSpip->ajouter(array("id_spip"=>$idArt,"id_iste"=>$infoLivre["id_livre"],"obj_spip"=>"articles","obj_iste"=>"livre","lang"=>$lang));
 		
 		//ajout des mots clefs
 		if($infoLivre["series"]){
@@ -279,4 +294,43 @@ class Flux_Spip extends Flux_Site{
 		$this->dbML->ajouter(array("objet"=>$obj,"id_objet"=>$id,"id_mot"=>$idMC));
 				
 	}
+	
+	/**
+	 * mis à jour des articles
+	 * 
+	 * @param	int		$idLivre
+	 * 
+	 * @return array
+	 */
+	public function modifArticleFromIste($idLivre) {
+
+		$this->trace("DEBUT ".__METHOD__);		
+		$this->trace("id_livre = ".$idLivre);										
+		//récupère les infos du livre
+		$infoLivre = $this->dbLivre->getProductionLivre($idLivre);
+		$this->trace("Infos livre ".$infoLivre["titre_fr"]." ".$infoLivre["titre_en"]);
+		//récupère la date de parution
+		$arrDate = explode(",", $infoLivre["date_parution"]);
+		$dateParution=false;
+		foreach ($arrDate as $d) {
+			if($d!="0000-00-00" || $d!=null)$dateParution=$d;
+		}
+		//récupère l'identifiant de l'article
+		$arrArt = $this->dbSpip->findArtSpip($idLivre,"livre","articles",$this->idBase);
+		$this->trace("Infos Article ",$arrArt);
+		foreach ($arrArt as $art) {
+			$lang = $art["lang"];
+			$dataArt = array("chapo"=>"", "titre"=>$infoLivre["titre_".$lang], "soustitre"=>$infoLivre["soustitre_".$lang]
+			, "descriptif"=>$infoLivre["contexte_".$lang], "ps"=>$infoLivre["bio_".$lang], "texte"=>$infoLivre["tdm_".$lang]
+			, "lang"=>$lang, "langue_choisie"=>"oui");
+			if($dateParution){
+				$dataArt["statut"] = "publie"; 	
+				$dataArt["date"] = $dateParution; 	
+			}else $dataArt["statut"] = "prepa";			
+			$this->dbArt->edit($art["id_article"], $dataArt);
+			$this->trace("article mis à jour ".$idArt. " avec ".$idLivre);							
+		}
+		$this->trace("FIN ".__METHOD__);		
+	}
+	
 }

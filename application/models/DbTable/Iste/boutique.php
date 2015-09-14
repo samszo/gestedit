@@ -96,7 +96,7 @@ class Model_DbTable_Iste_boutique extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"nom","nom"))
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"nom","nom","coef"))
             ->order(array("nom"));        
         return $this->fetchAll($query)->toArray();
 	} 

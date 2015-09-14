@@ -74,9 +74,21 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
+    {           		
+	    	$this->update($data, 'iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
+    }
+    /**
+     * Recherche des entrée Iste_auteurxcontrat avec l'identifiant ISBN
+     * et modifie ces entrées avec les nouvelles données.
+     *
+     * @param integer $id
+     * @param array $data
+     *
+     * @return void
+     */
+    public function editByISBN($id, $data)
+    {           		
+	    return	$this->update($data, 'iste_auteurxcontrat.id_isbn = ' . $id);
     }
     
     /**
