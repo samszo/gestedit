@@ -64,14 +64,51 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
      * et modifie cette entrée avec les nouvelles données.
      *
-     * @param integer $id
-     * @param array $data
+     * @param integer 	$id
+     * @param array 		$data
+     * @param boolean	$setDataLiees
      *
      * @return void
      */
-    public function edit($id, $data)
+    public function edit($id, $data, $setDataLiees=false)
     {          	
 	    	$this->update($data, 'iste_prevision.id_prevision = ' . $id);
+	    if($setDataLiees){
+	    		if(isset($data["fin"])){
+	    			$r = $this->findById_prevision($id);
+		    		switch ($r["id_tache"]) {
+		    			case 17://parution GB
+						$sql = "UPDATE iste_isbn tab1 join (
+						SELECT i.id_isbn, i.date_parution
+						, p.fin, p.id_prevision
+						FROM iste_isbn i
+						INNER JOIN iste_processusxlivre pl ON pl.id_livre = i.id_livre
+						INNER JOIN iste_prevision p ON p.id_pxu = pl.id_plu AND p.id_prevision = ".$id."
+						WHERE i.date_parution is null AND p.fin is not null
+						) tab2 on tab1.id_isbn = tab2.id_isbn set tab1.date_parution = tab2.fin";	
+				    		$db = $this->_db->query($sql);						
+			    			break;
+		    			case 18://parution FR
+						$sql = "UPDATE iste_isbn tab1 join (
+						SELECT i.id_isbn, i.date_parution
+						, p.fin, p.id_prevision
+						FROM iste_isbn i
+						INNER JOIN iste_processusxlivre pl ON pl.id_livre = i.id_livre
+						INNER JOIN iste_prevision p ON p.id_pxu = pl.id_plu AND p.id_prevision = ".$id."
+						WHERE i.date_parution is null AND p.fin is not null
+						) tab2 on tab1.id_isbn = tab2.id_isbn set tab1.date_parution = tab2.fin";	
+				    		$db = $this->_db->query($sql);
+		    				break;
+		    		}
+		    		//echo $sql;
+	    		}
+	    		if(isset($data["debut"])){
+				$vals = " prevision = DATE_ADD('".$data["debut"]."', INTERVAL 30 DAY), alerte = DATE_ADD('".$data["debut"]."', INTERVAL 25 DAY)";
+				$this->editSql($vals, $id);
+	    			
+	    		}
+	    		return $this->findById_prevision($id);
+	    }
     }
 
     /**
@@ -88,6 +125,44 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
     {          	
 	    	$this->update($data, 'id_tache = '.$idTache.' AND id_pxu='.$idPxu.' AND obj="livre"' );
     }
+    
+    /**
+     * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
+     * et modifie cette entrée avec les nouvelles données.
+     *
+     * @param string		$vals
+     * @param integer 	$idPxu
+     * @param integer 	$idTache
+     *
+     * @return void
+     */
+    public function editLivreTacheSql($vals, $idPxu, $idTache)
+    {          	
+	    	$sql = 'UPDATE iste_prevision
+	    	SET '.$vals.'
+	    	WHERE id_tache = '.$idTache.' AND id_pxu='.$idPxu.' AND obj="livre"';
+	    //	echo $sql;
+    		$db = $this->_db->query($sql);
+    }
+    
+    /**
+     * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
+     * et modifie cette entrée avec les nouvelles données.
+     *
+     * @param string		$vals
+     * @param integer 	$idPrev
+     *
+     * @return void
+     */
+    public function editSql($vals, $idPrev)
+    {          	
+	    	$sql = 'UPDATE iste_prevision
+	    	SET '.$vals.'
+	    	WHERE id_prevision = '.$idPrev;
+	    //	echo $sql;
+    		$db = $this->_db->query($sql);
+    }
+    
     
     /**
      * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
@@ -149,12 +224,12 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
      */
     public function findById_prevision($id_prevision)
     {
-	$sql = "SELECT 
+		$sql = "SELECT 
 				p.nom, p.id_processus
 				, pl.date_creation, pl.id_plu
 				, u.login, u.id_uti
-			    , t.nom tache, t.ordre
-			    , pre.id_prevision recid, pre.debut, pre.prevision, pre.fin, pre.commentaire, pre.alerte
+			    , t.id_tache, t.nom tache, t.ordre
+			    , pre.id_prevision recid, pre.debut, pre.prevision, pre.fin, pre.commentaire, pre.alerte, pre.relance
 			FROM iste_processus p
 				INNER JOIN iste_processusxlivre pl ON pl.id_processus = p.id_processus
 				INNER JOIN iste_prevision pre ON pre.id_pxu = pl.id_plu AND pre.obj = 'livre'     
@@ -168,6 +243,31 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
 		if(count($rs)) return $rs[0];
 		else return false;
     }
+    
+	/**
+     * Recherche une entrée Iste_processus avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param varchar $idP
+     * @param varchar $idL
+     * @param varchar $idT
+     *
+     * @return array
+     */
+    public function findByProcessLivreTache($idP, $idL, $idT)
+    {
+		$sql = "SELECT pre.id_prevision, pre.id_prevision recid, pre.debut, pre.prevision, pre.fin, pre.commentaire, pre.alerte, pre.relance
+			FROM iste_prevision pre 
+			INNER JOIN iste_processusxlivre pl ON pl.id_plu = pre.id_pxu AND pl.id_processus = ".$idP."
+				AND pl.id_livre = ".$idL."
+			WHERE pre.obj = 'livre' AND pre.id_tache = ".$idT;
+	 	//echo $sql."<br/>";
+	    $db = $this->_db->query($sql);
+	    $rs = $db->fetchAll();
+		if(count($rs)) return $rs[0];
+		else return false;
+    }    
+    
     	/**
      * Recherche une entrée Iste_prevision avec la valeur spécifiée
      * et retourne cette entrée.

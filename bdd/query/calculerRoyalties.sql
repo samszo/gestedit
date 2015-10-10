@@ -13,5 +13,5 @@ SELECT
 				    DATE_FORMAT(date_taux, '%d-%m-%Y') = DATE_FORMAT(date_vente, '%d-%m-%Y')
 		 LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
 		WHERE pc_papier is not null AND pc_ebook is not null AND pc_papier != 0 AND pc_ebook != 0
-			AND v.montant_euro > 0 AND i.id_isbn = 505
+			AND v.montant_euro > 0 -- AND i.id_isbn = 505
 		    AND r.id_royalty is null

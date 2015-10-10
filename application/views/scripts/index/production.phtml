@@ -21,8 +21,7 @@ if(!$this->ajax){
 		<script type="text/javascript" src="../js/ckeditor/ckeditor.js"></script>
 		<script type="text/javascript">
 			$(function () {
-				fctInit = initProd;			
-				initAll(); 
+				initAll(initProd); 
 	  			if(uti.id_uti!=0)
 					utiIsConnect();
 			});                       		
@@ -152,6 +151,7 @@ function initProd() {
 		        },
 		        records: rs,
 		        onClick: function (event) {
+					if(itemSelect && itemSelect.recid == event.recid) return;
 		            itemSelect = this.get(event.recid);
 			        showDataProdLivre();        		                    		           
 		        }	    
@@ -187,9 +187,10 @@ function initProd() {
 			            if(c.id_uti) c.id_uti = c.id_uti.id;
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        }
 		    },		    		    
@@ -224,9 +225,10 @@ function initProd() {
 			            if(c.alerte) c.alerte = w2utils.formatDate(c.alerte, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        }
 		    },		    	    		    		    	    		    
@@ -244,12 +246,13 @@ function initProd() {
 		                data.obj = "livre";
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 							data,
-			            		function(html){
+			            		function(js){
+			            			finsession(js);
 			            			//met à jour les données de base
 			            			itemSelect['commentaire']=data.commentaire;
 			            			//affiche le résultat
-					            w2alert(html);
-			           		});
+					            w2alert(js.message);
+			           		},"json");
 		            }
 		        }
 		    },
@@ -270,13 +273,14 @@ function initProd() {
 		                data.obj = "livre";
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 							data,
-			            		function(html){
+			            		function(js){
+			            			finsession(js);
 			            			//met à jour les données de base
 			            			itemSelect['contexte_fr']=data.contexte_fr;
 			            			itemSelect['contexte_en']=data.contexte_en;
 			            			//affiche le résultat
-					            w2alert(html);
-			           		});
+					            w2alert(js.message);
+			           		},"json");
 		            }
 		        }
 		    },
@@ -297,13 +301,14 @@ function initProd() {
 		                data.obj = "livre";
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 							data,
-			            		function(html){
+			            		function(js){
+			            			finsession(js);
 			            			//met à jour les données de base
 			            			itemSelect['tdm_fr']=data.tdm_fr;
 			            			itemSelect['tdm_en']=data.tdm_en;
 			            			//affiche le résultat
-					            w2alert(html);
-			           		});
+					            w2alert(js.message);
+			           		},"json");
 		            }
 		        }
 		    },
@@ -324,13 +329,14 @@ function initProd() {
 		                data.bio_en = CKEDITOR.instances["bio_en"].getData();		                		                
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 							data,
-			            		function(html){
+			            		function(js){
+			            			finsession(js);
 			            			//met à jour les données de base
 			            			itemSelect['bio_fr']=data.bio_fr;
 			            			itemSelect['bio_en']=data.bio_en;
 			            			//affiche le résultat
-					            w2alert(html);
-			           		});
+					            w2alert(js.message);
+			           		},"json");
 		            }
 		        },
 		    },
@@ -385,13 +391,14 @@ function initProd() {
 		                this.clear();		                
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 							data,
-			            		function(html){
+			            		function(js){
+			            			finsession(js);
 			            			//met à jour les données de base
 			            			itemSelect['bio_fr']=data.bio_fr;
 			            			itemSelect['bio_en']=data.bio_en;
 			            			//affiche le résultat
-					            w2alert(html);
-			           		});
+					            w2alert(js.message);
+			           		},"json");
 		            }
 		        }
 		    },	
@@ -449,9 +456,10 @@ function initProd() {
 			            if(c.type) c.type = c.type.text;
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },
     	            onAdd: function(event) {
@@ -459,6 +467,7 @@ function initProd() {
 		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 						data,
 		            		function(js){
+		            			finsession(js);
 		            			if(js.rs){
 				                var g = w2ui['grid_<?php echo $idPage;?>_web'];
 								g.add(js.rs);
@@ -475,6 +484,7 @@ function initProd() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -506,6 +516,7 @@ function updateFormTab(a){
 		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 				{id:itemSelect.id_livre, obj:'web'},
 		    		function(js){
+        				finsession(js);
 		            document.getElementById('ifWeb').setAttribute('src',"");		    		
 		            g = w2ui['grid_<?php echo $idPage;?>_web'];
 		            g.clear();
@@ -533,6 +544,7 @@ function showDataProdLivre(){
     $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
 		{id:itemSelect.id_livre, process:'Fabrication livre'},
     		function(js){
+			finsession(js);
             var g = w2ui['grid_<?php echo $idPage;?>_process_livre'];
             g.clear();
           	//mise à jour de la grille responsable			        

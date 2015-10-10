@@ -5,6 +5,8 @@ class ImportController extends Zend_Controller_Action
 	var $s;
 	var $arrMois = array("janvier"=>"01","février"=>"02","mars"=>"03","avril"=>"04","mai"=>"05","juin"=>"06",
 		"juillet"=>"07","août"=>"08","septembre"=>"09","octobre"=>"10","novembre"=>"11","décembre"=>"12");
+	var $arrMoisCourt = array("janv."=>"01","fév."=>"02","mars"=>"03","avr."=>"04","mai"=>"05","juin"=>"06",
+		"juil."=>"07","août"=>"08","sept."=>"09","oct."=>"10","nov."=>"11","déc."=>"12");
 	
 	function initInstance(){
     		$auth = Zend_Auth::getInstance();
@@ -15,7 +17,7 @@ class ImportController extends Zend_Controller_Action
 		    $this->view->uti = json_encode($ssUti->uti);
 		}else{			
 		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
-		    $this->_redirect('/auth/login');		    
+		    $this->_redirect('/auth/finsession');		    
 		}
 		    	
 		$this->view->inc = $this->_getParam('inc');
@@ -199,7 +201,26 @@ class ImportController extends Zend_Controller_Action
 		  		//enregistre les liens web	
 		  		for ($i = 0; $i < 6; $i++) {
 			  		$this->s->trace("enregistre le lien ".$book["ebook_".$i]. " ".$rIsbn["id_livre"]);
-		  			if($book["ebook_".$i])$this->dbWeb->ajouter(array("id_livre"=>$rIsbn["id_livre"],"type"=>"ebook_".$i,"url"=>$book["ebook_".$i]));		  			
+		  			if($book["ebook_".$i]){
+		  				switch ($i) {
+		  					case 1:
+			  					$type = "WileyOnLine";
+			  					break;
+		  					case 2:
+			  					$type = "WileyOnLine";
+			  					break;
+		  					case 3:
+			  					$type = "NetLibrary";
+			  					break;
+			  				case 4:
+			  					$type = "Elsevier";
+			  					break;
+		  					default:
+			  					$type = "aucun";
+			  					break;
+		  				}
+		  				$this->dbWeb->ajouter(array("id_livre"=>$rIsbn["id_livre"],"type"=>$type,"url"=>$book["ebook_".$i]));	
+		  			}	  			
 		  		}
 		  		
 	    		}else $this->s->trace("isbn ABSCENT ");
@@ -274,7 +295,7 @@ class ImportController extends Zend_Controller_Action
 				$this->s->trace(" isbn TROUVé id_livre =".$rIsbn["id_livre"]);		
 				$nbOK ++;
 				//ajoute le site web
-			  	$this->dbWeb->ajouter(array("id_livre"=>$rIsbn["id_livre"],"type"=>"Page Shopify","url"=>"http://iste-editions.fr/products/".$p[0]));		  			
+			  	$this->dbWeb->ajouter(array("id_livre"=>$rIsbn["id_livre"],"type"=>"Shopify","url"=>"http://iste-editions.fr/products/".$p[0]));		  			
 				//mis à jour du contexte
 				$this->dbLivre->edit($rIsbn["id_livre"], array("contexte_fr"=>$p[2]));
 				//enregistre l'image
@@ -395,11 +416,11 @@ class ImportController extends Zend_Controller_Action
 		
 		
 		$arrType = array(0, 1, 2, 3, 4, 5, 6);
-		$arrType = array(10);
+		$arrType = array(15);
 		foreach ($arrType as $type) {
 			$this->s->trace("TYPE ".$type);		
-			if($type==0)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015BD.csv");
-			if($type==1)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015WileyBase.csv");
+			if($type==0 || $type == 11)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015BD.csv");
+			if($type==1 || $type == 13)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015WileyBase.csv");
 			if($type==2)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015ISTEedition.csv");
 			if($type==3)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015Elsevier.csv");
 			if($type==4)$arr = $this->s->csvToArray("../bdd/import/DtsAuteursWiley.csv");
@@ -409,10 +430,10 @@ class ImportController extends Zend_Controller_Action
 			$i = 1;
 			$this->s->trace("nb Ligne ".count($arr));		
 			foreach ($arr as $r) {
-				//if($type==0)$this->importGlobalBD($r, $i);
-				if($type==0)$this->updateGlobalBD($r, $i);				
+				if($type==0)$this->importGlobalBD($r, $i);
+				if($type==11)$this->updateGlobalBD($r, $i);				
 				if($type==1)$this->importGlobalWileyBase($r, $i);
-				//if($type==2)$this->importGlobalIsteEdition($r, $i, 0);
+				if($type==13)$this->importGlobalIsteEdition($r, $i, 0);
 				if($type==2)$this->updateIsteEdition($r, $i);
 				if($type==3)$this->importGlobalElsevier($r, $i);
 				if($type==4)$this->importGlobalDtsAuteursWiley($r, $i);
@@ -421,12 +442,14 @@ class ImportController extends Zend_Controller_Action
 				$i++;
 				//if($i>1)break;
 			}
-		}
-		
-		if($type==7)$this->updateManquesLivre();
-		if($type==8)$this->updateManquesAuteur();
-		if($type==9)$this->nettoyerIsbn();
-		if($type==10)$this->upadateManquesIsbn();
+			
+			if($type==7)$this->updateManquesLivre();
+			if($type==8)$this->updateManquesAuteur();
+			if($type==9)$this->nettoyerIsbn();
+			if($type==10)$this->updateManquesIsbn();
+			if($type==14)$this->updateByBase();
+			if($type==15)$this->updateNbPage();
+		}		
 		
 		$this->s->trace("FIN ".__METHOD__);		
     }
@@ -871,29 +894,53 @@ class ImportController extends Zend_Controller_Action
 			$rIsbn = $this->dbIsbn->findByNum($r[28]);
 		}
 		
+		if(!$rIsbn){
+			$this->s->trace($i." ISBN INTROUVABLE ".$r[26]." ".$r[27]." ".$r[28]." ");	
+			$rIsbn = $this->dbLivre->findByAllTitre($r[13], $r[11]);
+			if($rIsbn)
+				$rIsbn = $rIsbn[0];
+			else
+				$this->s->trace($i." LIVRE INTROUVABLE ".$r[13]." ".$r[11]);	
+		}
+				
 		//vérifie si l'isbn est créé
 		if($rIsbn){
+			$this->s->trace($i." LIVRE ".$rIsbn["id_livre"]);	
+			
 			$idPlu = $this->dbProc->setProcessusForLivre('Projet livre', $rIsbn["id_livre"], 1, false);
 			
 			$this->s->trace($i." mise à jour des processus de production = ".$idPlu);	
-			/*			
-			$iste_tache = array(
-			  array('id_tache' => '15','id_processus' => '3','nom' => 'Réception manuscrit','ordre' => '1'),
-			  array('id_tache' => '16','id_processus' => '3','nom' => 'Réception traduction anglaise','ordre' => '2'),
-			  array('id_tache' => '17','id_processus' => '3','nom' => 'Prévision parution GB','ordre' => '3'),
-			  array('id_tache' => '18','id_processus' => '3','nom' => 'Prévision parution FR','ordre' => '4'),
-			  array('id_tache' => '23','id_processus' => '3','nom' => 'vérification orthographe','ordre' => '5'),
-			  array('id_tache' => '24','id_processus' => '3','nom' => 'vérification état civil','ordre' => '6'),
-			  array('id_tache' => '25','id_processus' => '3','nom' => 'Envoi proposal','ordre' => '7'),
-			  array('id_tache' => '26','id_processus' => '3','nom' => 'reception proposal','ordre' => '8')
-			);
-			*/						
 			if($r[24])$this->dbPrev->editLivreTache($idPlu, 15, array("prevision"=>$this->formatDateExcelToSql($r[24])));
 			if($r[29])$this->dbPrev->editLivreTache($idPlu, 15, array("fin"=>$this->formatDateExcelToSql($r[29])));
 			if($r[30])$this->dbPrev->editLivreTache($idPlu, 16, array("fin"=>$this->formatDateExcelToSql($r[30])));
 			if($r[31])$this->dbPrev->editLivreTache($idPlu, 17, array("prevision"=>$this->formatDateExcelToSql($r[31])));
 			if($r[32])$this->dbPrev->editLivreTache($idPlu, 18, array("prevision"=>$this->formatDateExcelToSql($r[32])));			
-			
+			//						
+			$this->s->trace($i." mise à jour date entrée base ".$r[2]);	
+			if($r[2])
+				$this->dbProp->editByLivre($rIsbn["id_livre"], array("date_debut"=>$this->formatDateExcelToSql($r[2],"mc")));
+
+			$this->s->trace($i." mise à jour date proposal :".$r[15]);	
+			if($r[15]=="reçu")
+				$this->dbPrev->editLivreTache($idPlu, 25, array("fin"=>new Zend_Db_Expr('NOW()')));
+			elseif ($r[15] && $r[15]!=" "){
+				$d = $this->formatDateExcelToSql($r[15],"mc");
+				$vals = " debut = '".$d."' , prevision = DATE_ADD('".$d."', INTERVAL 30 DAY), alerte = DATE_ADD('".$d."', INTERVAL 25 DAY)";
+				$this->dbPrev->editLivreTacheSql($vals, $idPlu, 25);
+				return;								
+			}
+							
+			$this->s->trace($i." mise à jour des dates de contrat ".$r[16]);	
+			if(substr($r[16], 0, 3)=="ENV")
+				$this->dbPrev->editLivreTache($idPlu, 37, array("debut"=>$this->formatDateExcelToSql(substr($r[16], 4))));							
+			elseif($r[16]){
+				$d = $this->formatDateExcelToSql($r[16]);
+				$this->dbPrev->editLivreTache($idPlu, 37, array("debut"=>null
+					,"fin"=>$d
+					,"prevision"=>null
+					,"alerte"=>null
+					));										
+			}
 		}
 		$this->s->trace("FIN ".__METHOD__);					
     } 
@@ -1014,6 +1061,7 @@ class ImportController extends Zend_Controller_Action
 					$this->s->trace(" livre supprimé ".$arrIdLivre[$k]." ".$ten);			
     				}
     			}
+    			/*
     			$arrDate = explode(",", $l["dates"]);
     			$arrIsbn = explode(",", $l["ids"]);
     			//vérifie s'il faut supprimer les isbn sans date
@@ -1031,6 +1079,7 @@ class ImportController extends Zend_Controller_Action
 					}
 				}				
 			}
+			*/
     		}
     		$this->s->trace("lignes traitées ".$i);		
 
@@ -1060,8 +1109,33 @@ class ImportController extends Zend_Controller_Action
     		$this->s->trace("FIN ".__METHOD__);		
     		
     }    
+
+	function updateNbPage(){
+		$this->s->trace("DEBUT ".__METHOD__);		
+
+		$dbP = new Model_DbTable_Iste_page();
+		
+		$arrL = $this->dbLivre->getNbPage();		
+		$i = 0;
+		$nb = count($arrL);
+    		$this->s->trace($i." nb=".$nb);
+    		for ($i = 0; $i < $nb; $i++) {
+    			$l = $arrL[$i];
+    			if($l["nb_page_fr"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"prévu FR","nombre"=>$l["nb_page_fr"]));
+    			if($l["nb_page_en"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"prévu GB","nombre"=>$l["nb_page_en"]));
+    			if($l["nb_page"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"final ".substr($l["type"], -2),"nombre"=>$l["nb_page"]));
+    		$this->s->trace($i." ".$l["id_livre"]." (".$l["type"]." ".substr($l["type"], -2).") : ".$l["nb_page_fr"]." ".$l["nb_page_en"]." ".$l["nb_page"]);		
+    		}
+    		$this->s->trace("lignes traitées ".$i);		
+
+    		wiley colonne 9 final GB
+    		
+    		
+    		$this->s->trace("FIN ".__METHOD__);		
+    		
+    }    
     
-    function upadateManquesIsbn(){
+    function updateManquesIsbn(){
 
 		require_once '../bdd/isbnSansLivre.php';
 		$oIsbn = 0;
@@ -1074,6 +1148,38 @@ class ImportController extends Zend_Controller_Action
 		}
     	
     }
+
+    function updateByBase(){
+    	
+		//met à jour la date de parution dans le planning		
+    		$rs = $this->dbIsbn->findParu();
+		foreach ($rs as $r) {
+			if($r["id_editeur"]==1)$idT = 18; else $idT = 17;
+			$rPrev = $this->dbPrev->findByProcessLivreTache(3, $r["id_livre"], $idT);
+			if($rPrev && (!$rPrev["fin"] || $rPrev["fin"]!="0000-00-00")){
+				$this->dbPrev->edit($rPrev['id_prevision'], array("fin"=>$r["date_parution"]));
+				$this->s->trace("Date fin mis à jour ".$r["id_livre"]." ".$r["date_parution"]);			
+			}else{
+				$this->s->trace("Prévision introuvable ".$r["id_livre"]." ".$idT);							
+			}	
+		}
+		
+		//met à jour les ordres d'affichage d'auteurs		
+    		$rs = $this->dbLiAut->getAll(array("id_livre","role DESC","ordre"));
+    		$oIdL = 0;
+    		$ordre = 1;
+		foreach ($rs as $r) {
+			if($oIdL != 0 && $oIdL!= $r["id_livre"])$ordre = 1;
+			// if(!$r["ordre"]){
+				$this->dbLiAut->edit($r["id_livrexauteur"], array("ordre"=>$ordre));
+				$this->s->trace("Ordre auteur mis à jour ".$r["id_livre"]." ".$r["id_auteur"]." ".$r["role"]." ".$ordre);							
+				$ordre ++;	
+			// }else $ordre = $r["ordre"];	
+			$oIdL = $r["id_livre"]; 
+		}
+		
+    	
+    }    
     
     function ajoutLivre($data){
 
@@ -1179,6 +1285,12 @@ class ImportController extends Zend_Controller_Action
     		if($format=="m"){
 	    		$arr = explode("-", $d);
     			$strDate = $arr[1]."-".$this->arrMois[$arr[0]]."-01";
+			$this->s->trace("Mois:".$d." : ".$strDate);
+    		}
+    		if($format=="mc"){
+	    		$arr = explode("-", $d);
+    			$strDate = $arr[1]."-".$this->arrMoisCourt[$arr[0]]."-01";
+			$this->s->trace("MoisCourt:".$d." : ".$strDate);
     		}
     		
 		//$this->s->trace($d." : ".$strDate);

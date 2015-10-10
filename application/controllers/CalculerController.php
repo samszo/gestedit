@@ -27,7 +27,8 @@ class CalculerController extends Zend_Controller_Action
     		$dbR = new Model_DbTable_Iste_royalty();    		
 		$this->view->rs = $dbR->setForAuteur();	
 		
-		$bdd = new Model_DbTable_Iste_livre();
+		//$bdd = new Model_DbTable_Iste_livre();
+		$bdd = new Model_DbTable_Iste_auteur();
 		$this->view->rs = $bdd->getAllVente();
 		
 		$this->view->message = "Les royalties sont calculés.";		
@@ -47,9 +48,16 @@ class CalculerController extends Zend_Controller_Action
     			case "livre":
     				$rs = $dbRoy->paiementLivre(implode(",", $this->_getParam('ids')));
 				foreach ($rs as $r) {
-			    		$rapport->creaPaiement($this->_getParam('idMod'),$r);
+			    		$rapport->creaPaiement($r);
 				}
-				$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+    				break;
+    			case "auteur":
+    				$rs = $dbRoy->paiementAuteur(implode(",", $this->_getParam('ids')));
+				foreach ($rs as $r) {
+			    		$rapport->creaPaiement($r);
+				}
+				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
     				break;
     		}
     				
@@ -58,6 +66,35 @@ class CalculerController extends Zend_Controller_Action
 		
     }
     
+	public function rapportAction()
+    {
+    		$this->initInstance();
+    		$dbRap = new Model_DbTable_Iste_rapport();
+    		$rapport = new Flux_Rapport();    		
+    		$result = array();
+    		
+    		$type = $this->_getParam('type');
+    		switch ($type) {
+    			case "EtatSerie":
+    				$rs = $dbRoy->paiementLivre(implode(",", $this->_getParam('ids')));
+				foreach ($rs as $r) {
+			    		$rapport->creaPaiement($r);
+				}
+				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+    				break;
+    			case "auteur":
+    				$rs = $dbRoy->paiementAuteur(implode(",", $this->_getParam('ids')));
+				foreach ($rs as $r) {
+			    		$rapport->creaPaiement($r);
+				}
+				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+    				break;
+    		}
+    				
+		$this->view->rs = $result;
+    		$this->view->message = "Les paiements sont édités.";		
+		
+    }    
     
     public function tauxdeviseAction()
     {
@@ -108,7 +145,7 @@ class CalculerController extends Zend_Controller_Action
 		    $this->view->uti = json_encode($ssUti->uti);
 		}else{			
 		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
-		    $this->_redirect('/auth/login');		    
+		    $this->_redirect('/auth/finsession');		    
 		}
 		    	
 		$this->view->ajax = $this->_getParam('ajax');

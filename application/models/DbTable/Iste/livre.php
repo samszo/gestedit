@@ -28,6 +28,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
        ,"Model_DbTable_Iste_isbn"
        ,"Model_DbTable_Iste_web"
        ,"Model_DbTable_Iste_proposition"
+       ,"Model_DbTable_Iste_auteurxcontrat"
        );    
     
     /**
@@ -95,6 +96,13 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
+    		//vérifie les contrats en cours
+    		$dbR = new Model_DbTable_Iste_royalty();
+    		$rs = $dbR->verifEnCoursByIdLivre($id);
+    		if($rs[0]["mtDue"]>0){
+    			return array("message"=>"Il reste : ".$rs[0]["mtDue"]." &pound; à payer ou encaisser.<br/>Vous ne pouvez pas supprimer le livre.");
+    		}
+		
     		$n = array();
         $dt = $this->getDependentTables();
         foreach($dt as $t){
@@ -124,7 +132,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr, '/', titre_en)"))
+            		,array("id"=>$this->_primary[1],"text"=>"CONCAT(IFNULL(titre_fr,''), '/', IFNULL(titre_en,''))"))
             ->order("titre_fr");        
         return $this->fetchAll($query)->toArray();
 	} 
@@ -138,24 +146,34 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
      * @param int 		$limit
      * @param int 		$from
      * @param string 	$where
+     * @param string 	$ids
      * 
-     * 
+     * @return array
      */
-    public function getAll($order=null, $limit=0, $from=0, $where=null)
+    public function getAll($order=null, $limit=0, $from=0, $where=null,$ids=false)
     {
    	
 	    	$query = $this->select()
 			->from( array("l" => "iste_livre"),array("recid"=>"id_livre","id_livre","reference","titre_fr","soustitre_fr","titre_en","soustitre_en","num_vol","type_1","type_2") )
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("i" => "iste_isbn"),
+                'i.id_livre = l.id_livre', array("isbns"=>"GROUP_CONCAT(DISTINCT(i.num))"))
+            ->joinLeft(array("e" => "iste_editeur"),
+                'e.id_editeur = i.id_editeur', array("editeurs"=>"GROUP_CONCAT(DISTINCT(e.nom))"))
             ->joinLeft(array("la" => "iste_livrexauteur"),
-                'la.id_livre = l.id_livre', array())
+                'la.id_livre = l.id_livre AND la.ordre > 0 AND la.role = "auteur"', array())
             ->joinLeft(array("a" => "iste_auteur"),
                 'a.id_auteur = la.id_auteur', array("auteurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',a.prenom,' ',a.nom)))"))
-            /*
-            ->joinLeft(array("i" => "iste_isbn"),
-                'i.id_livre = l.id_livre', array("isbns"=>"GROUP_CONCAT(DISTINCT(i.num))"))
-            */
+            ->joinLeft(array("lad" => "iste_livrexauteur"),
+                'lad.id_livre = l.id_livre AND lad.ordre > 0 AND lad.role = "directeur"', array())
+            ->joinLeft(array("ad" => "iste_auteur"),
+                'ad.id_auteur = lad.id_auteur', array("directeurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ad.prenom,' ',ad.nom)))"))
+            ->joinLeft(array("lac" => "iste_livrexauteur"),
+                'lac.id_livre = l.id_livre AND lac.ordre > 0 AND lac.role = "coordinateur"', array())
+            ->joinLeft(array("ac" => "iste_auteur"),
+                'ac.id_auteur = lac.id_auteur', array("coordinateurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ac.prenom,' ',ac.nom)))"))
             ->group("l.id_livre")
+            //->order("la.ordre")
             ;
         if($order != null)
         {
@@ -169,6 +187,9 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
         if($limit != 0)
         {
             $query->limit($limit, $from);
+        }
+        if($ids){
+            $query->where("l.id_livre IN (".$ids.")");
         }
 
         return $this->fetchAll($query)->toArray();
@@ -314,7 +335,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 	    	
     }
     
-/**
+	/**
      * Récupère toutes les entrées Iste_livre avec certains critères
      * de tri, intervalles
      * @param int $idLivre
@@ -363,6 +384,50 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 		return $rs;
 	    	
     }    
+    
+	/**
+     * Récupère toutes les entrées Iste_livre avec certains critères
+     * de tri, intervalles
+     * @param int $idLivre
+     * @param int $resume
+     * 
+     * @return array
+     * 
+     */
+    public function getIdAuteurVente($idLivre, $resume=true)
+    {
+		$sql = "SELECT 	
+			a.id_auteur recid, CONCAT(a.prenom,' ',a.nom) auteur
+			, COUNT(DISTINCT l.id_livre) nbL
+            , GROUP_CONCAT(DISTINCT IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,'')) livres
+			, GROUP_CONCAT(DISTINCT(i.num)) isbns
+			, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d, GROUP_CONCAT(DISTINCT(b.nom)) boutiques			
+			, MAX(v.date_vente) date_last , MIN(v.date_vente) date_first			
+			, SUM(r.montant_livre) mt_e_r
+			, p.prix_livre, prix_euro, prix_dollar
+			FROM iste_auteur a 
+				INNER JOIN iste_livrexauteur la ON a.id_auteur = la.id_auteur
+				INNER JOIN iste_livre l ON l.id_livre = la.id_livre
+				INNER JOIN iste_isbn i ON i.id_livre = l.id_livre 
+				INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
+				INNER JOIN iste_boutique b ON b.id_boutique = v.id_boutique
+				LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente
+				LEFT JOIN iste_prix p ON p.id_prix = v.id_prix
+    			WHERE l.id_livre = ".$idLivre."
+			GROUP BY a.id_auteur";            
+	    	$db = $this->_db->query($sql);
+	    	$rs = $db->fetchAll();
+	    	
+	    	if($resume){
+			//ajoute les résumés
+			$bdd = new Model_DbTable_Iste_vente();
+			$rs = array_merge($rs,$bdd->getResume());
+	    	}
+		return $rs;
+	    	
+    }    
+    
+    
     	/**
      * Recherche une entrée Iste_livre avec la valeur spécifiée
      * et retourne cette entrée.
@@ -411,11 +476,30 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     public function findByTitre($titre, $langue)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_livre") )                           
+                    ->from( array("i" => "iste_livre") )
                     ->where( "i.titre_".$langue." = ?", $titre);
 
         return $this->fetchAll($query)->toArray(); 
     }
+    	/**
+     * Recherche une entrée Iste_livre avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param varchar $titreFr
+     * @param varchar $titreEn
+     *
+     * @return array
+     */
+    public function findByAllTitre($titreFr, $titreEn)
+    {
+        $query = $this->select()
+           	->from( array("i" => "iste_livre") )
+			->where( "i.titre_en = ?", $titreEn)
+           	->where( "i.titre_fr = ?", $titreFr);
+
+        return $this->fetchAll($query)->toArray(); 
+    }
+    
     /**
      * Recherche une entrée Iste_livre avec la valeur spécifiée
      * et retourne cette entrée.
@@ -540,6 +624,8 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     {
 	$sql = "SELECT GROUP_CONCAT(DISTINCT l.id_livre) ids
 		FROM iste_livre l ";
+		$where = false;
+	
 	    	foreach ($arrWhere as $w) {
 	    		//création de l'opérateur
 	    		//print_r($w);
@@ -619,27 +705,45 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 					$sql .= "INNER JOIN iste_processusxlivre pc ON pc.id_livre = l.id_livre AND pc.id_processus = 3 
 						INNER JOIN iste_prevision p ON p.id_pxu = pc.id_plu AND p.id_tache =".$arrTache[1]." AND ".$op;
 				break;
+				case "fin":
+					$sql .= "INNER JOIN iste_processusxlivre pc ON pc.id_livre = l.id_livre AND pc.id_processus = 3 
+						INNER JOIN iste_prevision p ON p.id_pxu = pc.id_plu AND p.id_tache =".$arrTache[1]." AND ".$op;
+				break;
+				case "relance":
+					$sql .= "INNER JOIN iste_processusxlivre pc ON pc.id_livre = l.id_livre AND pc.id_processus = 3 
+						INNER JOIN iste_prevision p ON p.id_pxu = pc.id_plu AND ".$op;
+				break;
+				case "alerte":
+					$sql .= "INNER JOIN iste_processusxlivre pc ON pc.id_livre = l.id_livre AND pc.id_processus = 3 
+						INNER JOIN iste_prevision p ON p.id_pxu = pc.id_plu AND ".$op;
+				break;
 				case "date_parution":
 					$sql .= "INNER JOIN iste_isbn i ON i.id_livre = l.id_livre AND i.date_parution != '0000-00-00' AND ".$op;
 				break;
 				default:
-					$sql .= " WHERE ".$op;
+					if(!$where)
+						$where = " WHERE ".$op;
+					else 
+						$where .= " AND ".$op;
 				break;
 			}
 		}
-		
-		//echo $sql;
+		if($where)		
+			$sql .= $where;
+		//echo $sql; return;
 	    	$db = $this->_db->query($sql);
 	    return $db->fetchAll();
     }
     	/**
      * récupère les livres à traduire
+     * 
+     * @param string		$ids
      *
      * @return array
      */
-    public function getTraductionLivre()
+    public function getTraductionLivre($ids=false)
     {
- 	$sql = "SELECT 
+ 		$sql = "SELECT 
 			i.id_isbn recid, i.date_parution, i.num isbn, i.nb_page 
 			, GROUP_CONCAT(DISTINCT CONCAT(a.prenom, ' ', a.nom)) auteurs
 			, l.titre_en, l.soustitre_en, l.type_2, l.id_livre
@@ -650,8 +754,9 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 			INNER JOIN iste_proposition p ON p.id_livre = l.id_livre     
 			INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.role = 'auteur'
 			INNER JOIN iste_auteur a ON a.id_auteur = la.id_auteur 
-			INNER JOIN iste_editeur e ON e.id_editeur = i.id_editeur 
-		GROUP BY i.id_livre";
+			INNER JOIN iste_editeur e ON e.id_editeur = i.id_editeur"; 
+		if($ids)$sql .= " WHERE i.id_isbn IN (".$ids.")";
+ 		$sql .= " GROUP BY i.id_isbn";
 	    	//echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
 	    	return $db->fetchAll();
@@ -798,7 +903,8 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
 			pGB.maj = (SELECT MAX(pGBm.maj) FROM iste_page pGBm WHERE pGBm.id_livre = pGB.id_livre AND pGBm.type = 'prévu GB')
         LEFT JOIN iste_page pFR ON pFR.id_livre = l.id_livre AND
 			pFR.maj = (SELECT MAX(pFRm.maj) FROM iste_page pFRm WHERE pFRm.id_livre = pFR.id_livre AND pFRm.type = 'prévu FR')
-	GROUP BY l.id_livre";
+		WHERE i.date_parution IS NULL OR i.date_parution > NOW()
+		GROUP BY l.id_livre";
  	
 	    	//echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
@@ -855,6 +961,24 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
 			WHERE
 				i.id_livre IS NULL  
 			ORDER BY l.id_livre ";
+	    	//echo $sql."<br/>";
+	    	$db = $this->_db->query($sql);
+	    	return $db->fetchAll();
+    }    
+    
+	/**
+     * récupère les nb de page
+     *     
+     * @return array
+     */
+    public function getNbPage()
+    {
+ 		$sql = "SELECT l.id_livre
+			, p.nb_page_en, p.nb_page_fr 
+			, i.nb_page, i.type
+			FROM iste_livre l
+			LEFT JOIN iste_proposition p ON p.id_livre = l.id_livre AND (nb_page_fr > 0 OR nb_page_en > 0)
+			LEFT JOIN iste_isbn i ON i.id_livre = l.id_livre AND nb_page > 0 ";
 	    	//echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
 	    	return $db->fetchAll();

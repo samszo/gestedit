@@ -70,7 +70,7 @@ try {
     	$dbProcess->getTraductionByLivre(1);
 	*/
 	
-	//
+	/*
 	$s = new Flux_Spip("spip_iste",true);
 	$dbAut = new Model_DbTable_Iste_auteur();	
 	//charge la liste des auteurs
@@ -79,19 +79,19 @@ try {
 	for ($i = 0; $i < $nbM; $i++) {			
 			//if($arrAuteur[$i]["id_auteur"]==200)
 				$s->creaAuteurFromIste($arrAuteur[$i]);
-	}
-		
-	//
+	}		
+	*/
 	
-	/*
+	//
 	$result = array();
     	$dbR = new Model_DbTable_Iste_royalty();
-	$rs = $dbR->paiementLivre("1249");
-    	$rapport = new Flux_Rapport();    		
+	//$rs = $dbR->paiementLivre("1249");
+	$rs = $dbR->paiementAuteur("206");
+	$rapport = new Flux_Rapport();    		
 	foreach ($rs as $r) {
     		$result[] = $rapport->creaPaiement($r);
 	}
-	*/
+	//
 
 	$s->trace("FIN TEST");		
 	

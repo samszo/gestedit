@@ -87,12 +87,14 @@ class Model_DbTable_Iste_tache extends Zend_Db_Table_Abstract
      *
      * @param integer $id
      * @param array $data
+     * @param boolean $bGetRow
      *
      * @return void
      */
-    public function edit($id, $data)
+    public function edit($id, $data, $bGetRow=true)
     {           	
     		$this->update($data, 'iste_tache.id_tache = ' . $id);
+    		if($bGetRow)return $this->getListe($id);
     }
     
     /**

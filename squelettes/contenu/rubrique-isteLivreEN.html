@@ -1,1 +1,27 @@
-COUCOU
+<BOUCLE_contenu_rubrique(RUBRIQUES){id_rubrique}>
+[(#REM) Fil d'Ariane ]
+<p id="hierarchie"><a href="#URL_SITE_SPIP/"><:accueil_site:></a><BOUCLE_ariane(HIERARCHIE){id_rubrique}> &gt; <a href="#URL_RUBRIQUE">[(#TITRE|couper{80})]</a></BOUCLE_ariane>[ &gt; <strong class="on">(#TITRE|couper{80})</strong>]</p>
+
+<div class="contenu-principal">
+  <div class="cartouche">
+      <h1 class="h1 #EDIT{titre}">#DESCRIPTIF</h1>
+  </div>
+
+  [<div class="#EDIT{texte} chapo">(#TEXTE)</div>]
+
+</div>
+
+  [(#REM) Liste des titres ]
+   <B_articles>
+  <div class="liste articles">
+      #ANCRE_PAGINATION
+      <ul class="liste-items">
+          <BOUCLE_articles(ARTICLES) {id_rubrique}{lang= #ENV{lang}} {par titre} {pagination 10}>
+			#MODELE{livre_resume}
+          </BOUCLE_articles>
+      </ul>
+      [<p class="pagination">(#PAGINATION)</p>]
+  </div>
+  </B_articles>
+
+</BOUCLE_contenu_rubrique>

@@ -175,9 +175,10 @@ function initParam() {
 			            c.obj = 'licence';
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		        onDelete: function(event) {            
@@ -206,6 +207,7 @@ function initParam() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){
 				            		    	arrListes[type].push(js.rs[0]);			                  
 					                var g = w2ui['grid_<?php echo $idPage;?>_licence'];
@@ -247,14 +249,16 @@ function initParam() {
 			        	openPopupAjoutBoutique();            
 			    },
 			    onSave: function(event) {
-		            var changes = w2ui['grid_<?php echo $idPage;?>_licence'].getChanges();		            
+		            var changes = w2ui['grid_<?php echo $idPage;?>_boutique'].getChanges();		            
 		            changes.forEach(function(c, i){
 			            c.obj = 'boutique';
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+				        			setListe(js.rs[0],"boutique");
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		        onDelete: function(event) {            
@@ -280,6 +284,7 @@ function initParam() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){
 				            		    	arrListes["boutique"].push(js.rs[0]);			                  
 					                var g = w2ui['grid_<?php echo $idPage;?>_boutique'];
@@ -336,9 +341,10 @@ function initParam() {
 			            c.obj = 'uti';
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		        onDelete: function(event) {            
@@ -368,6 +374,7 @@ function initParam() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){
 				            		    	arrListes["uti"].push(js.rs[0]);			                  
 					                var g = w2ui['grid_<?php echo $idPage;?>_uti'];
@@ -414,6 +421,7 @@ function initParam() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -441,6 +449,7 @@ function initParam() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							p,
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){
 					                var g = w2ui['grid_<?php echo $idPage;?>_usercol'];
 									g.add(js.rs);
@@ -487,6 +496,7 @@ function initParam() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -497,9 +507,11 @@ function initParam() {
 			            c.obj = 'tache';
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+				        			setListe(js.rs[0],"tache");
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		    },	
@@ -524,7 +536,8 @@ function initParam() {
 		                data.obj = "tache";
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
-			            		function(js){
+			            		function(js){			            		
+			            			finsession(js);
 			            			if(js.rs){					            			
 				            		    	arrListes['tache'].push(js.rs[0]);			                  
 						            var g = w2ui['grid_<?php echo $idPage;?>_tache'];
@@ -625,7 +638,7 @@ function getGridCol(type){
 	    toolbar: {
             items: [
                 { id: 'copier', type: 'button', caption: 'Copier', icon: 'fa-files-o' },
-                { id: 'fusion', type: 'button', caption: 'Fusionner', icon: 'fa-compress' },
+                { id: 'fusion', type: 'button' ,hidden:type=="serie", caption: 'Fusionner', icon: 'fa-compress' },
                 { id: 'users', type: 'button', caption: 'Participants', icon: 'fa-users' },                
             ],
             onClick: function (event) {
@@ -672,6 +685,7 @@ function addParam(obj, type){
 	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 		p,
 		function(js){
+			finsession(js);
 	        	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
     		    	arrListes[type].push(js.rs[0]);			                  
 			w2alert(js.message);
@@ -688,13 +702,11 @@ function saveParam(obj, typeP){
         		c = {"obj":obj,"recid":c.recid,"nom":c.text};
 	    	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
     			c,
-    			function(html){
-    				//remplace la valeur enregistrée
-    				arrListes[typeP].forEach(function(r){
-        				if(r.recid==c.recid)r.text=c.nom;
-    				})
-    				if(changes.length==i+1)w2alert(html);
-    			});                        
+			function(js){
+	    			finsession(js);
+	        		setListe(js.rs[0],typeP);
+        			if(changes.length==i+1)w2alert(js.message);
+        		},"json");                        
     });	
 }
 
@@ -714,6 +726,7 @@ function delParam(event, obj, type){
 		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 			p,
 	    		function(js){
+				finsession(js);
 				arrListes[type] = arrListes[type].filter(function(r){
 					return r.recid==p.id ? false : true;
 				})		
@@ -735,6 +748,7 @@ function copierCol(type){
 		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/copier',
 			p,
 	    		function(js){
+				finsession(js);
 			    	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
 			    	arrListes[type].push(js.rs[0]);
 			    	selectRowInGrid(js.rs[0].recid, 'grid_<?php echo $idPage;?>_'+type)			                  
@@ -753,6 +767,7 @@ function fusionCol(type){
 	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/fusion',
 		p,
     		function(js){
+			finsession(js);
 		    	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
 		    	arrListes[type].push(js.rs[0]);			                  
 			w2alert(js.message);
@@ -811,6 +826,7 @@ function openPopupColUser(type) {
 	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/finduser',
 		p,
     		function(js){
+			finsession(js);
 
 		    w2popup.open({
 		        title   : itemSelect.titre_fr+' / '+itemSelect.titre_en,

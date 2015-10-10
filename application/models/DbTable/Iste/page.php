@@ -51,7 +51,7 @@ class Model_DbTable_Iste_page extends Zend_Db_Table_Abstract
 	    	$id=false;
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
-	    		//if(!isset($data['debut']))$data['debut']= new Zend_Db_Expr('NOW()');
+	    		if(!isset($data['maj']))$data['maj']= new Zend_Db_Expr('NOW()');
 	    		$id = $this->insert($data);
 	    	}
 	    	if($rs)

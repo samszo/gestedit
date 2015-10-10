@@ -30,7 +30,7 @@ class Model_DbTable_Iste_prix extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_prix'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($v)$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_prix; else $id=false;

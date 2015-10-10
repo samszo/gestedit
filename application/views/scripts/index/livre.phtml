@@ -69,8 +69,8 @@ function initLivre() {
 		    layoutDetail1 : {
 		        name: 'layoutDetail1_<?php echo $idPage;?>',
 		        panels: [
-		            { type: 'left', size: '305px', resizable: true, style: pstyleDetail},
-		            { type: 'main', size: '450px', resizable: true, style: pstyleDetail},
+		            { type: 'left', size: '350px', resizable: true, style: pstyleDetail},
+		            { type: 'main', size: '400px', resizable: true, style: pstyleDetail},
 		        ]
 		    },		    
 		    layoutThemes : {
@@ -112,6 +112,7 @@ function initLivre() {
 		            	toolbarAdd      : true,
 		            	toolbarDelete   : true,
 		            	toolbarSave		: true,
+		            	selectColumn		: true,
 		            	footer: true,
 		        },
 		        multiSearch: true,
@@ -119,15 +120,27 @@ function initLivre() {
 				    { field: 'titre_fr', caption: 'Titre FR', type: 'text' },
 				    { field: 'titre_en', caption: 'Titre EN', type: 'text' },
 		            { field: 'auteurs', caption: 'Auteurs', type: 'text', hidden:true },
-		            { field: 'prenom', caption: 'Prénom auteur', type: 'text' },
-		            { field: 'nom', caption: 'Nom auteur', type: 'text' },
+		            { field: 'directeurs', caption: 'Auteurs', type: 'text', hidden:true },
+		            { field: 'coordinateurs', caption: 'Auteurs', type: 'text', hidden:true },
+		            { field: 'prenom', caption: 'Prénom', type: 'text' },
+		            { field: 'nom', caption: 'Nom', type: 'text' },
 		            { field: 'num', caption: 'ISBN', type: 'text' },
 		            { field: 'id_comite', caption: 'Comité', type: 'combo', options: { items: arrListes['comite']} },
 		            { field: 'id_serie', caption: 'Série', type: 'combo', options: { items: arrListes['serie']} },
 		            { field: 'tache-15-prevision', caption: 'Arrivée prévue du manuscrit', type: 'date'},
-		            { field: 'tache-16-prevision', caption: 'Arrivée prévue remise de traduction', type: 'date'},
+		            { field: 'tache-15-fin', caption: 'Manuscrit arrivé', type: 'date'},
+		            { field: 'tache-16-prevision', caption: 'Arrivée prévue de la traduction', type: 'date'},
+		            { field: 'tache-16-fin', caption: 'Traduction arrivée', type: 'date'},
 		            { field: 'tache-18-prevision', caption: 'Parution FR prévue', type: 'date'},
+		            { field: 'tache-18-fin', caption: 'Date parution FR', type: 'date'},
 		            { field: 'tache-17-prevision', caption: 'Parution GB prévue', type: 'date'},
+		            { field: 'tache-17-fin', caption: 'Date parution GB', type: 'date'},
+		            { field: 'tache-26-prevision', caption: 'Réception prévue proposal', type: 'date'},
+		            { field: 'tache-26-fin', caption: 'Proposal reçu', type: 'date'},
+		            { field: 'tache-37-prevision', caption: 'Réception prévue contrat', type: 'date'},
+		            { field: 'tache-37-fin', caption: 'Contrat reçu', type: 'date'},
+		            { field: 'tache-all-relance', caption: 'Dernière relance', type: 'date'},
+		            { field: 'tache-all-alerte', caption: 'Date alerte', type: 'date'},
 		            { field: 'date_parution', caption: 'Parution définitive', type: 'date'},
 		        ],
 		        columns: [                
@@ -136,6 +149,8 @@ function initLivre() {
 		                editable: { type: 'int'}
 		            },		            
 		            { field: 'auteurs', caption: 'Auteurs', size: '20%', sortable: true, resizable: true},
+		            { field: 'directeurs', caption: 'Directeurs', size: '20%', sortable: true, resizable: true},
+		            { field: 'coordinateurs', caption: 'Coordinateurs', size: '20%', sortable: true, resizable: true},
 		            { field: 'titre_fr', caption: 'Titre français', size: '20%', sortable: true, resizable: true, 
 		                editable: { type: 'text' }
 		            },
@@ -148,6 +163,8 @@ function initLivre() {
 		            { field: 'soustitre_en', caption: 'Sous titre anglais', size: '20%', sortable: true, resizable: true, 
 		                editable: { type: 'text'},
 		            },		            
+		            { field: 'isbns', caption: 'ISBN', size: '60px', sortable: true, resizable: true},		            
+		            { field: 'editeurs', caption: 'Co-éditeur', size: '60px', sortable: true, resizable: true},		            
 		            { field: 'num_vol', caption: 'N° vol.', size: '60px', sortable: true, resizable: true, 
 		                editable: { type: 'int'},
 		            },		            
@@ -176,7 +193,8 @@ function initLivre() {
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
-		                		open(urlP+'export?obj=livre',"_blank")
+				            var ids = w2ui.grid_<?php echo $idPage;?>.getSelection();
+		                		open(urlP+'export?obj=livre&ids='+ids,"_blank");
 		                }
 		                if (event.target == 'export_tresor') {
 		                		open(urlP+'export?obj=tresor',"_blank")
@@ -191,6 +209,7 @@ function initLivre() {
 			            		$.get('<?php if(!$this->ajax) echo '../'; ?>cherche/livre',
 							{"searchData":event.searchData},
 			            		function(js){
+			            			finsession(js);
 			            			var ids = [];
 			            			js.rs.forEach(function(d){
 			            				rsLivre.forEach(function(l, i){
@@ -232,17 +251,21 @@ function initLivre() {
 			            if(c.type_2)c.type_2=c.type_2.text;			            
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },
 		        onDelete: function(event) {            
 					var p = {id:itemSelect.recid, obj:'livre'};
-					if(event.force){
+					if(event.force){						
+						var g = w2ui[event.target];
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 							p,
 			            		function(js){
+			            			finsession(js);
+								g.add(itemSelect);
 			            			w2alert(js.message);
 			           		},"json");
 					}
@@ -253,6 +276,7 @@ function initLivre() {
 		            w2ui['layout_<?php echo $idPage;?>'].hide('right', true);
 			    },
 		        onClick: function (event) {
+					if(itemSelect && itemSelect.recid == event.recid) return;
 		            itemSelect = this.get(event.recid);
 					showDataLivre();           			           		           
 		        }	    
@@ -292,6 +316,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+			            			finsession(js);
 				                var g = w2ui['grid_<?php echo $idPage;?>'];
 								g.add(js.rs.rsLivre);
 					        		selectRowInGrid(js.rs.rsLivre[0].id_livre,'grid_<?php echo $idPage;?>');
@@ -313,8 +338,8 @@ function initLivre() {
 			        fields: [
 			            { name: 'date_debut', type: 'date', options:{format: 'yyyy-mm-dd'}, required: true,  html: {caption: 'Date entrée base'} },
 			            //{ name: 'date_contrat', type: 'date', options:{format: 'yyyy-mm-dd'}, required: false, html: { caption: 'Date de contrat'} },
-			            { name: 'base_contrat', type: 'list', required: false, html: { caption: 'Base contrat'}
-			            		,options: { items: arrListes['contrat'].base }} , 
+			            { name: 'base_contrat', type: 'list', required: false, html: { caption: 'Base contractuelle'}
+			            		,options: { items: arrListes['contratBase']}} , 
 			            //{ name: 'date_manuscrit', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date du manuscrit' } },
 			            { name: 'langue', type: 'list', html: { caption: 'langue du manuscrit'}
 			            		,options: { items: arrListes['langues'] }} , 
@@ -337,9 +362,10 @@ function initLivre() {
 			                data.obj = "proposition";
 				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 								data,
-				            		function(message){
-				            			w2alert(message);
-				           		});
+				            		function(js){
+				            			finsession(js);
+				            			w2alert(js.message);
+				           		},"json");
 			            }
 			        }
 			    },
@@ -360,9 +386,10 @@ function initLivre() {
 			            { field: 'tache', caption: 'Tâche', size: '175px', sortable: true, resizable: true},
 			            { field: 'debut', caption: 'Origine', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 			            { field: 'prevision', caption: 'Prévision', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+			            { field: 'relance', caption: 'Der. relance', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+			            { field: 'alerte', caption: 'Date alerte', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 			            { field: 'fin', caption: 'Fin', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 			            { field: 'commentaire', caption: 'Commentaires', editable: { type: 'text'}, size: '200px', sortable: true, resizable: true},
-			            { field: 'alerte', caption: 'Date alerte', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 			        ],
 			        onClick: function (event) {
 			        },
@@ -374,11 +401,15 @@ function initLivre() {
 				            if(c.prevision) c.prevision = w2utils.formatDate(c.prevision, 'yyyy-mm-dd');
 				            if(c.fin) c.fin = w2utils.formatDate(c.fin, 'yyyy-mm-dd');
 				            if(c.alerte) c.alerte = w2utils.formatDate(c.alerte, 'yyyy-mm-dd');
+				            if(c.relance) c.relance = w2utils.formatDate(c.relance, 'yyyy-mm-dd');
 					        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 				        			c,
-				        			function(html){
-				        				if(changes.length==i+1)w2alert(html);
-				        			});                        
+				        			function(js){
+				            			finsession(js);
+				        				if(c.debut)
+							        		w2ui['grid_<?php echo $idPage;?>_process_livre'].set(c.recid, js.rs);
+				        				if(changes.length==i+1)w2alert(js.message);
+				        			},"json");                        
 			            });
 			        },
 	    		        onDelete: function(event) {            
@@ -388,6 +419,7 @@ function initLivre() {
 	    			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 	    							p,
 	    			            		function(js){
+				            			finsession(js);
 	    			            			w2alert(js.message);
 	    			           		},"json");
 	    					}
@@ -422,6 +454,7 @@ function initLivre() {
 				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 								data,
 				            		function(js){
+				            			finsession(js);
 				            			if(js.rs){					            			
 										g.add(js.rs);
 										g.selectNone();
@@ -460,6 +493,7 @@ function initLivre() {
 				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 									p,
 					            		function(js){
+					            			finsession(js);
 					            			w2alert(js.message);
 					           		},"json");
 						}
@@ -493,6 +527,7 @@ function initLivre() {
 					            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 									data,
 					            		function(js){
+					            			finsession(js);
 					            			if(js.rs){					            			
 											g.add(js.rs);
 											g.selectNone();
@@ -517,9 +552,10 @@ function initLivre() {
 			                data.obj = "proposition";
 				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 								data,
-				            		function(html){
-				            			w2alert(html);
-				           		});
+				            		function(js){
+				            			finsession(js);
+				            			w2alert(js.message);
+				           		},"json");
 			            }
 			        }
 			    },	
@@ -555,6 +591,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -586,6 +623,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							{obj:"livrexcollection",id_livre:itemSelect["id_livre"],id_collection:data.collection.id},
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){					            			
 									g.add(js.rs);
 									g.selectNone();
@@ -631,6 +669,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -662,6 +701,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							{obj:"comitexlivre",id_livre:itemSelect["id_livre"],id_comite:data.comite.id},
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){					            			
 									g.add(js.rs);
 									g.selectNone();
@@ -707,6 +747,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -738,6 +779,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							{obj:"livrexserie",id_livre:itemSelect["id_livre"],id_serie:data.serie.id},
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){					            			
 									g.add(js.rs);
 									g.selectNone();
@@ -764,12 +806,12 @@ function initLivre() {
 	                	columnHeaders	: true},
 	            name: 'grid_<?php echo $idPage;?>_isbn', 
 	            columns: [                
-	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
+	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:false, sortable: true, resizable: true },
 			            { field: 'num', caption: 'ISBN', size: '140px', sortable: true, resizable: true,
-			                editable: { type: 'text'}},
+			                editable: { type: 'text',autoFormat:false}},
 			            { field: 'date_parution', caption: 'Parution', size: '90px', sortable: true, resizable: true,
 			                editable: { type: 'date'}},
-			            { field: 'id_editeur', caption: 'Editeur', size: '130px', sortable: true, resizable: true,
+			            { field: 'id_editeur', caption: 'Co-éditeur', size: '130px', sortable: true, resizable: true,
 			            	editable: { type: 'select', items: arrListes['editeur'] }, 
 			                render: function (record, index, col_index) {
 			                    var html = '';
@@ -805,9 +847,10 @@ function initLivre() {
 			            if(c.date_parution)c.date_parution = w2utils.formatDate(c.date_parution, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },
 		        onDelete: function(event) {            
@@ -817,6 +860,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 			            			{'id':s[0],'obj':'isbn'},
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -855,6 +899,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){					            			
 									g.add(js.rs);
 									g.selectNone();
@@ -905,9 +950,10 @@ function initLivre() {
 			            delete c.type_prix;
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
+			        			function(js){
+			            			finsession(js);
 			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			},"json");                        
 		            });
 		        },
 		        onDelete: function(event) {            
@@ -965,8 +1011,9 @@ function initLivre() {
 			        }
 			    },	
 	    		gridAuteur : {
-	            header: 'Auteurs',
-	            show: {toolbar		: true,
+	            header: 'Participants',
+	            show: {
+		            toolbar		: true,
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
@@ -978,7 +1025,7 @@ function initLivre() {
 	            name: 'grid_<?php echo $idPage;?>_auteur', 
 	            columns: [                
 	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:true, sortable: true, resizable: true },
-			            { field: 'id_auteur', caption: 'Auteur', size: '60%', sortable: true, resizable: true,
+			            { field: 'id_auteur', caption: 'Auteur', size: '160px', sortable: true, resizable: true,
 			            	editable: { type: 'select', items: arrListes['auteur'] }, 
 			                render: function (record, index, col_index) {
 			                    var html = '';
@@ -987,26 +1034,43 @@ function initLivre() {
 			                    }
 			                    return html;
 			                }},	  		            
-			            { field: 'role', caption: 'Role', size: '40%', sortable: true, resizable: true,
+			            { field: 'role', caption: 'Role', size: '90px', sortable: true, resizable: true,
 				                editable: { type: 'list', items: arrListes['roles'], showAll: true },
 				                render: function (record, index, col_index) {
 				                    var html = this.getCellValue(index, col_index);
 				                    return html.text ? html.text : html;
 				                }},
+	  		            { field: 'ordre', caption: 'Ordre couv.', size: '100px', sortable: true, resizable: true, editable: { type: 'int'} },
 	            ],
 	            onAdd: function(event) {
 		        		openPopupAjoutAuteur();
 			    },
+		        toolbar: {
+		            items: [
+		                { id: 'ajoutContrat', type: 'button', caption: 'Créer contrat', icon: 'fa-file' }
+		            ],
+		            onClick: function (event) {
+		                if (event.target == 'ajoutContrat') {
+			                var sAut = w2ui.grid_<?php echo $idPage;?>_auteur.getSelection();
+		                		if(!sAut.length){
+		                			w2alert("Veuillez sélectionner un participant.");
+		                			return;
+		                		}
+		                		openPopupAjoutContrat(w2ui.grid_<?php echo $idPage;?>_auteur.get(sAut[0]));
+		                }
+		            }
+		        },			    
 		        onSave: function(event) {
 		            var changes = w2ui['grid_<?php echo $idPage;?>_auteur'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'livrexauteur';
 		                if(c.role)c.role = c.role.text;
-				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+		                $.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+		            				finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		        onDelete: function(event) {            
@@ -1017,6 +1081,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -1032,6 +1097,7 @@ function initLivre() {
 		            { name: 'role', required: true, type: 'list', options: { items: arrListes['roles'] }
 		            		, html: { caption: 'Rôle', attr: 'size="20"' } 
 		            		},
+		            { name: 'ordre', required: false, type: 'int', html: { caption: 'Ordre couv.', attr: 'size="20"' } },
 		        ],
 		        actions: {
 		            Reset: function () {
@@ -1051,6 +1117,7 @@ function initLivre() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+			            			finsession(js);
 			            			if(js.rs){					            			
 									g.add(js.rs);
 									g.selectNone();
@@ -1060,7 +1127,40 @@ function initLivre() {
 		            }
 		        }
 		    },
-		    	    
+
+		    formContratAuteur: { 
+		        header: 'Ajouter un contrat à un participant',
+		        msgSaving  : 'Merci de patienter...',
+		        name: 'form_<?php echo $idPage;?>_contrat',
+		        fields: [
+		            { name: 'date_signature', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date signature' } },
+		            { name: 'pc_papier', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier', attr: 'size="10"' } },
+		            { name: 'pc_ebook', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook', attr: 'size="10"' } },
+		            { name: 'commentaire', type: 'textarea', html: { caption: 'Commentaire', attr: 'style="width: 100%; height: 80px; resize: none"' } },
+		        ],
+		        actions: {
+		            Reset: function () {
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var g = w2ui['grid_<?php echo $idPage;?>_auteur'];
+		                var data = this.record;
+		                data.obj = "auteurxcontrat";
+		                this.clear();		                
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+		            				finsession(js);
+								g.add(js.rs);
+								g.selectNone();
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },
+		    
 		};
 	
     // initialisation
@@ -1182,6 +1282,31 @@ function openPopupAjoutPage() {
     });
 }
 
+function openPopupAjoutContrat(item) {
+    w2popup.open({
+        title   : 'Ajouter un contrat au participant',
+        width   : 400,
+        height  : 300,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>_contrat'])w2ui['form_<?php echo $idPage;?>_contrat'].destroy();
+                $('#w2ui-popup #main').w2form(config.formContratAuteur)
+	            var g = w2ui['form_<?php echo $idPage;?>_contrat'];
+	            g.header = item['auteur']+" : "+item['role'];
+	            g.clear();
+				g.record = {id_livre:item['id_livre'],id_auteur:item['id_auteur'],type:item['role']};
+				g.refresh();		            			
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+}
 function openPopupAjoutAuteur(){
     w2popup.open({
         title   : 'Ajouter un auteur',
@@ -1227,6 +1352,7 @@ function showDataLivre(){
     	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 			{id:itemSelect.recid, obj:'livrexcollection'},
         		function(js){
+	    			finsession(js);
 	            g = w2ui['grid_<?php echo $idPage;?>_collection'];
 	            g.clear();
 				g.add(js.rs);								
@@ -1236,6 +1362,7 @@ function showDataLivre(){
     	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 			{id:itemSelect.recid, obj:'comitexlivre'},
         		function(js){
+	    			finsession(js);
 	            g = w2ui['grid_<?php echo $idPage;?>_comite'];
 	            g.clear();
 				g.add(js.rs);
@@ -1244,6 +1371,7 @@ function showDataLivre(){
     	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 			{id:itemSelect.recid, obj:'livrexserie'},
         		function(js){
+	    			finsession(js);
 	            g = w2ui['grid_<?php echo $idPage;?>_serie'];
 	            g.clear();
 				g.add(js.rs);
@@ -1252,6 +1380,7 @@ function showDataLivre(){
     	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 			{id:itemSelect.recid, obj:'isbn'},
         		function(js){
+	    			finsession(js);
 	            g = w2ui['grid_<?php echo $idPage;?>_isbn'];
 	            g.clear();
 				g.add(js.rs);
@@ -1260,6 +1389,7 @@ function showDataLivre(){
     	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 			{id:itemSelect.recid, obj:'livrexauteur'},
         		function(js){
+	    			finsession(js);
 	            g = w2ui['grid_<?php echo $idPage;?>_auteur'];
 	            g.clear();
 				g.add(js.rs);
@@ -1272,6 +1402,7 @@ function showDataLivre(){
     $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
 		{id:itemSelect.id_livre, process:'Projet livre'},
     		function(js){
+			finsession(js);
             var gPL = w2ui['grid_<?php echo $idPage;?>_process_livre'];
             gPL.clear();
     			if(js.rs.length){
@@ -1284,6 +1415,7 @@ function showDataLivre(){
     $.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 		{id:itemSelect.id_livre, obj:'page'},
     		function(js){
+			finsession(js);
             var gP = w2ui['grid_<?php echo $idPage;?>_page'];
             gP.clear();
     			if(js.rs.length){
@@ -1294,6 +1426,7 @@ function showDataLivre(){
     $.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 		{id:itemSelect.id_livre, obj:'prix'},
     		function(js){
+			finsession(js);
             var gPr = w2ui['grid_<?php echo $idPage;?>_prix'];
             gPr.clear();
     			if(js.rs.length){

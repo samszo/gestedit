@@ -52,6 +52,12 @@ h1, h2, h3, h4, h5, h6 {
     margin: 1em 0 1em;
     padding: 0;
 }
+
+h4 {
+    margin: 0.2em 0 0.2em;
+    padding: 0;
+}
+
 p {
     display: block;
     margin: 1em 0 1em 0;
@@ -683,6 +689,45 @@ table#wp-calendar td.pad {
     height: 241px;
     overflow: hidden;
 }
+
+ul.liste-items{
+	padding-left:0px;
+}
+ul.liste-items li h3, .cartouche h1, #comments .h2{
+    font: 24px/28px 'Lora',serif;
+}
+ul.liste-items li h3 a, .cartouche h1, #comments .h2{
+	color: #000000;
+    text-decoration: none;
+    font: 26px/29px 'Lucida Grande','Lucida Sans',sans-serif;
+    text-transform: uppercase;
+}
+.liste-items-text{
+	float:left;
+    margin-left: 6px;
+}
+.liste-items-artmot{
+    display: flex;
+}
+
+.home-soustitre{
+	display:inline-block;
+}
+.soustitre{
+	color: #000000;
+    text-decoration: none;
+    font: 16px/18px 'Lucida Grande','Lucida Sans',sans-serif;
+    text-transform: uppercase;
+}
+
+.home-mot-item{
+	float:left;
+}
+
+ul.liste-items li h3 a{
+    font: 18px/20px 'Lucida Grande','Lucida Sans',sans-serif;
+}
+
 .loop-index ul {
     display: block;
     list-style-type: none;
@@ -692,15 +737,13 @@ table#wp-calendar td.pad {
 	list-style-type: none;
     margin: 6px;
 }
-.item {
-    display: flex;
-}
-
 .loop-index ul li img {
     /*background: url("img/bg-thumbnail.png") no-repeat scroll left top transparent;*/
     border: 0 none;
     padding: 0px;
 }
+
+
 .comments-list {
     display: block;
     list-style: none outside none;
@@ -1010,28 +1053,6 @@ div#slogan_site_spip{
     margin-top: 71px;
     margin-left: 30px;
 }
-ul.liste-items{
-	padding-left:0px;
-}
-.liste-items-text{
-	float:left;
-    margin-left: 6px;
-}
-
-ul.liste-items li h3, .cartouche h1, #comments .h2{
-    font: 24px/28px 'Lora',serif;
-}
-
-ul.liste-items li h3 a, .cartouche h1, #comments .h2{
-	color: #000000;
-    text-decoration: none;
-    font: 26px/29px 'Lucida Grande','Lucida Sans',sans-serif;
-    text-transform: uppercase;
-}
-
-ul.liste-items li h3 a{
-    font: 18px/20px 'Lucida Grande','Lucida Sans',sans-serif;
-}
 
 .sommaire .spip_logos {float: left;}
 .sommaire h2 { display: none; }
@@ -1083,7 +1104,7 @@ div.rubriques ul li ul li, div.forums ul li ul li, div.syndic_articles ul li ul 
 }
 h3{
 	font-size: 20px;
-	margin:10px 0px;
+	margin:3px 0px;
 }
 /*div.articles ul.liste-items{
 	border:none;
@@ -1244,3 +1265,6 @@ div.meta-publi{
 .categorie{
       font-variant: small-caps;
 }
+.boutique{
+	display:inline-block;
+	}

@@ -94,16 +94,20 @@ class IndexController extends Zend_Controller_Action
     {
     		$this->initInstance();
 		//récupère les enregistrements
-		$bdd = new Model_DbTable_Iste_livre();
-		$rs = $bdd->getAllVente();
+		//$bdd = new Model_DbTable_Iste_livre();
+		$bdd = new Model_DbTable_Iste_auteur();
+		$rs = $bdd->getAllVente(true);
 		$this->view->json = json_encode($rs);		
-		$dbI = new Model_DbTable_Iste_importfic();
-		$this->view->rsMod = json_encode($dbI->findByType('paiement royalty livre'));		
-		
+		$dbD = new Model_DbTable_Iste_devise();
+		$this->view->rsDev = json_encode($dbD->getAll());
     }    
     
     function initInstance(){
-    		$auth = Zend_Auth::getInstance();
+		$this->view->ajax = $this->_getParam('ajax');
+		$this->view->idObj = $this->_getParam('idObj');
+		$this->view->typeObj = $this->_getParam('typeObj');
+    		
+		$auth = Zend_Auth::getInstance();
 		if ($auth->hasIdentity()) {						
 			// l'identité existe ; on la récupère
 		    $this->view->identite = $auth->getIdentity();
@@ -111,12 +115,10 @@ class IndexController extends Zend_Controller_Action
 		    $this->view->uti = json_encode($ssUti->uti);
 		}else{			
 		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
-		    $this->_redirect('/auth/login');		    
+		    if($this->view->ajax)$this->_redirect('/auth/finsession');		    
+		    else $this->_redirect('/auth/login');
 		}
 		    	
-		$this->view->ajax = $this->_getParam('ajax');
-		$this->view->idObj = $this->_getParam('idObj');
-		$this->view->typeObj = $this->_getParam('typeObj');
     }
     
     public function institutionAction()

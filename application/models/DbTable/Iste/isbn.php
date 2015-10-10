@@ -54,7 +54,7 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
      */
     public function ajouter($data, $existe=true, $rs=false)
     {    	
-	    	$id=false;
+    		$id=false;
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
@@ -564,4 +564,56 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
 	    	return $db->fetchAll();
 				
 	}
+	
+    	/**
+     * Recherche une entrée Iste_isbn avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     *
+     * @return array
+     */
+    public function findParu()
+    {
+        $query = $this->select()
+                    ->from( array("i" => "iste_isbn"),array("date_parution","id_isbn","id_livre","id_editeur") )                           
+                    ->where( "i.date_parution != '0000-00-00'")
+                    ->where( "i.date_parution IS NOT NULL");
+
+        return $this->fetchAll($query)->toArray(); 
+    }
+    
+    	/**
+     * Recherche une entrée Iste_isbn avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     *
+     * @return array
+     */
+    public function setType()
+    {
+		/*
+		Hardback en
+		E-Book en
+		Ouvrage papier fr
+		E-Book fr
+		$iste_editeur = array(
+		  array('id_editeur' => '1','nom' => 'ISTE Editions'),
+		  array('id_editeur' => '2','nom' => 'ISTE International'),
+		  array('id_editeur' => '3','nom' => 'ISTE Press'),
+		  array('id_editeur' => '4','nom' => 'Elsevier'),
+		  array('id_editeur' => '5','nom' => 'Wiley'),
+		  array('id_editeur' => '6','nom' => 'Inconnu')
+		);
+		
+		*/    	
+		$sql = "UPDATE iste_isbn
+        		SET type = 'Hardback en' 
+         	WHERE id_editeur = 4"; 
+	    	//echo $sql."<br/>";
+	    	$db = $this->_db->query($sql);
+
+	    	
+	    	    	
+    }
+    
 }

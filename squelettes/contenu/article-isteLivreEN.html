@@ -7,7 +7,6 @@
 			<BOUCLE_IsteLivre(iste:ISTE_LIVRE){id_livre=#ID_ISTE}>		
 
 	<div class="cartouche">
-		[(#LOGO_ARTICLE|image_reduire{200,200})]
 		<BOUCLE_couverture(DOCUMENTS){id_article}{extension==jpg|png|gif}{titre="Couverture en."}{doublons}>
 			[<a href="#URL_DOCUMENT">(#FICHIER|image_reduire{500}) </a>]
 		</BOUCLE_couverture>				
@@ -17,9 +16,9 @@
 				<p class="info-publi">				
 					<span class="categorie">Publication Date : </span><abbr class="published" title="[(#DATE|date_iso)]">[(#DATE|affdate_mois_annee)]</abbr>
 					<br/>
-					<BOUCLE_IsteLivreAuteur(iste:ISTE_LIVREXAUTEUR){id_livre=#ID_ISTE}>
+					<BOUCLE_IsteLivreAuteur(iste:ISTE_LIVREXAUTEUR){id_livre=#ID_ISTE}{par role}>
 						<BOUCLE_IsteAuteur(iste:ISTE_AUTEUR){id_auteur=#ID_AUTEUR}>
-							<span class="categorie">#ROLE :</span>
+							<span class="categorie"><BOUCLE_motRole(MOTS){descriptif=#ROLE}>#TITRE</BOUCLE_motRole>:</span>
 							<span class="vcard author">
 								<BOUCLE_IsteAuteurSPIP(iste:ISTE_SPIP){id_iste=#ID_AUTEUR}{obj_iste='auteur'}{obj_spip='auteurs'}>							
 								<a class="url fn spip_in" href="spip.php?page=auteur&id_auteur=#ID_SPIP"></BOUCLE_IsteAuteurSPIP>
@@ -30,15 +29,33 @@
 							</BOUCLE_IsteInstitution>
 							<br/>											
 						</BOUCLE_IsteAuteur>				
-					</BOUCLE_IsteLivreAuteur>				
+					</BOUCLE_IsteLivreAuteur>	
+								
+					<BOUCLE_IsteIsbn(iste:ISTE_ISBN){id_livre=#ID_ISTE}{type LIKE %#ENV{lang}}>
+						<h4 class="h4">ISBN : #NUM</h4>
+						<span class="categorie">[(#TYPE|substr{0,-2})]</span>
+						<BOUCLE_IsteNbPage(iste:ISTE_PAGE){id_livre=#ID_ISTE}{type LIKE final%}{type LIKE %#ENV{lang}}{par maj}{inverse} {0, 1}>
+						#NOMBRE pp. 
+						</BOUCLE_IsteNbPage>
+						<BOUCLE_IstePrix(iste:ISTE_PRIX){id_isbn=#ID_ISBN}{type = prix catalogue}{par maj}{inverse} {0, 1}>
+						: #PRIX_LIVRE &pound; 
+						</BOUCLE_IstePrix>
+					</BOUCLE_IsteIsbn>
 				</p>
 		<BOUCLE_arttrad(ARTICLES){id_article}>
 		[(#REM) Inclure le modele des liens de traductions ]
-		#MODELE{article_traductions}
+		#MODELE{livre_traductions}
 		</BOUCLE_arttrad>				
 				
 	</div>
-
+	
+	<div class="boutique">
+		<h2 class="h2"><:iste:lien_boutique:></h2>
+		<BOUCLE_IsteWeb(iste:ISTE_WEB){id_livre=#ID_ISTE}{type !IN SPIP,aucun}>
+			<a class="url fn spip_out" href="#URL"><img src="IMG/#TYPE.jpg"/></a>
+		</BOUCLE_IsteWeb>				
+	</div>
+	
 	<div class="surlignable">
 		<h2 class="h2">Description</h2>
 		[<div class="#EDIT{texte} texte">(#CONTEXTE_EN)</div>]
@@ -55,9 +72,6 @@
 
 			</BOUCLE_IsteLivre>
 		</BOUCLE_IsteSpip>
-
-	[(#REM) Inclure le modele des liens de traductions ]
-	#MODELE{article_traductions}
 
 <B_articles_lies>
 <ul>

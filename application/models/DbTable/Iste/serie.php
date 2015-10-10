@@ -72,12 +72,14 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
      *
      * @param integer $id
      * @param array $data
+     * @param boolean $bGetRow
      *
      * @return void
      */
-    public function edit($id, $data)
+    public function edit($id, $data, $bGetRow=true)
     {           	
 	    	$this->update($data, 'iste_serie.id_serie = ' . $id);
+    		if($bGetRow)return $this->getListe($id);
     }
     
     /**
@@ -111,15 +113,18 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     
     /**
      * Renvoie la liste des entrée
+     * 
+     * @param int	$id
      *
      * @return void
      */
-    public function getListe()
+    public function getListe($id=false)
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
             		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en)","titre_fr", "titre_en"))
             ->order(array("titre_fr","titre_en"));        
+        if($id)$query->where( "l.id_serie = ?", $id);        
         return $this->fetchAll($query)->toArray();
 	} 
     /**

@@ -16,7 +16,7 @@ class ExportController extends Zend_Controller_Action
     				break;    			
     			case "traduction":
 				$bdd = new Model_DbTable_Iste_livre();
-				$rs = $bdd->getTraductionLivre();
+				$rs = $bdd->getTraductionLivre($this->_getParam('ids'));
     				break;    			
     			case "keshifLivre":
 				$bdd = new Model_DbTable_Iste_livre();
@@ -29,7 +29,7 @@ class ExportController extends Zend_Controller_Action
     			default:
 		    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
 		    		$oBdd = new $oName();
-    				$rs = $oBdd->getAll();
+    				$rs = $oBdd->getAll(null, 0, 0, null,$this->_getParam('ids'));
     	    			break;
     		}
     		if($this->_getParam('json')){
@@ -228,7 +228,7 @@ class ExportController extends Zend_Controller_Action
 		    $this->view->uti = json_encode($ssUti->uti);
 		}else{			
 		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
-		    $this->_redirect('/auth/login');		    
+		    $this->_redirect('/auth/finsession');		    
 		}
 		    	
 		$this->view->ajax = $this->_getParam('ajax');

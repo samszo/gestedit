@@ -91,6 +91,7 @@ function initTraduction() {
 		            	toolbarAdd      : false,
 		            	toolbarDelete   : false,
 		            	toolbarSave		: false,
+		            	selectColumn		: true,
 		            	footer: true,
 		        },
 		        columns: [         
@@ -111,12 +112,14 @@ function initTraduction() {
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
-		                		open(urlP+'export?obj=traduction',"_blank")
+				            var ids = w2ui.grid_<?php echo $idPage;?>.getSelection();
+		                		open(urlP+'export?obj=traduction&ids='+ids,"_blank");
 		                }
 		            }
 		        },
 		        records: rs,
 		        onClick: function (event) {
+					if(itemSelect && itemSelect.recid == event.recid) return;
 		            itemSelect = this.get(event.recid);
 		            showDataTraduction();
 		        }	    
@@ -151,9 +154,10 @@ function initTraduction() {
 			            c.obj = 'processusxlivre';
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        }
 		    },		    		    
@@ -188,9 +192,10 @@ function initTraduction() {
 			            if(c.alerte) c.alerte = w2utils.formatDate(c.alerte, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        }
 		    },		    	    		    
@@ -248,9 +253,10 @@ function initTraduction() {
 			            }
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			data,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },
 	            onAdd: function(event) {
@@ -289,6 +295,7 @@ function initTraduction() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+		            				finsession(js);
 				                var g = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'];
 			            			if(js.rs){					            			
 									g.add(js.rs);
@@ -382,14 +389,16 @@ function initTraduction() {
 			                	delete data.expanded;
 			                	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 								data,
-				            		function(mess){
+				            		function(js){
+				            			finsession(js);
 				                		g.set(data.recid, data);
-						            w2alert(mess);
-				           		});
+						            w2alert(js.message);
+				           		},"json");
 		                }else{
 			                	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 								data,
 				            		function(js){
+				            			finsession(js);
 				            			if(js.rs){					            			
 										g.add(js.rs);
 							        		selectRowInGrid(js.rs[0]["recid"],'grid_<?php echo $idPage;?>_traducteur');
@@ -430,6 +439,7 @@ function showDataTraduction(){
     $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
 		{id:itemSelect.id_livre, process:'Traduction livre'},
     		function(js){
+			finsession(js);
             var g = w2ui['grid_<?php echo $idPage;?>_trad_livre'];
             g.clear();
           	//mise à jour de la grille responsable			        
@@ -446,6 +456,7 @@ function showDataTraduction(){
 	$.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
 		{id:itemSelect.id_livre, process:'Traduction chapitre'},
     		function(js){
+			finsession(js);
             g = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'];
             g.clear();		            		
     			if(js.rs.length){

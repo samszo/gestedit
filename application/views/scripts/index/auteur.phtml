@@ -99,6 +99,7 @@ function initAuteur() {
 		            	toolbarAdd      : true,
 		            	toolbarDelete   : true,
 		            	toolbarSave		: true,
+		            	selectColumn		: true,		            	
 		            	footer: true,
 		        },
 		        columns: [                
@@ -126,7 +127,8 @@ function initAuteur() {
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
-		                		open(urlP+'export?obj=auteur',"_blank")
+				            var ids = w2ui.grid_<?php echo $idPage;?>.getSelection();
+		                		open(urlP+'export?obj=auteur&ids='+ids,"_blank");
 		                }
 		            }
 		        },
@@ -138,9 +140,10 @@ function initAuteur() {
 			            if(c.civilite)c.civilite=c.civilite.text;			            
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 				        			c,
-				        			function(html){
+				        			function(js){
+		            					finsession(js);			        			
 				        				if(changes.length==i+1)w2alert(html);
-				        			});                        
+				        			},"json");                        
 		            });
 		        },
 		        onDelete: function(event) {            
@@ -149,6 +152,7 @@ function initAuteur() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -159,6 +163,8 @@ function initAuteur() {
 		            w2ui['layout_<?php echo $idPage;?>'].hide('right', true);
 			    },
 		        onClick: function (event) {
+					if(itemSelect && itemSelect.recid == event.recid) return;
+			        
 		            itemSelect = this.get(event.recid);
 			        //gestion des coordonnées
 		            var g = w2ui['grid_<?php echo $idPage;?>_detail1'];
@@ -178,6 +184,7 @@ function initAuteur() {
 		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/auteurdata',
 							{id:itemSelect.recid, obj:'coordination'},
 			            		function(js){
+		            				finsession(js);
 								g.add(js.rs);
 
 						        //gestion des comite
@@ -186,6 +193,8 @@ function initAuteur() {
 					            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/auteurdata',
 										{id:itemSelect.recid, obj:'comitexauteur'},
 						            		function(js){
+					            				finsession(js);
+						            		
 											g.add(js.rs);
 										    w2ui.layout_<?php echo $idPage;?>.unlock('right');
 						           		},"json");
@@ -197,6 +206,7 @@ function initAuteur() {
 		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/auteurdata',
 							{id:itemSelect.recid, obj:'livrexauteur'},
 			            		function(js){
+		            				finsession(js);
 								gL.add(js.rs);								
 			           		},"json");		           		
 		        }	    
@@ -216,9 +226,10 @@ function initAuteur() {
 		                data.obj = "auteur";
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 							data,
-			            		function(html){
-			            			w2alert(html);
-			           		});
+			            		function(js){
+			            			finsession(js);
+			            			w2alert(js.message);
+			           		},"json");
 		            }
 		        }
 		    },
@@ -291,6 +302,7 @@ function initAuteur() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+		            				finsession(js);
 								g.add(js.rs);
 								g.selectNone();
 		                        	w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
@@ -347,11 +359,12 @@ function initAuteur() {
 				    changes.forEach(function(d, i){
 				    		data['id_collection'] = d.recid;
 				    		data['prime'] = d.prime;
-						$.get(urlP+"crud/update",data,function(html){
+						$.get(urlP+"crud/update",data,function(js){
+	            				finsession(js);
 							if(changes.length-1==i){
-								w2alert(html);
+								w2alert(js.message);
 							}
-						});                        				
+						},"json");                        				
 				    });				
     			    },
 		        onDelete: function(event) {            
@@ -363,6 +376,7 @@ function initAuteur() {
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 								p,
 				            		function(js){
+				            			finsession(js);
 				            			w2alert(js.message);
 				           		},"json");
 					}
@@ -393,6 +407,7 @@ function initAuteur() {
 				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 								{obj:"coordination",id_auteur:itemSelect["id_auteur"],id_serie:data.serie.id,prime:data.prime},
 				            		function(js){
+				            			finsession(js);
 				            			if(js.rs){					            			
 										g.add(js.rs);
 										g.selectNone();
@@ -429,9 +444,10 @@ function initAuteur() {
 						var data = {'id_auteur':itemSelect.recid,'obj':'comite'};
 					    changes.forEach(function(d, i){
 					    		data['id_comite'] = d.recid;
-							$.get(urlP+"crud/update",data,function(html){
+							$.get(urlP+"crud/update",data,function(js){
+		            				finsession(js);
 								if(changes.length-1==i){
-									w2alert(html);
+									w2alert(js.message);
 								}
 							});                        				
 					    });				
@@ -445,6 +461,7 @@ function initAuteur() {
 				            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
 									p,
 					            		function(js){
+					            			finsession(js);
 					            			w2alert(js.message);
 					           		},"json");
 						}
@@ -474,6 +491,7 @@ function initAuteur() {
 					            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 									{obj:"comitexauteur",id_auteur:itemSelect["id_auteur"],id_comite:data.comite.id},
 					            		function(js){
+					            			finsession(js);
 					            			if(js.rs){					            			
 											g.add(js.rs);
 											g.selectNone();

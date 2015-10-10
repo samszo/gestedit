@@ -142,7 +142,8 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
 	        ->where( "p.nom = ?", $process);
         return $this->fetchAll($query)->toArray(); 
     }    
-    	/**
+    
+    /**
      * Recherche une entrée Iste_processus avec la valeur spécifiée
      * et retourne cette entrée.
      *

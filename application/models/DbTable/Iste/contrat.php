@@ -178,35 +178,51 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
      * 
      * @param int 		$idAutCont
      * @param string 	$type
+     * @param int 		$idLivre
      *
      * @return array
      */
-    public function getAllContratAuteur($idAutCont=false,$type="")
+    public function getAllContratAuteur($idAutCont=false,$type="",$idLivre=false)
     {
- 	$sql = "SELECT 
-		id_auteurxcontrat recid, date_signature, pc_papier, pc_ebook, ac.commentaire
-		, a.id_auteur, a.prenom, a.nom
-		, c.id_contrat, c.nom cnom, c.type ctype, c.url curl
-		, l.titre_en, l.titre_fr, l.type_1, l.type_2
-		, i.id_isbn, i.date_parution, i.num isbn 
-		, isbn_auteur
-	    , com.id_comite, com.titre_en com_en, com.titre_fr com_en
-		, s.id_serie, s.titre_en serie_en, s.titre_fr serie_en
-	FROM iste_auteurxcontrat ac
-		INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
-		INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur 
-	    LEFT JOIN iste_livre l ON l.id_livre = ac.id_livre
-		LEFT JOIN iste_isbn i ON i.id_isbn = ac.id_isbn 
-		LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur 
-		LEFT JOIN iste_comite com ON com.id_comite = ac.id_comite 
-		LEFT JOIN iste_serie s ON s.id_serie = ac.id_serie";
- 	if($idAutCont)$sql .= "  WHERE ac.id_auteurxcontrat=".$idAutCont;
- 	if($type)$sql .= "  WHERE c.type='".$type."'";
- 	//echo $sql."<br/>";
+	 	$sql = "SELECT 
+			id_auteurxcontrat recid, date_signature, pc_papier, pc_ebook, ac.commentaire
+			, a.id_auteur, a.prenom, a.nom
+			, c.id_contrat, c.nom cnom, c.type ctype, c.url curl
+			, l.titre_en, l.titre_fr, l.type_1, l.type_2
+			, i.id_isbn, i.date_parution, i.num isbn 
+			, isbn_auteur
+		    , com.id_comite, com.titre_en com_en, com.titre_fr com_en
+			, s.id_serie, s.titre_en serie_en, s.titre_fr serie_en
+		FROM iste_auteurxcontrat ac
+			INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+			INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur 
+		    LEFT JOIN iste_livre l ON l.id_livre = ac.id_livre
+			LEFT JOIN iste_isbn i ON i.id_isbn = ac.id_isbn 
+			LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur 
+			LEFT JOIN iste_comite com ON com.id_comite = ac.id_comite 
+			LEFT JOIN iste_serie s ON s.id_serie = ac.id_serie";
+	 	if($idAutCont)$sql .= "  WHERE ac.id_auteurxcontrat=".$idAutCont;
+	 	if($idLivre)$sql .= "  WHERE ac.id_livre=".$idLivre;
+	 	if($type)$sql .= "  WHERE c.type='".$type."'";
+	 	//echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
 	    	return $db->fetchAll();
     } 
 
+	/**
+     * Renvoie la liste des entrée
+     *
+     * @return void
+     */
+    public function getListe()
+    {
+    		$query = $this->select()
+            ->from( array("l" => $this->_name)
+            		,array("id"=>$this->_primary[1],"text"=>"type"))
+            ->order(array("type"));        
+        return $this->fetchAll($query)->toArray();
+	} 
+        
 	/**
      * récupère tous les contrats de traducteur
      * 

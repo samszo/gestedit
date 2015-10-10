@@ -222,6 +222,24 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
-
+	/**
+	 * 
+	 * format une chaine de caractère comme nom de fichier valide
+	 * merci à http://www.phpsources.org/scripts275-PHP.htm
+	 * @param string $chaineNonValide
+	 * 
+	 * @return string
+	 */
+	function valideChaine($chaineNonValide)
+	{
+	  $chaineNonValide = preg_replace('`\s+`', '_', trim($chaineNonValide));
+	  $chaineNonValide = str_replace("'", "_", $chaineNonValide);
+	  $chaineNonValide = preg_replace('`_+`', '_', trim($chaineNonValide));
+	  $chaineValide=strtr($chaineNonValide,
+	"ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ",
+	                        "aaaaaaaaaaaaooooooooooooeeeeeeeecciiiiiiiiuuuuuuuuynn")
+	;
+	  return ($chaineValide);
+	}
     
 }

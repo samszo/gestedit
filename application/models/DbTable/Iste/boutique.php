@@ -65,13 +65,14 @@ class Model_DbTable_Iste_boutique extends Zend_Db_Table_Abstract
      *
      * @param integer $id
      * @param array $data
+     * @param boolean $bGetRow
      *
      * @return void
      */
-    public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_boutique.id_boutique = ' . $id);
+    public function edit($id, $data, $bGetRow=true)
+    {           	
+	    	$this->update($data, 'iste_boutique.id_boutique = ' . $id);
+    		if($bGetRow)return $this->getListe($id);
     }
     
     /**
@@ -89,15 +90,18 @@ class Model_DbTable_Iste_boutique extends Zend_Db_Table_Abstract
 
     /**
      * Renvoie la liste des entrée
+     * 
+     * @param int	$id
      *
      * @return void
      */
-    public function getListe()
+    public function getListe($id=false)
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
             		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"nom","nom","coef"))
             ->order(array("nom"));        
+        if($id)$query->where( "l.id_boutique = ?", $id);        
         return $this->fetchAll($query)->toArray();
 	} 
 	    

@@ -19,8 +19,7 @@ if(!$this->ajax){
 		<script type="text/javascript" src="../js/log.js"></script>
 		<script type="text/javascript">
 			$(function () {
-				fctInit = initProd;			
-				initAll(); 
+				initAll(initContrat); 
 	  			if(uti.id_uti!=0)
 					utiIsConnect();
 	  			else
@@ -38,12 +37,13 @@ $idPage = "Contrat";
 <script type="text/javascript">
 var rs = <?php echo $this->json; ?>;
 var rsTrad = <?php echo $this->jsonTrad; ?>;
+var rsContratLivre;
 
 //widget configuration
 var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
 var pstyleDetail = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
 var config;
-function initProd() {
+function initContrat() {
 
 	config = {
 		    layoutContrat: {
@@ -90,7 +90,7 @@ function initProd() {
 					toolbarColumns  : true,
 		            	toolbarSearch   : true,
 		            	toolbarAdd      : true,
-		            	toolbarDelete   : false,
+		            	toolbarDelete   : true,
 		            	toolbarSave		: true,
 		            	footer: true,
 		        },
@@ -120,9 +120,9 @@ function initProd() {
 		            { field: 'titre_fr', caption: 'Titre fr', size: '120px', sortable: true, resizable: true},
 		            { field: 'type_1', hidden:true, caption: 'Type 1', size: '60px', sortable: true, resizable: true},		            		            
 		            { field: 'type_2', hidden:true, caption: 'Type 2', size: '60px', sortable: true, resizable: true},		            		            
-		            { field: 'isbn', caption: 'N°', size: '100px', sortable: true, resizable: true},		            
 		            { field: 'date_parution', caption: 'Parution', size: '80px', sortable: true, resizable: true},		            
 /*
+		            { field: 'isbn', caption: 'N°', size: '100px', sortable: true, resizable: true},		            
 		            { field: 'isbn_auteur', caption: 'ISBN auteur', size: '100px', sortable: true, resizable: true},		            
 		            { field: 'col_en', hidden:true, caption: 'Col. en', size: '80px', sortable: true, resizable: true},		            
 		            { field: 'col_fr', hidden:true, caption: 'Col. fr', size: '80px', sortable: true, resizable: true},		            
@@ -132,11 +132,19 @@ function initProd() {
 		            ],
 		        toolbar: {
 		            items: [
-		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' },
+		                { id: 'lien-ouvrage', type: 'button', caption: 'Lier une nouvelle édition', icon: 'fa-link' }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
 		                		open(urlP+'export?obj=contrat&type=auteur',"_blank")
+		                }
+		                if (event.target == 'lien-ouvrage') {
+			                if(!itemSelect){
+				                w2alert("Veuillez sélectionner un contrat.");
+				                return;
+			                }
+			                openPopupChoixLivre();
 		                }
 		            }
 		        },
@@ -150,6 +158,11 @@ function initProd() {
 		            w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
 		            w2ui['layout_<?php echo $idPage;?>'].hide('main', true);
 			    },
+		        onDelete: function(event) {            
+					if(event.force){
+						deleteContrat(w2ui[event.target]);
+					}		        	    
+		        },
 			    onSave: function(event) {
 		            var changes = w2ui['grid_<?php echo $idPage;?>_auteur'].getChanges();
 		            changes.forEach(function(c, i){
@@ -157,14 +170,15 @@ function initProd() {
 			            if(c.date_signature)c.date_signature = w2utils.formatDate(c.date_signature, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		    },		    
-		    gridContratCoor: { 
-		        name: 'grid_<?php echo $idPage;?>_coor', 
+		    gridContratDir: { 
+		        name: 'grid_<?php echo $idPage;?>_dir', 
 				header: 'Contrats',		
 		        show: { 
 					header			: false,		
@@ -173,14 +187,14 @@ function initProd() {
 					toolbarColumns  : true,
 		            	toolbarSearch   : true,
 		            	toolbarAdd      : true,
-		            	toolbarDelete   : false,
+		            	toolbarDelete   : true,
 		            	toolbarSave		: true,
 		            	footer: true,
 		        },
 		        columnGroups: [
 		                       { caption: 'Contrat', span: 5 },
 		                       { caption: 'Signataire', span: 2 },
-		                       { caption: 'Comite', span: 2 },
+		                       //{ caption: 'Comite', span: 2 },
 		                       { caption: 'Serie', span: 2 }
 		                   ],
 		       columns: [  		  		        
@@ -193,14 +207,14 @@ function initProd() {
 			            		,editable: { type: 'percent' }},
 		            { field: 'cnom', caption: 'Nom du contrat', size: '100px', sortable: true, resizable: true
 			            		,editable: { type: 'text' }},    		
-		            { field: 'commentaire', caption: 'Commentaire', size: '100px', sortable: true, resizable: true
+		            { field: 'commentaire', caption: 'Commentaire', size: '30%', sortable: true, resizable: true
 				            		,editable: { type: 'textarea' }},
-		            { field: 'prenom', caption: 'Prénom', size: '60px', sortable: true, resizable: true},
-		            { field: 'nom', caption: 'Nom', size: '100px', sortable: true, resizable: true},		            
-		            { field: 'com_en', hidden:false, caption: 'Com. en', size: '200px', sortable: true, resizable: true},		            
-		            { field: 'com_fr', hidden:false, caption: 'Com. fr', size: '200px', sortable: true, resizable: true},		            
-		            { field: 'serie_en', hidden:false, caption: 'Serie en', size: '200px', sortable: true, resizable: true},		            
-		            { field: 'serie_fr', hidden:false, caption: 'Serie fr', size: '200px', sortable: true, resizable: true},		            
+		            { field: 'prenom', caption: 'Prénom', size: '10%', sortable: true, resizable: true},
+		            { field: 'nom', caption: 'Nom', size: '10%', sortable: true, resizable: true},		            
+		            //{ field: 'com_en', hidden:false, caption: 'Com. en', size: '200px', sortable: true, resizable: true},		            
+		            //{ field: 'com_fr', hidden:false, caption: 'Com. fr', size: '200px', sortable: true, resizable: true},		            
+		            { field: 'serie_en', hidden:false, caption: 'Serie en', size: '20%', sortable: true, resizable: true},		            
+		            { field: 'serie_fr', hidden:false, caption: 'Serie fr', size: '20%', sortable: true, resizable: true},		            
 		            ],
 		        toolbar: {
 		            items: [
@@ -208,12 +222,12 @@ function initProd() {
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
-		                		open(urlP+'export?obj=contrat&type=coordination',"_blank")
+		                		open(urlP+'export?obj=contrat&type=directeur',"_blank")
 		                }
 		            }
 		        },
 		        records: rs.filter(function(d){
-			        		return d.ctype=="coordination";
+			        		return d.ctype=="directeur";
 					}),
 		        onClick: function (event) {
 		            itemSelect = this.get(event.recid);           		           
@@ -222,21 +236,28 @@ function initProd() {
 		            w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
 		            w2ui['layout_<?php echo $idPage;?>'].hide('main', true);
 			    },
+		        onDelete: function(event) {            
+					var p = {obj:'auteurxcontrat'};
+					if(event.force){
+						deleteContrat(w2ui[event.target]);
+					}		        	    
+		        },
 			    onSave: function(event) {
-		            var changes = w2ui['grid_<?php echo $idPage;?>_auteur'].getChanges();
+		            var changes = w2ui['grid_<?php echo $idPage;?>_dir'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'auteurxcontrat';
 			            if(c.date_signature)c.date_signature = w2utils.formatDate(c.date_signature, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		    },
-		    gridContratDir: { 
-		        name: 'grid_<?php echo $idPage;?>_dir', 
+		    gridContratCoor: { 
+		        name: 'grid_<?php echo $idPage;?>_coor', 
 				header: 'Contrats',		
 		        show: { 
 					header			: false,		
@@ -245,7 +266,7 @@ function initProd() {
 					toolbarColumns  : true,
 		            	toolbarSearch   : true,
 		            	toolbarAdd      : true,
-		            	toolbarDelete   : false,
+		            	toolbarDelete   : true,
 		            	toolbarSave		: true,
 		            	footer: true,
 		        },
@@ -282,30 +303,37 @@ function initProd() {
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
-		                		open(urlP+'export?obj=contrat&type=directeur',"_blank")
+		                		open(urlP+'export?obj=contrat&type=coordinateur',"_blank")
 		                }
 		            }
 		        },
 		        records: rs.filter(function(d){
-			        		return d.ctype=="directeur";
+			        		return d.ctype=="coordinateur";
 					}),
 		        onClick: function (event) {
 		            itemSelect = this.get(event.recid);           		           
-		        },	    
+		        },
+		        onDelete: function(event) {            
+					var p = {obj:'auteurxcontrat'};
+					if(event.force){
+						deleteContrat(w2ui[event.target]);
+					}		        	    
+		        },
 		        onAdd: function(event) {            
 		            w2ui['layout_<?php echo $idPage;?>'].toggle('left', true);
 		            w2ui['layout_<?php echo $idPage;?>'].hide('main', true);
 			    },
 			    onSave: function(event) {
-		            var changes = w2ui['grid_<?php echo $idPage;?>_dir'].getChanges();
+		            var changes = w2ui['grid_<?php echo $idPage;?>_coor'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'auteurxcontrat';
 			            if(c.date_signature)c.date_signature = w2utils.formatDate(c.date_signature, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		    },
@@ -373,9 +401,10 @@ function initProd() {
 			            if(c.date_signature)c.date_signature = w2utils.formatDate(c.date_signature, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
-			        			function(html){
-			        				if(changes.length==i+1)w2alert(html);
-			        			});                        
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
 		            });
 		        },			    
 		    },
@@ -384,43 +413,66 @@ function initProd() {
 		        msgSaving  : 'Merci de patienter...',
 		        name: 'form_<?php echo $idPage;?>_auteur',
 		        fields: [
-		            { name: 'id_auteur', type: 'enum'
+		            { name: 'id_auteur', type: 'list'
 		            		, required: true 
 		            		, options: { items: arrListes['auteur'], max: 1 }
 		        			, html: { caption: 'Auteur', attr: 'size="60"' }
 		           	},
+	           		{ name: 'id_contrat', type: 'list'	            		
+		           		, required: true 
+	            			, options: { items: arrListes['contrat'], max: 1 }
+	        				, html: { caption: 'Type du contrat', attr: 'size="60"' }
+	           		},
+		            { name: 'id_serie', type: 'list'
+	            		, required: false
+	            		, options: { items: arrListes['serie'], max: 1 }
+	        			, html: { caption: 'Serie', attr: 'size="60"' }
+		           	},
+		            { name: 'id_livre', type: 'list'
+		            		, required: false
+		            		, options: { items: arrListes['livre'], max: 1 }
+		        			, html: { caption: 'Livre', attr: 'size="60"' }
+		           	},	           		
+		            { name: 'date_signature', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date signature' } },
+		            { name: 'pc_papier', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier', attr: 'size="10"' } },
+		            { name: 'pc_ebook', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook', attr: 'size="10"' } },
+		            { name: 'commentaire', type: 'textarea', html: { caption: 'Commentaire', attr: 'style="width: 100%; height: 80px; resize: none"' } },
+					/*
 		            { name: 'nom', type: 'enum'
 		            		, required: true 
 		            		, options: { items: arrListes['contrat'].nom, max: 1 }
 		        			, html: { caption: 'Nom du contrat', attr: 'size="60"' }
 	           		},
-	           		{ name: 'type', type: 'enum'	            		
-		           		, required: true 
-	            			, options: { items: arrListes['contrat'].type, max: 1 }
-	        				, html: { caption: 'Type du contrat', attr: 'size="60"' }
-	           		},
-		            { name: 'date_signature', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date signature' } },
-		            { name: 'pc_papier', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier', attr: 'size="10"' } },
-		            { name: 'pc_ebook', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook', attr: 'size="10"' } },
-		            { name: 'commentaire', type: 'textarea', html: { caption: 'Commentaire', attr: 'style="width: 100%; height: 80px; resize: none"' } },
-		            { name: 'id_comite', type: 'enum'
+		            { name: 'id_comite', type: 'list'
 		            		, required: false
 		            		, options: { items: arrListes['comite'], max: 1 }
 		        			, html: { caption: 'Comité', attr: 'size="60"' }
 		           	},
-		            { name: 'id_serie', type: 'enum'
-		            		, required: false
-		            		, options: { items: arrListes['serie'], max: 1 }
-		        			, html: { caption: 'Serie', attr: 'size="60"' }
-		           	},
-		            { name: 'id_livre', type: 'enum'
-		            		, required: false
-		            		, options: { items: arrListes['livre'], max: 1 }
-		        			, html: { caption: 'Livre', attr: 'size="60"' }
-		           	},
-		            { name: 'isbn', type: 'text', required: false, html: { caption: 'ISBN', attr: 'size="40"' } },
+		           	*/
+		            //{ name: 'isbn', type: 'text', required: false, html: { caption: 'ISBN', attr: 'size="40"' } },
 		            //{ name: 'isbn_auteur', type: 'text', required: false, html: { caption: 'ISBN - Auteur', attr: 'size="40"' } },
 		        ],
+		        onChange: function (event) {
+			           var r = this.record;
+			           event.onComplete = function () {
+				           //masque les listes suivant le besoin
+				           var wF = w2ui['form_<?php echo $idPage;?>_auteur'];
+				           if(r.id_contrat.id == 3){
+				        	   		wF.fields[2].required = true; 
+				        	   		wF.fields[3].required = false;
+				        	   		wF.fields[3].visible = false; 				        	   		 
+				        	   		wF.refresh();
+				        	   		wF.fields[2].el.parentElement.parentElement.style.display = "block"; 				        	   		 
+				        	   		wF.fields[3].el.parentElement.parentElement.style.display = "none"; 				        	   		 
+				           }else{
+				        	   		wF.fields[2].required = false; 
+				        	   		wF.fields[3].required = true;
+				        	   		wF.refresh();
+				        	   		wF.fields[3].el.parentElement.parentElement.style.display = "block"; 				        	   		 
+				        	   		wF.fields[2].el.parentElement.parentElement.style.display = "none"; 				        	   		 
+				           }				           
+			           }		           
+			        },		        
 		        actions: {
 		            Reset: function () {
 			            w2ui['layout_<?php echo $idPage;?>'].toggle('main', true);
@@ -432,17 +484,18 @@ function initProd() {
 		                if (errors.length > 0) return;
 		                var g = w2ui['grid_<?php echo $idPage;?>_auteur'];
 		                var data = this.record;
-		                if(data.id_auteur) data.id_auteur = data.id_auteur[0].id;
-		                if(data.id_comite) data.id_comite = data.id_comite[0].id;
-		                if(data.id_serie) data.id_serie = data.id_serie[0].id;
-		                if(data.id_livre) data.id_livre = data.id_livre[0].id;
-		                if(data.type) data.type = data.type[0].text;
-		                if(data.nom) data.nom = data.nom[0].text;
+		                if(data.id_auteur) data.id_auteur = data.id_auteur.id;
+		                //if(data.id_comite) data.id_comite = data.id_comite.id;
+		                if(data.id_serie) data.id_serie = data.id_serie.id;
+		                if(data.id_livre) data.id_livre = data.id_livre.id;
+		                data.id_contrat = data.id_contrat.id;
+		                //if(data.nom) data.nom = data.nom[0].text;
 		                data.obj = "auteurxcontrat";
 		                this.clear();		                
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,
 			            		function(js){
+		            				finsession(js);
 								g.add(js.rs);
 								g.selectNone();
 					            w2ui['layout_<?php echo $idPage;?>'].toggle('main', true);
@@ -457,24 +510,24 @@ function initProd() {
 		        msgSaving  : 'Merci de patienter...',
 		        name: 'form_<?php echo $idPage;?>_traducteur',
 		        fields: [
-		            { name: 'id_traducteur', type: 'enum'
+		            { name: 'id_traducteur', type: 'list'
 		            		, required: true 
 		            		, options: { items: arrListes['traducteur'], max: 1 }
 		        			, html: { caption: 'Traducteur', attr: 'size="60"' }
 		           	},
-		            { name: 'nom', type: 'combo'
+		            { name: 'nom', type: 'list'
 		            		, required: true 
 		            		, options: { items: arrListes['contrat'].nom, max: 1 }
 		        			, html: { caption: 'Nom du contrat', attr: 'size="60"' }
 	           		},
 		            { name: 'date_signature', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date signature' } },
 		            { name: 'commentaire', type: 'textarea', html: { caption: 'Commentaire', attr: 'style="width: 100%; height: 80px; resize: none"' } },
-		            { name: 'id_livre', type: 'enum'
+		            { name: 'id_livre', type: 'list'
 		            		, required: false
 		            		, options: { items: arrListes['livre'], max: 1 }
 		        			, html: { caption: 'Livre', attr: 'size="60"' }
 		           	},
-		            { name: 'isbn', type: 'text', required: false, html: { caption: 'ISBN', attr: 'size="40"' } },
+		            //{ name: 'isbn', type: 'text', required: false, html: { caption: 'ISBN', attr: 'size="40"' } },
 		        ],
 		        actions: {
 		            Reset: function () {
@@ -504,6 +557,33 @@ function initProd() {
 		            }
 		        }
 		    },
+		    formLivre: { 
+		        name: 'form_<?php echo $idPage;?>_livre',
+		        fields: [
+		            { name: 'id_livre', required: true, type: 'list', options: { items: rsContratLivre }
+		            		, html: { caption: 'Livre', attr: 'size="20"' } 
+		            		},
+		        ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+		                var c = {"obj":"auteurxcontrat","idLivreSrc":itemSelect.recid,"idLivreDst":data.id_livre.id};		                
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/copier',
+			        			c,
+			        			function(js){
+		            				finsession(js);
+					            w2ui['grid_<?php echo $idPage;?>_auteur'].add(js.rs);				        				
+			        				w2alert(js.message);
+			        			},"json");                        
+			    		}
+		        }
+		    },		    
 		};
 	
     // initialisation
@@ -511,6 +591,49 @@ function initProd() {
     w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridContratAuteur));
     w2ui.layout_<?php echo $idPage;?>.content('right', $().w2form(config.formContratTraducteur));
     w2ui.layout_<?php echo $idPage;?>.content('left', $().w2form(config.formContratAuteur));
+	
+}
+
+function openPopupChoixLivre(){
+    w2popup.open({
+        title   : 'Choisir un ouvrage',
+        width   : 400,
+        height  : 200,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>_livre'])w2ui['form_<?php echo $idPage;?>_livre'].destroy();
+
+    		        rsContratLivre = arrListes['livre'].filter(function(p){return p.text!=null && p.text!="/"; });
+    		        config.formLivre.fields[0].options.items = rsContratLivre;
+                $('#w2ui-popup #main').w2form(config.formLivre)
+                w2ui['form_<?php echo $idPage;?>_livre'].refresh();
+                w2ui['form_<?php echo $idPage;?>_livre'].clear();
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+	
+}
+
+function deleteContrat(g){
+
+	var p = {obj:'auteurxcontrat'};
+	var s = g.getSelection();
+	var d = g.get(s);
+	p.id = s[0];
+	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+		p,
+    		function(js){
+				g.add(d);
+    			finsession(js);
+    			w2alert(js.message);
+   		},"json");
 	
 }
 </script>
@@ -521,7 +644,7 @@ if(!$this->ajax){
 </html>';
 }else{
 	echo '<script type="text/javascript">
-			$(function () {initProd(); });                       		
+			$(function () {initContrat(); });                       		
 		</script>		
 		';	
 }

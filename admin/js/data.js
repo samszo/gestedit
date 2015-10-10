@@ -4,7 +4,7 @@ var arrListes = [];
 //arrListes['civilites'] = ['Mr', 'Mme', 'Mlle', 'Docteur', 'Doctor', 'Professeur', 'Professor'];
 //arrListes['type1'] = ['Edited', 'Author'];
 //arrListes['type2'] = ['Set', 'Focus', 'Classic'];
-arrListes['contrat'] = {base:['GB','FR'],type:["auteur","coordinateur"],nom:["Contrat de traduction","Contrat de coordination"]};
+arrListes['contratBase'] = ['GB','FR'];
 //arrListes['langues'] = ['anglais','français'];
 //arrListes['roles'] = ['auteur','coordinateur','préfacier'];
 //arrListes['traduction'] = ['français -> anglais', 'anglais -> français'];
@@ -51,8 +51,11 @@ function initAll(fct){
 														arrListes['processus']=js;														
 														$.get(urlP+"Index/liste",{obj:'boutique'},function(js){
 															arrListes['boutique']=js;														
-															//initialisation des configurations de layout										
-															if(fct)fct();
+															$.get(urlP+"Index/liste",{obj:'contrat'},function(js){
+																arrListes['contrat']=js;														
+																//initialisation des configurations de layout										
+																if(fct)fct();
+																},"json");                        				
 															},"json");                        				
 														},"json");                        				
 													},"json");                        				

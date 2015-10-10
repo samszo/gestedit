@@ -74,6 +74,20 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
     {        
 	    	$this->update($data, 'iste_proposition.id_proposition = ' . $id);
     }
+
+    /**
+     * Recherche une entrée Iste_proposition avec la clef primaire spécifiée
+     * et modifie cette entrée avec les nouvelles données.
+     *
+     * @param integer $id
+     * @param array $data
+     *
+     * @return void
+     */
+    public function editByLivre($id, $data)
+    {        
+	    	$this->update($data, 'iste_proposition.id_livre = ' . $id);
+    }
     
     /**
      * Recherche une entrée Iste_proposition avec la clef primaire spécifiée

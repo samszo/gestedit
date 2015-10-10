@@ -65,13 +65,14 @@ class Model_DbTable_Iste_param extends Zend_Db_Table_Abstract
      *
      * @param integer $id
      * @param array $data
+     * @param boolean $bGetRow
      *
      * @return void
      */
-    public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_param.id_param = ' . $id);
+    public function edit($id, $data, $bGetRow=true)
+    {           	
+    		$this->update($data, 'iste_param.id_param = ' . $id);
+    	    	if($bGetRow)return $this->getListe($id);
     }
     
     /**
@@ -91,14 +92,17 @@ class Model_DbTable_Iste_param extends Zend_Db_Table_Abstract
     /**
      * Renvoie la liste des entrée
      *
+     * @param int	$id
+     *
      * @return void
      */
-    public function getListe()
+    public function getListe($id=false)
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
             		,array("id"=>"nom","recid"=>$this->_primary[1],"text"=>"nom","type"))
             ->order(array("type","nom"));        
+        if($id)$query->where( "l.id_param = ?", $id);        
         return $this->fetchAll($query)->toArray();
 	} 
     /**

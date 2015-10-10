@@ -205,6 +205,42 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_vente avec la valeur spécifiée
      * et retourne cette entrée.
      *
+     * @param int $idAuteur
+     *
+     * @return array
+     */
+    public function findById_auteur($idAuteur)
+    {
+        $query = $this->select()
+			->from( array("v" => "iste_vente") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("vid" => "iste_vente"),
+                'vid.id_vente = v.id_vente', array("recid"=>"id_vente"))
+            ->joinInner(array("i" => "iste_isbn"),
+                'v.id_isbn = i.id_isbn', array("num","type","date_parution"))
+            ->joinInner(array("pro" => "iste_proposition"),
+                'pro.id_livre = i.id_livre', array("base_contrat"))
+            ->joinInner(array("l" => "iste_livre"),
+                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''))"))
+            ->joinInner(array("la" => "iste_livrexauteur"),
+                'la.id_livre = l.id_livre', array())
+            ->joinInner(array("b" => "iste_boutique"),
+                'b.id_boutique = v.id_boutique', array("boutique"=>"b.nom"))
+            ->joinLeft(array("p" => "iste_prix"),
+                'p.id_prix = v.id_prix', array("prix_euro","prix_livre","prix_dollar"))
+            ->joinLeft(array("li" => "iste_licence"),
+                'li.id_licence = v.id_licence', array("id_licence","licence"=>"CONCAT(li.nom,' ',IFNULL(licence_unitaire,''),' ',IFNULL(licence_coef,'- '),'% ',IFNULL(licence_illimite,''),' ',IFNULL(mutiplicateur,''))"))
+            ->joinLeft(array("ac" => "iste_auteurxcontrat"),
+                'ac.id_auteur = la.id_auteur AND ac.id_livre = la.id_livre', array("date_contrat"=>"MIN(ac.date_signature)"))
+            ->where( "la.id_auteur = ?", $idAuteur)
+			->group("v.id_vente");
+
+        return $this->fetchAll($query)->toArray(); 
+    }    
+    /**
+     * Recherche une entrée Iste_vente avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
      * @param int $id_devise
      *
      * @return array
@@ -341,23 +377,51 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
     {
         $query = $this->select()
         		->from( array("v" => "iste_vente"), array("tot_e"=>"SUM(v.montant_euro)","tot_l"=>"SUM(v.montant_livre)","tot_d"=>"SUM(v.montant_dollar)"
-        			,"id_boutique", "nbLivre"=>"COUNT(DISTINCT(i.id_livre))", "nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))", "nb"=>"SUM(nombre)", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"
-        			,"nbA"=>"COUNT(DISTINCT(v.acheteur))","nbV"=>"COUNT(DISTINCT(v.id_vente))"
+        			,"id_boutique", "nbLivre"=>"COUNT(DISTINCT(i.id_livre))", "nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))", "nb"=>"SUM(nombre)/COUNT(DISTINCT(la.id_auteur))", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"
+        			,"nbAut"=>"COUNT(DISTINCT(la.id_auteur))","nbA"=>"COUNT(DISTINCT(v.acheteur))","nbV"=>"COUNT(DISTINCT(v.id_vente))"
         			))
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
         		->joinInner(array("i" => "iste_isbn"),'v.id_isbn = i.id_isbn')
-			->joinInner(array("b" => "iste_boutique"),       
+        		->joinInner(array("la" => "iste_livrexauteur"),'la.id_livre = i.id_livre')
+        		->joinLeft(array("b" => "iste_boutique"),       
                 'v.id_boutique = b.id_boutique', array("boutique"=>"nom"))
 			->joinLeft(array("p" => "iste_prix"),       
                 'p.id_prix = v.id_prix', array("prix_e"=>"SUM(p.prix_euro)","prix_l"=>"SUM(p.prix_livre)","prix_d"=>"SUM(p.prix_dollar)"))
 			->joinLeft(array("r" => "iste_royalty"),       
                 'r.id_vente = v.id_vente', array("r_livre"=>"SUM(r.montant_livre)"))
-            ->group("id_boutique");
+			->joinLeft(array("rDue" => "iste_royalty"),       
+                "rDue.id_vente = v.id_vente AND rDue.date_paiement = '0000-00-00'", array("r_livreDue"=>"SUM(rDue.montant_livre)"))
+			->joinLeft(array("rPaie" => "iste_royalty"),       
+                "rPaie.id_vente = v.id_vente AND rDue.date_paiement != '0000-00-00'", array("r_livrePaie"=>"SUM(rPaie.montant_livre)"))
+			->group("id_boutique");
         	if($idLivre){
         		$query->where( "i.id_livre = ?", $idLivre);        		
         	}
 
         return $this->fetchAll($query)->toArray(); 
+    }
+    
+    
+   	/**
+     * Récupère le résumé des ventes
+     *
+     * @return array
+     */
+    public function getResume()
+    {
+	    $rsR = $this->getTotaux();
+		$i=1;
+		$rs = array();
+        foreach ($rsR as $r) {
+			$rs[]= array("summary"=>true,"recid"=>"S-".$i,"boutiques"=>$r["boutique"]
+				,"auteur"=>$r["nbAut"],"livres"=>$r["nbLivre"]
+				,"nb_vente"=>$r["nb"],"isbns"=>$r["nbIsbn"]
+				,"date_first"=>$r["dMin"],"date_last"=>$r["dMax"]
+				,"mt_e"=>$r["tot_e"],"mt_l"=>$r["tot_l"],"mt_d"=>$r["tot_d"]
+				,"mt_rTot"=>$r["r_livre"],"mt_rDue"=>$r["r_livreDue"],"mt_rPaie"=>$r["r_livrePaie"]
+				);
+		}
+		return $rs;
     }
     
    	/**

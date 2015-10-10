@@ -1,6 +1,10 @@
 
 var fuVerif = false;
 
+function finsession(js){
+	if(js.finsession) window.location = urlP+'auth/login';	
+}
+
 function selectRowInGrid(recid, idGrid){
 	var id;
 	if( typeof recid === 'string' ) id = recid; else	id = recid[0];
@@ -18,6 +22,16 @@ function selectRowInGrid(recid, idGrid){
 	w2ui[idGrid].scrollIntoView(idRow);
 			
 }
+
+function setListe(r,nom) {
+	//remplace la valeur enregistrée
+	var i = 0;
+	arrListes[nom].forEach(function(rl){
+		if(rl.recid==r.recid)arrListes[nom][i]=r;
+		i++;
+	})
+}
+
 
 function showChanged(id) {
     console.log(w2ui[id].getChanges()); 

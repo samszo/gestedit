@@ -18,7 +18,7 @@ class ChercheController extends Zend_Controller_Action
     		$this->view->rs = explode(",", $rs[0]["ids"]);
     		if(!count($rs[0]["ids"]))$nb=0;
     		else $nb = count($this->view->rs);
-    		if($nb > 1)
+    		if($nb < 1)
 	    		$this->view->message = $nb." livre a été trouvé";
 	    	else
 	    		$this->view->message = $nb." livres ont été trouvés";
@@ -56,7 +56,7 @@ class ChercheController extends Zend_Controller_Action
 		    $this->view->uti = json_encode($ssUti->uti);
 		}else{			
 		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
-		    $this->_redirect('/auth/login');		    
+		    $this->_redirect('/auth/finsession');		    
 		}
 		    	
 		$this->view->ajax = $this->_getParam('ajax');

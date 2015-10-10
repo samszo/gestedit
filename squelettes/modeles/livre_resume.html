@@ -1,0 +1,24 @@
+[(#REM)
+	Affiche le résumé d'un livre
+]
+<BOUCLE_article(ARTICLES){id_article}>
+<li class="item">
+	<div class="liste-items-artmot" >
+    		<div class="liste-items-img" >
+		<BOUCLE_couverture(DOCUMENTS){id_article}{extension==jpg|png|gif}{titre LIKE %medium%}{doublons}>
+			[<a href="#URL_ARTICLE">(#FICHIER|image_reduire{100}) </a>]
+		</BOUCLE_couverture>				
+		</div>
+		<div class="liste-items-text" >
+			<h3 class="h3"><a href="#URL_ARTICLE">#TITRE</a></h3>
+	        <div class="small">[(#DATE|affdate_mois_annee)][, <:par_auteur:> (#LESAUTEURS)]</div>
+			<BOUCLE_IsteSpip(iste:ISTE_SPIP){obj_spip='articles'}{obj_iste='livre'}{id_spip=#ID_ARTICLE}>
+				<BOUCLE_IsteLivre(iste:ISTE_LIVRE){id_livre=#ID_ISTE}>		
+				<div class="#EDIT{texte} texte">[(#CONTEXTE_EN|couper{200})]</div>		
+				</BOUCLE_IsteLivre>	
+			</BOUCLE_IsteSpip>
+	        
+		</div>
+	</div>			
+</li>
+</BOUCLE_article>

@@ -18,12 +18,18 @@ class CrudController extends Zend_Controller_Action
     		$params = $this->_request->getParams();
     		//création de l'objet BDD
     		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
-    		$oBdd = new $oName();    		
-	    	$this->view->rs = $oBdd->copier($this->_getParam('id'));
+    		$oBdd = new $oName();
+    		if($this->_getParam('obj')=="auteurxcontrat")
+		    	$this->view->rs = $oBdd->copier($this->_getParam('idLivreSrc'),$this->_getParam('idLivreDst'));
+    		else    		
+		    	$this->view->rs = $oBdd->copier($this->_getParam('id'));
 	    	$this->view->message="Les données ont été copiées.";
 	    	
 		$dbHM = new Model_DbTable_Iste_histomodif();
-		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$this->_getParam('id')));   		
+    		if($this->_getParam('obj')=="auteurxcontrat")
+	    		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"data"=>'{idLivreSrc:'.$this->_getParam('idLivreSrc').',idLivreDst:'.$this->_getParam('idLivreDst').'}'));   		
+    		else
+	    		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$this->_getParam('id')));   		
 	    	
     }    
 
@@ -83,7 +89,8 @@ class CrudController extends Zend_Controller_Action
 				unset($params['titre_en']);				
 				unset($params['resume_fr']);				
 				unset($params['resume_en']);				
-			break;			
+			break;
+			/*			
 			case 'auteurxcontrat':
 				//création/récupération du contrat;
 				$dbCont = new Model_DbTable_Iste_contrat();
@@ -100,6 +107,7 @@ class CrudController extends Zend_Controller_Action
 				unset($params['type']);				
 				unset($params['isbn']);				
 			break;
+			*/
 			case 'vente':
 				$idLivre = $params['id_livre'];
 				unset($params['id_livre']);						
@@ -137,17 +145,18 @@ class CrudController extends Zend_Controller_Action
 		switch ($this->_getParam('obj')) {
 			case 'livre':
 				//création de la proposition
+				$idLivre = $result[0]["id_livre"];
 				$dbPropo = new Model_DbTable_Iste_proposition();
-				$rsPropo = $dbPropo->ajouter(array("id_livre"=>$result[0]["id_livre"]),false,true);
+				$rsPropo = $dbPropo->ajouter(array("id_livre"=>$idLivre),false,true);
 				//création du processus
 				$dbProce = new Model_DbTable_Iste_processus();
-				$rsProcess = $dbProce->setProcessusForLivre('Projet livre', $result[0]["id_livre"]);
-				$dbProce->setProcessusForLivre('Traduction livre', $result[0]["id_livre"]);
-				$dbProce->setProcessusForLivre('Fabrication livre', $result[0]["id_livre"]);
+				$rsProcess = $dbProce->setProcessusForLivre('Projet livre', $idLivre);
+				$dbProce->setProcessusForLivre('Traduction livre', $idLivre);
+				$dbProce->setProcessusForLivre('Fabrication livre', $idLivre);
 				$result = array("rsLivre"=>$result,"rsPropo"=>$rsPropo,"rsProcess"=>$rsProcess);
 				//création de l'isbn
 				$dbIsbn = new Model_DbTable_Iste_isbn();
-				$dbIsbn->ajouter(array("id_livre"=> $result[0]["id_livre"]));
+				$dbIsbn->ajouter(array("id_livre"=> $idLivre,"num"=>"000"));
 				break;
 			case 'processusxchapitre':
 				//création des prévisions
@@ -157,7 +166,8 @@ class CrudController extends Zend_Controller_Action
 			case 'vente':
 				//récupère les ventes
 				$dbL = new Model_DbTable_Iste_livre();
-				$result = $dbL->getIdLivreVente($idLivre);
+				$result = $dbL->getIdAuteurVente($idLivre);
+				
 			break;			
 			case 'tache':
 				//création des prévisions supplémentaires
@@ -209,12 +219,26 @@ class CrudController extends Zend_Controller_Action
 			case 'coordination':
 				$oBdd->edit($params["id_auteur"],$params["id_collection"],array("prime"=>$params["prime"]));
 			break;			
+			case 'prevision':
+				$this->view->rs = $oBdd->edit($id,$params,true);
+			break;			
+			case 'isbn':
+				$this->view->rs = false;
+				if(isset($params["num"])){
+					//vérifie que le num n'est pas attribué
+					$dbI = new Model_DbTable_Iste_isbn();
+					$this->view->rs = $dbI->findByNum($params["num"]);					
+				}
+				if(!$this->view->rs)$this->view->rs = $oBdd->edit($id,$params);
+				else $this->view->message = "Le numéro ISNB est déjà attribué.";
+			break;			
 			default:
-				$oBdd->edit($id,$params);
+				$this->view->rs = $oBdd->edit($id,$params);
 			break;
 		} 
+		if(!$this->view->message)$this->view->message = "Les modifications ont été effectuées.";
 		$dbHM = new Model_DbTable_Iste_histomodif();
-		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id,"data"=>json_encode($params)));   		
+		$dbHM->ajouter(array("id_uti"=>$this->ssUti->uti["id_uti"],"action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id,"data"=>json_encode($params)));   		
     }
     
 	public function deleteAction()
@@ -286,8 +310,11 @@ class CrudController extends Zend_Controller_Action
     		//création de l'objet BDD
     		$oBdd = new Model_DbTable_Iste_rapport();
     	    //récupère les données
-    		$rs = $oBdd->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));
-		$this->view->rs = $rs;
+    	    if($this->_getParam('idLivre'))
+	    		$rs = $oBdd->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));
+    	    if($this->_getParam('mod')=="paiement royalties")
+	    		$rs = $oBdd->findPaiementByAuteur($this->_getParam('idAuteur'));
+	    	$this->view->rs = $rs;
     }    
     
     public function finduserAction()
@@ -310,7 +337,8 @@ class CrudController extends Zend_Controller_Action
     		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
     		$oBdd = new $oName();
     	    //récupère les données
-    		$rs = $oBdd->findById_livre($this->_getParam('id'));
+    		//$rs = $oBdd->findById_livre($this->_getParam('id'));
+    		$rs = $oBdd->findById_auteur($this->_getParam('id'));
     		
 		//ajoute les résumés
 		$rsR = $oBdd->getTotaux($this->_getParam('id'));
@@ -359,11 +387,11 @@ class CrudController extends Zend_Controller_Action
 		if ($auth->hasIdentity()) {						
 			// l'identité existe ; on la récupère
 		    $this->view->identite = $auth->getIdentity();
-		    $ssUti = new Zend_Session_Namespace('uti');
-		    $this->view->uti = json_encode($ssUti->uti);
+		    $this->ssUti = new Zend_Session_Namespace('uti');
+		    $this->view->uti = json_encode($this->ssUti->uti);
 		}else{			
 		    //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
-		    $this->_redirect('/auth/login');		    
+		    $this->_redirect('/auth/login');
 		}
 		    	
 		$this->view->ajax = $this->_getParam('ajax');

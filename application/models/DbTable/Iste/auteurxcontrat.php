@@ -29,10 +29,12 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
     {
 		$select = $this->select();
 		$select->from($this, array('id_auteurxcontrat'));
-		foreach($data as $k=>$v){
-			if($v)$select->where($k.' = ?', $v);
-		}
-	    $rows = $this->fetchAll($select);        
+		if($data["id_livre"])$select->where('id_livre = ?', $data["id_livre"]);
+		if($data["id_serie"])$select->where('id_serie = ?', $data["id_serie"]);
+		$select->where('id_auteur = ?', $data["id_auteur"]);
+		$select->where('id_contrat = ?', $data["id_contrat"]);
+		
+		$rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_auteurxcontrat; else $id=false;
         return $id;
     } 
@@ -51,6 +53,15 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
     {
     	
     	$id=false;
+    	
+	if(isset($data["type"])){
+		//récupère l'identifiant du contrat
+		$dbC = new Model_DbTable_Iste_contrat();
+		$item = $dbC->findByType($data["type"]);
+		$data["id_contrat"] = $item[0]["id_contrat"];
+	    	unset($data['type']);	    			
+    	}
+    	
     	if($existe)$id = $this->existe($data);
     	if(!$id){
     	 	$id = $this->insert($data);
@@ -101,7 +112,13 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
+    		//vérifie l'éxistence de royalties
+    		$dbR = new Model_DbTable_Iste_royalty();
+    		$rs = $dbR->verifEnCoursByIdAuteurContrat($id);
+    		if($rs[0]["mtDue"]>0){
+    			return array("message"=>"Il reste : ".$rs[0]["mtDue"]." &pound; à payer ou encaisser.<br/>Vous ne pouvez pas supprimer le contrat.");
+    		}
+    		$this->delete('iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
     }
 
     
@@ -215,5 +232,23 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
+	/**
+     * Copier une entrée de la table
+     *
+     * @param int $idLivreSrc
+     * @param int $idLivreDst
+     *
+     * @return array
+     */
+    public function copier($idLivreSrc, $idLivreDst)
+    {
+    		//création de la copie
+		$sql = "INSERT INTO iste_auteurxcontrat (id_auteur, id_livre, id_contrat, date_signature, pc_papier, pc_ebook) 
+				SELECT id_auteur, ".$idLivreDst.", id_contrat, date_signature, pc_papier, pc_ebook
+				FROM iste_auteurxcontrat WHERE id_livre = ".$idLivreSrc; 	 
+	    $this->_db->query($sql);
+	    $dbC = new Model_DbTable_Iste_contrat();
+        return $dbC->getAllContratAuteur(false,"",$idLivreDst);
+    }    
     
 }

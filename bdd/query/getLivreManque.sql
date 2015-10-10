@@ -1,9 +1,9 @@
 SELECT 
-	COUNT(DISTINCT l.id_livre) 
---	, COUNT(DISTINCT p.id_livre) 
---	, COUNT(DISTINCT pl1.id_livre) 
---	, COUNT(DISTINCT pl3.id_livre) 
---	, COUNT(DISTINCT pl4.id_livre) 
+--	COUNT(DISTINCT l.id_livre) 
+	 COUNT(DISTINCT p.id_livre) 
+	, COUNT(DISTINCT pl1.id_livre) 
+	, COUNT(DISTINCT pl3.id_livre) 
+	, COUNT(DISTINCT pl4.id_livre) 
     
 --    , COUNT(DISTINCT pcs.id_livre) 
 -- l.id_livre

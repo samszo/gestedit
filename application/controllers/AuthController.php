@@ -68,6 +68,11 @@ class AuthController extends Zend_Controller_Action
     {
 		$this->clearConnexion();
     }
+
+    public function finsessionAction()
+    {
+		
+    }
     
     function clearConnexion(){
 		$ssExi = new Zend_Session_Namespace('uti'); 		   	

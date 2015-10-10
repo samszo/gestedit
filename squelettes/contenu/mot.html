@@ -17,18 +17,7 @@
       <h2 class="h2"><:iste:livres_lien_comite:></h2>
       <ul class="liste-items">
           <BOUCLE_articles(ARTICLES) {id_rubrique !IN 15,27}{id_mot}{titre!=""}{lang= #ENV{lang}} {par titre} {pagination 10}>
-          <li class="item">
-          		<div class="liste-items-img" >
-					<BOUCLE_couverture(DOCUMENTS){id_article}{extension==jpg|png|gif}{titre LIKE %medium%}{doublons}>
-						[<a href="#URL_DOCUMENT">(#FICHIER|image_reduire{100}) </a>]
-					</BOUCLE_couverture>				
-				</div>
-				<div class="liste-items-text" >
-					<h3 class="h3"><a href="#URL_ARTICLE">#TITRE</a></h3>
-		          	<div class="small">[(#DATE|affdate_mois_annee)][, <:par_auteur:> (#LESAUTEURS)]</div>
-				</div>
-			
-	      </li>
+			#MODELE{livre_resume}
           </BOUCLE_articles>
       </ul>
       [<p class="pagination">(#PAGINATION)</p>]
