@@ -55,7 +55,7 @@ function initProd() {
 		        panels: [
 		 		    { type: 'top', size: "50%", style: pstyle},
 					{ type: 'main', size: '50%', resizable: true, style: pstyleDetail},
-		            { type: 'right', size: '1200px', hidden:false, resizable: true, style: pstyleDetail
+		            { type: 'right', size: '710px', hidden:false, resizable: true, style: pstyleDetail
 			    		    ,tabs: {
 			    		        name: 'tabs_<?php echo $idPage;?>_prod',
 			    		        active: 'tab',
@@ -107,7 +107,8 @@ function initProd() {
 		        name: 'layout_<?php echo $idPage;?>_process_livre',
 		        panels: [
 		 			{ type: 'top', size: '110px', style: pstyleDetail, resizable: true },
-		            	{ type: 'main', size: '200px', style: pstyleDetail, resizable: true },
+		            	{ type: 'main', size: '50%', style: pstyleDetail, resizable: true },
+		            	{ type: 'right', size: '50%', style: pstyleDetail, resizable: true },
 		        ]
 		    },
 		    gridProduction: { 
@@ -184,8 +185,7 @@ function initProd() {
 		            var changes = w2ui['grid_<?php echo $idPage;?>_process_livre_resp'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'processusxlivre';
-			            if(c.id_uti) c.id_uti = c.id_uti.id;
-				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
 			        			function(js){
 			            			finsession(js);
@@ -194,9 +194,9 @@ function initProd() {
 		            });
 		        }
 		    },		    		    
-		    gridProcessLivre: { 
-		        name: 'grid_<?php echo $idPage;?>_process_livre', 
-				header: 'Production du livre',		
+		    gridProcessLivreFR: { 
+		        name: 'grid_<?php echo $idPage;?>_process_livreFR', 
+				header: 'Planning production FR',		
 				show: {toolbar		: true,
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
@@ -208,30 +208,80 @@ function initProd() {
 	                	columnHeaders	: true},
 		        columns: [      		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
-		            { field: 'tache', caption: 'Tâche', size: '118px', sortable: true, resizable: true},
+		            { field: 'tache', caption: 'Tâche', size: '175px', sortable: true, resizable: true},
 		            { field: 'debut', caption: 'Origine', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'prevision', caption: 'Prévision', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'relance', caption: 'Der. relance', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'alerte', caption: 'Date alerte', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'fin', caption: 'Fin', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'commentaire', caption: 'Commentaires', editable: { type: 'text'}, size: '200px', sortable: true, resizable: true},
-		            { field: 'alerte', caption: 'Date alerte', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		        ],
+		        onClick: function (event) {
+		        },
 		        onSave: function(event) {
-		            var changes = w2ui['grid_<?php echo $idPage;?>_process_livre'].getChanges();
+		            var changes = w2ui['grid_<?php echo $idPage;?>_process_livreFR'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'prevision';
 			            if(c.debut) c.debut = w2utils.formatDate(c.debut, 'yyyy-mm-dd');
 			            if(c.prevision) c.prevision = w2utils.formatDate(c.prevision, 'yyyy-mm-dd');
 			            if(c.fin) c.fin = w2utils.formatDate(c.fin, 'yyyy-mm-dd');
 			            if(c.alerte) c.alerte = w2utils.formatDate(c.alerte, 'yyyy-mm-dd');
+			            if(c.relance) c.relance = w2utils.formatDate(c.relance, 'yyyy-mm-dd');
 				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
 			        			c,
 			        			function(js){
 			            			finsession(js);
+			        				if(c.debut)
+						        		w2ui['grid_<?php echo $idPage;?>_process_livreFR'].set(c.recid, js.rs);
 			        				if(changes.length==i+1)w2alert(js.message);
 			        			},"json");                        
 		            });
-		        }
-		    },		    	    		    		    	    		    
+		        },
+		    },	
+		    gridProcessLivreGB: { 
+		        name: 'grid_<?php echo $idPage;?>_process_livreGB', 
+				header: 'Planning production GB',		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : false,
+	                	toolbarDelete   : false,
+	                	toolbarSave		: true,
+	                	header			: true, 
+	                	columnHeaders	: true},
+		        columns: [      		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'tache', caption: 'Tâche', size: '175px', sortable: true, resizable: true},
+		            { field: 'debut', caption: 'Origine', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'prevision', caption: 'Prévision', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'relance', caption: 'Der. relance', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'alerte', caption: 'Date alerte', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'fin', caption: 'Fin', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'commentaire', caption: 'Commentaires', editable: { type: 'text'}, size: '200px', sortable: true, resizable: true},
+		        ],
+		        onClick: function (event) {
+		        },
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_process_livreGB'].getChanges();
+		            changes.forEach(function(c, i){
+			            c.obj = 'prevision';
+			            if(c.debut) c.debut = w2utils.formatDate(c.debut, 'yyyy-mm-dd');
+			            if(c.prevision) c.prevision = w2utils.formatDate(c.prevision, 'yyyy-mm-dd');
+			            if(c.fin) c.fin = w2utils.formatDate(c.fin, 'yyyy-mm-dd');
+			            if(c.alerte) c.alerte = w2utils.formatDate(c.alerte, 'yyyy-mm-dd');
+			            if(c.relance) c.relance = w2utils.formatDate(c.relance, 'yyyy-mm-dd');
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(js){
+			            			finsession(js);
+			        				if(c.debut)
+						        		w2ui['grid_<?php echo $idPage;?>_process_livreGB'].set(c.recid, js.rs);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
+		            });
+		        },
+		    },		    	    	    		    		    	    		    
 		    formProdCommentaire: { 
 		        name: 'form_<?php echo $idPage;?>_commentaire',
 		        fields: [
@@ -500,7 +550,8 @@ function initProd() {
     w2ui.layout_<?php echo $idPage;?>.content('right', $().w2form(config.formProdCommentaire));
        
     w2ui.layout_<?php echo $idPage;?>_process_livre.content('top', $().w2grid(config.gridProcessLivreResp));
-    w2ui.layout_<?php echo $idPage;?>_process_livre.content('main', $().w2grid(config.gridProcessLivre));
+    w2ui.layout_<?php echo $idPage;?>_process_livre.content('main', $().w2grid(config.gridProcessLivreFR));
+    w2ui.layout_<?php echo $idPage;?>_process_livre.content('right', $().w2grid(config.gridProcessLivreGB));
     
     w2ui.layout_<?php echo $idPage;?>.lock('main', "Sélectionner un livre", true);
     w2ui.layout_<?php echo $idPage;?>.lock('right', "Sélectionner un livre", true);
@@ -541,18 +592,19 @@ function updateFormTab(a){
 
 function showDataProdLivre(){
 	//récupère le processus de traduction des livres
+	w2ui.layout_<?php echo $idPage;?>.unlock('main');
+    w2ui.layout_<?php echo $idPage;?>.unlock('right');
     $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
-		{id:itemSelect.id_livre, process:'Fabrication livre'},
+		{id:itemSelect.id_livre, process:'Production FR'},
     		function(js){
 			finsession(js);
-            var g = w2ui['grid_<?php echo $idPage;?>_process_livre'];
+            var g = w2ui['grid_<?php echo $idPage;?>_process_livreFR'];
             g.clear();
           	//mise à jour de la grille responsable			        
             var g1 = w2ui['grid_<?php echo $idPage;?>_process_livre_resp'];
             g1.clear();
     			if(js.rs.length){
         			//mise à jour de la grille processus			        
-	            idPLU = js.rs[0].id_plu;
 	            g.add(js.rs);
 	            g1.add([{recid:js.rs[0].id_plu, id_uti:js.rs[0].id_uti}]);
 
@@ -567,12 +619,21 @@ function showDataProdLivre(){
 			            w2ui.layout_<?php echo $idPage;?>.content('right', $().w2layout(config.layoutProdFic));
 			            w2ui.layout_<?php echo $idPage;?>_fic.load('main', urlP+'import?typeObj=livre&idObj='+itemSelect.id_livre+'&ajax=1&inc=<?php echo $inc;?>')
 	            }
-            						
-	            w2ui.layout_<?php echo $idPage;?>.unlock('main');
-	            w2ui.layout_<?php echo $idPage;?>.unlock('right');
-	            
+            							            
     			}
     },"json");   
+    $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
+    		{id:itemSelect.id_livre, process:'Production GB'},
+        	function(js){
+	    			finsession(js);
+                var g = w2ui['grid_<?php echo $idPage;?>_process_livreGB'];
+                g.clear();
+        			if(js.rs.length){
+            			//mise à jour de la grille processus			        
+	    	            g.add(js.rs);
+        			}
+        },"json");   
+    
 }
 
 </script>

@@ -165,19 +165,29 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
      *
      * @param varchar	$process
      * @param int 		$idLivre
+     * @param int 		$idProcessus
      * 
      * @return array
      */
-    public function getProcessusByLivre($process, $idLivre)
+    public function getProcessusByLivre($process, $idLivre, $idProcessus=0)
     {
-    		if($process=="All")$where = "";
-    		else $where = " AND p.nom = '".$process."' ";
+    		switch ($process) {
+    			case "All":
+				$where = " ";
+    				break;    			
+    			case "production":
+    				$where = " AND p.id_processus = ".$idProcessus." ";
+    				break;    			
+    			default:
+    				$where = " AND p.nom = '".$process."' ";
+    				break;
+    		}
 	    	$sql = "SELECT 
 				p.nom, p.id_processus
 				, pl.date_creation, pl.id_plu
 				, u.login, u.id_uti
 			    , t.nom tache, t.ordre
-			    , pre.id_prevision recid, pre.debut, pre.prevision, pre.fin, pre.commentaire, pre.alerte
+			    , pre.id_prevision recid, pre.debut, pre.prevision, pre.fin, pre.commentaire, pre.alerte, pre.relance
 			FROM iste_processus p
 				INNER JOIN iste_processusxlivre pl ON pl.id_processus = p.id_processus
 				INNER JOIN iste_prevision pre ON pre.id_pxu = pl.id_plu AND pre.obj = 'livre'     

@@ -117,11 +117,14 @@ function initLivre() {
 		        },
 		        multiSearch: true,
 		        searches: [
+		   		    { field: 'recid', caption: 'id', type: 'text', hidden:true },
+		   		    { field: 'isbns', caption: 'isbns', type: 'text', hidden:true },
 				    { field: 'titre_fr', caption: 'Titre FR', type: 'text' },
 				    { field: 'titre_en', caption: 'Titre EN', type: 'text' },
 		            { field: 'auteurs', caption: 'Auteurs', type: 'text', hidden:true },
-		            { field: 'directeurs', caption: 'Auteurs', type: 'text', hidden:true },
-		            { field: 'coordinateurs', caption: 'Auteurs', type: 'text', hidden:true },
+		            { field: 'coordonnateurs', caption: 'Coordonnateur', type: 'text', hidden:true },
+		            { field: 'directeurs', caption: 'Directeurs', type: 'text', hidden:true },
+		            { field: 'resp', caption: 'Resp. série', type: 'text', hidden:true },
 		            { field: 'prenom', caption: 'Prénom', type: 'text' },
 		            { field: 'nom', caption: 'Nom', type: 'text' },
 		            { field: 'num', caption: 'ISBN', type: 'text' },
@@ -145,12 +148,13 @@ function initLivre() {
 		        ],
 		        columns: [                
 		            { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
-		            { field: 'reference', caption: 'Référence', size: '80px', sortable: true, resizable: true, 
+		            { field: 'reference', hidden:true, caption: 'Référence', size: '80px', sortable: true, resizable: true, 
 		                editable: { type: 'int'}
 		            },		            
 		            { field: 'auteurs', caption: 'Auteurs', size: '20%', sortable: true, resizable: true},
+		            { field: 'coordonnateurs', caption: 'Coordonnateurs', size: '20%', sortable: true, resizable: true},
 		            { field: 'directeurs', caption: 'Directeurs', size: '20%', sortable: true, resizable: true},
-		            { field: 'coordinateurs', caption: 'Coordinateurs', size: '20%', sortable: true, resizable: true},
+		            { field: 'resp', caption: 'Resp. série', size: '20%', sortable: true, resizable: true},
 		            { field: 'titre_fr', caption: 'Titre français', size: '20%', sortable: true, resizable: true, 
 		                editable: { type: 'text' }
 		            },
@@ -377,7 +381,7 @@ function initLivre() {
 		    				toolbarColumns  : false,
 		                	toolbarSearch   : false,
 		                	toolbarAdd      : false,
-		                	toolbarDelete   : true,
+		                	toolbarDelete   : false,
 		                	toolbarSave		: true,
 		                	header			: true, 
 		                	columnHeaders	: true},
@@ -808,7 +812,7 @@ function initLivre() {
 	            columns: [                
 	  		            { field: 'recid', caption: 'ID', size: '5px',hidden:false, sortable: true, resizable: true },
 			            { field: 'num', caption: 'ISBN', size: '140px', sortable: true, resizable: true,
-			                editable: { type: 'text',autoFormat:false}},
+			                editable: { type: 'alphanumeric',autoFormat:false}},
 			            { field: 'date_parution', caption: 'Parution', size: '90px', sortable: true, resizable: true,
 			                editable: { type: 'date'}},
 			            { field: 'id_editeur', caption: 'Co-éditeur', size: '130px', sortable: true, resizable: true,
@@ -832,7 +836,16 @@ function initLivre() {
 				                    var html = this.getCellValue(index, col_index);
 				                    return html.text ? html.text : html;
 				                }},
+			            { field: 'ordre', caption: 'Ordre', size: '80px', sortable: true, resizable: true,
+			                editable: { type: 'int'}},
 	            ],
+	            /*
+	            onEditField: function(event) {
+		        		event.onComplete = function () {
+		                console.log('value', event.value);
+		        	    }				            
+	            },
+	            */ 
 	            onAdd: function(event) {
 		        		openPopupAjoutISBN();
 			    },
@@ -870,7 +883,7 @@ function initLivre() {
 		        //header: 'Ajouter un ISBN',
 		        name: 'form_<?php echo $idPage;?>_isbn',
 		        fields: [
-		            { name: 'num', type: 'text', required: true, html: { caption: 'ISBN', attr: 'size="60px"' } },
+		            { name: 'num', type: 'text', required: false, html: { caption: 'ISBN', attr: 'size="60px"' } },
 		            { name: 'id_editeur', required: true, type: 'list', options: { items: arrListes['editeur'] }
 		            		, html: { caption: 'Editeur', attr: 'size="20"' } 
 		            		},
@@ -1383,6 +1396,10 @@ function showDataLivre(){
 	    			finsession(js);
 	            g = w2ui['grid_<?php echo $idPage;?>_isbn'];
 	            g.clear();
+	            //formate le num comme une chaine
+	            js.rs.forEach(function(r){
+		            r.num = r.num+"";
+	            });
 				g.add(js.rs);
        		},"json");	           		           
 	//gestion des auteurs

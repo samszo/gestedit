@@ -157,7 +157,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 			->from( array("l" => "iste_livre"),array("recid"=>"id_livre","id_livre","reference","titre_fr","soustitre_fr","titre_en","soustitre_en","num_vol","type_1","type_2") )
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("i" => "iste_isbn"),
-                'i.id_livre = l.id_livre', array("isbns"=>"GROUP_CONCAT(DISTINCT(i.num))"))
+                'i.id_livre = l.id_livre', array("isbns"=>"GROUP_CONCAT(DISTINCT(i.num) ORDER BY i.ordre)"))
             ->joinLeft(array("e" => "iste_editeur"),
                 'e.id_editeur = i.id_editeur', array("editeurs"=>"GROUP_CONCAT(DISTINCT(e.nom))"))
             ->joinLeft(array("la" => "iste_livrexauteur"),
@@ -169,9 +169,13 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
             ->joinLeft(array("ad" => "iste_auteur"),
                 'ad.id_auteur = lad.id_auteur', array("directeurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ad.prenom,' ',ad.nom)))"))
             ->joinLeft(array("lac" => "iste_livrexauteur"),
-                'lac.id_livre = l.id_livre AND lac.ordre > 0 AND lac.role = "coordinateur"', array())
+                'lac.id_livre = l.id_livre AND lac.ordre > 0 AND lac.role = "coordonnateur"', array())
             ->joinLeft(array("ac" => "iste_auteur"),
-                'ac.id_auteur = lac.id_auteur', array("coordinateurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ac.prenom,' ',ac.nom)))"))
+                'ac.id_auteur = lac.id_auteur', array("coordonnateurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ac.prenom,' ',ac.nom)))"))
+            ->joinLeft(array("lar" => "iste_livrexauteur"),
+                'lar.id_livre = l.id_livre AND lar.ordre > 0 AND lar.role = "resp. série"', array())
+            ->joinLeft(array("ar" => "iste_auteur"),
+                'ar.id_auteur = lar.id_auteur', array("resp"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ar.prenom,' ',ar.nom)))"))
             ->group("l.id_livre")
             //->order("la.ordre")
             ;

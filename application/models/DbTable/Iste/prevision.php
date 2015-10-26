@@ -104,7 +104,7 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
 	    		}
 	    		if(isset($data["debut"])){
 				$vals = " prevision = DATE_ADD('".$data["debut"]."', INTERVAL 30 DAY), alerte = DATE_ADD('".$data["debut"]."', INTERVAL 25 DAY)";
-				$this->editSql($vals, $id);
+				//$this->editSql($vals, $id);
 	    			
 	    		}
 	    		return $this->findById_prevision($id);

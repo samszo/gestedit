@@ -416,11 +416,11 @@ class ImportController extends Zend_Controller_Action
 		
 		
 		$arrType = array(0, 1, 2, 3, 4, 5, 6);
-		$arrType = array(15);
+		$arrType = array(16);
 		foreach ($arrType as $type) {
 			$this->s->trace("TYPE ".$type);		
 			if($type==0 || $type == 11)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015BD.csv");
-			if($type==1 || $type == 13)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015WileyBase.csv");
+			if($type==1 || $type == 13 || $type == 16 || $type == 17)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015WileyBase.csv");
 			if($type==2)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015ISTEedition.csv");
 			if($type==3)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015Elsevier.csv");
 			if($type==4)$arr = $this->s->csvToArray("../bdd/import/DtsAuteursWiley.csv");
@@ -439,6 +439,8 @@ class ImportController extends Zend_Controller_Action
 				if($type==4)$this->importGlobalDtsAuteursWiley($r, $i);
 				if($type==5)$this->importAuteurs($r, $i);
 				if($type==6)$this->importDroitsAuteurs($r, $i);
+				if($type==16)$this->updateNbPage($r, $i);
+				if($type==17)$this->verifWileyISBN($r, $i);
 				$i++;
 				//if($i>1)break;
 			}
@@ -1110,30 +1112,57 @@ class ImportController extends Zend_Controller_Action
     		
     }    
 
-	function updateNbPage(){
+	function updateNbPage($r=false, $i=false){
 		$this->s->trace("DEBUT ".__METHOD__);		
 
 		$dbP = new Model_DbTable_Iste_page();
 		
-		$arrL = $this->dbLivre->getNbPage();		
-		$i = 0;
-		$nb = count($arrL);
-    		$this->s->trace($i." nb=".$nb);
-    		for ($i = 0; $i < $nb; $i++) {
-    			$l = $arrL[$i];
-    			if($l["nb_page_fr"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"prévu FR","nombre"=>$l["nb_page_fr"]));
-    			if($l["nb_page_en"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"prévu GB","nombre"=>$l["nb_page_en"]));
-    			if($l["nb_page"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"final ".substr($l["type"], -2),"nombre"=>$l["nb_page"]));
-    		$this->s->trace($i." ".$l["id_livre"]." (".$l["type"]." ".substr($l["type"], -2).") : ".$l["nb_page_fr"]." ".$l["nb_page_en"]." ".$l["nb_page"]);		
-    		}
-    		$this->s->trace("lignes traitées ".$i);		
-
-    		wiley colonne 9 final GB
-    		
+		if($r && $i){
+			
+	    		if($r[2]){
+		    		//recherche les références
+	    			$l = $this->dbIsbn->findByNum($r[0]);
+	    			if($r[9] && $l["id_livre"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"final GB","nombre"=>$r[9]));
+	    		}
+	    		$this->s->trace($i." ".$l["id_livre"]." (".$l["type"].") : ".$r[9]);		
+		}else{
+			$arrL = $this->dbLivre->getNbPage();		
+			$i = 0;
+			$nb = count($arrL);
+	    		$this->s->trace($i." nb=".$nb);
+	    		for ($i = 0; $i < $nb; $i++) {
+	    			$l = $arrL[$i];
+	    			if($l["nb_page_fr"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"prévu FR","nombre"=>$l["nb_page_fr"]));
+	    			if($l["nb_page_en"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"prévu GB","nombre"=>$l["nb_page_en"]));
+	    			if($l["nb_page"])$dbP->ajouter(array("id_livre"=>$l["id_livre"],"type"=>"final ".substr($l["type"], -2),"nombre"=>$l["nb_page"]));
+		    		$this->s->trace($i." ".$l["id_livre"]." (".$l["type"]." ".substr($l["type"], -2).") : ".$l["nb_page_fr"]." ".$l["nb_page_en"]." ".$l["nb_page"]);		
+	    		}
+		}    		
     		
     		$this->s->trace("FIN ".__METHOD__);		
     		
     }    
+    
+	function verifWileyISBN($r=false, $i=false){
+		//$this->s->trace("DEBUT ".__METHOD__);		
+		
+    		if($r[2]){
+	    		//recherche les références
+    			$rsIsbn = $this->dbIsbn->findByNum($r[0]);
+			if($rsIsbn["titre_en"] && $rsIsbn["titre_en"]!=$r[2]){
+    				$this->s->trace($i." ".$rsIsbn["id_livre"]." ".$rsIsbn["titre_en"]." != ".$r[2]);
+    				$rsLivre = $this->dbLivre->findByTitre($r[2], "en");
+    				$this->dbIsbn->edit($rsIsbn["id_isbn"],array("id_livre"=>$rsLivre[0]["id_livre"]));
+    				$this->s->trace($i." ".$rsIsbn["id_livre"]." => ".$rsLivre[0]["id_livre"]);   						    					
+    			}else{
+    				$this->s->trace($i." OK ".$rsIsbn["id_livre"]);		    					    					
+    			}
+		} 		
+    		
+    		//$this->s->trace("FIN ".__METHOD__);		
+    		
+    }    
+        
     
     function updateManquesIsbn(){
 
@@ -1149,6 +1178,7 @@ class ImportController extends Zend_Controller_Action
     	
     }
 
+    
     function updateByBase(){
     	
 		//met à jour la date de parution dans le planning		

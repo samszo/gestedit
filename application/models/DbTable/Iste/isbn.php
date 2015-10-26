@@ -201,7 +201,8 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("iid" => "iste_isbn"),
                 'i.id_isbn = iid.id_isbn', array("recid"=>"id_isbn"))
-			->where( "i.id_livre = ?", $id_livre );
+			->where( "i.id_livre = ?", $id_livre )
+			->order("i.ordre");
 
         return $this->fetchAll($query)->toArray(); 
     }
@@ -290,8 +291,11 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
     public function findByNum($num)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_isbn") )                           
-                    ->where( "i.num = ?", $num );
+			->from( array("i" => "iste_isbn") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("l" => "iste_livre"),
+                'i.id_livre = l.id_livre', array("titre_fr","titre_en"))
+			->where( "i.num = ?", $num );
 		$rs = $this->fetchAll($query)->toArray();
         if(count($rs))	
 	        return $rs[0] ;
