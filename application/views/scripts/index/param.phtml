@@ -687,6 +687,7 @@ function addParam(obj, type){
 		function(js){
 			finsession(js);
 	        	w2ui['grid_<?php echo $idPage;?>_'+type].add(js.rs);
+        		selectRowInGrid(js.rs[0].recid,'grid_<?php echo $idPage;?>_'+type);	        	
     		    	arrListes[type].push(js.rs[0]);			                  
 			w2alert(js.message);
 		},"json");                        

@@ -77,6 +77,7 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
 	    	$this->update($data, 'iste_isbn.id_isbn = ' . $id);
+	    return $this->findById_isbn($id);
     }
     
     /**
@@ -120,7 +121,7 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
     		$rs = $this->findById_livre($id);
     		$n = array();
     		foreach ($rs as $r) {
-    			$n["removeLivre_".$r['id_livre']] = $this->remove($r['id_livre']);
+    			$n["removeLivre_".$r['id_livre']] = $this->remove($r['id_isbn']);
     		}
     		return $n;
     }    
@@ -134,8 +135,7 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("id"=>$this->_primary[1],"text"=>"num","id_livre"))
-            	->where("length(num)>=13")
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"num","id_livre"))
             ->order("num");        
         return $this->fetchAll($query)->toArray();
 	}     

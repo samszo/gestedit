@@ -163,15 +163,15 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
             ->joinLeft(array("la" => "iste_livrexauteur"),
                 'la.id_livre = l.id_livre AND la.ordre > 0 AND la.role = "auteur"', array())
             ->joinLeft(array("a" => "iste_auteur"),
-                'a.id_auteur = la.id_auteur', array("auteurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',a.prenom,' ',a.nom)))"))
+                'a.id_auteur = la.id_auteur', array("auteurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',a.prenom,' ',a.nom)) ORDER BY la.ordre)"))
             ->joinLeft(array("lad" => "iste_livrexauteur"),
                 'lad.id_livre = l.id_livre AND lad.ordre > 0 AND lad.role = "directeur"', array())
             ->joinLeft(array("ad" => "iste_auteur"),
-                'ad.id_auteur = lad.id_auteur', array("directeurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ad.prenom,' ',ad.nom)))"))
+                'ad.id_auteur = lad.id_auteur', array("directeurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ad.prenom,' ',ad.nom)) ORDER BY lac.ordre)"))
             ->joinLeft(array("lac" => "iste_livrexauteur"),
                 'lac.id_livre = l.id_livre AND lac.ordre > 0 AND lac.role = "coordonnateur"', array())
             ->joinLeft(array("ac" => "iste_auteur"),
-                'ac.id_auteur = lac.id_auteur', array("coordonnateurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ac.prenom,' ',ac.nom)))"))
+                'ac.id_auteur = lac.id_auteur', array("coordonnateurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ac.prenom,' ',ac.nom)) ORDER BY lar.ordre)"))
             ->joinLeft(array("lar" => "iste_livrexauteur"),
                 'lar.id_livre = l.id_livre AND lar.ordre > 0 AND lar.role = "resp. série"', array())
             ->joinLeft(array("ar" => "iste_auteur"),

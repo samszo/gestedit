@@ -862,6 +862,8 @@ function initLivre() {
 			        			c,
 			        			function(js){
 			            			finsession(js);
+			            			js.rs.text = js.rs.num;
+				    	        		setListe(js.rs,'isbn');			            			
 			        				if(changes.length==i+1)w2alert(js.message);
 			        			},"json");                        
 		            });
