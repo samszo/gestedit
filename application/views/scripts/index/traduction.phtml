@@ -52,7 +52,7 @@ function initTraduction() {
 		        panels: [
 		 		    { type: 'top', size: "550px", style: pstyle},
 					{ type: 'main', size: '50%', resizable: true, style: pstyleDetail},
-		            { type: 'left', size: '50%', resizable: true, style: pstyleDetail},
+		            { type: 'left', size: '664px', resizable: true, style: pstyleDetail},
 		            { type: 'right', size: '50%', hidden:true, resizable: true, style: pstyleDetail},
 		        ]
 		    },
@@ -207,13 +207,13 @@ function initTraduction() {
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
 	                	toolbarAdd      : true,
-	                	toolbarDelete   : false,
+	                	toolbarDelete   : true,
 	                	toolbarSave		: true,
 	                	header			: true, 
 	                	columnHeaders	: true},
 		        columns: [      		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
-		            { field: 'content', caption: 'Content', size: '118px', sortable: true, resizable: true},
+		            { field: 'num', caption: 'N°', editable: { type: 'text'}, size: '120px', sortable: true, resizable: true},
 		            { field: 'tache1', caption: 'MS received', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'tache2', caption: 'proofs sent to author', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'tache3', caption: 'acknowledged receipt ?', editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
@@ -225,43 +225,107 @@ function initTraduction() {
 		            { field: 'id4', caption: 'id4', hidden:true, size: '80px', sortable: true, resizable: true},
 		            { field: 'id5', caption: 'id5', hidden:true, size: '80px', sortable: true, resizable: true},
 		            { field: 'commentaire', caption: 'commentaire', editable: { type: 'text'}, size: '120px', sortable: true, resizable: true},
-		        ],
+		            { field: 'id_traducteur', caption: 'Traducteur', size: '100px', sortable: true, resizable: true, 
+	            		editable: { type: 'select', items: arrListes['traducteur'], showAll: true },
+		                render: function (record, index, col_index) {
+		                    var html = '';
+		                    for (var p in arrListes['traducteur']) {
+		                        if (arrListes['traducteur'][p].id == this.getCellValue(index, col_index)) html = arrListes['traducteur'][p].text;
+		                    }
+		                    return html;
+		                }	  		            
+		            },
+		            { field: 'titre_fr', caption: 'Titre FR', editable: { type: 'text'}, size: '20%', sortable: true, resizable: true},
+		            { field: 'titre_en', caption: 'Titre EN', editable: { type: 'text'}, size: '20%', sortable: true, resizable: true},
+	            ],
 		        onSave: function(event) {
-					var data={obj:'prevision'};
-		            var changes = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'].getChanges();
-		            changes.forEach(function(c, i){
+					var changes = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'].getChanges();
+		            changes.forEach(function(c, j){
 		            		var i = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'].get(c.recid);
+		            		var data = {obj:'chapitre',recid:c.recid};
+		         		var bChap = false;
+				        if(c.id_traducteur){
+				        		data.id_traducteur=c.id_traducteur;
+				        		bChap = true;
+				        }
+				        if(c.num){
+				        		data.num=c.num;
+				        		bChap = true;
+				        }
+				        if(c.titre_fr){
+				        		data.titre_fr=c.titre_fr;
+				        		bChap = true;
+				        }
+				        if(c.titre_en){
+				        		data.titre_en=c.titre_en;
+				        		bChap = true;
+				        }
+				        if(c.commentaire){
+				        		data.commentaire=c.commentaire;
+				        		bChap = true;
+				        }
+				        if(bChap){	
+					        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+					        		data,
+				        			function(js){
+				            			finsession(js);
+				        			},"json");                        
+				        }			        
+				        var datas=[];
 			            if(c.tache1){
-				             data.fin = w2utils.formatDate(c.tache1, 'yyyy-mm-dd');
-				             data.recid = i.id1;
+				            datas.push({obj:'prevision',fin:w2utils.formatDate(c.tache1, 'yyyy-mm-dd'),recid:i.id1});
 			            }
 			            if(c.tache2){
-				             data.fin = w2utils.formatDate(c.tache2, 'yyyy-mm-dd');
-				             data.recid = i.id2;
+				            datas.push({obj:'prevision',fin:w2utils.formatDate(c.tache2, 'yyyy-mm-dd'),recid:i.id2});
 			            }
 			            if(c.tache3){
-				             data.fin = w2utils.formatDate(c.tache3, 'yyyy-mm-dd');
-				             data.recid = i.id3;
+				            datas.push({obj:'prevision',fin:w2utils.formatDate(c.tache3, 'yyyy-mm-dd'),recid:i.id3});
 			            }
 			            if(c.tache4){
-				             data.fin = w2utils.formatDate(c.tache4, 'yyyy-mm-dd');
-				             data.recid = i.id4;
+				            datas.push({obj:'prevision',fin:w2utils.formatDate(c.tache4, 'yyyy-mm-dd'),recid:i.id4});
 			            }
 			            if(c.tache5){
-				             data.fin = w2utils.formatDate(c.tache5, 'yyyy-mm-dd');
-				             data.recid = i.id5;
+				            datas.push({obj:'prevision',fin:w2utils.formatDate(c.tache5, 'yyyy-mm-dd'),recid:i.id5});
 			            }
-				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
-			        			data,
-			        			function(js){
-			            			finsession(js);
-			        				if(changes.length==i+1)w2alert(js.message);
-			        			},"json");                        
+			            datas.forEach(function(d,k){
+					        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+				        			d,
+				        			function(js){
+				            			finsession(js);
+				        				if(changes.length==j+1 && datas.length <= k+1)w2alert(js.message);
+				        			},"json");                        
+			            });
 		            });
 		        },
 	            onAdd: function(event) {
-		            w2ui['layout_<?php echo $idPage;?>'].hide('main', true);
-		            w2ui['layout_<?php echo $idPage;?>'].toggle('right', true);		            
+	                var data = {"num":"new Chap.","id_livre":itemSelect["id_livre"],"id_uti":uti.id_uti,"obj":"processusxchapitre"};
+		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+						data,
+		            		function(js){
+	            				finsession(js);
+			                var g = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'];
+		            			if(js.rs){					            			
+								g.add(js.rs);
+					        		selectRowInGrid(js.rs[0].recid,'grid_<?php echo $idPage;?>_trad_chapitre');
+		            			}
+				            w2alert(js.message);
+		           		},"json");
+		            
+		            //w2ui['layout_<?php echo $idPage;?>'].hide('main', true);
+		            //w2ui['layout_<?php echo $idPage;?>'].toggle('right', true);		            
+			    },
+		        onDelete: function(event) {            
+					var p = {'obj':'chapitre'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id = s[0];
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+								p,
+				            		function(js){
+				            			finsession(js);
+				            			w2alert(js.message);
+				           		},"json");
+					}
 			    },
 		    },		    	    		    
 	    		formTradChapitre: { 

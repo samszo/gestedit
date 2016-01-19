@@ -6,7 +6,7 @@ class ExportController extends Zend_Controller_Action
     public function indexAction()
     {
     		$this->initInstance();
-    	
+    		$nomFic = $this->_getParam('obj');
     		switch ($this->_getParam('obj')) {
     			case "contrat":
 		    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
@@ -26,6 +26,17 @@ class ExportController extends Zend_Controller_Action
 				$bdd = new Model_DbTable_Iste_livre();
 				$rs = $bdd->getTresorie();
     				break;    			
+    			case "etatEditeur":
+				$bdd = new Model_DbTable_Iste_livre();
+				$rs = $bdd->getEtatEditeur($this->_getParam('idEditeur'));
+				if($this->_getParam('idEditeur')==5) $nomFic .= "_wiley"; 
+				if($this->_getParam('idEditeur')==4) $nomFic .= "_elsevier"; 
+				break;
+    			case "suivi":
+				$bdd = new Model_DbTable_Iste_livre();
+				$rs = $bdd->getEtatSuivi($this->_getParam('ids'));
+				break;
+				    			
     			default:
 		    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
 		    		$oBdd = new $oName();
@@ -35,8 +46,8 @@ class ExportController extends Zend_Controller_Action
     		if($this->_getParam('json')){
     			$this->view->rs = $rs;
     		}else{
-			$this->_helper->viewRenderer->setNoRender(true);		
-			$this->printExcel($rs, "gestedit-".$this->_getParam('obj'));
+			$this->_helper->viewRenderer->setNoRender(true);		    			
+			$this->printExcel($rs, $nomFic);
     		}
     }
     
@@ -50,174 +61,90 @@ class ExportController extends Zend_Controller_Action
 		$this->printExcel($rs, "gestedit");
     }
     
-    public function royaltyAction()
-    {
-	
-		$this->bTrace = false;
-		$this->temps_debut = microtime(true);
-				
-		//initialisation des objets	
-		$dbR = new Model_DbTable_Iste_royalty();
-				
-		//récupère l'auteur
-		$this->idExi = $idExi; 
-		$this->arrExi = $this->dbE->findById_exi($idExi);
-				
-		//récupère le Modele
-		$rm = $this->dbDoc->findByIdDoc($idModele);
-		//vérifie le type de rapport
-		$typeRapport = $rm['branche'];
-		$this->trace("typeRapport=".$typeRapport);
-		
-		//récupère les mots clefs
-		$this->arrMC = $this->dbMC->getAll();
-		
-		//charge le modèle
-		//pour le debugage
-		if($this->pathDebug)$ps = str_replace("/home/gevu/www", $this->pathDebug, $rm['path_source']);
-		else $ps = $rm['path_source'];
-		$this->trace($ps);
-		$config = array(
-    	'ZIP_PROXY' => 'PclZipProxy',
-    	'DELIMITER_LEFT' => '{',
-    	'DELIMITER_RIGHT' => '}',
-		'PATH_TO_TMP' => ROOT_PATH.'/tmp'
-   		);
-		$this->odf = new odf($ps, $config);		
-		/*dégugage du contenu xml
-		header("Content-Type:text/xml");
-		echo $this->odf->getContentXml();
-		return;
-		*/
-		
-		//récupération de l'état des lieux
-		$this->arrEtatLieux = $this->oDiag->getNodeRelatedData($idLieu, $idExi, $idBase);
-		
-		//récupère le fil d'ariane du lieu
-		$this->arrAriane = $this->arrEtatLieux["ariane"];
-		$this->ariane = "";
-		foreach ($this->arrAriane as $l) {
-			$this->ariane .= $l['lib']." - ";			
-		}
-		$this->trace($this->ariane);
-		
-		/*
-		[{"id_type_doc": 8,"lib": "Rapport bâtiment"}, {"id_type_doc": 9,"lib": "Rapport espace"}, {"id_type_doc": 10,"lib": "Rapport niveau"}
-		, {"id_type_doc": 11,"lib": "Rapport objet"}, {"id_type_doc": 12,"lib": "Fiche logement"}, {"id_type_doc": 13,"lib": "Rapport logement"}];
-		*/
-		switch ($typeRapport) {
-			case 8:
-				$this->creaRapportBat();
-				break;			
-			case 9:
-				$this->creaRapportEspace();
-				break;			
-			case 10:
-				$this->creaRapportNiv();
-				break;			
-			case 11:
-				$this->creaRapportEspace();
-				break;			
-			case 12:
-				$this->creaFicheLog();
-				break;			
-			case 13:
-				$this->creaRapportLog();
-				break;			
-			default:
-				$this->creaRapportDefaut();
-				break;
-		}
-				
-		//on enregistre le fichier
-		$idInst = $this->dbInst->ajouter(array("id_exi"=>$idExi,"nom"=>"Création rapport"));
-		
-		$nomFic = preg_replace('/[^a-zA-Z0-9-_\.]/','', $nomEtab);
-		$nomFic = $idModele."_".$idLieu."_".$nomFic."_".$idInst.".odt";
-		//copie le fichier dans le répertoire data
-		$newfile = ROOT_PATH."/data/rapports/documents/".$nomFic;
-		copy($this->odf->tmpfile, $newfile);
-		
-		//on enregistre le doc dans la base
-		$idDoc = $this->dbDoc->ajouter(array("id_instant"=>$idInst,"url"=>WEB_ROOT."/data/rapports/documents/".$nomFic,"titre"=>$nomFic,"path_source"=>$newfile,"content_type"=>"application/vnd.oasis.opendocument.text"));
-		$this->trace("idDoc =".$idDoc);
-		$idRap = $this->dbRapport->ajouter(array("id_lieu"=>$idLieu, "id_exi"=>$idExi, "lib"=>$nomFic));
-		$this->trace("idRap =".$idRap);
-		$this->dbDocRapport->ajouter(array("id_doc"=>$idDoc,"id_rapport"=>$idRap));
-		$this->trace("Association du doc et du rapport");
-		
-		$this->trace("on propose de télécharger le rapport : ".$nomFic);
-		$this->odf->exportAsAttachedFile($nomFic);
-		
-		$this->trace("FIN");
-		    	
-    }
-    
 	/**
-   * array via fputcsv() zu csv
-   * http://blog.abmeier.de/zend-csv-action-helper
-   * @param  array $aryData
-   * @param  string $strName
-   * @param  bool $bolCols
-   * @return void
-   */
-  function printExcel($aryData = array(), $strName = "csv", $bolCols = true)
-  {
+	* array via fputcsv() zu csv
+	* http://blog.abmeier.de/zend-csv-action-helper
+	* @param  array $aryData
+	* @param  string $strName
+	* @param  bool $bolCols
+	* @return void
+	*/
+	function printExcel($aryData = array(), $strName = "csv", $bolCols = true, $flux = false, $unique=true)
+	{
+		$erreur = "no";
+		if (!is_array($aryData) || empty($aryData)){
+			exit(1);
+    		}
  
-    if (!is_array($aryData) || empty($aryData))
-    {
-      exit(1);
-    }
+	    // header
+	    if($flux){
+		    header('Content-Description: File Transfer');
+		    header('Content-Type: text/csv; charset=utf-8');
+		    header("Content-Disposition: attachment; filename=" . $strName . "-export.csv");
+		    header('Content-Transfer-Encoding: binary');
+		    header('Expires: 0');
+		    header('Cache-control: private, must-revalidate');
+		    header("Pragma: public");
+	    }
+     
+	    // Spaltenüberschriften
+	    if ($bolCols)
+	    {
+	      $aryCols = array_keys($aryData[0]);
+	      array_unshift($aryData, $aryCols);
+	    }
  
-    // header
-    header('Content-Description: File Transfer');
-    header('Content-Type: text/csv; charset=utf-8');
-    header("Content-Disposition: attachment; filename=" . $strName . "-export.csv");
-    header('Content-Transfer-Encoding: binary');
-    header('Expires: 0');
-    header('Cache-control: private, must-revalidate');
-    header("Pragma: public");
+	    // Ausgabepuffer für fputcsv
+	    ob_start();
  
-    // Spaltenüberschriften
-    if ($bolCols)
-    {
-      $aryCols = array_keys($aryData[0]);
-      array_unshift($aryData, $aryCols);
-    }
+	    // output Stream für fputcsv
+	    
+	    if($flux){
+	    		$fp = fopen("php://output", "w");
+	    }else{
+	    		if($unique)$strName.="_".uniqid().".csv";
+	    		$ficPath = "/data/export/".$strName;
+	    		$fp = fopen(ROOT_PATH.$ficPath, "w");
+	    }
+	    if (is_resource($fp))
+	    {
+			foreach ($aryData as $aryLine){
+		        // ";" für Excel
+		        fputcsv($fp, $aryLine, ';', '"');
+			}
  
-    // Ausgabepuffer für fputcsv
-    ob_start();
- 
-    // output Stream für fputcsv
-    $fp = fopen("php://output", "w");
-    if (is_resource($fp))
-    {
-      foreach ($aryData as $aryLine)
-      {
-        // ";" für Excel
-        fputcsv($fp, $aryLine, ';', '"');
-      }
- 
-      $strContent = ob_get_clean();
-       
-      // Excel SYLK-Bug
-      // http://support.microsoft.com/kb/323626/de
-      $strContent = preg_replace('/^ID/', 'id', $strContent);
-       
-      $strContent = utf8_decode($strContent);
-      $intLength = mb_strlen($strContent, 'utf-8');
- 
-      // length
-      header('Content-Length: ' . $intLength);
- 
-      // kein fclose($fp);
- 
-      echo $strContent;
-      exit(0);
-    }
-    ob_end_clean();
-    exit(1);
-  }
+		    if($flux){
+			    $strContent = ob_get_clean();
+			       
+			    // Excel SYLK-Bug
+			    // http://support.microsoft.com/kb/323626/de
+			    $strContent = preg_replace('/^ID/', 'id', $strContent);
+			       
+			    $strContent = utf8_decode($strContent);
+			    $intLength = mb_strlen($strContent, 'utf-8');
+			 
+			    // length
+			    header('Content-Length: ' . $intLength);		 
+			    echo $strContent;
+		    		exit(0);
+		    }
+		    fclose($fp);
+    		}else{
+    			$erreur = "Erreur d'exportation";
+    		}
+    		
+	    ob_end_clean();
+		if($flux){	    
+		    exit(1);
+		}elseif($erreur=="no"){			
+		    header("Content-Disposition: attachment; filename=".$strName);
+			header('Content-type: application/octetstream'); 			
+			readfile(ROOT_PATH.$ficPath);			
+		}else{
+			echo "ERREUR d'exportation";
+		}
+	    
+	}  
     
 	function initInstance(){
     		$auth = Zend_Auth::getInstance();

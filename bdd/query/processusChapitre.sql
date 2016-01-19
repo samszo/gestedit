@@ -17,5 +17,6 @@ FROM iste_processus p
 	INNER JOIN iste_prevision pre3 ON pre3.id_pxu = pc.id_pcu AND pre3.obj = 'chapitre' AND pre3.id_tache = 12     
 	INNER JOIN iste_prevision pre4 ON pre4.id_pxu = pc.id_pcu AND pre4.obj = 'chapitre' AND pre4.id_tache = 13     
 	INNER JOIN iste_prevision pre5 ON pre5.id_pxu = pc.id_pcu AND pre5.obj = 'chapitre' AND pre5.id_tache = 14         
-WHERE c.id_livre = 2
+WHERE c.id_livre = 28
+
 GROUP BY c.id_chapitre

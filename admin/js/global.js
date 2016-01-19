@@ -11,10 +11,12 @@ function selectRowInGrid(recid, idGrid){
 	itemSelect = w2ui[idGrid].get(id);
 	var idRow = w2ui[idGrid].get(id, true);
 	w2ui[idGrid].selectNone();
+	/*
 	if(!idRow){
 	    w2alert('Pas de ligne correspondante dans la grille');
 	    return;
 	}
+	*/
 	if( typeof recid === 'string' )
 		w2ui[idGrid].select(recid);
 	else
@@ -58,3 +60,32 @@ function openPopup(name, html) {
 	});
 }
 
+function exportByPost(ids, obj){
+	var form = document.getElementById("exportPostForm");
+	if(form){
+		form.ids.value = ids;
+		form.obj.value = obj;
+	}else{
+	    var form = document.createElement("form");
+	    form.setAttribute("id", "exportPostForm");
+	    form.setAttribute("method", "post");
+	    form.setAttribute("action", "export");
+	
+	    form.setAttribute("target", "view");
+	
+	    var hiddenField = document.createElement("input"); 
+	    hiddenField.setAttribute("type", "hidden");
+	    hiddenField.setAttribute("name", "ids");
+	    hiddenField.setAttribute("value", ids);
+	    form.appendChild(hiddenField);
+	    hiddenField = document.createElement("input"); 
+	    hiddenField.setAttribute("type", "hidden");
+	    hiddenField.setAttribute("name", "obj");
+	    hiddenField.setAttribute("value", obj);
+	    form.appendChild(hiddenField);
+	    document.body.appendChild(form);
+	}
+    window.open('', 'view');
+    form.submit();				            
+	
+}

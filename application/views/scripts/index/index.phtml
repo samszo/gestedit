@@ -105,9 +105,48 @@ $(function () {
     }
 
 
-    
+	var treeEdition = {
+        name       : 'sidebar',
+        topHTML    : '<div style="background-color: #eee; padding: 10px 5px; border-bottom: 1px solid silver">Choisissez une édition</div>',
+        bottomHTML : '<div style="background-color: #eee; padding: 10px 5px; border-top: 1px solid silver"></div>',
+        nodes : [ 
+            { id: 'etatSerie', text: 'Etat des séries', img: 'fa-list-ul'},
+            { id: 'etatWiley', text: 'Etat Wiley', img: 'fa-list-alt'},
+            { id: 'etatElsevier', text: 'Etat Elsevier', img: 'fa-list-alt'},
+        ],
+	    onClick: function (event) {
+		    if(event.target=="etatSerie"){
+		        if(w2ui['layout_Param']){
+			        //récupère la sélection
+			        	var items = w2ui['grid_Param_serie'].getSelection();	
+		            if(items.length == 0){
+		                w2alert("Veuillez sélectionner au moins une série.");
+		                return false;
+		            }else{
+			        		$.post('calculer/rapport',
+		        				{"type":"etatSerie","ids":items},
+		        		    		function(js){
+		                			finsession(js);
+		        					w2alert(js.message);	    		
+		                			window.open(js.rs.url);
+		        		    },"json");           		           	
+		            }
+		        }else{
+			        	chargeLayout('tbParam');		        	
+		            w2alert("Veuillez sélectionner le(s) série(s).");
+		        }			    
+		    }
+		    if(event.target=="etatWiley"){
+	        		open(urlP+'export?obj=etatEditeur&idEditeur='+5,"_blank");
+		    }
+		    if(event.target=="etatElsevier"){
+	        		open(urlP+'export?obj=etatEditeur&idEditeur='+5,"_blank");
+		    }
+	    },        	    
+    };    
     w2ui['layout'].content('left', w2ui['layout2']);
     w2ui['layout2'].content('top', $().w2grid(gridAlerte));
+    w2ui['layout2'].content('bottom', $().w2sidebar(treeEdition));
 
     
     $('#toolbar').w2toolbar({

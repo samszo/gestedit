@@ -84,7 +84,7 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
 						FROM iste_isbn i
 						INNER JOIN iste_processusxlivre pl ON pl.id_livre = i.id_livre
 						INNER JOIN iste_prevision p ON p.id_pxu = pl.id_plu AND p.id_prevision = ".$id."
-						WHERE i.date_parution is null AND p.fin is not null
+						WHERE p.fin is not null AND i.id_editeur IN (4, 5)
 						) tab2 on tab1.id_isbn = tab2.id_isbn set tab1.date_parution = tab2.fin";	
 				    		$db = $this->_db->query($sql);						
 			    			break;
@@ -95,7 +95,7 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
 						FROM iste_isbn i
 						INNER JOIN iste_processusxlivre pl ON pl.id_livre = i.id_livre
 						INNER JOIN iste_prevision p ON p.id_pxu = pl.id_plu AND p.id_prevision = ".$id."
-						WHERE i.date_parution is null AND p.fin is not null
+						WHERE p.fin is not null  AND i.id_editeur IN (1)
 						) tab2 on tab1.id_isbn = tab2.id_isbn set tab1.date_parution = tab2.fin";	
 				    		$db = $this->_db->query($sql);
 		    				break;
@@ -177,6 +177,20 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
     		return $this->delete('iste_prevision.id_prevision = ' . $id);
     }
 
+    /**
+     * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
+     * et supprime cette entrée.
+     *
+     * @param integer 	$id
+     * @param string 	$obj
+     *
+     * @return void
+     */
+    public function removePxuObj($id, $obj)
+    {
+    		return $this->delete('iste_prevision.id_pxu = '.$id.' AND iste_prevision.obj="'.$obj.'"');
+    }
+    
     /**
      * Recherche une entrée Iste_prevision avec la clef primaire spécifiée
      * et supprime cette entrée.
@@ -267,6 +281,31 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
 		if(count($rs)) return $rs[0];
 		else return false;
     }    
+
+	/**
+     * Recherche une entrée Iste_processus avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param varchar $idP
+     * @param varchar $idT
+     *
+     * @return array
+     */
+    public function findByIsbnTache($idIsbn, $idT)
+    {
+		$sql = "SELECT pre.id_prevision, pre.id_prevision recid, pre.debut, pre.prevision, pre.fin, pre.commentaire, pre.alerte, pre.relance
+			FROM iste_prevision pre 
+			INNER JOIN iste_processusxlivre pl ON pl.id_plu = pre.id_pxu
+			INNER JOIN iste_livre l ON l.id_livre = pl.id_livre
+			INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
+			INNER JOIN iste_tache t ON t.id_tache = pre.id_tache
+			WHERE i.id_isbn = ".$idIsbn." AND pre.id_tache = ".$idT;
+	 	//echo $sql."<br/>";
+	    $db = $this->_db->query($sql);
+	    $rs = $db->fetchAll();
+		if(count($rs)) return $rs[0];
+		else return false;
+    }    
     
     	/**
      * Recherche une entrée Iste_prevision avec la valeur spécifiée
@@ -279,8 +318,8 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
     public function findById_tache($id_tache)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_prevision") )                           
-                    ->where( "i.id_tache = ?", $id_tache );
+        		->from( array("i" => "iste_prevision") )                           
+            ->where( "i.id_tache = ?", $id_tache );
 
         return $this->fetchAll($query)->toArray(); 
     }

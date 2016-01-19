@@ -77,18 +77,23 @@ class CrudController extends Zend_Controller_Action
 			case 'processusxchapitre':
 				//création du chapitre;
 				$dbChap = new Model_DbTable_Iste_chapitre();
+				/*
 				$idChap = $dbChap->ajouter(array("id_livre"=>$params["id_livre"],"id_traducteur"=>$params["id_traducteur"]
 					,"num"=>$params["num"],"titre_fr"=>$params["titre_fr"],"titre_en"=>$params["titre_en"]
 					,"resume_fr"=>$params["resume_fr"],"resume_en"=>$params["resume_en"]
 					));
-				$params['id_chapitre'] = $idChap;				
 				unset($params['id_livre']);				
 				unset($params['id_traducteur']);				
 				unset($params['num']);				
 				unset($params['titre_fr']);				
 				unset($params['titre_en']);				
 				unset($params['resume_fr']);				
-				unset($params['resume_en']);				
+				unset($params['resume_en']);					
+				*/
+				$idChap = $dbChap->ajouter(array("id_livre"=>$params["id_livre"],"num"=>$params["num"]),false);
+				$params['id_chapitre'] = $idChap;				
+				unset($params['id_livre']);				
+				unset($params['num']);				
 			break;
 			/*			
 			case 'auteurxcontrat':

@@ -42,10 +42,11 @@ class Model_DbTable_Iste_processusxchapitre extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {
 	    	
 	    	$id=false;
@@ -54,7 +55,10 @@ class Model_DbTable_Iste_processusxchapitre extends Zend_Db_Table_Abstract
 	    		if(!isset($data['date_creation']))$data['date_creation']= new Zend_Db_Expr('NOW()');
 	    		$id = $this->insert($data);
 	    	}
-	    	return $id;
+	    	if($rs)
+			return $this->findById_processus($id);
+	    	else
+		    	return $id;
     } 
            
     /**
@@ -82,7 +86,7 @@ class Model_DbTable_Iste_processusxchapitre extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_processusxchapitre.id_processus = ' . $id);
+    		$this->delete('iste_processusxchapitre.id_pcu = ' . $id);
     }
     
     /**

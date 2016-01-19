@@ -75,24 +75,21 @@ class CalculerController extends Zend_Controller_Action
     		
     		$type = $this->_getParam('type');
     		switch ($type) {
-    			case "EtatSerie":
-    				$rs = $dbRoy->paiementLivre(implode(",", $this->_getParam('ids')));
-				foreach ($rs as $r) {
-			    		$rapport->creaPaiement($r);
-				}
-				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+    			case "etatSerie":
+		    		$result = $rapport->creaEtatSeries($this->_getParam('ids'));
+		    		$this->view->message = "L'état est disponible.";		
     				break;
     			case "auteur":
     				$rs = $dbRoy->paiementAuteur(implode(",", $this->_getParam('ids')));
 				foreach ($rs as $r) {
 			    		$rapport->creaPaiement($r);
 				}
+		    		$this->view->message = "Les paiements sont édités.";		
 				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
     				break;
     		}
     				
 		$this->view->rs = $result;
-    		$this->view->message = "Les paiements sont édités.";		
 		
     }    
     

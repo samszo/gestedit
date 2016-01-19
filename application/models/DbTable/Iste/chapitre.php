@@ -80,6 +80,15 @@ class Model_DbTable_Iste_chapitre extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
+    		//récupère les processus
+    		$dbP = new Model_DbTable_Iste_prevision();
+    		$dbPC = new Model_DbTable_Iste_processusxchapitre();
+    		$arrC = $dbPC->findById_chapitre($id);
+    		//supprime les lignes
+    		foreach ($arrC as $c) {
+    			$dbP->removePxuObj($c["id_pcu"],"chapitre");
+    			$dbPC->remove($c["id_pcu"]);
+    		}
 	    	$this->delete('iste_chapitre.id_chapitre = ' . $id);
     }
     

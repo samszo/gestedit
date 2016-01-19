@@ -1,2 +1,2 @@
 <?php
-	if($this->rs)echo json_encode($this->rs);
+	echo json_encode(array("rs"=>$this->rs,"message"=>$this->message));

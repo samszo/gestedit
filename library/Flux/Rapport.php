@@ -13,6 +13,7 @@ class Flux_Rapport extends Flux_Site{
 	var $dbRoyalty;
 	var $dbDevise;
 	var $dbImportfic;
+	var $dbSerie;
 	
     function __construct($idBase=false,$idTrace=false){    	
     	    	
@@ -23,7 +24,7 @@ class Flux_Rapport extends Flux_Site{
 	
 	
 	/**
-	 * récupère la liste des diagnostics pour un lieu
+	 * récupère la liste des rapports
 	 *
 	 * @param int 		$idObj
 	 * @param string 	$typeObj
@@ -40,7 +41,6 @@ class Flux_Rapport extends Flux_Site{
 	/**
 	 * création d'un paiement
 	 *
-	 * @param int 		$idMod
 	 * @param array 		$data
 	 *
 	 * @return array
@@ -154,7 +154,105 @@ class Flux_Rapport extends Flux_Site{
 		return $rsRapport;
 	}
 	
+	/**
+	 * création d'un etat de série
+	 *
+	 * @param array 		$data
+	 *
+	 * @return array
+	 */
+	public function creaEtatSeries($data){
+	
+		$this->bTrace = false;
+		$this->temps_debut = microtime(true);
+				
+		//initialisation des objets	
+		if(!$this->dbRapport) $this->dbRapport = new Model_DbTable_Iste_rapport();
+		if(!$this->dbSerie) $this->dbSerie = new Model_DbTable_Iste_serie();
+		if(!$this->dbImportfic) $this->dbImportfic = new Model_DbTable_Iste_importfic();
+		
+		$date = new DateTime();
+		$refRapport = "EtatSeries_".uniqid()."_".$date->format('Y-m-d');
 
+		
+		//charge le modèle
+		$mod = $this->dbImportfic->findByType("etatSerie");
+		$this->trace("//charge le modèle ".$mod["url"]);
+		$config = array(
+		    	'ZIP_PROXY' => 'PclZipProxy',
+		    	'DELIMITER_LEFT' => '{',
+		    	'DELIMITER_RIGHT' => '}',
+				'PATH_TO_TMP' => ROOT_PATH.'/tmp'
+		   		);
+		$this->odf = new odf(ROOT_PATH.$mod["url"], $config);		
+		/*dégugage du contenu xml
+		header("Content-Type:text/xml");
+		echo $this->odf->getContentXml();
+		return;
+		*/
+		$titreRecap = "Série éditée";
+		if(count($data)>1)$titreRecap = "Séries éditées";
+		$this->odf->setVars('titre_recap',$titreRecap);	
+		
+		//ajout des infos		
+		$series = $this->odf->setSegment('series');	
+		$recap = $this->odf->setSegment('recap');	
+		
+		foreach ($data as $idSerie) {
+			$rsSerie = $this->dbSerie->getDetails($idSerie);
+			$first=true;
+			foreach ($rsSerie as $s) {
+				if($first){
+					$first=false;
+					$series->setVars('date_jour', $date->format('d m Y'));
+					$series->setVars('serie_titre_en', $s['serie_titre_en']);
+					$series->setVars('serie_titre_fr', $s['serie_titre_fr']);
+					$recap->setVars('recap_fr', $s['serie_titre_fr']);
+					$recap->setVars('recap_en', $s['serie_titre_en']);
+					$series->setVars('coordinateur', $s['coordinateur']);
+				};
+				$series->livres->titre_fr($s['titre_fr']);
+				$series->livres->titre_en($s['titre_en']);
+				$series->livres->auteurs($s['auteurs']);
+				//ajout du planning
+				if($s["pFin"])$series->livres->proposal("reçu : ".$s["pFin"]);
+				else $series->livres->proposal("prévu : ".$s["pPrev"]);
+				if($s["cFin"])$series->livres->contrat("signé : ".$s["cFin"]);
+				else $series->livres->contrat("prévu : ".$s["cPrev"]);
+				if($s["mFin"])$series->livres->manuscrit("reçu : ".$s["mFin"]);
+				else $series->livres->manuscrit("prévu : ".$s["mPrev"]);
+				//ajout des commentaires
+				$com = $s["commentaire"];
+				if($s["pCom"])$com .= "\nProposal:\n".$s["pCom"]; 
+				if($s["cCom"])$com .= "\nContrat:\n".$s["cCom"]; 
+				if($s["mCom"])$com .= "\nManuscrit:\n".$s["mCom"]; 
+				$series->livres->commentaire($com);
+				$series->livres->merge();
+			}		
+			$series->merge();
+			$recap->merge();
+		}
+		$this->odf->mergeSegment($series);
+		$this->odf->mergeSegment($recap);
+		
+		//on enregistre le fichier
+		$nomFic = $refRapport.".odt";
+		//copie le fichier dans le répertoire data
+		$newfile = ROOT_PATH."/data/editions/".$nomFic;
+		//copy($this->odf->tmpfile, $newfile);
+
+		$this->odf->saveToDisk($newfile);
+		$this->trace("//enregistre le fichier ".$newfile);
+		
+		//enregistrement du rapport
+		$rsRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic,"id_importfic"=>$mod["id_importfic"]
+			, "data"=>json_encode($data), "obj_type"=>"serie", "obj_id"=>implode(",", $data)),true,true);		
+			
+		$this->trace("FIN");		
+		
+		return $rsRapport;
+	}
+	
 	/**
 	 * ajoute une image au modèle
 	 *

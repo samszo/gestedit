@@ -77,6 +77,23 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
 	    	$this->update($data, 'iste_isbn.id_isbn = ' . $id);
+		$rs = $this->findById_isbn($id);
+	    	
+	    	//vérifie s'il faut mettre à jour la date de parution
+	    	if(isset($data["date_parution"])){
+	    		$dbPrev = new Model_DbTable_Iste_prevision($this->_db);
+	    		//récupère l'éditeur
+	    		if($rs["id_editeur"]== 4 ||$rs["id_editeur"]== 5){
+		    		//récupère l'id_prevision
+		    		$rsPrev = $dbPrev->findByIsbnTache($id, 17, true);//parution GB
+		    		if($rsPrev)$dbPrev->update(array("fin"=>$data["date_parution"]),"id_prevision = ".$rsPrev["id_prevision"]);
+	    		}
+	    		if($rs["id_editeur"]== 1){
+		    		$rsPrev = $dbPrev->findByIsbnTache($id, 18, true);//parution FR
+		    		if($rsPrev)$dbPrev->update(array("fin"=>$data["date_parution"]),"id_prevision = ".$rsPrev["id_prevision"]);	
+	    		}
+	    	}
+	    	
 	    return $this->findById_isbn($id);
     }
     

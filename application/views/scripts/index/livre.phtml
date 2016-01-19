@@ -119,6 +119,7 @@ function initLivre() {
 		        searches: [
 		   		    { field: 'recid', caption: 'id', type: 'text', hidden:true },
 		   		    { field: 'isbns', caption: 'isbns', type: 'text', hidden:true },
+		   		    { field: 'production', caption: 'Production', type: 'text', hidden:true },
 				    { field: 'titre_fr', caption: 'Titre FR', type: 'text' },
 				    { field: 'titre_en', caption: 'Titre EN', type: 'text' },
 		            { field: 'auteurs', caption: 'Auteurs', type: 'text', hidden:true },
@@ -128,6 +129,7 @@ function initLivre() {
 		            { field: 'prenom', caption: 'Prénom', type: 'text' },
 		            { field: 'nom', caption: 'Nom', type: 'text' },
 		            { field: 'num', caption: 'ISBN', type: 'text' },
+		            { field: 'type_2', caption: 'Type 2', type: 'combo', options: { items: arrListes['type2']} },
 		            { field: 'id_comite', caption: 'Comité', type: 'combo', options: { items: arrListes['comite']} },
 		            { field: 'id_serie', caption: 'Série', type: 'combo', options: { items: arrListes['serie']} },
 		            { field: 'tache-15-prevision', caption: 'Arrivée prévue du manuscrit', type: 'date'},
@@ -138,8 +140,10 @@ function initLivre() {
 		            { field: 'tache-18-fin', caption: 'Date parution FR', type: 'date'},
 		            { field: 'tache-17-prevision', caption: 'Parution GB prévue', type: 'date'},
 		            { field: 'tache-17-fin', caption: 'Date parution GB', type: 'date'},
-		            { field: 'tache-26-prevision', caption: 'Réception prévue proposal', type: 'date'},
-		            { field: 'tache-26-fin', caption: 'Proposal reçu', type: 'date'},
+		            { field: 'tache-25-debut', caption: 'Origine gestion proposal', type: 'date'},
+		            { field: 'tache-25-prevision', caption: 'Réception prévue proposal', type: 'date'},
+		            { field: 'tache-25-fin', caption: 'Proposal reçu', type: 'date'},
+		            { field: 'tache-37-debut', caption: 'Origine gestion contrat', type: 'date'},
 		            { field: 'tache-37-prevision', caption: 'Réception prévue contrat', type: 'date'},
 		            { field: 'tache-37-fin', caption: 'Contrat reçu', type: 'date'},
 		            { field: 'tache-all-relance', caption: 'Dernière relance', type: 'date'},
@@ -151,6 +155,9 @@ function initLivre() {
 		            { field: 'reference', hidden:true, caption: 'Référence', size: '80px', sortable: true, resizable: true, 
 		                editable: { type: 'int'}
 		            },		            
+		            { field: 'production', caption: 'Production', size: '60px', sortable: true, resizable: true,
+			            editable: { type: 'text' }
+		            },
 		            { field: 'auteurs', caption: 'Auteurs', size: '20%', sortable: true, resizable: true},
 		            { field: 'coordonnateurs', caption: 'Coordonnateurs', size: '20%', sortable: true, resizable: true},
 		            { field: 'directeurs', caption: 'Directeurs', size: '20%', sortable: true, resizable: true},
@@ -193,12 +200,19 @@ function initLivre() {
 		        toolbar: {
 		            items: [
 		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' },
-		                { id: 'export_tresor', type: 'button', caption: 'Exporter trésorie', icon: 'fa-file-excel-o' }
+		                { id: 'export_tresor', type: 'button', caption: 'Exporter trésorie', icon: 'fa-file-excel-o' },
+		                { id: 'export_suivi', type: 'button', caption: 'Exporter le suivi', icon: 'fa-file-excel-o' },
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
 				            var ids = w2ui.grid_<?php echo $idPage;?>.getSelection();
-		                		open(urlP+'export?obj=livre&ids='+ids,"_blank");
+				            exportByPost(ids, "livre");
+		                		//open(urlP+'export?obj=livre&ids='+ids,"_blank");
+		                }
+		                if (event.target == 'export_suivi') {
+				            var ids = w2ui.grid_<?php echo $idPage;?>.getSelection();
+				            exportByPost(ids, "suivi");
+		                		//open(urlP+'export?obj=suivi&ids='+ids,"_blank");
 		                }
 		                if (event.target == 'export_tresor') {
 		                		open(urlP+'export?obj=tresor',"_blank")
@@ -216,8 +230,8 @@ function initLivre() {
 			            			finsession(js);
 			            			var ids = [];
 			            			js.rs.forEach(function(d){
-			            				rsLivre.forEach(function(l, i){
-				            				if(l.id_livre==d)ids.push(i);
+			            				grid.records.forEach(function(l, i){
+				            				if(l.recid==d)ids.push(i);
 			            				});
 				            		});
 		                        grid.last.searchIds = ids;
@@ -244,7 +258,7 @@ function initLivre() {
 		            		if(alerteSelect){
 		                		selectRowInGrid(alerteSelect.recid, 'grid_Livre');
 		            		}
-		        			
+		            	    document.getElementById("grid_grid_Livre_search_all").focus();		            			        			
 		        	    }		        
 		        },
 		        onSave: function(event) {
@@ -339,6 +353,7 @@ function initLivre() {
 	    		formPropo: { 
 			        header: 'Proposition',
 			        name: 'form_<?php echo $idPage;?>_propo',
+			        focus  : -1,
 			        fields: [
 			            { name: 'date_debut', type: 'date', options:{format: 'yyyy-mm-dd'}, required: true,  html: {caption: 'Date entrée base'} },
 			            //{ name: 'date_contrat', type: 'date', options:{format: 'yyyy-mm-dd'}, required: false, html: { caption: 'Date de contrat'} },
@@ -412,7 +427,11 @@ function initLivre() {
 				            			finsession(js);
 				        				if(c.debut)
 							        		w2ui['grid_<?php echo $idPage;?>_process_livre'].set(c.recid, js.rs);
-				        				if(changes.length==i+1)w2alert(js.message);
+				        				if(changes.length==i+1){
+				        					//recharge le grid des isbn pour les mis à jour de date de parution
+					        				getIsbnLivre();
+					        				w2alert(js.message);
+				        				}
 				        			},"json");                        
 			            });
 			        },
@@ -543,6 +562,7 @@ function initLivre() {
 				    },				    			    			    
 	    			formCommentaire: { 
 			        name: 'form_<?php echo $idPage;?>_commentaire',
+			        focus  : -1,
 			        fields: [
 			            { name: 'commentaire', type: 'textarea'
 				            , html: { caption: 'Commentaires :', attr: 'style="width: 100%; height: 150px; resize: none"'} 
@@ -743,7 +763,7 @@ function initLivre() {
 		            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('top', true);
 			    },
 		        onDelete: function(event) {            
-					console.log(event);
+					//console.log(event);
 					var p = {'id_livre':itemSelect.recid,'obj':'livrexserie'};
 					if(event.force){
 						var s = w2ui[event.target].getSelection();
@@ -863,13 +883,20 @@ function initLivre() {
 			        			function(js){
 			            			finsession(js);
 			            			js.rs.text = js.rs.num;
-				    	        		setListe(js.rs,'isbn');			            			
+				    	        		setListe(js.rs,'isbn');
+				    	        		if(c.date_parution){
+			        					//recharge le grid des isbn pour les mis à jour de date de parution
+				        				getPlanningLivre();
+				    	        		}				    	        					            			
 			        				if(changes.length==i+1)w2alert(js.message);
 			        			},"json");                        
 		            });
 		        },
 		        onDelete: function(event) {            
-					console.log(event);
+					if(w2ui[event.target].records.length==1){
+	            			w2alert("Vous ne pouvez pas supprimer le dernier ISBN.");
+    		        			event.cancel = true;
+					}
 					if(event.force){
 						var s = w2ui[event.target].getSelection();
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
@@ -918,6 +945,9 @@ function initLivre() {
 			            			if(js.rs){					            			
 									g.add(js.rs);
 									g.selectNone();
+									js.rs.id = js.rs.recid;
+									js.rs.text = js.rs.num;
+									arrListes["isbn"].push(js.rs);
 			            			}
 					            w2alert(js.message);
 			           		},"json");
@@ -1203,7 +1233,7 @@ function initLivre() {
     w2ui.layoutDetail1_<?php echo $idPage;?>.content('main', $().w2grid(config.gridPage));
     
     w2ui.layout_<?php echo $idPage;?>.lock('main', "Sélectionner un livre");
-    w2ui.layout_<?php echo $idPage;?>.lock('right', "Sélectionner un livre");
+    w2ui.layout_<?php echo $idPage;?>.lock('right', "Sélectionner un livre");    
     
 }
 
@@ -1392,18 +1422,7 @@ function showDataLivre(){
 				g.add(js.rs);
        		},"json");	           		           
 	//gestion des isbn
-    	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
-			{id:itemSelect.recid, obj:'isbn'},
-        		function(js){
-	    			finsession(js);
-	            g = w2ui['grid_<?php echo $idPage;?>_isbn'];
-	            g.clear();
-	            //formate le num comme une chaine
-	            js.rs.forEach(function(r){
-		            r.num = r.num+"";
-	            });
-				g.add(js.rs);
-       		},"json");	           		           
+    getIsbnLivre();     		           
 	//gestion des auteurs
     	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 			{id:itemSelect.recid, obj:'livrexauteur'},
@@ -1418,18 +1437,7 @@ function showDataLivre(){
 				
        		},"json");
     //récupère le planning du livre
-    $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
-		{id:itemSelect.id_livre, process:'Projet livre'},
-    		function(js){
-			finsession(js);
-            var gPL = w2ui['grid_<?php echo $idPage;?>_process_livre'];
-            gPL.clear();
-    			if(js.rs.length){
-        			//mise à jour de la grille processus			        
-	            idPLU = js.rs[0].id_plu;
-	            gPL.add(js.rs);
-    			}
-	},"json");		           			           		           
+    getPlanningLivre();
     //récupère les pages du livre
     $.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
 		{id:itemSelect.id_livre, obj:'page'},
@@ -1453,6 +1461,36 @@ function showDataLivre(){
     			}
 	},"json");		
 	
+}
+
+function getIsbnLivre(){
+	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
+			{id:itemSelect.recid, obj:'isbn'},
+        		function(js){
+	    			finsession(js);
+	            g = w2ui['grid_<?php echo $idPage;?>_isbn'];
+	            g.clear();
+	            //formate le num comme une chaine
+	            js.rs.forEach(function(r){
+		            r.num = r.num+"";
+	            });
+				g.add(js.rs);
+       		},"json");	      
+}
+
+function getPlanningLivre(){
+    $.get('<?php if(!$this->ajax) echo '../'; ?>processus/getprocess',
+    		{id:itemSelect.id_livre, process:'Projet livre'},
+        		function(js){
+    			finsession(js);
+                var gPL = w2ui['grid_<?php echo $idPage;?>_process_livre'];
+                gPL.clear();
+        			if(js.rs.length){
+            			//mise à jour de la grille processus			        
+    	            idPLU = js.rs[0].id_plu;
+    	            gPL.add(js.rs);
+        			}
+    	},"json");		           			           		           	
 }
 
 </script>

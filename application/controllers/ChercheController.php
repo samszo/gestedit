@@ -24,6 +24,22 @@ class ChercheController extends Zend_Controller_Action
 	    		$this->view->message = $nb." livres ont été trouvés";
     }
 
+    public function auteurAction()
+    {
+    		$this->initInstance();
+    		
+    		//echo __METHOD__;
+    		$dbAuteur = new Model_DbTable_Iste_auteur();
+    		$rs = $dbAuteur->findId($this->_getParam('searchData'));
+    		$this->view->rs = explode(",", $rs[0]["ids"]);
+    		if(!count($rs[0]["ids"]))$nb=0;
+    		else $nb = count($this->view->rs);
+    		if($nb < 1)
+	    		$this->view->message = $nb." auteur a été trouvé";
+	    	else
+	    		$this->view->message = $nb." auteurs ont été trouvés";
+    }
+
     public function venteAction()
     {
     		$this->initInstance();

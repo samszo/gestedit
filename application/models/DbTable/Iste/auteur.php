@@ -72,6 +72,7 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {           	
 	    	$this->update($data, 'iste_auteur.id_auteur = ' . $id);
+	    	return $this->findById_auteur($id);
     }
     
     /**
@@ -477,5 +478,123 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
 		return $rs;
 	    	
     }    
+
     
+	/**
+     * Recherche une entrée Iste_auteur avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param array $arrWhere
+     *
+     * @return array
+     */
+    public function findId($arrWhere)
+    {
+	$sql = "SELECT GROUP_CONCAT(DISTINCT a.id_auteur) ids
+		FROM iste_auteur a ";
+		$where = false;
+	
+	    	foreach ($arrWhere as $w) {
+	    		//création de l'opérateur
+	    		//print_r($w);
+	    		//vérification du champ
+	    		if(strpos($w["field"], "-")){
+	    			$arrTache = explode("-", $w["field"]);
+	    			$w["field"] = $arrTache[2];
+	    			if($w["operator"]=="between") {
+		    			$dt = new DateTime($w["value"][0]);
+		    			$w["value"][0] = $dt->format('Y-m-d');
+		    			$dt = new DateTime($w["value"][1]);
+		    			$w["value"][1] = $dt->format('Y-m-d');
+	    			}else{
+		    			$dt = new DateTime($w["value"]);
+		    			$w["value"] = $dt->format('Y-m-d');
+	    			}
+	    		}
+	    		if($w["field"]=="date_parution"){
+	    			if($w["operator"]=="between") {
+		    			$dt = new DateTime($w["value"][0]);
+		    			$w["value"][0] = $dt->format('Y-m-d');
+		    			$dt = new DateTime($w["value"][1]);
+		    			$w["value"][1] = $dt->format('Y-m-d');
+	    			}else{
+		    			$dt = new DateTime($w["value"]);
+		    			$w["value"] = $dt->format('Y-m-d');
+	    			}
+	    		}
+	    		
+	    		switch ($w["operator"]) {
+	    			case "is":
+	    				$op = $w["field"]." ='".$w["value"]."' ";
+	    			break;
+	    			case "begins":
+	    				$op = $w["field"]." LIKE '".$w["value"]."%' ";
+	    			break;
+	    			case "ends":
+	    				$op = $w["field"]." LIKE '%".$w["value"]."' ";
+	    			break;
+	    			case "contains":
+	    				$op = $w["field"]." LIKE '%".$w["value"]."%' ";
+	    			break;
+	    			case "less":
+	    				$op = $w["field"]." < '".$w["value"]."' ";
+	    			break;
+	    			case "more":
+	    				$op = $w["field"]." > '".$w["value"]."' ";
+	    			break;
+	    			case "between":
+	    				$op = $w["field"]." BETWEEN '".$w["value"][0]."' AND '".$w["value"][1]."' ";
+	    			break;	    			
+	    		}
+	    		/*modification de la requête pour les champs liés
+   		    { field: 'recid', caption: 'id', type: 'text', hidden:true },
+   		    { field: 'civilite', caption: 'civilite', type: 'text', hidden:true },
+            { field: 'prenom', caption: 'Prénom', type: 'text' },
+            { field: 'nom', caption: 'Nom', type: 'text' },
+            { field: 'instNom', caption: 'Institution', type: 'text' },
+            { field: 'id_comite', caption: 'Comité', type: 'combo', options: { items: arrListes['comite']} },
+            { field: 'id_serie', caption: 'Coordination', type: 'combo', options: { items: arrListes['serie']} },
+            { field: 'titre_fr', caption: 'Titre FR', type: 'text' },
+            { field: 'titre_en', caption: 'Titre EN', type: 'text' },		            
+			*/	    		
+			switch ($w["field"]) {
+				case "instNom":
+					$sql .= "INNER JOIN iste_institution ins ON ins.id_institution = a.id_institution AND ins.".$op;
+				break;
+				case "id_serie":
+					$nop = str_replace("id_serie", "s.titre_fr", $op)." OR ".str_replace("id_serie", "s.titre_en", $op);
+					$sql .= "INNER JOIN iste_coordination c ON c.id_auteur = a.id_auteur
+					INNER JOIN iste_serie s ON s.id_serie = c.id_serie AND (".$nop.")";
+				break;
+				case "id_comite":
+					$nop = str_replace("id_comite", "c.titre_fr", $op)." OR ".str_replace("id_comite", "c.titre_en", $op);
+					$sql .= "INNER JOIN iste_comitexauteur ca ON ca.id_auteur = a.id_auteur
+					INNER JOIN iste_comite c ON c.id_comite = ca.id_comite AND (".$nop.")";
+				break;
+				case "titre_fr":
+					$sql .= "INNER JOIN iste_livrexauteur la ON la.id_auteur = a.id_auteur
+						INNER JOIN iste_livre l ON l.id_livre = la.id_livre AND ".$op;
+						break;
+				case "titre_en":
+					$sql .= "INNER JOIN iste_livrexauteur la ON la.id_auteur = a.id_auteur
+						INNER JOIN iste_livre l ON l.id_livre = la.id_livre AND ".$op;
+						break;
+				case "date_parution":
+					$sql .= "INNER JOIN iste_livrexauteur la ON la.id_auteur = a.id_auteur
+						INNER JOIN iste_isbn i ON i.id_livre = la.id_livre AND i.date_parution != '0000-00-00' AND ".$op;
+					break;
+				default:
+					if(!$where)
+						$where = " WHERE ".$op;
+					else 
+						$where .= " AND ".$op;
+				break;
+			}
+		}
+		if($where)		
+			$sql .= $where;
+		//echo $sql; return;
+	    	$db = $this->_db->query($sql);
+	    return $db->fetchAll();
+    }    
 }
