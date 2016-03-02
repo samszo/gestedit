@@ -68,7 +68,7 @@ if($this->inc)
 ?>
 	</script>	
 
-<div class="container" >
+<div class="container" id="mainDivImport" >
 	<div id="layoutImportFicVente" style="width: 1000px; height: 200px;"></div>    
     <!-- The file upload form used as target for the file upload widget -->
     <form id="fileupload" action="//jquery-file-upload.appspot.com/" method="POST" enctype="multipart/form-data">
@@ -129,12 +129,13 @@ if($this->inc)
             <strong class="error text-danger"></strong>
 			<input type="hidden" name="obj[]" value="<?php echo $this->obj; ?>"  />
 			<input type="hidden" name="idObj[]" value="<?php echo $this->idObj; ?>"  />
-			<div class="w2ui-field w2ui-span6 w2ui-required" style="">
-         		<label>Dernière vente : </label>
+			<div class="w2ui-field w2ui-span4 w2ui-required" style="">
+         		<label style="width:200px;">Année fin (YYYY) : </label>
          		<div style="white-space: nowrap;">
-					<input name="date_fin[]" type="date" >
+					<input name="date_fin[]" type="number" >
 	      		</div>
       		</div>
+			<!--
 			<div class="w2ui-field w2ui-span6 w2ui-required" style="">
          		<label>Type de fichier : </label>
 				<div style="white-space: nowrap;">
@@ -145,6 +146,7 @@ if($this->inc)
 					</select>
 				</div>
       		</div>
+			-->
         </td>
         <td style="width: 30%;">
             <p class="size">Processing...</p>
@@ -205,7 +207,7 @@ if($this->inc)
             {% } %}
 
             {% if (file.nbLigne=="0" || file.nbLigne=="") { %}
-                <button class="btn btn-warning" id="btnImp{%=file.id%}" onclick="importerData({%=file.id%},'{%=file.dateFin%}','{%=file.type%}')" >
+                <button class="btn btn-warning" id="btnImp{%=file.id%}" onclick="importerData({%=file.id%},'in','global')" >
                     <i class="glyphicon glyphicon-download-alt" ></i>
                     <span>Importer</span>
                 </button>
@@ -213,7 +215,7 @@ if($this->inc)
                     <i class="glyphicon glyphicons-list-alt"></i>
                     <span>Voir</span>
                 </button>
-                <button class="btn btn-warning hidden" id="btnCalculer{%=file.id%}" onclick="calculerData({%=file.id%},'{%=file.type%}')" >
+                <button class="btn btn-warning hidden" id="btnCalculer{%=file.id%}" onclick="calculerData({%=file.id%},'global')" >
                     <i class="glyphicon glyphicon-calendar"></i>
                     <span>Calculer</span>
                 </button>
@@ -223,7 +225,7 @@ if($this->inc)
                     <span>Voir</span>
                 </button>
 	            {% if (file.nbVente=="0" || file.nbVente=="") { %}
-				<button class="btn btn-warning" id="btnCalculer{%=file.id%}" onclick="calculerData({%=file.id%},'{%=file.type%}')" >
+				<button class="btn btn-warning" id="btnCalculer{%=file.id%}" onclick="calculerData({%=file.id%},'global')" >
         		    		<i class="glyphicon glyphicon-calendar"></i>
         	    	    		<span>Calculer</span>
 				</button>
@@ -313,19 +315,12 @@ function initImportVente() {
 function importerData(id, dt, tp){
 	console.log("importerData : "+id);
 	var e = window.event;
-	w2popup.open({
-        width: 500,
-        height: 300,
-        title: 'Importation des données',
-        body: '<div class="w2ui-centered"></div>',
-        showMax: true
-    });	
-    w2popup.lock("traitement en cours", true);
+	var div = document.getElementById('mainDivImport');
+	w2utils.lock(div, { spinner: true, opacity : 1 });
 	$.get(urlP+'import/setdataficvente',
 			{idFic:id, dateFin:dt, type:tp},
         		function(html){
-				w2popup.unlock();
-				w2popup.close();        		
+				w2utils.unlock(div);
 				w2alert(html);
 				//affiche les boutons voir et calculer
 				document.getElementById('btnVoir'+id).className = 'btn btn-info';				
@@ -358,21 +353,14 @@ function calculerData(id, tp){
 	console.log("voirData : "+id);
 	var e = window.event;
 	idFicImport = id;
-
-	w2popup.open({
-        width: 500,
-        height: 300,
-        title: 'Calcul des ventes',
-        body: '<div class="w2ui-centered"></div>',
-        showMax: true
-    });	
+	var div = document.getElementById('mainDivImport');
+	w2utils.lock(div, { spinner: true, opacity : 1 });
     w2popup.lock("traitement en cours", true);
 	
 	$.get(urlP+'import/calculervente',
 			{idFic:id, type:tp},
         		function(html){
-				w2popup.unlock();
-				w2popup.close();        		
+				w2utils.unlock(div);
 				w2alert(html);
 				//cache le bouton calculer
 				document.getElementById('btnCalculer'+id).className += ' hidden';				

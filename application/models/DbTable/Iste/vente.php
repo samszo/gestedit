@@ -30,7 +30,7 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_vente'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($k=="id_isbn" || $k=="id_importdata")$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_vente; else $id=false;
@@ -50,8 +50,11 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
     	
 	    	$id=false;
 	    	if($existe)$id = $this->existe($data);
+	    	if(!isset($data['maj']))$data['maj']= new Zend_Db_Expr('NOW()');
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
+	    	}else{
+	    	 	$this->edit($id, $data);	    		
 	    	}
 	    	return $id;
     } 
@@ -66,9 +69,9 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-   	
-    	$this->update($data, 'iste_vente.id_vente = ' . $id);
+    {           	
+	    	if(!isset($data['maj']))$data['maj']= new Zend_Db_Expr('NOW()');
+    		$this->update($data, 'iste_vente.id_vente = ' . $id);
     }
     
     /**

@@ -375,6 +375,7 @@ class CrudController extends Zend_Controller_Action
 					,"id_vente"=>""
 					,"auteur"=>$r["auteur"]
 					,"date_vente"=>$r["dMin"]." / ".$r["dMax"]
+					,"montant_vente"=>$r["montant_vente"]					
 					,"montant_euro"=>$r["tot_e"],"montant_livre"=>$r["tot_l"],"montant_dollar"=>$r["tot_d"]
 					,'taxe_taux'=>""
 					,'taxe_deduction'=>''

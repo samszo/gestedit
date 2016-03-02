@@ -29,6 +29,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
        ,"Model_DbTable_Iste_web"
        ,"Model_DbTable_Iste_proposition"
        ,"Model_DbTable_Iste_auteurxcontrat"
+       ,"Model_DbTable_Iste_page"
        );    
     
     /**
@@ -630,8 +631,14 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
      */
     public function findId($arrWhere)
     {
-	$sql = "SELECT GROUP_CONCAT(DISTINCT l.id_livre) ids
+		/*Problème avec la limite en octet du group concat
+		 * 
+		 $sql = "SELECT GROUP_CONCAT(DISTINCT l.id_livre) ids
+			FROM iste_livre l ";
+		*/
+		$sql = "SELECT DISTINCT l.id_livre id
 		FROM iste_livre l ";
+		
 		$where = false;
 	
 	    	foreach ($arrWhere as $w) {
@@ -755,7 +762,13 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 			$sql .= $where;
 		//echo $sql; return;
 	    	$db = $this->_db->query($sql);
-	    return $db->fetchAll();
+	    	return $db->fetchAll();
+	    	//construction de la réponse
+	    	foreach ($arr as $v) {
+	    		$result .= $v["id_livre"].",";
+	    	}	    	
+	    	$result = substr($result, 0, -1);
+	    return array(0=>$result);
     }
     	/**
      * récupère les livres à traduire
@@ -896,7 +909,7 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
     		 */
     	
 	 	$sql = "SELECT 
-		GROUP_CONCAT(DISTINCT a.prenom, ' ',a.nom, ':', la.role) auteurs
+		GROUP_CONCAT(DISTINCT a.nom, ' ',a.prenom, ':', la.role) auteurs
 		,l.titre_en 
 		,l.titre_fr 
 		,pGB.nombre 'Nbre Pages prévision GB'
@@ -1018,7 +1031,7 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
     {
  		$sql = "SELECT 
 			i.num 'ISBN'
-			, GROUP_CONCAT(DISTINCT IFNULL(a.prenom,'') , ' ', IFNULL(a.nom,'') SEPARATOR ', ') 'AUTHOR(s)'
+			, GROUP_CONCAT(DISTINCT IFNULL(a.nom,'') , ' ', IFNULL(a.prenom,'') SEPARATOR ', ') 'AUTHOR(s)'
 			, l.titre_en 'TITLE', l.soustitre_en 'SUBTITLE', l.type_2 'TYPE 2', l.type_1 'TYPE 1'
 			, s.titre_en 'Set Title'
 			, c.titre_en 'Catalog Section'
@@ -1059,10 +1072,10 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
     {
  		$sql = "SELECT 
 			l.id_livre, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.type_1, l.type_2
-			, GROUP_CONCAT(DISTINCT IFNULL(a.prenom,'') , ' ', IFNULL(a.nom,'') SEPARATOR ', ') 'auteur'
-			, GROUP_CONCAT(DISTINCT IFNULL(co.prenom,'') , ' ', IFNULL(co.nom,'') SEPARATOR ', ') 'coordonateur'			
-			, GROUP_CONCAT(DISTINCT IFNULL(ad.prenom,'') , ' ', IFNULL(ad.nom,'') SEPARATOR ', ') 'directeur'
-			, GROUP_CONCAT(DISTINCT IFNULL(ar.prenom,'') , ' ', IFNULL(ar.nom,'') SEPARATOR ', ') 'resp. série'
+			, GROUP_CONCAT(DISTINCT IFNULL(a.nom,'') , ' ', IFNULL(a.prenom,'') SEPARATOR ', ') 'auteur'
+			, GROUP_CONCAT(DISTINCT IFNULL(co.nom,'') , ' ', IFNULL(co.prenom,'') SEPARATOR ', ') 'coordonateur'			
+			, GROUP_CONCAT(DISTINCT IFNULL(ad.nom,'') , ' ', IFNULL(ad.prenom,'') SEPARATOR ', ') 'directeur'
+			, GROUP_CONCAT(DISTINCT IFNULL(ar.nom,'') , ' ', IFNULL(ar.prenom,'') SEPARATOR ', ') 'resp. série'
 			,iW.num 'ISBN Wiley', CONCAT(IFNULL(iW.date_parution,''), IFNULL(iE.date_parution,'')) 'Fin Parution GB'
 			,iE.num 'ISBN Elsevier'
 			,iI.num 'ISBN ISTE', iI.date_parution 'Fin Parution FR'

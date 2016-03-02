@@ -149,7 +149,8 @@ class Model_DbTable_Iste_prix extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    	/**
+
+    /**
      * Recherche une entrée Iste_prix avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -168,6 +169,27 @@ class Model_DbTable_Iste_prix extends Zend_Db_Table_Abstract
                     
         return $this->fetchAll($query)->toArray(); 
     }
+
+    	/**
+     * Recherche une entrée Iste_prix avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $id_isbn
+     *
+     * @return array
+     */
+    public function findByIdIsbn($id_isbn)
+    {
+        $query = $this->select()
+            ->from( array("p" => "iste_prix"), array("recid"=>"id_prix","id_prix","id_livre","pdf","prix_euro","prix_dollar","prix_livre","type_prix"=>"type","maj") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("i" => "iste_isbn"),
+                'i.id_isbn = p.id_isbn AND i.id_livre ='.$id_livre, array("id_livre","num", "type_isbn"=>"type"))
+            ->order("type");
+                    
+        return $this->fetchAll($query)->toArray(); 
+    }
+    
     
     /**
      * Recherche une entrée Iste_prix avec la valeur spécifiée

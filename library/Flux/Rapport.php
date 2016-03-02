@@ -49,7 +49,8 @@ class Flux_Rapport extends Flux_Site{
 	
 		$this->bTrace = false;
 		$this->temps_debut = microtime(true);
-				
+		$this->trace("creaPaiement",$data);
+		
 		//initialisation des objets	
 		if(!$this->dbRapport) $this->dbRapport = new Model_DbTable_Iste_rapport();
 		if(!$this->dbRoyalty) $this->dbRoyalty = new Model_DbTable_Iste_royalty();
@@ -70,7 +71,7 @@ class Flux_Rapport extends Flux_Site{
 		$mod = $this->dbImportfic->findByType("paiement royalties ".$data["base_contrat"]);
 		$this->trace("//charge le modèle ".$mod["url"]);
 		$config = array(
-		    	'ZIP_PROXY' => 'PclZipProxy',
+		    	'ZIP_PROXY' => 'PhpZipProxy',
 		    	'DELIMITER_LEFT' => '{',
 		    	'DELIMITER_RIGHT' => '}',
 				'PATH_TO_TMP' => ROOT_PATH.'/tmp'
@@ -87,7 +88,8 @@ class Flux_Rapport extends Flux_Site{
 		$this->odf->setVars('roy_reference', $data["isbns"]);
 		$periode = $data["date_taux"]." - ".$data["date_taux_fin"];
 		$this->odf->setVars('roy_periode', $periode);
-
+		$this->odf->setVars('livre_roy_pc', $data["pc_papier"]." %");
+		
 		//ajout des infos d'auteur
 		$this->odf->setVars('aut_civilite', $data["civilite"]);
 		$this->odf->setVars('aut_nom', $data["autNom"]);
@@ -110,18 +112,27 @@ class Flux_Rapport extends Flux_Site{
 		//ajout des infos de royalty		
 		$roys = $this->odf->setSegment('roys');	
 		$due = 0;
+		$revTot = 0;
 		foreach ($rsRoyalty as $r) {
-			$roys->setVars('roy_type', $r["typeIsbn"]." ".$r["typeContrat"]);
+			$this->trace("détail royalties",$r);
+			
+			if($r["typeVente"]=="N")$r["typeVente"]="Book digital";
+			if($r["typeVente"]=="P")$r["typeVente"]="Book paper";
+			if($r["typeVente"]=="Licence num")$r["typeVente"]="E-Licence";
+			
+			$roys->setVars('roy_type', $r["typeVente"]." ".$r["typeIsbn"]." ".$r["typeContrat"]);
 			$roys->setVars('roy_unit', $r["unit"]);
 			$roys->setVars('roy_rev', $r["rMtVente"]);
+			$revTot += $r["rMtVente"];
 			$roys->setVars('roy_pc', $r["pc"]);
 			$roys->setVars('roy_livre', $r["rMtRoy"]);
 			$due += $r["rMtRoy"];
 		}
 		$roys->merge();
 		$this->odf->mergeSegment($roys);
-
+	
 		//ajout les totaux
+		$this->odf->setVars('roy_rev_tot', $revTot);
 		$this->odf->setVars('roy_balance_due', $due);
 		$this->odf->setVars('roy_tax_deduc_pc', $r["deduction"]);
 		$deduc = $due*$r["deduction"]/100;
@@ -143,15 +154,15 @@ class Flux_Rapport extends Flux_Site{
 		$this->trace("//enregistre le fichier ".$newfile);
 		
 		//enregistrement du rapport
-		$rsRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic,"id_importfic"=>$mod["id_importfic"]
-			, "data"=>json_encode($data), "obj_type"=>"auteur_livre_royalty", "obj_id"=>$data["id_auteur"]."_".$data["id_livre"]."_".$data["idsRoyalty"]));		
+		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic,"id_importfic"=>$mod["id_importfic"]
+			, "data"=>json_encode($data), "obj_type"=>"auteur_livre", "obj_id"=>$data["id_auteur"]."_".$data["id_livre"]));		
 			
 		//mise à jour de la date d'éditions
-		$this->dbRoyalty->edit(false,array("date_edition"=>new Zend_Db_Expr('NOW()')),$data["idsRoyalty"]);
+		$this->dbRoyalty->edit(false,array("id_rapport"=>$idRapport,"date_edition"=>new Zend_Db_Expr('NOW()')),$data["idsRoyalty"]);
 
 		$this->trace("FIN");		
 		
-		return $rsRapport;
+		return $idRapport;
 	}
 	
 	/**

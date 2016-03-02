@@ -23,7 +23,7 @@ function initFileUpload () {
     		.on('fileuploadsubmit', function (e, data) {
 	    		data.formData = data.context.find(':input').serializeArray(); 
 	    		if(fuVerif && !data.formData[2].value){
-	    		    w2alert('Veuillez sélectionner une date');
+	    		    w2alert('Veuillez définir une année');
 	    		    data.context.find('button').prop('disabled', false);
 	    		    return false;
 	    		}
@@ -32,7 +32,7 @@ function initFileUpload () {
     				console.log("fileuploaddone = "+data.result);
     			})
     		.bind('fileuploadadded', function (e, data) {
-                    var fileType = data.files[0].name.split('.').pop(), allowdtypes = 'csv,xsl,CSV,XLS';
+                    var fileType = data.files[0].name.split('.').pop(), allowdtypes = 'csv,xls,CSV,XLS';
                     if (fuVerif && allowdtypes.indexOf(fileType) < 0) {
                     		w2alert("Le type de fichier n'est pas bon");
                         return false;

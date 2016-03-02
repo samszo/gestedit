@@ -11,7 +11,9 @@ class CustomUploadHandler extends UploadHandler {
     		$file->idObj = @$_REQUEST['idObj'][$index];
         $file->obj = @$_REQUEST['obj'][$index];
         $file->type = @$_REQUEST['type'][$index];
-        $file->dateFin = @$_REQUEST['date_fin'][$index];
+        //on ne précise que l'année
+        $file->dateFin = @$_REQUEST['date_fin'][$index]."-01-01";
+        $file->dateDeb = (@$_REQUEST['date_fin'][$index]-1)."-01-01";
     }
 
     protected function handle_file_upload($uploaded_file, $name, $size, $type, $error,

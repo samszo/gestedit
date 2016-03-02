@@ -55,6 +55,10 @@ class ImportController extends Zend_Controller_Action
 				$nbn = new Flux_Nbn(false,true);
 				$nbn->importer(null,$this->_getParam('dateFin'),$this->_getParam('idFic'));
 				break;			
+			case "global":
+				$v = new Flux_Vente(false,true);
+				$v->importer(null,$this->_getParam('idFic'));
+				break;			
 			default:
 				echo "pas de processus d'importation pour ce type de fichier";
 				break;			
@@ -72,6 +76,10 @@ class ImportController extends Zend_Controller_Action
 			case "NBN":
 				$nbn = new Flux_Nbn(false,true);
 				$nbn->calculerVentes($this->_getParam('idFic'));
+				break;			
+			case "global":
+				$v = new Flux_Vente(false,true);
+				$v->calculerVentes($this->_getParam('idFic'));
 				break;			
 			default:
 				echo "pas de processus de calcule pour ce type de fichier";
@@ -415,9 +423,9 @@ class ImportController extends Zend_Controller_Action
 		 */
 		
 		
-		//max 19
+		//max 20
 		$arrType = array(0, 1, 2, 3, 4, 5, 6);
-		$arrType = array(7,18,19);
+		$arrType = array(20);
 		foreach ($arrType as $type) {
 			$this->s->trace("TYPE ".$type);		
 			if($type==0 || $type == 11)$arr = $this->s->csvToArray("../bdd/import/ISTEGlobal2015BD.csv");
@@ -428,6 +436,7 @@ class ImportController extends Zend_Controller_Action
 			if($type==5)$arr = $this->s->csvToArray("../bdd/import/ISTE-EDITIONS-AUTEURS.csv");
 			if($type==6)$arr = $this->s->csvToArray("../bdd/import/ISTEPourcentageDroitsN.csv");
 			if($type==19)$arr = $this->s->csvToArray("../bdd/import/correctionISBN.csv");
+			if($type==20)$arr = $this->s->csvToArray("../bdd/import/FichierDroits.csv",0,",");
 			
 			$i = 1;
 			$this->s->trace("nb Ligne ".count($arr));		
@@ -444,8 +453,9 @@ class ImportController extends Zend_Controller_Action
 				if($type==16)$this->updateNbPage($r, $i);
 				if($type==17)$this->verifWileyISBN($r, $i);
 				if($type==19)$this->corrigeISBN($r, $i);
+				if($type==20)$this->updateAuteurContrat($r, $i);
 				$i++;
-				//if($i>1)break;
+				//if($i>3)break;
 			}
 			
 			if($type==7)$this->updateManquesLivre();
@@ -950,7 +960,53 @@ class ImportController extends Zend_Controller_Action
 		}
 		$this->s->trace("FIN ".__METHOD__);					
     } 
+    
+    
+	function updateAuteurContrat($r, $i){
+		$this->s->trace("DEBUT ".__METHOD__);		
+		//gestion des lignes vides
+		if($r[0]=="nb" || $r[0]=="0"){$this->s->trace($i." ligne vide");return;}
 
+		//traitement de l'action 1
+		$this->actionUpdateAuteurContrat(0, $r, $i);
+		//traitement de l'action 2
+		$this->actionUpdateAuteurContrat(1, $r, $i);
+		//traitement de l'action 3
+		$this->actionUpdateAuteurContrat(2, $r, $i);
+		
+		$this->s->trace("FIN ".__METHOD__);					
+    } 
+    
+    function actionUpdateAuteurContrat($num, $r, $i){
+
+    		$this->s->trace($i." traitement de l'action ".($num+1)." = ".$r[2+$num]);
+    		if(!$r[5+$num]){$this->s->trace($i." pas d'identifiant ");return;}
+    				
+		switch (strtolower($r[2+$num])) {
+			case "s":
+				//supprime le contrat;
+				$this->dbAutCont->remove($r[5+$num], true);
+				$this->s->trace($i." Contrat supprimé ".$r[5+$num]);		
+				break;			
+			case "u":
+				//formate la date
+				$arrDate = explode("/", $r[8+$num]);
+				if(count($arrDate)==1)$strDate = $r[8+$num];
+				else $strDate = $arrDate[2]."-".$arrDate[1]."-".$arrDate[0];
+				//modifie le contrat;				
+				$data = array("commentaire"=>"correction Excel 14-02-16 : corriger","date_signature"=>$strDate,"pc_papier"=>$r[11+$num],"pc_ebook"=>$r[14+$num]);
+				$this->dbAutCont->edit($r[5+$num], $data);
+				$this->s->trace($i." Contrat modifié ".$r[5+$num],$data);		
+				break;			
+			default:
+				$this->dbAutCont->edit($r[5+$num], array("commentaire"=>"correction Excel 2016-02-14 : laisser"));
+				$this->s->trace($i." Contrat laissé ".$r[5+$num]);		
+				break;
+		}
+    	
+    }
+    
+    
 	function updateIsteEdition($r, $i){
 		$this->s->trace("DEBUT ".__METHOD__);		
 		//gestion des lignes vides

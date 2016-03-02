@@ -30,7 +30,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_importdata'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($k=="id_importfic" || $k=="numsheet" || $k=="numrow")$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_importdata; else $id=false;
@@ -50,9 +50,11 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
 	    	
 	    	$id=false;
 	    	if($existe)$id = $this->existe($data);
+	    	if(!isset($data['creation']))$data['creation']= new Zend_Db_Expr('NOW()');
 	    	if(!$id){
-	    		if(!isset($data['creation']))$data['creation']= new Zend_Db_Expr('NOW()');
 	    		$id = $this->insert($data);
+	    	}else{
+			$this->edit($id, $data);	    		
 	    	}
 	    	return $id;
     } 
@@ -210,7 +212,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
         
     }    
     
-/**
+	/**
      * Recherche des entrées avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -233,4 +235,29 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
         
     }    
+    
+	/**
+     * Recherche des entrées avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idFic
+     *
+     * @return array
+     */
+    public function findSalesByIdFic($idFic)
+    {
+		//élimine les isbn introuvable
+        $query = $this->select()
+            ->from( array("d" => "iste_importdata") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("f" => "iste_importfic"),
+                'f.id_importfic = d.id_importfic', array("periode_debut","periode_fin"))
+            ->where( "d.commentaire != 'isbn introuvable'")
+            ->where( "d.id_importfic = ?", $idFic )
+            ->order("d.id_importdata");
+
+        return $this->fetchAll($query)->toArray(); 
+        
+    }    
+    
 }

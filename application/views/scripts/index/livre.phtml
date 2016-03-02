@@ -231,7 +231,7 @@ function initLivre() {
 			            			var ids = [];
 			            			js.rs.forEach(function(d){
 			            				grid.records.forEach(function(l, i){
-				            				if(l.recid==d)ids.push(i);
+				            				if(l.recid==d.id)ids.push(i);
 			            				});
 				            		});
 		                        grid.last.searchIds = ids;
@@ -1193,6 +1193,7 @@ function initLivre() {
 		                var g = w2ui['grid_<?php echo $idPage;?>_auteur'];
 		                var data = this.record;
 		                data.obj = "auteurxcontrat";
+		                if(data.type.text) data.type = data.type.text;
 		                this.clear();		                
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 							data,

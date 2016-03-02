@@ -104,6 +104,20 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     {
 	    return 	$this->delete('iste_royalty.id_vente = ' . $id);
     }
+
+    /**
+     * Recherche une entrée Iste_royalty avec la clef primaire spécifiée
+     * et supprime cette entrée.
+     *
+     * @param integer $id
+     *
+     * @return void
+     */
+    public function removeAuteurContrat($id)
+    {
+	    return 	$this->delete('iste_royalty.id_auteurxcontrat = ' . $id);
+    }
+    
     
     /**
      * Récupère toutes les entrées Iste_royalty avec certains critères
@@ -189,7 +203,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 			->joinInner(array("d" => "iste_devise"),
                 'd.id_devise = r.id_devise', array("id_devise","base_contrat",'annee'=>"DATE_FORMAT(date_taux,'%Y')"))
             ->joinInner(array("v" => "iste_vente"),
-                'v.id_vente = r.id_vente', array("date_vente"))
+                'v.id_vente = r.id_vente', array("date_vente","montant_vente"=>"v.montant_livre",))
 			->joinInner(array("i" => "iste_isbn"),
                 'v.id_isbn = i.id_isbn', array("type_isbn"=>"type"))
 			->joinInner(array("l" => "iste_livre"),
@@ -388,7 +402,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         		->from( array("r" => "iste_royalty"), array("tot_e"=>"SUM(r.montant_euro)","tot_l"=>"SUM(r.montant_livre)","tot_d"=>"SUM(r.montant_dollar)"))
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("v" => "iste_vente"),
-                'v.id_vente = r.id_vente', array("nb"=>"SUM(nombre)", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"))
+                'v.id_vente = r.id_vente', array("montant_vente"=>"SUM(v.montant_livre)","nb"=>"SUM(nombre)", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"))
         		->joinInner(array("i" => "iste_isbn"),'v.id_isbn = i.id_isbn',array("nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))"))
 			->joinInner(array("ac" => "iste_auteurxcontrat"),
                 'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
@@ -409,6 +423,10 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      */
     public function setForAuteur()
     {
+    		//met à jour les proposition qui n'ont pas de base contrat et qui ne sont pas null
+    		$dbP = new Model_DbTable_Iste_proposition();
+    		$dbP->update(array("base_contrat"=>null), "base_contrat=''");
+    	
 	    	//récupère les vente qui n'ont pas de royalty
 	    	$sql = "SELECT 
 		ac.id_auteurxcontrat
@@ -427,8 +445,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 		 INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
 		 INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
 		 INNER JOIN iste_livrexauteur la ON la.id_livre = i.id_livre AND la.id_auteur = ac.id_auteur AND la.role = c.type
-		 INNER JOIN iste_devise d ON d.base_contrat = p.base_contrat
-				    AND date_vente BETWEEN date_taux AND date_taux_fin
+		 INNER JOIN iste_devise d ON d.base_contrat = IFNULL(p.base_contrat,'GB')
+				    AND DATE_FORMAT(date_vente, '%Y') = DATE_FORMAT(date_taux, '%Y')
 		 LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
 		WHERE pc_papier is not null AND pc_ebook is not null AND pc_papier != 0 AND pc_ebook != 0
 			AND v.montant_livre > 0
@@ -507,7 +525,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 		    , a.id_auteur, a.nom autNom, a.prenom, a.adresse_1, a.adresse_2, a.civilite, a.code_postal, a.ville, a.pays
 --		    , ac.pc_papier, ac.pc_ebook
 --		    , c.nom contNom
-            , MIN(i.date_parution) parution, GROUP_CONCAT(i.num SEPARATOR ' - ') isbns
+            , MIN(i.date_parution) parution, GROUP_CONCAT(DISTINCT i.num SEPARATOR ' - ') isbns
 		    , l.id_livre, l.titre_en, l.titre_fr
             , d.base_contrat, DATE_FORMAT(d.date_taux,'%Y') annee, d.date_taux, d.date_taux_fin, d.taux_livre_euro, d.taux_livre_dollar, d.taxe_taux, d.taxe_deduction
 		FROM iste_royalty r 
@@ -542,8 +560,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     		//récupère les royalty pour les livres sélectionnés
 	    	$sql = "SELECT 
 			COUNT(DISTINCT r.id_royalty) nbRoy
-		    ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit
-	    	,SUM(r.montant_livre) rMtRoy
+		    ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
+	    		,SUM(r.montant_livre) rMtRoy
 			,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
 			,i.id_isbn, i.date_parution, i.type typeIsbn, i.num
             ,c.type typeContrat

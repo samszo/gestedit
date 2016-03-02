@@ -107,16 +107,21 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
      * et supprime cette entrée.
      *
      * @param integer $id
+     * @param boolean $force
      *
      * @return void
      */
-    public function remove($id)
+    public function remove($id, $force=false)
     {
     		//vérifie l'éxistence de royalties
     		$dbR = new Model_DbTable_Iste_royalty();
-    		$rs = $dbR->verifEnCoursByIdAuteurContrat($id);
-    		if($rs[0]["mtDue"]>0){
-    			return array("message"=>"Il reste : ".$rs[0]["mtDue"]." &pound; à payer ou encaisser.<br/>Vous ne pouvez pas supprimer le contrat.");
+    		if($force){
+	    		$dbR->removeAuteurContrat($id);	
+    		}else{
+	    		$rs = $dbR->verifEnCoursByIdAuteurContrat($id);
+	    		if($rs[0]["mtDue"]>0){
+	    			return array("message"=>"Il reste : ".$rs[0]["mtDue"]." &pound; à payer ou encaisser.<br/>Vous ne pouvez pas supprimer le contrat.");
+	    		}
     		}
     		$this->delete('iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
     }
@@ -180,6 +185,22 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
             ->where( "i.id_isbn = ?", $idIsbn);
 		$rs = $this->fetchAll($query)->toArray(); 
         return count($rs) ? $rs[0] : false;
+    }
+
+    	/**
+     * Recherche une entrée Iste_auteurxcontrat avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idIsbn
+     * 
+     * @return array
+     */
+    public function findByIdIsbn($idIsbn)
+    {
+        $query = $this->select()
+			->from( array("i" => "iste_auteurxcontrat") )                           
+            ->where( "i.id_isbn = ?", $idIsbn);
+		return $this->fetchAll($query)->toArray(); 
     }
     
 	/**

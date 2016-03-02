@@ -15,8 +15,8 @@ class ChercheController extends Zend_Controller_Action
     		$dbLivre = new Model_DbTable_Iste_livre();
     		$rs = $dbLivre->findId($this->_getParam('searchData'));
     		//$this->view->rs = $dbLivre->getAll(null,0,0,'l.id_livre IN ('.$rs[0]["ids"].')');
-    		$this->view->rs = explode(",", $rs[0]["ids"]);
-    		if(!count($rs[0]["ids"]))$nb=0;
+    		$this->view->rs = $rs;
+    		if(!count($rs))$nb=0;
     		else $nb = count($this->view->rs);
     		if($nb < 1)
 	    		$this->view->message = $nb." livre a été trouvé";

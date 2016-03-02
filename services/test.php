@@ -5,7 +5,7 @@ try {
 	$application->bootstrap();
 	$s = new Flux_Site(false,false);
 	$s->bTrace = true;
-	$s->bTraceFlush = true;
+	$s->bTraceFlush = false;
 	$s->trace("DEBUT TEST");		
 
 	/*
@@ -98,7 +98,7 @@ try {
 	$rapport = new Flux_Rapport();    		
 	$rapport->creaEtatSeries(array(1,2));	
 	*/
-	
+/*	
 $iste_serie = array(
   array('id_serie' => '140','titre_fr' => 'copie ','titre_en' => 'copy Advances in Information Systems','ref_racine' => NULL),
   array('id_serie' => '141','titre_fr' => 'copie ','titre_en' => 'copy Architecture-Aware Optimization Strategies in Real-Time Image Processing','ref_racine' => NULL),
@@ -243,7 +243,12 @@ $iste_serie = array(
 		$r = $dbS->remove($serie["id_serie"]);
 		$s->trace($serie["titre_fr"]." / ".$serie["titre_fr"],$r);		
 	}
-
+*/
+	
+	$v = new Flux_Vente(false,true);
+	//$v->importer("",2972);
+	$v->calculerVentes(2972);
+	
 	$s->trace("FIN TEST");		
 	
 }catch (Zend_Exception $e) {

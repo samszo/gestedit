@@ -383,6 +383,7 @@ function initVente() {
 		            { field: 'base_contrat', caption: 'Base contrat', size: '80px', sortable: true, resizable: true },
 		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true },
 		            { field: 'date_vente', caption: 'Date de vente', size: '80px', sortable: true, resizable: true },
+		            { field: 'montant_vente', editable:{type:'float'}, caption: 'Vente &pound;', size: '80px', sortable: true, resizable: true},
 		            { field: 'montant_euro', editable:{type:'float'}, caption: 'Montant &euro;', size: '80px', sortable: true, resizable: true},
 		            { field: 'montant_livre', editable:{type:'float'}, caption: 'Montant &pound;', size: '80px', sortable: true, resizable: true},
 		            { field: 'montant_dollar', editable:{type:'float'}, caption: 'Montant $', size: '80px', sortable: true, resizable: true},
@@ -533,7 +534,7 @@ function initVente() {
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
 	                	toolbarAdd      : false,
-	                	toolbarDelete   : false,
+	                	toolbarDelete   : true,
 	                	toolbarSave		: true,
 	                	header			: false, 
 	                	columnHeaders	: true},
@@ -787,6 +788,8 @@ function calculerPrixVente(){
 }
 
 function calculerRoyalties(){
+	var div = document.getElementById('Vente');
+	w2utils.lock(div, { spinner: true, opacity : 1 });
 	$.get('<?php if(!$this->ajax) echo '../'; ?>calculer/royalties',
 			{},
 	    		function(js){
@@ -794,18 +797,23 @@ function calculerRoyalties(){
 	            g = w2ui['grid_<?php echo $idPage;?>'];
 	            g.records = js.rs;
 	            g.refresh();	            		
-				w2alert(js.message);	    		
+				w2utils.unlock(div);
+	            w2alert(js.message);	    		
 	    },"json");           		           	
 }
 
 function calculerPaiements(){
-    var g = w2ui['grid_<?php echo $idPage;?>'];
+
+	var g = w2ui['grid_<?php echo $idPage;?>'];
     var s = g.getSelection();
 	if(s.length){
+		var div = document.getElementById('Vente');
+		w2utils.lock(div, { spinner: true, opacity : 1 });		
 		$.get('<?php if(!$this->ajax) echo '../'; ?>calculer/paiement',
-				{"type":"auteur","idAuteur":itemSelectAuteur.recid,"ids":s},
+				{"type":"auteur","ids":s},
 		    		function(js){
         				finsession(js);
+        				w2utils.unlock(div);
 					w2alert(js.message);	    		
 		    },"json");           		           	
 	}else
