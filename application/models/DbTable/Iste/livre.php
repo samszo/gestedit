@@ -809,7 +809,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
  		$sql = "SELECT 
 			GROUP_CONCAT(i.id_isbn) idsIsbn, GROUP_CONCAT(i.date_parution) date_parution, GROUP_CONCAT(i.num) isbn, GROUP_CONCAT(i.nb_page) nb_page 
 			, GROUP_CONCAT(DISTINCT CONCAT(a.prenom, ' ', a.nom)) auteurs
-			, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.type_2, l.id_livre, l.id_livre recid
+			, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.type_1, l.type_2, l.id_livre, l.id_livre recid
 			, l.contexte_fr, l.contexte_en, l.bio_fr, l.bio_en, l.tdm_fr, l.tdm_en, l.production 
 		    , p.traduction, p.langue
 		    , GROUP_CONCAT(DISTINCT e.nom) editeur
@@ -1072,10 +1072,10 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
     {
  		$sql = "SELECT 
 			l.id_livre, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.type_1, l.type_2
-			, GROUP_CONCAT(DISTINCT IFNULL(a.nom,'') , ' ', IFNULL(a.prenom,'') SEPARATOR ', ') 'auteur'
-			, GROUP_CONCAT(DISTINCT IFNULL(co.nom,'') , ' ', IFNULL(co.prenom,'') SEPARATOR ', ') 'coordonateur'			
-			, GROUP_CONCAT(DISTINCT IFNULL(ad.nom,'') , ' ', IFNULL(ad.prenom,'') SEPARATOR ', ') 'directeur'
-			, GROUP_CONCAT(DISTINCT IFNULL(ar.nom,'') , ' ', IFNULL(ar.prenom,'') SEPARATOR ', ') 'resp. série'
+			, GROUP_CONCAT(DISTINCT IFNULL(a.nom,'') , ' ', IFNULL(a.prenom,'') ORDER BY la.ordre SEPARATOR ', ') 'auteur'
+			, GROUP_CONCAT(DISTINCT IFNULL(co.nom,'') , ' ', IFNULL(co.prenom,'') ORDER BY lac.ordre SEPARATOR ', ') 'coordonateur'			
+			, GROUP_CONCAT(DISTINCT IFNULL(ad.nom,'') , ' ', IFNULL(ad.prenom,'') ORDER BY lad.ordre SEPARATOR ', ') 'directeur'
+			, GROUP_CONCAT(DISTINCT IFNULL(ar.nom,'') , ' ', IFNULL(ar.prenom,'') ORDER BY las.ordre SEPARATOR ', ') 'resp. série'
 			,iW.num 'ISBN Wiley', CONCAT(IFNULL(iW.date_parution,''), IFNULL(iE.date_parution,'')) 'Fin Parution GB'
 			,iE.num 'ISBN Elsevier'
 			,iI.num 'ISBN ISTE', iI.date_parution 'Fin Parution FR'
