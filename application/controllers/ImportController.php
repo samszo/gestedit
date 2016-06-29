@@ -470,7 +470,77 @@ class ImportController extends Zend_Controller_Action
 		$this->s->trace("FIN ".__METHOD__);		
     }
 
-	function importAuteurs($r, $i){
+	public function deleteAction()
+    {
+    		$this->initInstance();
+    	
+		$this->s = new Flux_Site();
+		$this->s->bTrace = true;		
+		$this->s->bTraceFlush = true;		
+		$this->s->trace("DEBUT ".__METHOD__);		
+		
+		$this->dbLivre = new Model_DbTable_Iste_livre();
+		
+		//max 0
+		$arrType = array(0);
+		foreach ($arrType as $type) {
+			$this->s->trace("TYPE ".$type);		
+			if($type==0)$arr = $this->s->csvToArray("../bdd/export/exportblancs.csv");
+			
+			$deb = 1;
+			$nb = count($arr);
+			$this->s->trace("nb Ligne ".$nb);		
+			for ($i = $deb; $i < $nb; $i++) {
+				$r = $arr[$i];
+				if($type==0){
+					//$this->s->trace("data=",$r);		
+					$result = $this->dbLivre->remove($r[1]);
+					$this->s->trace("id_livre =".$r[1],$result);	
+				}
+				
+				//if($i>3)break;
+			}
+		}				
+		$this->s->trace("FIN ".__METHOD__);		
+    }
+    
+	public function updateAction()
+    {
+    		$this->initInstance();
+    	
+		$this->s = new Flux_Site();
+		$this->s->bTrace = true;		
+		$this->s->bTraceFlush = false;		
+		$this->s->trace("DEBUT ".__METHOD__);		
+		
+		$this->dbHM = new Model_DbTable_Iste_histomodif();
+		
+		//récupère les modification suivant les critère
+		$arr = $this->dbHM->findByIdObjDate($this->_getParam('obj'),$this->_getParam('dateDeb'));
+		
+		foreach ($arr as $p) {
+			$this->s->trace("modif",$p);
+			$oData = json_decode($p["data"]);
+			$data=array();
+			foreach ($oData as $k => $v) {
+				$data[$k]=$v;
+			}
+			$this->s->trace("data",$data);
+	    		$oName = "Model_DbTable_Iste_".$p['obj'];
+	    		$oBdd = new $oName();
+			//$this->s->trace("oBdd",$oBdd);
+	    		switch ($p['action']) {
+				case "CrudController::updateAction":
+					$oBdd->edit($p['id_obj'],$data);
+					$this->s->trace($p['action'].":".$p['obj']."=".$p['id']);
+					break;
+			}
+	    							
+		}				
+		$this->s->trace("FIN ".__METHOD__);		
+    }    
+
+    function importAuteurs($r, $i){
 		//gestion des lignes vides
 		if(!$r[1]){$this->s->trace($i." ligne vide");return;}
 		

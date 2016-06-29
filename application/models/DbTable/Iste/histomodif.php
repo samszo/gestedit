@@ -127,6 +127,24 @@ class Model_DbTable_Iste_histomodif extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
     
+    	/**
+     * Recherche une entrée Iste_histomodif avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param string		$obj
+     * @param date	 	$dateDeb
+     *
+     * @return array
+     */
+    public function findByIdObjDate($obj, $dateDeb)
+    {
+        $query = $this->select()
+			->from( array("i" => "iste_histomodif"),array("recid"=>"id_histomodif","id_histomodif","maj","action","obj","id_obj","data") )                           
+            ->where( "i.maj > ?", $dateDeb)
+			->where( "i.obj = ?", $obj);
+
+        return $this->fetchAll($query)->toArray(); 
+    }
     
     
 }

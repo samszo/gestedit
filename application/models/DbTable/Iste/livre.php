@@ -103,7 +103,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     		if($rs[0]["mtDue"]>0){
     			return array("message"=>"Il reste : ".$rs[0]["mtDue"]." &pound; à payer ou encaisser.<br/>Vous ne pouvez pas supprimer le livre.");
     		}
-		
+    		
     		$n = array();
         $dt = $this->getDependentTables();
         foreach($dt as $t){
@@ -112,8 +112,16 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 	        		case "Model_DbTable_Iste_isbn":
 	        			$n[$t] = $dbT->removeLivre($id);
 	        		break;
-	        		case "Model_DbTable_Iste_prevision":
-				    	$n[$t] = $dbT->delete('id_pxu ='.$id.' AND obj="livre"');	        		
+	        		case "Model_DbTable_Iste_processusxlivre":	        			
+				    	$n[$t] = "suppression avec les prévisions";	        		
+	    	        		break;	        		
+	        		case "Model_DbTable_Iste_prevision":	        	
+	        			$dbPre = new Model_DbTable_Iste_processusxlivre();
+	        			$arr = $dbPre->findById_livre($id);
+	        			foreach ($arr as $pl) {
+					    	$n[$t] = $dbT->delete('id_pxu ='.$pl["id_plu"].' AND obj="livre"');	        		
+	        			}	
+	        			$dbPre->	delete('id_livre ='.$id);
 	    	        		break;	        		
 	        		default:
 	        			$n[$t] = $dbT->delete('id_livre ='.$id);
@@ -808,18 +816,23 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     {
  		$sql = "SELECT 
 			GROUP_CONCAT(i.id_isbn) idsIsbn, GROUP_CONCAT(i.date_parution) date_parution, GROUP_CONCAT(i.num) isbn, GROUP_CONCAT(i.nb_page) nb_page 
-			, GROUP_CONCAT(DISTINCT CONCAT(a.prenom, ' ', a.nom)) auteurs
+			, GROUP_CONCAT(DISTINCT IFNULL(a.nom,'') , ' ', IFNULL(a.prenom,'') ORDER BY la.ordre SEPARATOR ', ') 'auteur'
+			, GROUP_CONCAT(DISTINCT IFNULL(co.nom,'') , ' ', IFNULL(co.prenom,'') ORDER BY lac.ordre SEPARATOR ', ') 'coordonateur'			
+						
 			, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.type_1, l.type_2, l.id_livre, l.id_livre recid
 			, l.contexte_fr, l.contexte_en, l.bio_fr, l.bio_en, l.tdm_fr, l.tdm_en, l.production 
 		    , p.traduction, p.langue
 		    , GROUP_CONCAT(DISTINCT e.nom) editeur
 		FROM iste_livre l
-			INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.role = 'auteur'
-			INNER JOIN iste_auteur a ON a.id_auteur = la.id_auteur 
-			INNER JOIN iste_isbn i ON i.id_livre = l.id_livre 
 			INNER JOIN iste_proposition p ON p.id_livre = l.id_livre     
-			LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur"; 
-		if($idLivre) $sql .= " WHERE l.id_livre = ".$idLivre;
+			LEFT JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.role = 'auteur'
+			LEFT JOIN iste_auteur a ON a.id_auteur = la.id_auteur 
+			LEFT JOIN iste_livrexauteur lac ON lac.id_livre = l.id_livre AND lac.role = 'coordonnateur'
+			LEFT JOIN iste_auteur co ON co.id_auteur = lac.id_auteur				
+			LEFT JOIN iste_isbn i ON i.id_livre = l.id_livre 
+			LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur ";
+			//WHERE l.production = 'oui' "; 
+		if($idLivre) $sql .= "WHERE l.id_livre = ".$idLivre;
  		$sql .= " GROUP BY i.id_livre ";
  		//aucun filtre sur les livres
 	    	//echo $sql."<br/>";
@@ -1110,7 +1123,7 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
 		    , ppc.fin 'Gestion de contrat fin'
 		    , ppc.commentaire 'Gestion de contrat commentaire'
 		
-			, pr.prix_dollar 'Prix catalogue dollar'
+			, MAX(pr.prix_dollar) 'Prix catalogue dollar'
 			-- , prp.prix_dollar 'Prix papier GB livre'
 		
 			FROM iste_livre l
