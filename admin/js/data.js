@@ -11,7 +11,7 @@ arrListes['contratBase'] = ['GB','FR'];
 arrListes['alerte'] = ['1 semaine avant', '10 jours avant','2 jours avant','le jour même'];
 //arrListes['boutique'] = ['Amazon', 'NBN', 'Elsevier','Wiley'];
 //var arrData = ['auteur','livre','traduction','production','vente'];
-arrListes['role_uti'] = ["agent","admin","direction","lecteur","gestion"]                      
+arrListes['role_uti'] = ["agent","admin","direction","lecteur","gestion","usager"]                      
 
 function initAll(fct){
 	//chargements AJAX

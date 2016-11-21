@@ -119,11 +119,11 @@ function initProd() {
 		            toolbar			: true,
 					toolbarReload   : true,
 					toolbarColumns  : true,
-		            	toolbarSearch   : true,
-		            	toolbarAdd      : false,
-		            	toolbarDelete   : false,
-		            	toolbarSave		: false,
-		            	footer: true,
+	            	toolbarSearch   : true,
+	            	toolbarAdd      : false,
+	            	toolbarDelete   : false,
+	            	toolbarSave		: false,
+	            	footer: true,
 		        },
 		        columns: [         
 		            { field: 'recid', caption: 'ID ISBN', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -169,7 +169,7 @@ function initProd() {
 	                	toolbarSearch   : false,
 	                	toolbarAdd      : false,
 	                	toolbarDelete   : false,
-	                	toolbarSave		: true,
+	                	toolbarSave		: uti.role=="lecteur" ? false : true,
 	                	header			: false, 
 	                	columnHeaders	: true},
 		        columns: [      		  		           
@@ -206,7 +206,7 @@ function initProd() {
 	                	toolbarSearch   : false,
 	                	toolbarAdd      : false,
 	                	toolbarDelete   : false,
-	                	toolbarSave		: true,
+	                	toolbarSave		: uti.role=="lecteur" ? false : true,
 	                	header			: true, 
 	                	columnHeaders	: true},
 		        columns: [      		  		           
@@ -250,7 +250,7 @@ function initProd() {
 	                	toolbarSearch   : false,
 	                	toolbarAdd      : false,
 	                	toolbarDelete   : false,
-	                	toolbarSave		: true,
+	                	toolbarSave		: uti.role=="lecteur" ? false : true,
 	                	header			: true, 
 	                	columnHeaders	: true},
 		        columns: [      		  		           
@@ -293,6 +293,10 @@ function initProd() {
 		        ],
 		        actions: {
 		            Save: function () {
+			            if(uti.role=="lecteur"){
+			            	w2alert("Vous n'avez pas le droit de modifier les données.");
+			            	return;
+			            }		            
 		                var errors = this.validate();
 		                if (errors.length > 0) return;
 		                var data = this.record;
@@ -318,6 +322,10 @@ function initProd() {
 		        ],
 		        actions: {
 		            Save: function () {
+			            if(uti.role=="lecteur"){
+			            	w2alert("Vous n'avez pas le droit de modifier les données.");
+			            	return;
+			            }		            
 		                var errors = this.validate();
 		                if (errors.length > 0) return;
 		                var data = this.record;
@@ -337,7 +345,7 @@ function initProd() {
 		            }
 		        }
 		    },
-	    		formProdTdM: { 
+	    	formProdTdM: { 
 		        name: 'form_<?php echo $idPage;?>_tdm',
 		        fields: [
 				    { name: 'recid', type:'int', required:true, hidden:true },
@@ -346,6 +354,11 @@ function initProd() {
 		        ],
 		        actions: {
 		            Save: function () {
+			            if(uti.role=="lecteur"){
+			            	w2alert("Vous n'avez pas le droit de modifier les données.");
+			            	return;
+			            }
+			            
 		                var errors = this.validate();
 		                if (errors.length > 0) return;
 		                var data = this.record;
@@ -374,6 +387,11 @@ function initProd() {
 		        ],
 		        actions: {
 		            Save: function () {
+			            if(uti.role=="lecteur"){
+			            	w2alert("Vous n'avez pas le droit de modifier les données.");
+			            	return;
+			            }
+			            
 		                var errors = this.validate();
 		                if (errors.length > 0) return;
 		                var data = this.record;
@@ -437,6 +455,11 @@ function initProd() {
 		        ],
 		        actions: {
 		            Save: function () {
+			            if(uti.role=="lecteur"){
+			            	w2alert("Vous n'avez pas le droit de modifier les données.");
+			            	return;
+			            }
+			            
 		                var errors = this.validate();
 		                if (errors.length > 0) return;
 		                var data = this.record;
@@ -470,9 +493,9 @@ function initProd() {
 	    				toolbarReload   : false,
 	    				toolbarColumns  : true,
 	                	toolbarSearch   : false,
-	                	toolbarAdd      : true,
-	                	toolbarDelete   : true,
-	                	toolbarSave		: true,
+	                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+	                	toolbarDelete   : uti.role=="lecteur" ? false : true,
+	                	toolbarSave		: uti.role=="lecteur" ? false : true,
 	                	header			: true, 
 	                	columnHeaders	: true},
 		        columns: [      		  		           
@@ -503,6 +526,11 @@ function initProd() {
 		            }
 		        },		        
 		        onSave: function(event) {
+		            if(uti.role=="lecteur"){
+		            	w2alert("Vous n'avez pas le droit de modifier les données.");
+		            	return;
+		            }
+			        
 		            var changes = w2ui['grid_<?php echo $idPage;?>_web'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'web';
@@ -515,7 +543,7 @@ function initProd() {
 			        			},"json");                        
 		            });
 		        },
-    	            onAdd: function(event) {
+    	        onAdd: function(event) {
 			        var data = {'obj':"web",'id_livre':itemSelect["id_livre"],"type":'aucun',"url":'changer'};
 		            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
 						data,

@@ -95,11 +95,11 @@ function initAuteur() {
 					toolbarReload   : true,
 					toolbarColumns  : true,
 		            	toolbarSearch   : true,
-		            	toolbarAdd      : true,
-		            	toolbarDelete   : true,
-		            	toolbarSave		: true,
-		            	selectColumn		: true,		            	
-		            	footer: true,
+		            	toolbarAdd      : uti.role=="lecteur" ? false : true,
+		            	toolbarDelete   : uti.role=="lecteur" ? false : true,
+		            	toolbarSave		: uti.role=="lecteur" ? false : true,
+		            	selectColumn	: true,		            	
+		            	footer			: true,
 		        },
 		        multiSearch: true,
 		        searches: [
@@ -134,7 +134,7 @@ function initAuteur() {
 		        ],
 		        toolbar: {
 		            items: [
-		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file', hidden:uti.role=="lecteur" ? true : false }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
@@ -379,16 +379,16 @@ function initAuteur() {
 			            { field: 'titre_fr', caption: 'Titre fr.', size: '40%', sortable: true, resizable: true},
 			            { field: 'titre_en', caption: 'Titre en.', size: '40%', sortable: true, resizable: true}
 	            ],
-	    		},
-	    		gridCoordination : {
+    		},
+    		gridCoordination : {
 	            header: 'Coordination',
 	            show: {toolbar		: true,
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
-	                	toolbarAdd      : true,
-	                	toolbarDelete   : true,
-	                	toolbarSave		: true,
+	                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+	                	toolbarDelete   : uti.role=="lecteur" ? false : true,
+	                	toolbarSave		: uti.role=="lecteur" ? false : true,
 	                	header			: true, 
 	                	columnHeaders	: true},
 	            name: 'grid_<?php echo $idPage;?>_Coordination', 
@@ -473,8 +473,8 @@ function initAuteur() {
 		    				toolbarReload   : false,
 		    				toolbarColumns  : false,
 		                	toolbarSearch   : false,
-		                	toolbarAdd      : true,
-		                	toolbarDelete   : true,
+		                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+		                	toolbarDelete   : uti.role=="lecteur" ? false : true,
 		                	toolbarSave		: false,
 		                	header			: true, 
 		                	columnHeaders	: false},

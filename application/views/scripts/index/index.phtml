@@ -152,13 +152,13 @@ $(function () {
     $('#toolbar').w2toolbar({
 	    name: 'mainTB',
 	    items: [
-	        { type: 'button',  id: 'tbAuteur', caption: 'Auteurs', icon:'fa-group', hidden:uti.role=="admin" ? false : true},
+	        { type: 'button',  id: 'tbAuteur', caption: 'Auteurs', icon:'fa-group', hidden: false},
 	        { type: 'break',  id: 'break0' },
-	        { type: 'button',  id: 'tbLivre', caption: 'Livres', icon:'fa-book', hidden:uti.role=="admin" ? false : true},
+	        { type: 'button',  id: 'tbLivre', caption: 'Livres', icon:'fa-book', hidden:false},
 	        { type: 'break',  id: 'break0' },
 	        { type: 'button',  id: 'tbProdLivre', caption: 'Productions', icon:'fa-tasks'},
 	        { type: 'break',  id: 'break0' },
-	        { type: 'button',  id: 'tbTraduction', caption: 'Traductions', icon:'fa-language', hidden:uti.role=="admin" ? false : true},
+	        { type: 'button',  id: 'tbTraduction', caption: 'Traductions', icon:'fa-language', hidden:false},
 	        { type: 'break',  id: 'break0' },
 	        { type: 'button',  id: 'tbContrat', caption: 'Contrats', icon:'fa-leanpub', hidden:uti.role=="admin" ? false : true},
 	        { type: 'break',  id: 'break0' },
@@ -180,6 +180,7 @@ $(function () {
     		chargeLayout(event.target);      		 	       
 	});    
 });
+
 
 function chargeLayout(idLayout){
 	

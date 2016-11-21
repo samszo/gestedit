@@ -215,3 +215,5 @@ bdd/iste_prod25.zip
 bdd/iste_prod25c.zip
 
 bdd/lyor_iste_admin.sql.zip
+
+config/connect.php

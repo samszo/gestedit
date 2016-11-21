@@ -109,9 +109,9 @@ function initLivre() {
 					toolbarReload   : true,
 					toolbarColumns  : true,
 		            	toolbarSearch   : true,
-		            	toolbarAdd      : true,
-		            	toolbarDelete   : true,
-		            	toolbarSave		: true,
+		            	toolbarAdd      : uti.role=="lecteur" ? false : true,
+		            	toolbarDelete   : uti.role=="lecteur" ? false : true,
+		            	toolbarSave		: uti.role=="lecteur" ? false : true,
 		            	selectColumn		: true,
 		            	footer: true,
 		        },
@@ -199,9 +199,9 @@ function initLivre() {
 		        ],
 		        toolbar: {
 		            items: [
-		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' },
-		                { id: 'export_tresor', type: 'button', caption: 'Exporter trésorie', icon: 'fa-file-excel-o' },
-		                { id: 'export_suivi', type: 'button', caption: 'Exporter le suivi', icon: 'fa-file-excel-o' },
+		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file', hidden:uti.role=="lecteur" ? true : false },
+		                { id: 'export_tresor', type: 'button', caption: 'Exporter trésorie', icon: 'fa-file-excel-o', hidden:uti.role=="lecteur" ? true : false },
+		                { id: 'export_suivi', type: 'button', caption: 'Exporter le suivi', icon: 'fa-file-excel-o', hidden:uti.role=="lecteur" ? true : false  },
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
@@ -371,6 +371,10 @@ function initLivre() {
 			        ],
 			        actions: {
 			            Save: function () {
+				            if(uti.role=="lecteur"){
+				            	w2alert("Vous n'avez pas le droit de modifier les données.");
+				            	return;
+				            }
 			                var errors = this.validate();
 			                if (errors.length > 0) return;
 			                var data = this.record;
@@ -493,8 +497,8 @@ function initLivre() {
 		    				toolbarReload   : false,
 		    				toolbarColumns  : false,
 		                	toolbarSearch   : false,
-		                	toolbarAdd      : true,
-		                	toolbarDelete   : true,
+		                	toolbarAdd      : uti.role=="lecteur" ? false : true ,
+		                	toolbarDelete   : uti.role=="lecteur" ? false : true,
 		                	toolbarSave		: false,
 		                	header			: true, 
 		                	columnHeaders	: true},
@@ -589,8 +593,8 @@ function initLivre() {
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
-	                	toolbarAdd      : true,
-	                	toolbarDelete   : true,
+	                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+	                	toolbarDelete   : uti.role=="lecteur" ? false : true,
 	                	toolbarSave		: false,
 	                	header			: true, 
 	                	columnHeaders	: false},
@@ -667,8 +671,8 @@ function initLivre() {
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
-	                	toolbarAdd      : true,
-	                	toolbarDelete   : true,
+	                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+	                	toolbarDelete   : uti.role=="lecteur" ? false : true,
 	                	toolbarSave		: false,
 	                	header			: true, 
 	                	columnHeaders	: false},
@@ -700,14 +704,14 @@ function initLivre() {
 			    },
 	    		},
 	    		formComite: { 
-		        header: 'Ajouter un comite',
-		        name: 'form_<?php echo $idPage;?>_comite',
-		        fields: [
-		            { name: 'comite', type: 'list', required: true
-			            	, html: { caption: 'Comité', attr: 'size="60" maxlength="60"' } 
-		            		, options: { items: arrListes['comite'] }
-		           	}
-		        ],
+			        header: 'Ajouter un comite',
+			        name: 'form_<?php echo $idPage;?>_comite',
+			        fields: [
+			            { name: 'comite', type: 'list', required: true
+				            	, html: { caption: 'Comité', attr: 'size="60" maxlength="60"' } 
+			            		, options: { items: arrListes['comite'] }
+			           	}
+			        ],
 		        actions: {
 		            Reset: function () {
 			            w2ui['layoutThemes_<?php echo $idPage;?>'].toggle('main', true);
@@ -745,8 +749,8 @@ function initLivre() {
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
-	                	toolbarAdd      : true,
-	                	toolbarDelete   : true,
+	                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+	                	toolbarDelete   : uti.role=="lecteur" ? false : true,
 	                	toolbarSave		: false,
 	                	header			: true, 
 	                	columnHeaders	: false},
@@ -823,9 +827,9 @@ function initLivre() {
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
-	                	toolbarAdd      : true,
-	                	toolbarDelete   : true,
-	                	toolbarSave		: true,
+	                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+	                	toolbarDelete   : uti.role=="lecteur" ? false : true,
+	                	toolbarSave		: uti.role=="lecteur" ? false : true,
 	                	header			: true, 
 	                	columnHeaders	: true},
 	            name: 'grid_<?php echo $idPage;?>_isbn', 
@@ -960,9 +964,9 @@ function initLivre() {
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
-	                	toolbarAdd      : true,
-	                	toolbarDelete   : true,
-	                	toolbarSave		: true,
+	                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+	                	toolbarDelete   : uti.role=="lecteur" ? false : true,
+	                	toolbarSave		: uti.role=="lecteur" ? false : true,
 	                	header			: true, 
 	                	columnHeaders	: true},
 	            name: 'grid_<?php echo $idPage;?>_prix', 
@@ -1062,9 +1066,9 @@ function initLivre() {
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
 	                	toolbarSearch   : false,
-	                	toolbarAdd      : true,
-	                	toolbarDelete   : true,
-	                	toolbarSave		: true,
+	                	toolbarAdd      : uti.role=="lecteur" ? false : true,
+	                	toolbarDelete   : uti.role=="lecteur" ? false : true,
+	                	toolbarSave		: uti.role=="lecteur" ? false : true,
 	                	header			: true, 
 	                	columnHeaders	: true},
 	            name: 'grid_<?php echo $idPage;?>_auteur', 
@@ -1092,7 +1096,7 @@ function initLivre() {
 			    },
 		        toolbar: {
 		            items: [
-		                { id: 'ajoutContrat', type: 'button', caption: 'Créer contrat', icon: 'fa-file' }
+		                { id: 'ajoutContrat', type: 'button', caption: 'Créer contrat', icon: 'fa-file', hidden:uti.role=="lecteur" ? true : false }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'ajoutContrat') {

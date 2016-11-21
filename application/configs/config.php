@@ -4,7 +4,7 @@ setlocale (LC_TIME, 'fr_FR.utf8','fra');
 ini_set("memory_limit",'1600M');
 set_time_limit(36000);
 
-$www = "/Applications/XAMPP/xamppfiles/htdocs";
+$www = "/Library/WebServer/Documents";
 define ("WEB_ROOT","http://localhost/gestedit");
 define ("ROOT_PATH",$www."/gestedit");
 define ("WEB_ROOT_AJAX",WEB_ROOT."/admin");

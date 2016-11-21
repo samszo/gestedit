@@ -319,7 +319,7 @@ function initParam() {
 	            			,editable: { type: 'text'}},
 	            		{ field: 'mdp', options:{format: 'password'}, size: '100px', caption: 'Mot de passe', sortable: true, resizable: true
 		            		,editable: { type: 'password'}},
-	            		{ field: 'role', size: '100px', caption: 'Role', sortable: true, resizable: true
+	            		{ field: 'role', size: '100px', caption: 'Droits', sortable: true, resizable: true
 		            		,editable: { type: 'list', items: arrListes['role_uti'] , showAll: true , showAll: true },
 			                render: function (record, index, col_index) {
 			                    var html = this.getCellValue(index, col_index);
@@ -553,34 +553,38 @@ function initParam() {
 	
     // initialisation
     $('#<?php echo $idPage;?>').w2layout(config.layoutParam);
-    w2ui.layout_<?php echo $idPage;?>.content('right', $().w2layout(config.layoutParamAuteur));
-    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutParamLivre));
-    //w2ui.layout_<?php echo $idPage;?>.content('left', $().w2layout(config.layoutParamVente));
-
-    w2ui.layout_<?php echo $idPage;?>_Auteur.content('top', $().w2grid(config.gridTache));
-    w2ui.layout_<?php echo $idPage;?>_Auteur.content('left', $().w2grid(getGridParam('civilites')));
-    w2ui.layout_<?php echo $idPage;?>_Auteur.content('main', $().w2grid(getGridParam('roles')));
-    w2ui.layout_<?php echo $idPage;?>_Auteur.content('bottom', $().w2grid(config.gridUti));
-        
-    w2ui.layout_<?php echo $idPage;?>_Livre.content('top', $().w2layout(config.layoutParamLivre1));
-    w2ui.layout_<?php echo $idPage;?>_Livre.content('main', $().w2layout(config.layoutParamLivre2));
-
-    w2ui.layout_<?php echo $idPage;?>_Livre1.content('main', $().w2grid(getGridParam('type1')));
-    w2ui.layout_<?php echo $idPage;?>_Livre1.content('left', $().w2grid(getGridParam('type2')));
-    w2ui.layout_<?php echo $idPage;?>_Livre1.content('right', $().w2layout(config.layoutParamLivre3));
-
-    w2ui.layout_<?php echo $idPage;?>_Livre2.content('main', $().w2grid(config.gridLicence));
-    w2ui.layout_<?php echo $idPage;?>_Livre2.content('left', $().w2grid(getGridParam('prix')));
-    w2ui.layout_<?php echo $idPage;?>_Livre2.content('right', $().w2grid(config.gridBoutique));
-    w2ui.layout_<?php echo $idPage;?>_Livre2.content('bottom', $().w2layout(config.layoutParamLivreCol));
-
-    w2ui.layout_<?php echo $idPage;?>_Livre3.content('right', $().w2grid(getGridParam('langues')));
-    w2ui.layout_<?php echo $idPage;?>_Livre3.content('main', $().w2grid(getGridParam('traduction')));
-    w2ui.layout_<?php echo $idPage;?>_Livre3.content('left', $().w2grid(getGridParam('page')));
-
-    w2ui.layout_<?php echo $idPage;?>_LivreCol.content('left', $().w2grid(getGridCol('serie')));
-    w2ui.layout_<?php echo $idPage;?>_LivreCol.content('main', $().w2grid(getGridCol('comite')));
     
+	if(uti.role=="admin"){
+	    w2ui.layout_<?php echo $idPage;?>.content('right', $().w2layout(config.layoutParamAuteur));
+	    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutParamLivre));
+	    //w2ui.layout_<?php echo $idPage;?>.content('left', $().w2layout(config.layoutParamVente));
+	
+	    w2ui.layout_<?php echo $idPage;?>_Auteur.content('top', $().w2grid(config.gridTache));
+	    w2ui.layout_<?php echo $idPage;?>_Auteur.content('left', $().w2grid(getGridParam('civilites')));
+	    w2ui.layout_<?php echo $idPage;?>_Auteur.content('main', $().w2grid(getGridParam('roles')));
+	    w2ui.layout_<?php echo $idPage;?>_Auteur.content('bottom', $().w2grid(config.gridUti));
+	        
+	    w2ui.layout_<?php echo $idPage;?>_Livre.content('top', $().w2layout(config.layoutParamLivre1));
+	    w2ui.layout_<?php echo $idPage;?>_Livre.content('main', $().w2layout(config.layoutParamLivre2));
+	
+	    w2ui.layout_<?php echo $idPage;?>_Livre1.content('main', $().w2grid(getGridParam('type1')));
+	    w2ui.layout_<?php echo $idPage;?>_Livre1.content('left', $().w2grid(getGridParam('type2')));
+	    w2ui.layout_<?php echo $idPage;?>_Livre1.content('right', $().w2layout(config.layoutParamLivre3));
+	
+	    w2ui.layout_<?php echo $idPage;?>_Livre2.content('main', $().w2grid(config.gridLicence));
+	    w2ui.layout_<?php echo $idPage;?>_Livre2.content('left', $().w2grid(getGridParam('prix')));
+	    w2ui.layout_<?php echo $idPage;?>_Livre2.content('right', $().w2grid(config.gridBoutique));
+	    w2ui.layout_<?php echo $idPage;?>_Livre2.content('bottom', $().w2layout(config.layoutParamLivreCol));
+	
+	    w2ui.layout_<?php echo $idPage;?>_Livre3.content('right', $().w2grid(getGridParam('langues')));
+	    w2ui.layout_<?php echo $idPage;?>_Livre3.content('main', $().w2grid(getGridParam('traduction')));
+	    w2ui.layout_<?php echo $idPage;?>_Livre3.content('left', $().w2grid(getGridParam('page')));
+	
+	    w2ui.layout_<?php echo $idPage;?>_LivreCol.content('left', $().w2grid(getGridCol('serie')));
+	    w2ui.layout_<?php echo $idPage;?>_LivreCol.content('main', $().w2grid(getGridCol('comite')));
+	}else{
+	    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(getGridCol('serie')));	    
+	}    
     
 }
 
@@ -714,26 +718,32 @@ function saveParam(obj, typeP){
 function delParam(event, obj, type){
 	if(!type)type=obj;
 
-    if(itemSelect.type!=type){
+	var items = w2ui['grid_<?php echo $idPage;?>_'+type].getSelection();	
+    if(items.length == 0){
         w2alert("Veuillez sélectionner un paramètre.");
         return false;
     }
 	if(event.force){
-		var p = {id:itemSelect.recid};
-		if(type==obj)
-	        	p.obj=type;		
-		else
-	        	p.obj=obj;		
-		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
-			p,
-	    		function(js){
-				finsession(js);
-				arrListes[type] = arrListes[type].filter(function(r){
-					return r.recid==p.id ? false : true;
-				})		
-				//TODO:afficher un message clair
-	    			w2alert(js.message);
-	   		},"json");
+	    items.forEach(function(i,n){
+			var p = {id:i};
+			if(type==obj)
+		        	p.obj=type;		
+			else
+		        	p.obj=obj;		
+			$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+				p,
+		    		function(js){
+					finsession(js);
+					arrListes[type] = arrListes[type].filter(function(r){
+						return r.recid==p.id ? false : true;
+					})		
+					//TODO:afficher un message clair
+		    			if(n==items.length-1){
+		    			    w2ui['grid_<?php echo $idPage;?>_'+type].remove(items);			    			
+			    			w2alert(js.message);
+		    			}
+		   		},"json");
+	    });
 	}
 	
 }
