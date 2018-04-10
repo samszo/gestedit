@@ -101,7 +101,19 @@ class IndexController extends Zend_Controller_Action
 		$dbD = new Model_DbTable_Iste_devise();
 		$this->view->rsDev = json_encode($dbD->getAll());
     }    
-    
+	
+	public function editionAction()
+    {
+    	$this->initInstance();
+		//récupère les enregistrements
+		//$bdd = new Model_DbTable_Iste_livre();
+		// $bdd = new Model_DbTable_Iste_auteur();
+		// $rs = $bdd->getAllVente(true);
+		// $this->view->json = json_encode($rs);		
+		// $dbD = new Model_DbTable_Iste_devise();
+		// $this->view->rsDev = json_encode($dbD->getAll());
+    }
+
     function initInstance(){
 		$this->view->ajax = $this->_getParam('ajax');
 		$this->view->idObj = $this->_getParam('idObj');

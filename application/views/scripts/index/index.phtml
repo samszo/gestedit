@@ -164,6 +164,8 @@ $(function () {
 	        { type: 'break',  id: 'break0' },
 	        { type: 'button',  id: 'tbVentes', caption: 'Ventes', icon:'fa-shopping-cart', hidden:uti.role=="admin" ? false : true},
 	        { type: 'break',  id: 'break0' },
+			{ type: 'button',  id: 'tbEditions', caption: 'Editions', icon:'fa-edit', hidden:uti.role=="admin" ? false : true},
+	        { type: 'break',  id: 'break0' },
 	        //{ type: 'button',  id: 'tbRoyalties', caption: 'Royalties', icon:'fa-money'},
 	        //{ type: 'break',  id: 'break0' },
 	        { type: 'button',  id: 'tbParam', caption: 'Paramètres', icon:'fa-cog', hidden:uti.role=="admin" ? false : true},
@@ -300,7 +302,20 @@ function chargeLayout(idLayout){
     if(idLayout=="tbRoyalties"){
         	w2ui['layout'].content('main', 'ROYALTIES');
         	w2ui.layout.unlock('main');
-    }    
+    }   
+
+	if(w2ui['formEditions']){
+		console.log("destroy Editions");
+        w2ui['formEditions'].destroy();
+	}
+	if(idLayout=="tbEditions"){
+		console.log("avant de rentrer dans le load");
+		w2ui['layout'].load('main', 'Index/edition?ajax=1',null,function () {
+				console.log("on rentre dans load('main', 'Index/edition?ajax=1',null,function ()  ");
+        		w2ui.layout.unlock('main');
+        	});
+    } 
+
     //supprime les objets si déjà présent
     if(w2ui['layout_ProdLivre']){
         	w2ui['layout_ProdLivre'].destroy();
