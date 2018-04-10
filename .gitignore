@@ -15,6 +15,13 @@ data/sessions/
 data/tmp/
 temp/
 
+#vscode
+.vscode/launch.json
+#config files
+application/configs/application.ini
+application/configs/config.php
+
+
 # Legacy ZF1
 demos/
 extras/documentation
@@ -26,6 +33,7 @@ application/configs/configNL.php
 application/configs/applicationGapai.ini
 
 application/configs/configGapai.php
+
 
 bdd/import/
 

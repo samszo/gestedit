@@ -380,7 +380,7 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
     {
         $query = $this->select()
         		->from( array("v" => "iste_vente"), array("tot_e"=>"SUM(v.montant_euro)","tot_l"=>"SUM(v.montant_livre)","tot_d"=>"SUM(v.montant_dollar)"
-        			,"id_boutique", "nbLivre"=>"COUNT(DISTINCT(i.id_livre))", "nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))", "nb"=>"SUM(nombre)/COUNT(DISTINCT(la.id_auteur))", "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"
+        			,"id_boutique", "nbLivre"=>"COUNT(DISTINCT(i.id_livre))", "nbIsbn"=>"COUNT(DISTINCT(v.id_isbn))", "nb"=>new Zend_Db_Expr("SUM(nombre)/COUNT(DISTINCT(la.id_auteur))"), "dMin"=>"MIN(date_vente)", "dMax"=>"MAX(date_vente)"
         			,"nbAut"=>"COUNT(DISTINCT(la.id_auteur))","nbA"=>"COUNT(DISTINCT(v.acheteur))","nbV"=>"COUNT(DISTINCT(v.id_vente))"
         			))
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
