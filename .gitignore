@@ -225,3 +225,6 @@ bdd/iste_prod25c.zip
 bdd/lyor_iste_admin.sql.zip
 
 config/connect.php
+bdd/lyor_iste_admin_dump_sql_2018-04-24_17-06-01.sql
+bdd/lyor_iste_admin_dump_sql_2018-04-24_17-06-01.sql.gz
+bdd/.DS_Store

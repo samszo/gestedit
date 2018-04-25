@@ -178,11 +178,11 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
             ->joinLeft(array("ad" => "iste_auteur"),
                 'ad.id_auteur = lad.id_auteur', array("directeurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ad.prenom,' ',ad.nom)) ORDER BY lad.ordre)"))
             ->joinLeft(array("lac" => "iste_livrexauteur"),
-                'lac.id_livre = l.id_livre AND lac.ordre > 0 AND lac.role = "coordonnateur"', array())
+                'lac.id_livre = l.id_livre AND lac.ordre > 0 AND lac.role IN ("coordonnateur","Coordonnateur SCIENCES")', array())
             ->joinLeft(array("ac" => "iste_auteur"),
                 'ac.id_auteur = lac.id_auteur', array("coordonnateurs"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ac.prenom,' ',ac.nom)) ORDER BY lac.ordre)"))
             ->joinLeft(array("lar" => "iste_livrexauteur"),
-                'lar.id_livre = l.id_livre AND lar.ordre > 0 AND lar.role = "resp. série"', array())
+                'lar.id_livre = l.id_livre AND lar.ordre > 0 AND lar.role IN ("resp. série","SCIENCES-Responsable thème")', array())
             ->joinLeft(array("ar" => "iste_auteur"),
                 'ar.id_auteur = lar.id_auteur', array("resp"=>"GROUP_CONCAT(DISTINCT(CONCAT(' ',ar.prenom,' ',ar.nom)))"))
             ->joinLeft(array("pl" => "iste_processusxlivre"),
@@ -827,7 +827,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 			INNER JOIN iste_proposition p ON p.id_livre = l.id_livre     
 			LEFT JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.role = 'auteur'
 			LEFT JOIN iste_auteur a ON a.id_auteur = la.id_auteur 
-			LEFT JOIN iste_livrexauteur lac ON lac.id_livre = l.id_livre AND lac.role = 'coordonnateur'
+			LEFT JOIN iste_livrexauteur lac ON lac.id_livre = l.id_livre AND lac.role IN ('coordonnateur','Coordonnateur SCIENCES')
 			LEFT JOIN iste_auteur co ON co.id_auteur = lac.id_auteur				
 			LEFT JOIN iste_isbn i ON i.id_livre = l.id_livre 
 			LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur ";
