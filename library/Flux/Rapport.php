@@ -145,7 +145,7 @@ class Flux_Rapport extends Flux_Site{
 		
 				
 		//on enregistre le fichier
-		$nomFic = $refRapport.".odt";
+		$nomFic = utf8_encode($refRapport).".odt";
 		//copie le fichier dans le répertoire data
 		$newfile = ROOT_PATH."/data/editions/".$nomFic;
 		//copy($this->odf->tmpfile, $newfile);

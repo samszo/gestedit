@@ -11,20 +11,21 @@ class CalculerController extends Zend_Controller_Action
     public function prixventeAction()
     {
     		$this->initInstance();
-    		$this->updateTauxDevise(false);    		
+    		$s = new Flux_Vente(false,$this->_getParam('trace'));
+    		$s->updateTauxDevise();
     		$dbD = new Model_DbTable_Iste_devise();
-		$dbD->setMontantSansDevise();
-		$this->view->message = "Les prix sont actualisés.";		
-		$bdd = new Model_DbTable_Iste_livre();
-		$this->view->rs = $bdd->getAllVente();		
+        	$dbD->setMontantSansDevise();
+        	$this->view->message = "Les prix sont actualisés.";		
+        	$bdd = new Model_DbTable_Iste_livre();
+        	$this->view->rs = $bdd->getAllVente();		
     }
 
     public function royaltiesAction()
     {
-    		$this->initInstance();
+    	$this->initInstance();
     		
-    		//récupère les ventes
-    		$dbR = new Model_DbTable_Iste_royalty();    		
+    	//récupère les ventes
+        $dbR = new Model_DbTable_Iste_royalty();    		
 		$this->view->rs = $dbR->setForAuteur();	
 		
 		//$bdd = new Model_DbTable_Iste_livre();
@@ -47,17 +48,17 @@ class CalculerController extends Zend_Controller_Action
     		switch ($type) {
     			case "livre":
     				$rs = $dbRoy->paiementLivre(implode(",", $this->_getParam('ids')));
-				foreach ($rs as $r) {
-			    		$rapport->creaPaiement($r);
-				}
-				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+    				foreach ($rs as $r) {
+    			    		$rapport->creaPaiement($r);
+    				}
+    				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
     				break;
     			case "auteur":
     				$rs = $dbRoy->paiementAuteur(implode(",", $this->_getParam('ids')));
-				foreach ($rs as $r) {
-			    		$rapport->creaPaiement($r);
-				}
-				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+    				foreach ($rs as $r) {
+    			    		$rapport->creaPaiement($r);
+    				}
+    				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
     				break;
     		}
     				
@@ -95,45 +96,19 @@ class CalculerController extends Zend_Controller_Action
     
     public function tauxdeviseAction()
     {
-    		$this->initInstance();
-    		$this->updateTauxDevise(true);    		
-    }
+    		$this->initInstance();    		
+    		$s = new Flux_Vente(false,$this->_getParam('trace'));    		
+    		$s->updateTauxDevise();    		
+    }  
 
-    public function updateTauxDevise($trace)
+    public function problemesAction()
     {
-    		$this->initInstance();
-    		
-    		$s = new Flux_Site(false,$trace);
-    		$dbD = new Model_DbTable_Iste_devise();
-    		
-		//récupère les dates de ventes    		
-    		$rsDV = $dbD->getDateSansDevise();
-    		$arrC = array(
-    			array("url"=>'/usd/eur',"sql"=>"taux_dollar_euro")
-    			,array("url"=>'/eur/usd',"sql"=>"taux_euro_dollar")
-    			,array("url"=>'/gbp/usd',"sql"=>"taux_livre_dollar")
-    			,array("url"=>'/usd/gbp',"sql"=>"taux_dollar_livre")
-    			,array("url"=>'/eur/gbp',"sql"=>"taux_euro_livre")
-    			,array("url"=>'/gbp/eur',"sql"=>"taux_livre_euro")
-    			);
-    		//pour chaque date
-    		foreach ($rsDV as $d) {
-    			$s->trace($d['dv']);
-    			$data = array("date_taux"=>$d['dv']);
-    			foreach ($arrC as $c) {
-	    			//récupère les taux de conversion pour la date
-	    			$url = 'http://currencies.apps.grandtrunk.net/getrate/'.$d['dv'].$c["url"];
-	    			$t = $s->getUrlBodyContent($url);	
-    				$data[$c["sql"]] = $t;
-	    			$s->trace($c["sql"].' = '.$t);
-    			}
-			//Enregistre le taux
-	    		$dbD->ajouter($data);	    			    				
-    		}    		    		
-    		
-    }    
-
-	function initInstance(){
+        $this->initInstance();
+        $s = new Flux_Vente(false,$this->_getParam('trace'));
+        $this->view->rs =  $s->getProblemes($this->_getParam('idFic'));
+    }
+    
+    function initInstance(){
     		$auth = Zend_Auth::getInstance();
 		if ($auth->hasIdentity()) {						
 			// l'identité existe ; on la récupère

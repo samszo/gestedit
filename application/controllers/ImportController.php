@@ -22,7 +22,8 @@ class ImportController extends Zend_Controller_Action
 		    	
 		$this->view->inc = $this->_getParam('inc');
 		$this->view->ajax = $this->_getParam('ajax');
-		$this->view->idObj = $this->_getParam('idObj');
+		$this->view->idObj = $this->_getParam('idObj',-1);
+		$this->view->obj = $this->_getParam('obj','vente');
 		$this->view->typeObj = $this->_getParam('typeObj');
 		$this->view->nameObj = $this->_getParam('nameObj');
 	}     
@@ -57,7 +58,8 @@ class ImportController extends Zend_Controller_Action
 				break;			
 			case "global":
 				$v = new Flux_Vente(false,true);
-				$v->importer(null,$this->_getParam('idFic'));
+				//$v->importer(null,$this->_getParam('idFic'));
+				$v->importerNew($this->_getParam('idFic'));
 				break;			
 			default:
 				echo "pas de processus d'importation pour ce type de fichier";
@@ -79,7 +81,8 @@ class ImportController extends Zend_Controller_Action
 				break;			
 			case "global":
 				$v = new Flux_Vente(false,true);
-				$v->calculerVentes($this->_getParam('idFic'));
+				//$v->calculerVentes($this->_getParam('idFic'));
+				$v->calculerVentesNew($this->_getParam('idFic'));
 				break;			
 			default:
 				echo "pas de processus de calcule pour ce type de fichier";
@@ -105,8 +108,8 @@ class ImportController extends Zend_Controller_Action
 				,array("field"=>"id_isbn", "caption"=>"Id. isbn", "size"=>'50px', "sortable"=>1, "resizable"=>1)
 				);
     		$i=1;
-    		foreach ($cols as $c) {
-    			$arrC[]=array("field"=>"col".$i, "caption"=>$c, "size"=>'50px', "sortable"=>1, "resizable"=>1);
+    		foreach ($cols as $k=>$c) {
+    			$arrC[]=array("field"=>$k, "caption"=>$c, "size"=>'50px', "sortable"=>1, "resizable"=>1);
     			$i++;
     		}
     		

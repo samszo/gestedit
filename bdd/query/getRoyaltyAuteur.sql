@@ -16,4 +16,4 @@ SELECT
 		 INNER JOIN iste_editeur e ON e.id_editeur = i.id_editeur
 		 INNER JOIN iste_livrexauteur la ON la.id_livre = i.id_livre AND la.id_auteur = ac.id_auteur -- AND la.role = c.type
 		 INNER JOIN iste_devise d ON d.id_devise = r.id_devise
-		WHERE ac.id_auteur = 206
+	-- 	WHERE ac.id_auteur = 484

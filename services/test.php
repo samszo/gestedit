@@ -88,7 +88,7 @@ try {
 	$result = array();
     	$dbR = new Model_DbTable_Iste_royalty();
 	//$rs = $dbR->paiementLivre("1249");
-	$rs = $dbR->paiementAuteur("206");
+	$rs = $dbR->paiementAuteur("484");
 	$rapport = new Flux_Rapport();    		
 	foreach ($rs as $r) {
     		$result[] = $rapport->creaPaiement($r);
@@ -244,11 +244,21 @@ $iste_serie = array(
 		$s->trace($serie["titre_fr"]." / ".$serie["titre_fr"],$r);		
 	}
 */
+	//
+	$v = new Flux_Vente(false,true);	
+	//$v->importerNew(4061);
+	//$v->importer(null,4059,null,1);
+	//$v->calculerVentes(2972);
+	//$v->calculerVentesNew(4065);
+	//$v->updateTauxDevise();
+	//$dbR = new Model_DbTable_Iste_royalty();
+	//$rs = $dbR->setForAuteur();
+	$descColo = array("ISBN"=>"col1","auteurs"=>"col2","QTY PAPER"=>"col3","AMOUNT PAPER"=>"col4","AMOUNT EBOOK"=>"col5");
+	$json = json_encode($descColo);
+	$rs =  $v->getProblemes(4065);
 	
-	$v = new Flux_Vente(false,true);
-	//$v->importer("",2972);
-	$v->calculerVentes(2972);
-	
+	//
+			
 	$s->trace("FIN TEST");		
 	
 }catch (Zend_Exception $e) {

@@ -151,6 +151,28 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
         
     }    
 
+    /**
+     * Recherche des entrées avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int   $idFic
+     * @param array $cols
+     *
+     * @return array
+     */
+    public function findErreurByIdFic($idFic, $cols)
+    {
+        
+        $query = $this->select()
+            ->from( array("id" => "iste_importdata"),$cols)
+            ->where( "id.id_importfic = ?", $idFic )
+            ->where( "id.commentaire IS NOT NULL")
+            ->order("id.commentaire");
+            
+        return $this->fetchAll($query)->toArray();
+            
+    }
+    
 	/**
      * Exporte en csv des entrées avec la valeur spécifiée
      *
@@ -252,7 +274,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("f" => "iste_importfic"),
                 'f.id_importfic = d.id_importfic', array("periode_debut","periode_fin"))
-            ->where( "d.commentaire != 'isbn introuvable'")
+            ->where( "d.commentaire IS NULL")
             ->where( "d.id_importfic = ?", $idFic )
             ->order("d.id_importdata");
 
@@ -260,4 +282,126 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
         
     }    
     
+    /**
+     * Recherche la définition des colonnes pour un fichier
+     * et retourne ces entrées.
+     *
+     * @param int $idFic
+     * @param array $cols
+     *
+     * @return array
+     */
+    public function getColForFic($idFic,$cols=NULL){
+        //calcul les colonnes
+        if(!$cols){
+            $dbFic = new Model_DbTable_Iste_importfic();
+            $rsFic = $dbFic->findById_importfic($idFic);
+            $cols = json_decode($rsFic["coldesc"]);
+        }
+        $arrC = array("recid"=>"id_importdata", "numrow", "creation", "id_isbn", "id_livre", "commentaire");
+        $i=1;
+        foreach ($cols as $k => $c) {
+            $arrC[$k]=$c;
+            $i++;
+        }
+        return $arrC;
+    }
+
+    /**
+     * Calcul les sommes pour un fichier 
+     * et retourne ces entrées.
+     *
+     * @param int $idFic
+     *
+     * @return array
+     */
+    public function getSommesForFic($idFic){
+        //calcul les sommes des datas importées
+        $query = $this->select()
+        ->from( array("d" => "iste_importdata"),array("nbVenteImp"=>"SUM(d.col3)", "mtPapier"=>"SUM(d.col4)", "mtEbook"=>"SUM(d.col5)"))
+            ->where( "d.id_importfic = ?", $idFic );            
+        $arrData = $this->fetchAll($query)->toArray();
+
+        //calcul les sommes des ventes
+        $query = $this->select()
+        ->from( array("d" => "iste_importdata"),NULL )
+        ->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+        ->joinInner(array("v" => "iste_vente"),
+            'v.id_importdata = d.id_importdata', array("type", "nbVente"=>"SUM(v.nombre)","mtLivre"=>"SUM(v.montant_livre)"))
+            ->where( "d.id_importfic = ?", $idFic )
+            ->group("type");
+        $arrVente = $this->fetchAll($query)->toArray();
+            
+        return array("data"=>$arrData,"vente"=>$arrVente);
+    }
+    
+    /**
+     * Recherche les data sans vente
+     * et retourne ces entrées.
+     *
+     * @param int $idFic
+     * @param array $cols
+     *
+     * @return array
+     */
+    public function getDataSansVenteForFic($idFic, $cols){
+        
+        //calcul les sommes des ventes
+        $query = $this->select()
+        ->from( array("d" => "iste_importdata"),$cols)
+        ->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+        ->joinInner(array("f" => "iste_importfic"),
+            'f.id_importfic = d.id_importfic', array("periode_debut", "periode_fin"))
+        ->joinLeft(array("v" => "iste_vente"),
+            'v.id_importdata = d.id_importdata', array("vente"=>"id_importdata"))
+            ->where( "d.id_importfic = ?", $idFic )
+            ->where( "v.id_importdata IS NULL")
+            ->order("d.id_importdata");
+           
+        return $this->fetchAll($query)->toArray();
+    }    
+    
+    /**
+     * Recherche les data sans contrat
+     * et retourne ces entrées.
+     *
+     * @param int $idFic
+     *
+     * @return array
+     */
+    public function getDataSansContrat($idFic){
+        
+        //calcul les sommes des ventes
+        $sql="SELECT DISTINCT
+                i.num,
+                a.id_auteur,
+                a.nom,
+                a.prenom,
+                l.id_livre,
+                l.titre_en,
+                l.titre_fr
+            FROM
+            iste_importdata d
+                INNER JOIN
+                iste_importfic f ON f.id_importfic = d.id_importfic
+                INNER JOIN
+                iste_vente v ON v.id_importdata = d.id_importdata
+                INNER JOIN
+                iste_isbn i ON i.id_isbn = v.id_isbn
+                INNER JOIN
+                iste_livrexauteur la ON la.id_livre = i.id_livre
+                INNER JOIN
+                iste_auteur a ON a.id_auteur = la.id_auteur
+                INNER JOIN
+                iste_livre l ON l.id_livre = i.id_livre
+                LEFT JOIN
+                iste_auteurxcontrat ac ON ac.id_auteur = la.id_auteur
+                AND ac.id_livre = la.id_livre
+            WHERE
+                d.id_importfic = $idFic
+                AND ac.id_auteurxcontrat IS NULL
+            ORDER BY v.id_importdata";
+        $stmt = $this->_db->query($sql);
+        return $stmt->fetchAll();
+    }   
 }

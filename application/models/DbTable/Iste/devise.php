@@ -260,7 +260,7 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     {
 	    	$sql = "update iste_vente v
 		 INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
-		 INNER JOIN iste_proposition p ON p.id_livre = v.id_livre
+		 INNER JOIN iste_proposition p ON p.id_livre = i.id_livre
 	    	 INNER JOIN iste_devise d on
 		    d.base_contrat = p.base_contrat AND date_vente BETWEEN date_taux AND date_taux_fin
 		set
@@ -271,8 +271,9 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     		$stmt = $this->_db->query($sql);
 
 	    	$sql = "update iste_vente v
-		 INNER JOIN iste_proposition p ON p.id_livre = v.id_livre
-	    	 INNER JOIN iste_devise d on
+		 INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+		 INNER JOIN iste_proposition p ON p.id_livre = i.id_livre
+	     INNER JOIN iste_devise d on
 		    d.base_contrat = p.base_contrat AND date_vente BETWEEN date_taux AND date_taux_fin
 	    	set
 	    	    v.id_devise = d.id_devise
@@ -282,8 +283,9 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     		$stmt = $this->_db->query($sql);
     		
 	    	$sql = "update iste_vente v
-		 INNER JOIN iste_proposition p ON p.id_livre = v.id_livre
-	    	 INNER JOIN iste_devise d on
+		 INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+		 INNER JOIN iste_proposition p ON p.id_livre = i.id_livre
+	     INNER JOIN iste_devise d on
 		    d.base_contrat = p.base_contrat AND date_vente BETWEEN date_taux AND date_taux_fin
 	    	set
 	    	    v.id_devise = d.id_devise
@@ -294,7 +296,7 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     		
     		$sql = "update iste_royalty r
 		INNER JOIN iste_vente v on r.id_vente = v.id_vente
-    		INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+    	INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
 		INNER JOIN iste_proposition p ON p.id_livre = i.id_livre
 	    	INNER JOIN iste_devise d on
 		    d.base_contrat = p.base_contrat AND date_vente BETWEEN date_taux AND date_taux_fin
@@ -307,7 +309,7 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
 
     		$sql = "update iste_royalty r
 		INNER JOIN iste_vente v on r.id_vente = v.id_vente
-    		INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+    	INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
 		INNER JOIN iste_proposition p ON p.id_livre = i.id_livre
 	    	INNER JOIN iste_devise d on
 		    d.base_contrat = p.base_contrat AND date_vente BETWEEN date_taux AND date_taux_fin
