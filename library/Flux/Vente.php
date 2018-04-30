@@ -16,14 +16,15 @@ class Flux_Vente extends Flux_Site{
 
 	
     /**
-	* méthode pour importer un fichier Wiley
+	* méthode pour importer un fichier de vente
 	*
     * @param string 		$path
     * @param integer		$idFic
     * @param integer		$anFin
+	* @param integer		$nbOnglet
     * 
     */
-	public function importer($path, $idFic=false, $anFin=1900){
+    public function importer($path, $idFic=false, $anFin=1900, $nbOnglet=3){
 		$this->trace("DEB ".__METHOD__);
 		$this->dbFic = new Model_DbTable_Iste_importfic();
 		$this->dbData = new Model_DbTable_Iste_importdata();
@@ -60,7 +61,7 @@ class Flux_Vente extends Flux_Site{
 		$this->trace("fichier enregistré");
 
 		//enregistre les onglets
-		for ($z = 0; $z < 3; $z++) {
+		for ($z = 0; $z < $nbOnglet; $z++) {
 			$this->trace("//enregistre les données de l'onglet $z : ".$this->data->sheets[$z]['numRows']." ligne(s);");
 			//for ($i = 2; $i <= $data->sheets[$z]['numRows']; $i++) {
 			foreach ($this->data->sheets[$z]['cells'] as $i => $c) {
@@ -73,7 +74,69 @@ class Flux_Vente extends Flux_Site{
 		
 		$this->trace("FIN ".__METHOD__);		
 	}
-    
+
+	
+	/**
+	 * méthode pour importer un fichier de vente
+	 *
+     * @param integer		$idFic
+	 *
+	 */
+	public function importerNew($idFic){
+	    $this->trace("DEB ".__METHOD__);
+	    $this->dbFic = new Model_DbTable_Iste_importfic();
+	    $this->dbData = new Model_DbTable_Iste_importdata();
+	    $this->dbLivre = new Model_DbTable_Iste_livre();
+	    $this->dbIsbn = new Model_DbTable_Iste_isbn();
+	    	    
+        $rsFic = $this->dbFic->findById_importfic($idFic);
+        $path = str_replace(WEB_ROOT, ROOT_PATH, $rsFic["url"]);
+        $this->trace("//url du fichier = ".$path);
+
+        $this->trace("//charge les données du fichier");
+        $this->data = $this->csvToArray($path);
+        $descColo = array("ISBN"=>"col1","auteurs"=>"col2","QTY PAPER"=>"col3","AMOUNT PAPER"=>"col4","AMOUNT EBOOK"=>"col5");
+        /*
+        foreach ($this->data[0] as $k => $v) {
+            $descColo[]="col".($k+1);
+        }
+        */
+        $nbCol = count($descColo);
+        $this->dbFic->edit($idFic,array("type"=>"Vente Globale","coldesc"=>json_encode($descColo),"reference"=>"rien"));
+	    $this->trace("fichier enregistré");
+	    
+	    //enregistre les onglets
+	    $i=0;
+	    foreach ($this->data as $c) {
+	        $this->trace("//enregistre les données de la ligne $i");
+            $r = array("id_importfic"=>$idFic,"numsheet"=>0,"numrow"=>$i);
+            if($c[0]){
+                //récupère les valeurs de colonnes
+                for ($j = 0; $j < $nbCol; $j++) {
+                    if(isset($c[$j]))$r["col".($j+1)] = str_replace("\0", "",trim($c[$j]));
+                }
+                //vérifie l'existence par isbn
+                $arrIsbn = $this->dbIsbn->findByNum($c[0]);
+                if(!$arrIsbn){
+                    $r["commentaire"]="isbn introuvable";
+                    $idD = $this->dbData->ajouter($r);
+                    $this->trace($r["numrow"]." isbn introuvable : ".$isbn." = ".$idD);
+                }else{
+                    $r["id_isbn"]=$arrIsbn["id_isbn"];
+                    $r["id_livre"]=$arrIsbn["id_livre"];
+                    $idD = $this->dbData->ajouter($r);
+                    $this->trace($r["numrow"]." ".$c[0]." ligne enregistrée = ".$idD." = ".$arrIsbn["num"]);
+                }
+            }else{
+                $this->trace($i." ligne vide");
+            }
+            $i++;
+	    }
+	    
+	    $this->trace("FIN ".__METHOD__);
+	}
+	
+	
 	function insertData($c, $r){
 		
 		//enregistre la ligne
@@ -113,7 +176,7 @@ class Flux_Vente extends Flux_Site{
 	}
 
 	
-/**
+    /**
 	* méthode pour calculer les ventes d'un fichier importé
 	*
     * @param int $idFic
@@ -185,5 +248,148 @@ class Flux_Vente extends Flux_Site{
 		}
 		$this->trace("FIN ".__METHOD__);				
 	}	
+
+	/**
+	 * méthode pour calculer les ventes d'un fichier importé
+	 *
+	 * @param int $idFic
+	 *
+	 */
+	public function calculerVentesNew($idFic){
+	    $this->bTraceFlush = false;
+	    $this->trace("DEB ".__METHOD__);
+	    $dbData = new Model_DbTable_Iste_importdata();
+	    $dbVente = new Model_DbTable_Iste_vente();
+	    $dbBout = new Model_DbTable_Iste_boutique();
+	    /*
+	     $dbLic = new Model_DbTable_Iste_licence();
+	     $dbRoy = new Model_DbTable_Iste_royalty();
+	     $dbPrix = new Model_DbTable_Iste_prix();
+	     $dbA = new Model_DbTable_Iste_auteur();
+	     $dbC = new Model_DbTable_Iste_contrat();
+	     $dbAC = new Model_DbTable_Iste_auteurxcontrat();
+	     */
+	    //récupération des références
+	    /*
+	     $idAuteurISTE = $dbA->ajouter(array("nom"=>"ISTE"));
+	     $idContratISTEWiley = $dbC->ajouter(array("nom"=>"Wiley - ISTE","type"=>"distribution"));
+	     $idContratISTEElsevier = $dbC->ajouter(array("nom"=>"Elsevier - ISTE","type"=>"distribution"));
+	     $idContratISTE = $dbC->ajouter(array("nom"=>"ISTE","type"=>"distribution"));
+	     */
+	    $idBoutISTE = $dbBout->ajouter(array("nom"=>"ISTE"));
+	    
+	    $this->trace("//charge les données du fichier");
+	    $rs = $dbData->findSalesByIdFic($idFic);
+	    //traite les lignes de ventes
+	    foreach ($rs as $r) {
+	        //création des lignes pour le papier
+	        if($r["col3"]){
+                $nbVente = $r["col3"] ? $r["col3"] : 1;
+                $type = "papier";
+                $mt = $this->tofloat($r["col4"]);
+                $idBout = $idBoutISTE;
+    	        //enregistre la vente
+    	        $idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"]
+    	            , "date_vente"=>$r["periode_fin"], "id_boutique"=>$idBout, "type"=>$type
+    	            , "nombre"=>$nbVente, "montant_livre"=>$mt, "id_licence"=>-1, "id_prix"=>-1));
+    	        $this->trace("ajout vente : ".$idVente."=".$mt);
+	        }
+	        //création des lignes pour les ebook
+	        if($r["col5"]){
+	            $nbVente = 1;
+	            $type = "ebook";
+	            $mt = $this->tofloat($r["col5"]);
+	            $idBout = $idBoutISTE;
+	            //enregistre la vente
+	            $idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"]
+	                , "date_vente"=>$r["periode_fin"], "id_boutique"=>$idBout, "type"=>$type
+	                , "nombre"=>$nbVente, "montant_livre"=>$mt, "id_licence"=>-1, "id_prix"=>-1));
+	            $this->trace("ajout vente : ".$idVente."=".$mt);
+	        }
+	    }
+	    $this->trace("FIN ".__METHOD__);
+	}	
 	
+	function tofloat($num) {
+	    $dotPos = strrpos($num, '.');
+	    $commaPos = strrpos($num, ',');
+	    $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
+	    ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+	    
+	    if (!$sep) {
+	        return floatval(preg_replace("/[^0-9]/", "", $num));
+	    }
+	    
+	    return floatval(
+	        preg_replace("/[^0-9]/", "", substr($num, 0, $sep)) . '.' .
+	        preg_replace("/[^0-9]/", "", substr($num, $sep+1, strlen($num)))
+	        );
+	}
+	
+	public function updateTauxDevise()
+	{
+	    $dbD = new Model_DbTable_Iste_devise();
+	    
+	    //récupère les dates de ventes
+	    $rsDV = $dbD->getDateSansDevise();
+	    $arrC = array(
+	        array("url"=>'/usd/eur',"sql"=>"taux_dollar_euro")
+	        ,array("url"=>'/eur/usd',"sql"=>"taux_euro_dollar")
+	        ,array("url"=>'/gbp/usd',"sql"=>"taux_livre_dollar")
+	        ,array("url"=>'/usd/gbp',"sql"=>"taux_dollar_livre")
+	        ,array("url"=>'/eur/gbp',"sql"=>"taux_euro_livre")
+	        ,array("url"=>'/gbp/eur',"sql"=>"taux_livre_euro")
+	    );
+	    //pour chaque date
+	    foreach ($rsDV as $d) {
+	        $this->trace($d['dv']);
+	        $data = array("date_taux"=>$d['dv'],"date_taux_fin"=>$d['dv'],"base_contrat"=>'FR','taxe_taux'=>0,'taxe_deduction'=>0);
+	        foreach ($arrC as $c) {
+	            //récupère les taux de conversion pour la date
+	            $url = 'http://currencies.apps.grandtrunk.net/getrate/'.$d['dv'].$c["url"];
+	            $t = $this->getUrlBodyContent($url);
+	            $data[$c["sql"]] = $t;
+	            $this->trace($c["sql"].' = '.$t);
+	        }
+	        //Enregistre le taux
+	        $dbD->ajouter($data);
+	    }
+	    
+	}  
+	
+	/**
+	 * méthode pour calculer les problèmes liés à l'oimportation d'un fichier de vente
+	 *
+	 * @param int $idFic
+	 *
+	 * @return array
+	 */
+	public function getProblemes($idFic){
+	    
+	    //récupère la définition du fichier
+	    $dbFic = new Model_DbTable_Iste_importfic();
+	    $dbID = new Model_DbTable_Iste_importdata();
+	    
+	    $rsFic = $dbFic->findById_importfic($idFic);
+	    $rs['fichier']=$rsFic;
+	    $cols = $dbID->getColForFic($idFic, json_decode($rsFic["coldesc"]));
+	    
+	    //récupère les lignes de data sans isbn et autres erreur
+	    $rs['commentaires']=$dbID->findErreurByIdFic($idFic, $cols);
+
+	    //calcul les sommes importées et les sommes de ventes
+	    $rs['sommes']=$dbID->getSommesForFic($idFic);
+	    
+	    /*récupère les lignes sans ventes
+	     * correspond au sommes vide aux ISBN introuvable ???
+	    */
+	    $rs['data_sans_vente']=$dbID->getDataSansVenteForFic($idFic, $cols);
+	    
+	    //récupère les lignes sans contrat
+	    $rs['data_sans_contrat']=$dbID->getDataSansContrat($idFic);
+	    
+	    //récupère les lignes sans royalties
+	    
+	    return  $rs;
+	}
 }

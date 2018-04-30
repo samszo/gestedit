@@ -517,7 +517,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      */
     function paiementAuteur($idsAuteur){
     		
-    		//récupère les royalty pour les livres sélectionnés
+    		//récupère les royalty pour les auteurs sélectionnés
 	    	$sql = "SELECT 
 			GROUP_CONCAT(DISTINCT r.id_royalty) idsRoyalty
             -- , MIN(r.taxe_taux) taxe_taux, MIN(r.taxe_deduction) taxe_deduction, MIN(r.date_paiement) date_paiement, MIN(r.date_edition) date_edition

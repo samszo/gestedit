@@ -30,7 +30,8 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_vente'));
 		foreach($data as $k=>$v){
-			if($k=="id_isbn" || $k=="id_importdata")$select->where($k.' = ?', $v);
+		    if($k=="id_isbn" || $k=="id_importdata" || $k=="type" || $k=="id_importdata")
+		        $select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_vente; else $id=false;
