@@ -1,0 +1,1075 @@
+<?php 
+if(!$this->ajax){
+	echo '<!DOCTYPE html>
+<html>
+	<head>
+		<title>ISTE - Droits</title>
+		<link rel="stylesheet" type="text/css" href="../css/gestedit.css" />
+		<link rel="stylesheet" type="text/css" href="../css/w2ui.css" />
+		<link rel="stylesheet" type="text/css" href="../fonts/font-awesome/font-awesome.css" />
+		<script type="text/javascript">
+			var urlP = "../";
+			var uti = '.$this->uti.';
+			var fctInit;			
+		</script>		
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/w2ui.js"></script>
+		<script type="text/javascript" src="../js/global.js"></script>
+		<script type="text/javascript" src="../js/data.js"></script>
+		<script type="text/javascript" src="../js/log.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				initAll(initDroit); 
+	  			if(uti)
+					utiIsConnect();
+	  			else
+		    	  	diagLogin.showModal();				
+			});                       		
+		</script>		
+		</head>
+<body>
+';
+}
+$idPage = "Droit";
+?>
+<div id="<?php echo $idPage;?>" style="width: 100%; height: 1000px;"></div>
+
+<script type="text/javascript">
+var rsVenteISBN = <?php echo $this->jsonISBN; ?>;
+var rsVenteAuteur = <?php echo $this->jsonAuteur; ?>;
+var rsDev = <?php echo $this->rsDev; ?>;
+
+
+//widget configuration
+var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
+var pstyleDetail = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
+var config;
+var idPLU, idPCU, itemSelectAuteur, itemSelectVente, rsIsbnLivre, rsIsbnPrix;
+function initDroit() {
+
+	config = {
+		    layoutVente: {
+		        name: 'layout_<?php echo $idPage;?>',
+		        padding: 4,
+		        panels: [
+		 		    { type: 'top', size: 400, style: pstyle},
+					{ type: 'main',  
+					    style: 'background-color: white; border: 1px solid silver; border-top: 0px; padding: 10px;',
+					    tabs: {
+					        active: 'tab0',
+					        tabs: [{ id: 'tab0', caption: "Problèmes pour le livre" },{ id: 'tab1', caption: "Détails des ventes pour le livre" }
+					        	,{ id: 'tab2', caption: "Détails des royalties pour le livre" }
+					        	,{ id: 'tab3', caption: "Problèmes pour l'auteur" },{ id: 'tab4', caption: "Détails des ventes pour l'auteur" }
+					        	,{ id: 'tab5', caption: "Détails des royalties pour l'auteur" },{ id: 'tab6', caption: "Paiements pour l'auteur" }],
+					        onClick: function (event) {
+						        if(event.target=="tab0"){
+						            w2ui['grid_<?php echo $idPage;?>_probleme'].destroy();
+						            w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteProbleme));
+						        }else if(event.target=="tab1"){
+						            w2ui['grid_<?php echo $idPage;?>_detail'].destroy();
+						            w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail));
+						        }else if(event.target=="tab2"){
+						            if(w2ui['grid_<?php echo $idPage;?>_royalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
+						            w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteRoyalties));						        	
+						        }
+							    getVenteData();						        
+					        },
+					        onClose: function (event) {
+					            this.click('tab0');
+					        }
+					    }
+					},		 		        
+		            { type: 'left', size: '100%', hidden:true, resizable: true, style: pstyleDetail},
+		            { type: 'right', size: '50%', hidden:true, resizable: true, style: pstyleDetail},
+		        ]
+		    },
+		    layoutVenteTop: {
+		        name: 'layout_<?php echo $idPage;?>_top',
+		        padding: 2,
+		        panels: [
+		 		    { type: 'main', 
+					    style: 'background-color: white; border: 1px solid silver; border-top: 0px; padding: 10px;',
+					    tabs: {
+					        active: 'tabTop0',
+					        tabs: [{ id: 'tabTop0', caption: "Ventes par ISBN" },{ id: 'tabTop1', caption: "Ventes par auteur" }
+					        	,{ id: 'tabTop2', caption: "Fichier de ventes" }],
+					        onClick: function (event) {
+						        if(event.target=="tabTop0"){
+						            w2ui['grid_<?php echo $idPage;?>_vente_isbn'].destroy();
+						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
+						        }else if(event.target=="tabTop1"){
+						            if(w2ui['grid_<?php echo $idPage;?>_vente_auteur'])w2ui['grid_<?php echo $idPage;?>_vente_auteur'].destroy();
+						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteAuteur));
+						        }else if(event.target=="tabTop2"){
+						            if(w2ui['layout_<?php echo $idPage;?>_fichier'])w2ui['layout_<?php echo $idPage;?>_fichier'].destroy();
+						            if(w2ui['grid_ImportVenteData'])w2ui['grid_ImportVenteData'].destroy();
+						            if(w2ui['grid_<?php echo $idPage;?>_fichier_import'])w2ui['grid_<?php echo $idPage;?>_fichier_import'].destroy();
+						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
+						            w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2layout(config.gridImportVenteData));
+						            w2ui.layout_<?php echo $idPage;?>_fichier.content('left', $().w2layout(config.gridFichierImport));
+						        }
+					        },
+					        onClose: function (event) {
+					            this.click('tabTop0');
+					        }
+					    }
+
+			 		},
+		            { type: 'right', size: '400px', resizable: true, style: pstyleDetail},
+		        ]
+		    },		    
+		    layoutVenteFichier: {
+		        name: 'layout_<?php echo $idPage;?>_fichier',
+		        padding: 2,
+		        panels: [
+		            { type: 'left', size: '400px', resizable: true, style: pstyleDetail},
+		            { type: 'main', size: '100%', resizable: true, style: pstyleDetail},
+		        ]
+		    },			    
+		    gridVenteISBN: { 
+		        name: 'grid_<?php echo $idPage;?>_vente_isbn', 
+				header: 'Ventes par ISBN',		
+		        show: { 
+					header			: true,		
+		            toolbar			: true,
+					toolbarReload   	: true,
+					toolbarColumns  	: true,
+	            	toolbarSearch   	: true,
+	            	toolbarAdd      	: true,
+	            	toolbarDelete   	: false,
+	            	toolbarSave		: false,
+		            selectColumn		: true,
+		            footer			: true,
+		        },
+		        multiSearch: true,
+		        searches: [
+				    { field: 'num', caption: 'ISBN', type: 'text' },
+				    { field: 'titre', caption: 'Titre', type: 'text' },
+				    { field: 'nom', caption: 'Nom auteur', type: 'text' },
+		            { field: 'id_boutique', caption: 'Boutique', type: 'combo', options: { items: arrListes['boutique']} },
+		            { field: 'date_vente', caption: 'Date de vente', type: 'date' },
+		            { field: 'montant_euro', caption: 'Montant &euro;', type: 'float'},
+		            { field: 'montant_livre', caption: 'Montant &pound;', type: 'float'},
+		            { field: 'montant_dollar', caption: 'Montant $', type: 'float'},
+		            { field: 'mt_r', caption: 'Mt. roy. &pound;', type: 'float'},
+		            { field: 'mt_r_due', caption: 'Mt. roy. due &pound;', type: 'float'},
+		        ],
+		        columns: [         
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'num', caption: 'ISBN', size: '100px', sortable: true, resizable: true},
+		            { field: 'titre_fr', caption: 'Titre FR', size: '180px', sortable: true, resizable: true},
+		            { field: 'titre_en', caption: 'Titre EN', size: '180px', sortable: true, resizable: true},
+		            { field: 'typeVente', caption: 'Type vente', size: '80px', sortable: true, resizable: true},		            
+		            { field: 'type', caption: 'Type ISBN', size: '80px', sortable: true, resizable: true},		            
+		            { field: 'auteurs', caption: 'Auteurs', size: '200px', sortable: true, resizable: true},
+		            { field: 'mt_e_r', caption: 'Mt. roy. &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'mt_rDue', caption: 'Mt. roy. due &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'mt_rPaie', caption: 'Mt. roy. pay. &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'boutiques', caption: 'Boutiques', size: '130px', sortable: true, resizable: true},
+		            { field: 'date_first', caption: 'Première vente', size: '80px', sortable: true, resizable: true},
+		            { field: 'date_last', caption: 'Dernière vente', size: '80px', sortable: true, resizable: true},
+		            { field: 'nb_vente', caption: 'Nb vente', size: '100px', render: 'int', sortable: true, resizable: true},
+		            { field: 'mt_l', caption: 'Mt. &pound;', size: '80px', sortable: true, resizable: true},
+		        ],
+		        toolbar: {
+		            items: [
+		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		                ,{ id: 'import', type: 'button', caption: 'Importer fichier de vente', icon: 'fa-cloud-upload' }
+		            ],
+		            onClick: function (event) {
+		                if (event.target == 'export') {
+		                		open(urlP+'export?obj=venteISBN',"_blank")
+		                }
+		                if (event.target == 'import') {
+			                	openPopupImportVente();
+		                }
+		            }
+		        },
+		        records: rsVenteISBN,
+		        onClick: function (event) {
+					if(itemSelect && itemSelect.recid == event.recid) return;
+		        		itemSelectAuteur = this.get(event.recid);
+		            getVenteData();
+		        },	    
+		        onAdd: function(event) {
+			        openPopupAjoutVente();            
+			    },
+		        onSearch: function(event) {
+		        		var grid = this;
+		        		if(event.searchField=="multi"){
+		            		event.onComplete = function () {
+			            		$.get('<?php if(!$this->ajax) echo '../'; ?>cherche/vente',
+							{"searchData":event.searchData, "bLivre":1},
+			            		function(js){
+			            			finsession(js);
+			            			var ids = [];
+			            			js.rs.forEach(function(d){
+			            				rsVente.forEach(function(l, i){
+				            				if(l.recid==d)ids.push(i);
+			            				});
+				            		});
+		                        grid.last.searchIds = ids;
+		                        grid.total      = grid.last.searchIds.length; 
+		                        grid.buffered   = grid.total; 
+		                        grid.refresh();
+		                        w2alert(js.message);
+			           		},"json");
+		                }
+		            }else{
+			            	grid.localSearch();		            
+		            }
+		        },				    
+		    },
+		    gridVenteAuteur: { 
+		        name: 'grid_<?php echo $idPage;?>_vente_auteur', 
+				header: 'Ventes par auteur',		
+		        show: { 
+					header			: true,		
+		            toolbar			: true,
+					toolbarReload   	: true,
+					toolbarColumns  	: true,
+		            	toolbarSearch   	: true,
+		            	toolbarAdd      	: true,
+		            	toolbarDelete   	: false,
+		            	toolbarSave		: false,
+		            selectColumn		: true,
+		            	footer			: true,
+		        },
+		        multiSearch: true,
+		        searches: [
+				    { field: 'titre', caption: 'Titre', type: 'text' },
+				    { field: 'nom', caption: 'Nom auteur', type: 'text' },
+		            { field: 'id_boutique', caption: 'Boutique', type: 'combo', options: { items: arrListes['boutique']} },
+		            { field: 'num', caption: 'ISBN', type: 'text' },
+		            { field: 'date_vente', caption: 'Date de vente', type: 'date' },
+		            { field: 'montant_euro', caption: 'Montant &euro;', type: 'float'},
+		            { field: 'montant_livre', caption: 'Montant &pound;', type: 'float'},
+		            { field: 'montant_dollar', caption: 'Montant $', type: 'float'},
+		            { field: 'mt_r', caption: 'Mt. roy. &pound;', type: 'float'},
+		            { field: 'mt_r_due', caption: 'Mt. roy. due &pound;', type: 'float'},
+		        ],
+		        columns: [         
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'auteur', caption: 'Auteur', size: '200px', sortable: true, resizable: true},
+		            { field: 'roles', caption: 'Roles', size: '160px', sortable: true, resizable: true},
+		            { field: 'mt_rTot', caption: 'Mt. roy. &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'mt_rDue', caption: 'Mt. roy. due &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'mt_rPaie', caption: 'Mt. roy. pay. &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'boutiques', caption: 'Boutiques', size: '130px', sortable: true, resizable: true},
+		            { field: 'livres', caption: 'Livres', size: '180px', sortable: true, resizable: true},
+		            { field: 'isbns', caption: 'ISBNs', size: '100px', sortable: true, resizable: true},
+		            { field: 'date_first', caption: 'Première vente', size: '80px', sortable: true, resizable: true},
+		            { field: 'date_last', caption: 'Dernière vente', size: '80px', sortable: true, resizable: true},
+		            { field: 'vAutnb_vente', caption: 'Nb vente aut.', size: '100px', render: 'int', sortable: true, resizable: true},
+		            { field: 'vAutmt_l', caption: 'Mt. aut. &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'vCoornb_vente', caption: 'Nb vente coor.', size: '100px', render: 'int', sortable: true, resizable: true},
+		            { field: 'vCoormt_l', caption: 'Mt. coor. &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'vDirnb_vente', caption: 'Nb vente dir.', size: '100px', render: 'int', sortable: true, resizable: true},
+		            { field: 'vDirmt_l', caption: 'Mt. dir. &pound;', size: '80px', sortable: true, resizable: true},
+		        ],
+		        toolbar: {
+		            items: [
+		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		            ],
+		            onClick: function (event) {
+		                if (event.target == 'export') {
+		                		open(urlP+'export?obj=venteAuteur',"_blank")
+		                }
+		            }
+		        },
+		        records: rsVenteAuteur,
+		        onClick: function (event) {
+					if(itemSelect && itemSelect.recid == event.recid) return;
+		        		itemSelectAuteur = this.get(event.recid);
+		            getVenteData();
+		        },	    
+		        onAdd: function(event) {
+			        	openPopupAjoutVente();            
+			    },
+		        onSearch: function(event) {
+		        		var grid = this;
+		        		if(event.searchField=="multi"){
+		            		event.onComplete = function () {
+			            		$.get('<?php if(!$this->ajax) echo '../'; ?>cherche/vente',
+							{"searchData":event.searchData, "bLivre":1},
+			            		function(js){
+			            			finsession(js);
+			            			var ids = [];
+			            			js.rs.forEach(function(d){
+			            				rsVente.forEach(function(l, i){
+				            				if(l.recid==d)ids.push(i);
+			            				});
+				            		});
+		                        grid.last.searchIds = ids;
+		                        grid.total      = grid.last.searchIds.length; 
+		                        grid.buffered   = grid.total; 
+		                        grid.refresh();
+		                        w2alert(js.message);
+			           		},"json");
+		                }
+		            }else{
+			            	grid.localSearch();		            
+		            }
+		        },				    
+		    },
+
+			gridFichierImport: { 
+                name: 'grid_<?php echo $idPage;?>_fichier_import', 
+        		header: 'Données importées',		
+                show: { 
+        			header			: true,		
+                    toolbar			: true,
+        			toolbarReload   : false,
+        			toolbarColumns  : true,
+                	toolbarSearch   : true,
+                	toolbarAdd      : true,
+                	toolbarDelete   : true,
+                	toolbarSave		: false,
+                	footer: true,
+                },
+		        columns: [         
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'name', caption: 'Nom', size: '50px', sortable: true, resizable: true },
+		            { field: 'size', caption: 'Taille', size: '50px', render: 'int', sortable: true, resizable: true },
+		            { field: 'url', caption: 'Adresse', size: '150px', sortable: true, resizable: true },
+		            { field: 'dateFin', caption: 'Début', size: '50px', sortable: true, resizable: true },
+		            { field: 'dateDeb', caption: 'Fin', size: '50px', sortable: true, resizable: true },
+		            { field: 'nbLigne', caption: 'Nb. ligne', size: '50px', render: 'int', sortable: true, resizable: true },
+		            { field: 'nbVente', caption: 'Nb vente', size: '50px', render: 'int', sortable: true, resizable: true },
+		            ],
+                toolbar: {
+                    items: [
+                        { id: 'export', type: 'button', caption: 'Supprimer', icon: 'fa-file' }
+                    ],
+                    onClick: function (event) {
+                        if (event.target == 'Supprimer') {
+							itemSelect = this.get(event.recid);
+                        	open(urlP+'export/datavente?idFic='+idFicImport,"_blank")
+                        }
+                    }
+                },
+                onClick: function (event) {
+                    itemSelect = this.get(event.recid);
+                    var g;           		           
+                }	    
+            },	   		    
+            gridImportVenteData: { 
+                name: 'grid_ImportVenteData', 
+        		header: 'Données importées',		
+                show: { 
+        			header			: true,		
+                    toolbar			: true,
+        			toolbarReload   : false,
+        			toolbarColumns  : true,
+                    	toolbarSearch   : true,
+                    	toolbarAdd      : false,
+                    	toolbarDelete   : false,
+                    	toolbarSave		: false,
+                    	footer: true,
+                },
+                toolbar: {
+                    items: [
+                        { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+                    ],
+                    onClick: function (event) {
+                        if (event.target == 'export') {
+                        		open(urlP+'export/datavente?idFic='+idFicImport,"_blank")
+                        }
+                    }
+                },
+                onClick: function (event) {
+                    itemSelect = this.get(event.recid);
+                    var g;           		           
+                }	    
+            },	   
+		    
+		    formVente: { 
+		        name: 'form_<?php echo $idPage;?>',
+		        fields: [
+		            {name: 'date_vente', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date de vente'} },
+		            {required: true,  name: 'id_isbn', type: 'list', options: { items: arrListes['isbn'] }
+		            		, html: { caption: 'ISBN', attr: 'size="20"' } 
+		            		},
+					{required: true, name: 'id_boutique', type: 'list', options: { items: arrListes['boutique'] }
+		            		, html: { caption: 'Boutique', attr: 'size="20"' } 
+		            		},
+		            	{required: false,  name: 'prix_euro',  type: 'float', html: { caption: 'Prix &euro;' }},
+		            	{required: false,  name: 'prix_livre',  type: 'float', html: { caption: 'Prix &pound;' }},
+		            	{required: false,  name: 'prix_dollar',  type: 'float', html: { caption: 'Prix $' }},
+		            {required: false,  name: 'id_licence', type: 'list', options: { items: arrListes['licence'] }
+		            		, html: { caption: 'Licence', attr: 'size="30"' } 
+		            		},
+		            {required: true,  name: 'nombre', type: 'int', html: { caption: 'Nombre' } },
+		            { name: 'montant_euro', type: 'float', html: { caption: 'Montant &euro;' } },
+		            { name: 'montant_livre', type: 'float', html: { caption: 'Montant &pound;' } },
+		            { name: 'montant_dollar', type: 'float', html: { caption: 'Montant $' } },
+		            { name: 'avec_droit', type: 'checkbox', html: { caption: 'Avec Droit' } },
+		            { name: 'prealable', type: 'checkbox', html: { caption: 'Préalable' } },
+		            { name: 'acheteur', type: 'text', html: { caption: 'Acheteur' } },
+		        ],
+		        onChange: function (event) {
+		           var r = this.record;
+		           event.onComplete = function () {
+			           /*calcul du prix
+			           if(r.id_licence && r.id_licence.licence_unitaire && r.nombre){
+			        	   		w2ui['form_<?php echo $idPage;?>'].record['montant_euro'] = r.id_licence.licence_unitaire * r.nombre; 
+			        	   		w2ui['form_<?php echo $idPage;?>'].refresh();
+			           }
+			           */
+			           if(r.prix_euro && r.nombre){
+				        	   w2ui['form_<?php echo $idPage;?>'].record['montant_euro'] = r.prix_euro * r.nombre; 
+				        	   w2ui['form_<?php echo $idPage;?>'].refresh();
+			           }
+			           if(r.prix_livre && r.nombre && !r.montant_livre){
+			        	   		w2ui['form_<?php echo $idPage;?>'].record['montant_livre'] = r.prix_livre * r.nombre; 
+			        	   		w2ui['form_<?php echo $idPage;?>'].refresh();
+			           }
+			           if(r.prix_dollar && r.nombre && !r.montant_dollar){
+			        	   		w2ui['form_<?php echo $idPage;?>'].record['montant_dollar'] = r.prix_dollar * r.nombre; 
+				           	w2ui['form_<?php echo $idPage;?>'].refresh();
+			           }
+		           }		           
+		        },
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+			            data.id_livre=data.id_isbn.id_livre;
+			            data.id_isbn=data.id_isbn.id;
+			            if(data.id_licence)data.id_licence=data.id_licence.id;			            
+			            if(data.id_boutique)data.id_boutique=data.id_boutique.id;			            
+		                data.obj = "vente";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+		            				finsession(js);
+				                var g = w2ui['grid_<?php echo $idPage;?>'];
+								g.add(js.rs);
+								g.selectNone();
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },		    
+		    gridVenteDetail: { 
+		        name: 'grid_<?php echo $idPage;?>_detail',
+		        header: "Détails des ventes pour l'auteur",		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: true,
+	                	header			: false, 
+	                	columnHeaders	: true},
+		        columns: [      		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            //{ field: 'devise', caption: 'Devise', size: '150px', sortable: true, resizable: true },
+		            { field: 'livre', caption: 'Livre', size: '10%', sortable: true, resizable: true },
+		            { field: 'num', caption: 'ISBN', size: '100px', sortable: true, resizable: true },
+		            { field: 'type', caption: 'Type', size: '100px', sortable: true, resizable: true },		            
+		            { field: 'date_parution', caption: 'Date parution', size: '80px', sortable: true, resizable: true },		            
+		            { field: 'licence', caption: 'Licence', size: '100px', sortable: true, resizable: true 
+		            		,editable: { type: 'list', items: arrListes['licence'], showAll: true },
+		                render: function (record, index, col_index) {
+		                    var html = this.getCellValue(index, col_index);
+		                    return html.text ? html.text : html;
+		                }},		                
+		            { field: 'base_contrat', caption: 'Base contractuelle', size: '80px', sortable: true, resizable: true },
+			        { field: 'date_contrat', caption: 'Signature contrat', size: '100px', sortable: true, resizable: true},
+		            { field: 'date_vente', caption: 'Date de vente', size: '100px', sortable: true, resizable: true 
+		            		,editable: { type: 'date'}},
+		            { field: 'id_boutique', caption: 'Boutique', size: '80px', sortable: true, resizable: true 
+	            			,editable: { type: 'select', items: arrListes['boutique'] }, 
+			                render: function (record, index, col_index) {
+			                    var html = '';
+			                    for (var p in arrListes['boutique']) {
+			                        if (arrListes['boutique'][p].id == this.getCellValue(index, col_index)) html = arrListes['boutique'][p].text;
+			                    }
+			                    return html;
+			                }},
+		            { field: 'prix_euro', caption: 'Prix &euro;', size: '80px', sortable: true, resizable: true 
+				    		,editable:{type:'float'}},
+				    	{ field: 'prix_livre', caption: 'Prix &pound;', size: '80px', sortable: true, resizable: true 
+					    		,editable:{type:'float'}},
+				    	{ field: 'prix_dollar', caption: 'Prix $', size: '80px', sortable: true, resizable: true 
+				    		,editable:{type:'float'}},
+		            { field: 'nombre', caption: 'Nombre', size: '80px', sortable: true, resizable: true 
+				    		,editable:{type:'int'}},
+		            { field: 'montant_euro', caption: 'Montant &euro;', size: '80px', sortable: true, resizable: true
+		            		,editable:{type:'float'}},
+		            { field: 'montant_livre', caption: 'Montant &pound;', size: '80px', sortable: true, resizable: true
+			            	,editable:{type:'float'}},
+			        { field: 'montant_dollar', caption: 'Montant $', size: '80px', sortable: true, resizable: true
+			        		,editable:{type:'float'}},
+		            { field: 'avec_droit', caption: 'Droit', size: '60px', sortable: true, resizable: true
+		            		,editable:{type:'checkbox'}},
+		            { field: 'prealable', caption: 'Préalable', size: '80px', sortable: true, resizable: true
+		            		,editable:{type:'checkbox'}},
+		            { field: 'acheteur', caption: 'Acheteur', size: '80px', sortable: true, resizable: true
+		    		        ,editable:{type:'text'}},
+		        ],
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_detail'].getChanges();		            
+		            changes.forEach(function(c, i){
+			            c.obj = 'vente';
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
+		            });
+		        },
+		        onDelete: function(event) {            
+					var p = {id:itemSelectVente.recid, obj:'vente'};
+					if(event.force){
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+							p,
+			            		function(js){
+		            				finsession(js);
+					            getVenteData();
+			            			w2alert(js.message);
+			           		},"json");
+					}
+			    },
+		        onClick: function (event) {
+		            itemSelectVente = this.get(event.recid);
+		        }	    
+		    },			    	    		    
+		    gridVenteRoyalties: { 
+		        name: 'grid_<?php echo $idPage;?>_royalties', 
+				header: "Royalties pour l'auteur",		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : false,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: true,
+	                	header			: false, 
+	                	columnHeaders	: true},
+		        columns: [      		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'id_vente', caption: 'id_vente', size: '50px', hidden:true, sortable: true, resizable: true},
+		            { field: 'livre', caption: 'Livre', size: '10%', sortable: true, resizable: true },
+		            { field: 'type_isbn', caption: 'Type', size: '80px', sortable: true, resizable: true },
+		            { field: 'type_contrat', caption: 'Type de contrat', size: '100px', sortable: true, resizable: true},
+		            { field: 'base_contrat', caption: 'Base contrat', size: '80px', sortable: true, resizable: true },
+		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true },
+		            { field: 'date_vente', caption: 'Date de vente', size: '80px', sortable: true, resizable: true },
+		            { field: 'montant_vente', editable:{type:'float'}, caption: 'Vente &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'montant_euro', editable:{type:'float'}, caption: 'Montant &euro;', size: '80px', sortable: true, resizable: true},
+		            { field: 'montant_livre', editable:{type:'float'}, caption: 'Montant &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'montant_dollar', editable:{type:'float'}, caption: 'Montant $', size: '80px', sortable: true, resizable: true},
+		            { field: 'taxe_taux', editable:{type:'float'}, caption: 'Taxe taux', size: '80px', sortable: true, resizable: true},
+		            { field: 'taxe_deduction', editable:{type:'float'}, caption: 'Taxe déduction', size: '100px', sortable: true, resizable: true},
+		            { field: 'pourcentage', editable:{type:'float'}, caption: '%', size: '200px', sortable: true, resizable: true},
+		            { field: 'date_edition', caption: 'Edition', size: '100px', sortable: true, resizable: true},
+		            { field: 'date_paiement', caption: 'Paiement', size: '100px', sortable: true, resizable: true},
+		            { field: 'date_encaissement', caption: 'Encaissement', size: '100px', sortable: true, resizable: true},
+		        ],
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_royalties'].getChanges();		            
+		            changes.forEach(function(c, i){
+			            c.obj = 'royalty';
+			            if(c.date_paiement) c.date_paiement = w2utils.formatDate(c.date_paiement, 'yyyy-mm-dd');
+			            if(c.date_encaissement) c.date_encaissement = w2utils.formatDate(c.date_encaissement, 'yyyy-mm-dd');			            
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
+		            });
+		        },
+		        onDelete: function(event) {            
+					var p = {obj:'royalty'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id = s[0];
+						$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+							p,
+			            		function(js){
+			            			finsession(js);
+			            			w2alert(js.message);
+			           		},"json");
+					}
+			    },		    
+		        onAdd: function(event) {
+			        //	openPopupAjoutRoyalty();            
+			    },
+		    },	
+		    gridVentePrix: { 
+		        name: 'grid_<?php echo $idPage;?>_prix', 
+				header: 'Prix pour le livre',		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: true,
+	                	header			: false, 
+	                	columnHeaders	: true},
+		        columns: [		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'id_isbn', caption: 'id_isbn', size: '50px', hidden:true, sortable: true, resizable: true},
+		            { field: 'num', caption: 'ISBN', size: '120px', sortable: true, resizable: true},
+		            { field: 'type_isbn', caption: "Type d'ISBN", size: '10%', sortable: true, resizable: true},
+		            { field: 'type_prix', caption: 'Type de prix', size: '10%', sortable: true, resizable: true,editable: { type: 'list', items: arrListes['prix'], showAll: true },
+		                render: function (record, index, col_index) {
+		                    var html = this.getCellValue(index, col_index);
+		                    return html.text ? html.text : html;
+		                }},
+		            { field: 'prix_euro', caption: 'Prix &euro;', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
+		            { field: 'prix_livre', caption: 'Prix &pound;', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
+		            { field: 'prix_dollar', caption: 'Prix $', size: '80px', sortable: true, resizable: true,editable:{type:'float'}},
+		            { field: 'maj', caption: 'Date', size: '200px', sortable: true, resizable: true, editable: { type: 'date'}},
+		        ],
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_prix'].getChanges();		            
+		            changes.forEach(function(c, i){
+			            c.obj = 'prix';
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
+		            });
+		        },
+		        onDelete: function(event) {            
+					var p = {obj:'prix'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id = s[0];
+
+						$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+							p,
+			            		function(js){
+		            				finsession(js);
+					            getVenteData();
+			            			w2alert(js.message);
+			           		},"json");
+					}
+			    },		    
+		        onAdd: function(event) {
+			        	openPopupAjoutPrix();            
+			    },
+			},	
+		    formPrix: { 
+		        name: 'form_<?php echo $idPage;?>_prix',
+		        fields: [
+		            {name: 'maj', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
+		            {required: true,  name: 'id_isbn', type: 'list', options: { items: rsIsbnLivre}
+		            		, html: { caption: 'ISBN', attr: 'size="20"' } 
+		            		},
+		            { name: 'prix_euro', type: 'float', html: { caption: 'Prix &euro;' } },
+		            { name: 'prix_livre', type: 'float', html: { caption: 'Prix &pound;' } },
+		            { name: 'prix_dollar', type: 'float', html: { caption: 'Prix $' } },
+		            {required: true, name: 'type', type: 'list', options: { items: arrListes['prix'] }
+		            		, html: { caption: 'type', attr: 'size="20"' } 
+		            		},
+		        ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+			            if(data.id_isbn){
+				            data.id_isbn=data.id_isbn.id;
+			            }			            
+			            if(data.type)data.type=data.type.text;			            
+			            data.pdf ? data.pdf=1 : data.pdf=0;			            
+			            data.obj = "prix";
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+			            			finsession(js);
+			            			if(js.rs){
+					                var g = w2ui['grid_<?php echo $idPage;?>_prix'];
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },		    		    	    	    		    
+		    gridVenteRapport: { 
+		        name: 'grid_<?php echo $idPage;?>_rapport', 
+				header: 'Rapport pour le livre',		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : false,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: true,
+	                	header			: false, 
+	                	columnHeaders	: true},
+		        columns: [		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'royIds', caption: 'royId', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'titre_fr', caption: "Titre FR", size: '10%', sortable: true, resizable: true},
+		            { field: 'titre_en', caption: "Titre EN", size: '10%', sortable: true, resizable: true},
+		            { field: 'base_contrat', caption: "Base contrat", size: '80px', sortable: true, resizable: true},
+		            { field: 'periode', caption: "Periode", size: '80px', sortable: true, resizable: true},
+		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '120px', sortable: true, resizable: true},
+		            { field: 'date_edition', caption: 'Edition', size: '80px', sortable: true, resizable: true},
+		            { field: 'date_paiement', editable:{type:'date'}, caption: 'Paiement', size: '80px', sortable: true, resizable: true},
+		            { field: 'date_encaissement', editable:{type:'date'}, caption: 'Encaissement', size: '80px', sortable: true, resizable: true},		            
+		            { field: 'url', caption: 'URL', size: '30%', sortable: true, resizable: true},
+		            ],
+		        onDelete: function(event) {            
+					var p = {obj:'rapport'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id = s[0];
+						$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+							p,
+			            		function(js){
+			            			finsession(js);
+						        getVenteData();
+			            			w2alert(js.message);
+			           		},"json");
+					}
+			    },		
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_rapport'].getChanges();
+		            changes.forEach(function(c, i){
+			            var r = w2ui[event.target].get(c.recid);
+			            c.royIds = r["royIds"];		            
+			            c.obj = 'royalty';
+			            if(c.date_paiement) c.date_paiement = w2utils.formatDate(c.date_paiement, 'yyyy-mm-dd');
+			            if(c.date_encaissement) c.date_encaissement = w2utils.formatDate(c.date_encaissement, 'yyyy-mm-dd');			            
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
+		            });
+		        },
+		        toolbar: {
+		            items: [
+		                { id: 'voirRapport', type: 'button', caption: "Voir le(s) édition(s)", icon: 'fa-file' }
+		            ],
+		            onClick: function (event) {
+		                if (event.target == 'voirRapport') {
+			                	var s = w2ui['grid_<?php echo $idPage;?>_rapport'].getSelection();
+			                	if(s){
+				                	s.forEach(function(r){
+				                		var item = w2ui['grid_<?php echo $idPage;?>_rapport'].get(r);
+				                		open(item["url"],"_blank");
+				                	})
+			                	}
+		                }
+		            }
+		        },
+			        
+			},			    
+			gridVenteDevise: { 
+		        name: 'grid_<?php echo $idPage;?>_devise', 
+				header: 'Taxes et taux de conversion',		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : true,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: true,
+	                	header			: true, 
+	                	columnHeaders	: true},
+		        columns: [		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'base_contrat', caption: 'Base contrat', size: '80px', sortable: true, resizable: true},
+		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true},
+		            //{ field: 'date_taux', caption: 'Deb. période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            //{ field: 'date_taux_fin', caption: 'Fin période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+					{ field: 'taxe_taux', caption: 'Taxe taux',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+					{ field: 'taxe_deduction', caption: 'Taxe déduction',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'taux_livre_dollar', caption: '&pound; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'taux_livre_euro', caption: '&pound; -> &euro;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'taux_euro_livre', caption: '&euro; -> &pound;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'taux_dollar_livre', caption: '$ -> &pound;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'taux_euro_dollar', caption: '&euro; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'taux_dollar_euro', caption: '$ -> &euro;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		        ],
+		        records:rsDev,
+		        onDelete: function(event) {            
+					var p = {obj:'devise'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id = s[0];
+						$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+							p,
+			            		function(js){
+			            			finsession(js);
+			            			w2alert(js.message);
+			           		},"json");
+					}
+			    },		
+	            onAdd: function(event) {
+		        		openPopupAjoutDevise();
+			    },
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_devise'].getChanges();
+		            changes.forEach(function(c, i){
+			            c.obj = 'devise';
+			            if(c.date_taux) c.date_taux = w2utils.formatDate(c.date_taux, 'yyyy-mm-dd');
+			            if(c.date_taux_fin) c.date_taux_fin = w2utils.formatDate(c.date_taux_fin, 'yyyy-mm-dd');
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
+		            });
+		        },
+			        
+			},				
+			formDevise: { 
+		        name: 'form_<?php echo $idPage;?>_devise',
+		        fields: [
+				    { name: 'base_contrat', type: 'list', required: false, html: { caption: 'Base contrat'}
+		            		,options: { items: arrListes['contratBase']}} , 
+				    {required: true,  name: 'annee', type: 'int', options:{min: '2000',autoFormat:false}, required: true,  html: {caption: 'Année'} },
+		            //{required: true,  name: 'date_taux', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
+		            //{required: true,  name: 'date_taux_fin', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
+		            { name: 'taux_livre_dollar', type: 'float', html: { caption: '&pound; -> $' } },
+		            { name: 'taux_livre_euro', type: 'float', html: { caption: '&pound; -> &euro;' } },
+		            { name: 'taux_euro_livre', type: 'float', html: { caption: '&euro; -> &pound;' } },
+		            { name: 'taux_euro_dollar', type: 'float', html: { caption: '&euro; -> $' } },
+		            { name: 'taux_dollar_livre', type: 'float', html: { caption: '$ -> &pound;' } },
+		            { name: 'taux_dollar_euro', type: 'float', html: { caption: '$ -> &euro;' } },
+	            ],
+		        actions: {
+		            Reset: function () {
+		                this.clear();
+		                w2popup.close();
+		            },
+		            Save: function () {
+		                var errors = this.validate();
+		                if (errors.length > 0) return;
+		                var data = this.record;
+			            data.obj = "devise";
+			            if(data.base_contrat)data.base_contrat=data.base_contrat.text;			            
+			            if(data.date_taux) data.date_taux = w2utils.formatDate(data.date_taux, 'yyyy-mm-dd');
+			            if(data.date_taux_fin) data.date_taux_fin = w2utils.formatDate(data.date_taux_fin, 'yyyy-mm-dd');
+			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
+							data,
+			            		function(js){
+			            			finsession(js);
+			            			if(js.rs){
+					                var g = w2ui['grid_<?php echo $idPage;?>_devise'];
+									g.add(js.rs);
+									g.selectNone();
+			            			}
+			            			w2alert(js.message);
+			           		},"json");
+		            }
+		        }
+		    },	
+			
+		};
+	
+    // initialisation
+    $('#<?php echo $idPage;?>').w2layout(config.layoutVente);
+    w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
+    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail)); 
+    w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
+    w2ui.layout_<?php echo $idPage;?>_top.content('right', $().w2grid(config.gridVenteDevise));
+     	
+}
+
+function getVenteData(){
+    if(!itemSelectAuteur) return;   
+    //récupère le infos liées
+    if(w2ui['grid_<?php echo $idPage;?>_detail']){
+		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/ventedata',
+			{id:itemSelectAuteur.recid, obj:'vente'},
+	    		function(js){
+    				finsession(js);
+	            var g = w2ui['grid_<?php echo $idPage;?>_detail'];
+	            g.clear();		            		
+	    			if(js.rs.length){
+	        			//mise à jour de la grille 			        
+		            g.add(js.rs);
+	    			}
+	    },"json");
+    }
+    if(w2ui['grid_<?php echo $idPage;?>_royalties']){
+		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/ventedata',
+			{id:itemSelectAuteur.recid, obj:'royalty'},
+	    		function(js){
+    				finsession(js);
+	            g = w2ui['grid_<?php echo $idPage;?>_royalties'];
+	            g.clear();		            		
+	    			if(js.rs.length){
+	        			//mise à jour de la grille 			        
+		            g.add(js.rs);
+	    			}else{
+            			w2alert("Pas de royalty pour le participant.<br/>Vérifiez :<br/>- vous avez lancé le calcul des royalties<br/>- la base contractuelle de la proposition est définie<br/>- il existe un contrat avec une date de signature<br/>- il existe un ISBN avec une date de publication");		    			
+	    			}
+	    },"json");           		           
+    }
+    /*
+    if(w2ui['grid_<?php echo $idPage;?>_prix']){
+		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
+			{id:itemSelectAuteur.recid, obj:'prix'},
+	    		function(js){
+    				finsession(js);
+	            g = w2ui['grid_<?php echo $idPage;?>_prix'];
+	            g.clear();		            		
+	    			if(js.rs.length){
+	        			//mise à jour de la grille 			        
+		            g.add(js.rs);
+	    			}
+	    },"json");           		           
+    } 
+    */   
+    if(w2ui['grid_<?php echo $idPage;?>_rapport']){
+		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
+			{idAuteur:itemSelectAuteur.recid, mod:'paiement royalties'},
+	    		function(js){
+    				finsession(js);
+	            g = w2ui['grid_<?php echo $idPage;?>_rapport'];
+	            g.clear();		            		
+	    			if(js.rs.length){
+	        			//mise à jour de la grille 			        
+		            g.add(js.rs);
+	    			}
+	    },"json");           		           
+    }    
+
+}
+
+
+
+
+function openPopupImportVente () {
+
+    w2popup.open({
+        title: 'Importation des fichiers de vente',
+        body: '<iframe height="100%" width="100%" scrolling="no" src="<?php if(!$this->ajax) echo '../'; ?>import/droit?obj=import&id=0"></iframe>',
+        width     : 1080,
+        height    : 740,
+        overflow  : 'hidden',
+        color     : '#333',
+        speed     : '0.3',
+        opacity   : '0.8',
+        modal     : true,
+        showClose : true,
+        showMax   : false,
+    });
+}
+
+function openPopupAjoutVente() {
+    w2popup.open({
+        title   : 'Ajouter une vente',
+        width   : 400,
+        height  : 550,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>'])w2ui['form_<?php echo $idPage;?>'].destroy();
+                $('#w2ui-popup #main').w2form(config.formVente)
+                w2ui['form_<?php echo $idPage;?>'].clear();
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+}
+function openPopupAjoutPrix() {
+    w2popup.open({
+        title   : 'Ajouter un prix',
+        width   : 400,
+        height  : 500,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>_prix'])w2ui['form_<?php echo $idPage;?>_prix'].destroy();
+    		        rsIsbnLivre = arrListes['isbn'].filter(function(p){return p.id_livre==itemSelectAuteur.recid});
+    		        config.formPrix.fields[1].options.items = rsIsbnLivre;
+                $('#w2ui-popup #main').w2form(config.formPrix)
+                w2ui['form_<?php echo $idPage;?>_prix'].refresh();
+                w2ui['form_<?php echo $idPage;?>_prix'].clear();
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+}
+function openPopupAjoutDevise() {
+    w2popup.open({
+        title   : 'Ajouter une devise',
+        width   : 400,
+        height  : 550,
+        showMax : true,
+        body    : '<div id="main" style="position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px;"></div>',
+        onOpen  : function (event) {
+            event.onComplete = function () {
+            	 	if(w2ui['form_<?php echo $idPage;?>_devise'])w2ui['form_<?php echo $idPage;?>_devise'].destroy();
+                $('#w2ui-popup #main').w2form(config.formDevise)
+                w2ui['form_<?php echo $idPage;?>_devise'].clear();
+            };
+        },
+        onToggle: function (event) { 
+            event.onComplete = function () {
+                w2ui.layout.resize();
+            }
+        }
+    });
+}
+function voirData(id){
+	console.log("voirData : "+id);
+	var e = window.event;
+	idFicImport = id;
+	$.get(urlP+'import/getdataficvente',
+			{idFic:id},
+        		function(js){
+				config.gridImportVenteData.columns=js.col;
+			    config.gridImportVenteData.records=js.rs;
+			    if(w2ui.grid_ImportVenteData)
+			    		w2ui.grid_ImportVenteData.destroy();        
+			    w2ui.layout_ImportVente.content('main', $().w2grid(config.gridImportVenteData));
+       		},'json');		
+
+	//empèche la propagation de l'événement
+	e.preventDefault();
+}
+
+</script>
+
+<?php 
+if(!$this->ajax){
+	echo '</body>
+</html>';
+}else{
+	echo '<script type="text/javascript">
+			$(function () {initDroit(); });                       		
+		</script>		
+		';	
+}
+?>

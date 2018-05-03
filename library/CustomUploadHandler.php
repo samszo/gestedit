@@ -8,12 +8,15 @@ class CustomUploadHandler extends UploadHandler {
 
     protected function handle_form_data($file, $index) {
         //$file->name = @$_REQUEST['nameObj'][$index];
-    		$file->idObj = @$_REQUEST['idObj'][$index];
+    	$file->idObj = @$_REQUEST['idObj'][$index];
         $file->obj = @$_REQUEST['obj'][$index];
         $file->type = @$_REQUEST['type'][$index];
         //on ne précise que l'année
-        $file->dateFin = @$_REQUEST['date_fin'][$index]."-01-01";
-        $file->dateDeb = (@$_REQUEST['date_fin'][$index]-1)."-01-01";
+        //$file->dateFin = @$_REQUEST['date_fin'][$index]."-01-01";
+        //$file->dateDeb = (@$_REQUEST['date_fin'][$index]-1)."-01-01";
+        //les dates sont explicitement choisies
+        $file->dateFin = @$_REQUEST['dateFin'];
+        $file->dateDeb = @$_REQUEST['dateDeb'];
     }
 
     protected function handle_file_upload($uploaded_file, $name, $size, $type, $error,
@@ -21,7 +24,8 @@ class CustomUploadHandler extends UploadHandler {
         $f = parent::handle_file_upload($uploaded_file, $name, $size, $type, $error, $index, $content_range);
         if (empty($f->error)) {        	
     			$rs =$this->db->ajouter(array("nom"=>$f->name,"url"=>$f->url,"size"=>$f->size
-				,"content_type"=>"inconnu","type"=>$f->type,"obj"=>$f->obj,"id_obj"=>$f->idObj,"periode_fin"=>$f->dateFin),false,true);
+    			    ,"content_type"=>"inconnu","type"=>$f->type,"obj"=>$f->obj,"id_obj"=>$f->idObj
+    			    ,"periode_debut"=>$f->dateDeb,"periode_fin"=>$f->dateFin),false,true);
             $f->id = $rs["id_importfic"];
             $f->nbLigne = $rs["nbLigne"];
             $f->nbVente = $rs["nbVente"];
@@ -32,13 +36,14 @@ class CustomUploadHandler extends UploadHandler {
     protected function set_additional_file_properties($file) {
 		parent::set_additional_file_properties($file);
        	if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-	    		$rs = $this->db->findByUrl($file->url,array("periode_fin DESC"));
+	    	$rs = $this->db->findByUrl($file->url,array("periode_fin DESC"));
 			$file->id = $rs["id_importfic"];
 			//$file->name = $rs["nom"];
 			$file->type = $rs["type"];
             $file->obj = $rs["obj"];
             $file->idObj = $rs["id_obj"];
             $file->dateFin = $rs["periode_fin"];
+            $file->dateDeb = $rs["periode_debut"];
             $file->nbLigne = $rs["nbLigne"];
             $file->nbVente = $rs["nbVente"];
        	}

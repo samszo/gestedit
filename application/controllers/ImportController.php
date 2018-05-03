@@ -44,6 +44,11 @@ class ImportController extends Zend_Controller_Action
     		$this->initInstance();        						
     }
 
+    public function droitAction()
+    {
+        $this->initInstance();
+    }
+    
     public function setdataficventeAction()
     {
     		$this->initInstance();
@@ -143,8 +148,8 @@ class ImportController extends Zend_Controller_Action
 				,'print_response'=>false);
 			//$upload_handler = new UploadHandler($options);
 			$upload_handler = new CustomUploadHandler($options);
-	    		$response = $upload_handler->get_response();
-	    		$this->view->json = json_encode($response);
+    		$response = $upload_handler->get_response();
+    		$this->view->json = json_encode($response);
 		} 
     			      
     }

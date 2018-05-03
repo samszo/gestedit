@@ -14,29 +14,36 @@ class ExportController extends Zend_Controller_Action
     				if($this->_getParam('type')=="traduction") $rs = $oBdd->getAllContratTraducteur();
     				else $rs = $oBdd->getAllContratAuteur(false,$this->_getParam('type'));    					
     				break;    			
+    			case "venteISBN":
+    			    $bdd = new Model_DbTable_Iste_vente();
+    			    $rs = $bdd->getAllISBN(null, 0, 0, null,$this->_getParam('ids'));
+    			    break;
+    			case "venteAuteur":
+    			    $bdd = new Model_DbTable_Iste_vente();
+    			    $rs = $bdd->getAll(null, 0, 0, null,$this->_getParam('ids'));
+    			    break;
     			case "traduction":
-				$bdd = new Model_DbTable_Iste_livre();
-				$rs = $bdd->getTraductionLivre($this->_getParam('ids'));
+    				$bdd = new Model_DbTable_Iste_livre();
+    				$rs = $bdd->getTraductionLivre($this->_getParam('ids'));
     				break;    			
     			case "keshifLivre":
-				$bdd = new Model_DbTable_Iste_livre();
-				$rs = $bdd->getKeshif();
+    				$bdd = new Model_DbTable_Iste_livre();
+    				$rs = $bdd->getKeshif();
     				break;    			
     			case "tresor":
-				$bdd = new Model_DbTable_Iste_livre();
-				$rs = $bdd->getTresorie();
+    				$bdd = new Model_DbTable_Iste_livre();
+    				$rs = $bdd->getTresorie();
     				break;    			
     			case "etatEditeur":
-				$bdd = new Model_DbTable_Iste_livre();
-				$rs = $bdd->getEtatEditeur($this->_getParam('idEditeur'));
-				if($this->_getParam('idEditeur')==5) $nomFic .= "_wiley"; 
-				if($this->_getParam('idEditeur')==4) $nomFic .= "_elsevier"; 
-				break;
+    				$bdd = new Model_DbTable_Iste_livre();
+    				$rs = $bdd->getEtatEditeur($this->_getParam('idEditeur'));
+    				if($this->_getParam('idEditeur')==5) $nomFic .= "_wiley"; 
+    				if($this->_getParam('idEditeur')==4) $nomFic .= "_elsevier"; 
+    				break;
     			case "suivi":
-				$bdd = new Model_DbTable_Iste_livre();
-				$rs = $bdd->getEtatSuivi($this->_getParam('ids'));
-				break;
-				    			
+    				$bdd = new Model_DbTable_Iste_livre();
+    				$rs = $bdd->getEtatSuivi($this->_getParam('ids'));
+    				break;				    			
     			default:
 		    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
 		    		$oBdd = new $oName();
@@ -57,8 +64,8 @@ class ExportController extends Zend_Controller_Action
     	
     		$dbData = new Model_DbTable_Iste_importdata();
     		$rs = $dbData->exportByIdFic($this->_getParam('idFic'));
-		$this->_helper->viewRenderer->setNoRender(true);		
-		$this->printExcel($rs, "gestedit");
+    		$this->_helper->viewRenderer->setNoRender(true);		
+    		$this->printExcel($rs, "gestedit");
     }
     
 	/**

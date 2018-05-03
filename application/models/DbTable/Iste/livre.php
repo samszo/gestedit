@@ -315,7 +315,8 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 			l.id_livre recid, CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,'')) titre
 			, ca.auteurs
 			, GROUP_CONCAT(DISTINCT(i.num)) isbns
-			, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d, GROUP_CONCAT(DISTINCT(b.nom)) boutiques			
+			, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d
+            , GROUP_CONCAT(DISTINCT(b.nom)) boutiques			
 			, MAX(v.date_vente) date_last , MIN(v.date_vente) date_first			
 			, SUM(r.montant_livre) mt_e_r
 			, p.prix_livre, prix_euro, prix_dollar
@@ -335,21 +336,73 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 	    	$rs = $db->fetchAll();
 	    	
 	    	if($resume){
-			//ajoute les résumés
-			$bdd = new Model_DbTable_Iste_vente();
-			$rsR = $bdd->getTotaux();
-			$i=1;
-	        foreach ($rsR as $r) {
-				$rs[]= array("summary"=>true,"recid"=>"S-".$i,"boutiques"=>$r["boutique"]
-					,"auteurs"=>$r["nbA"],"titre"=>$r["nbLivre"]
-					,"nb_vente"=>$r["nb"],"isbns"=>$r["nbIsbn"]
-					,"date_first"=>$r["dMin"],"date_last"=>$r["dMax"]
-					,"mt_e"=>$r["tot_e"],"mt_l"=>$r["tot_l"],"mt_d"=>$r["tot_d"],"mt_e_r"=>$r["r_livre"]
-					);
-			}
+    			//ajoute les résumés
+    			$bdd = new Model_DbTable_Iste_vente();
+    			$rsR = $bdd->getTotaux();
+    			$i=1;
+    	        foreach ($rsR as $r) {
+    				$rs[]= array("summary"=>true,"recid"=>"S-".$i,"boutiques"=>$r["boutique"]
+    					,"auteurs"=>$r["nbA"],"titre"=>$r["nbLivre"]
+    					,"nb_vente"=>$r["nb"],"isbns"=>$r["nbIsbn"]
+    					,"date_first"=>$r["dMin"],"date_last"=>$r["dMax"]
+    					,"mt_e"=>$r["tot_e"],"mt_l"=>$r["tot_l"],"mt_d"=>$r["tot_d"],"mt_e_r"=>$r["r_livre"]
+    					);
+    			}
 	    	}
 		return $rs;
 	    	
+    }
+    
+    /**
+     * Récupère toutes les entrées Iste_livre avec certains critères
+     * de tri, intervalles
+     * @param int $resume
+     *
+     * @return array
+     *
+     */
+    public function getAllVenteISBN($resume=true)
+    {
+        $sql = "SELECT
+			i.id_isbn recid, l.titre_fr, l.titre_en
+			, ca.auteurs
+			, i.num, i.type, v.type typeVente
+			, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d, GROUP_CONCAT(DISTINCT(b.nom)) boutiques
+			, MAX(v.date_vente) date_last , MIN(v.date_vente) date_first
+			, SUM(r.montant_livre) mt_e_r
+			, p.prix_livre, prix_euro, prix_dollar
+			FROM iste_livre l
+				INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
+				INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
+				INNER JOIN (SELECT GROUP_CONCAT(DISTINCT(CONCAT(a.prenom,' ',a.nom,' (',la.role,')'))) auteurs, la.id_livre
+				FROM iste_auteur a
+				INNER JOIN iste_livrexauteur la ON a.id_auteur = la.id_auteur
+				GROUP BY la.id_livre
+				) ca ON ca.id_livre = l.id_livre
+				INNER JOIN iste_boutique b ON b.id_boutique = v.id_boutique
+				LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente
+				LEFT JOIN iste_prix p ON p.id_prix = v.id_prix
+			GROUP BY i.id_isbn, v.type
+            ORDER BY l.titre_fr, l.titre_en";
+        $db = $this->_db->query($sql);
+        $rs = $db->fetchAll();
+        
+        if($resume){
+            //ajoute les résumés
+            $bdd = new Model_DbTable_Iste_vente();
+            $rsR = $bdd->getTotaux();
+            $i=1;
+            foreach ($rsR as $r) {
+                $rs[]= array("summary"=>true,"recid"=>"S-".$i,"boutiques"=>$r["boutique"]
+                    ,"auteurs"=>$r["nbA"],"titre"=>$r["nbLivre"]
+                    ,"nb_vente"=>$r["nb"],"isbns"=>$r["nbIsbn"]
+                    ,"date_first"=>$r["dMin"],"date_last"=>$r["dMax"]
+                    ,"mt_e"=>$r["tot_e"],"mt_l"=>$r["tot_l"],"mt_d"=>$r["tot_d"],"mt_e_r"=>$r["r_livre"]
+                );
+            }
+        }
+        return $rs;
+        
     }
     
 	/**

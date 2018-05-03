@@ -230,3 +230,4 @@ bdd/lyor_iste_admin_dump_sql_2018-04-24_17-06-01.sql.gz
 bdd/.DS_Store
 .DS_Store
 application/configs/configInfomaniak1.php
+bdd/gesteditNewDroit.sql
