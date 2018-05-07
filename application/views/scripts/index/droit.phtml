@@ -37,6 +37,7 @@ $idPage = "Droit";
 <script type="text/javascript">
 var rsVenteISBN = <?php echo $this->jsonISBN; ?>;
 var rsVenteAuteur = <?php echo $this->jsonAuteur; ?>;
+var rsFichierImport;
 var rsDev = <?php echo $this->rsDev; ?>;
 
 
@@ -103,10 +104,9 @@ function initDroit() {
 						        }else if(event.target=="tabTop2"){
 						            if(w2ui['layout_<?php echo $idPage;?>_fichier'])w2ui['layout_<?php echo $idPage;?>_fichier'].destroy();
 						            if(w2ui['grid_ImportVenteData'])w2ui['grid_ImportVenteData'].destroy();
-						            if(w2ui['grid_<?php echo $idPage;?>_fichier_import'])w2ui['grid_<?php echo $idPage;?>_fichier_import'].destroy();
 						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
 						            w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2layout(config.gridImportVenteData));
-						            w2ui.layout_<?php echo $idPage;?>_fichier.content('left', $().w2layout(config.gridFichierImport));
+						            getFichierImport();
 						        }
 					        },
 					        onClose: function (event) {
@@ -122,7 +122,7 @@ function initDroit() {
 		        name: 'layout_<?php echo $idPage;?>_fichier',
 		        padding: 2,
 		        panels: [
-		            { type: 'left', size: '400px', resizable: true, style: pstyleDetail},
+		            { type: 'left', size: '510px', resizable: true, style: pstyleDetail},
 		            { type: 'main', size: '100%', resizable: true, style: pstyleDetail},
 		        ]
 		    },			    
@@ -174,14 +174,10 @@ function initDroit() {
 		        toolbar: {
 		            items: [
 		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
-		                ,{ id: 'import', type: 'button', caption: 'Importer fichier de vente', icon: 'fa-cloud-upload' }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
 		                		open(urlP+'export?obj=venteISBN',"_blank")
-		                }
-		                if (event.target == 'import') {
-			                	openPopupImportVente();
 		                }
 		            }
 		        },
@@ -315,43 +311,42 @@ function initDroit() {
 
 			gridFichierImport: { 
                 name: 'grid_<?php echo $idPage;?>_fichier_import', 
-        		header: 'Données importées',		
+        		header: 'Fichiers importés',		
                 show: { 
         			header			: true,		
                     toolbar			: true,
         			toolbarReload   : false,
         			toolbarColumns  : true,
                 	toolbarSearch   : true,
-                	toolbarAdd      : true,
+                	toolbarAdd      : false,
                 	toolbarDelete   : true,
                 	toolbarSave		: false,
                 	footer: true,
                 },
 		        columns: [         
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
-		            { field: 'name', caption: 'Nom', size: '50px', sortable: true, resizable: true },
-		            { field: 'size', caption: 'Taille', size: '50px', render: 'int', sortable: true, resizable: true },
-		            { field: 'url', caption: 'Adresse', size: '150px', sortable: true, resizable: true },
-		            { field: 'dateFin', caption: 'Début', size: '50px', sortable: true, resizable: true },
-		            { field: 'dateDeb', caption: 'Fin', size: '50px', sortable: true, resizable: true },
-		            { field: 'nbLigne', caption: 'Nb. ligne', size: '50px', render: 'int', sortable: true, resizable: true },
-		            { field: 'nbVente', caption: 'Nb vente', size: '50px', render: 'int', sortable: true, resizable: true },
+		            { field: 'name', caption: 'Nom', size: '150px', sortable: true, resizable: true },
+		            { field: 'size', caption: 'Taille', size: '56px', render: 'int', sortable: true, resizable: true },
+		            { field: 'url', caption: 'Adresse', size: '150px', hidden:true, sortable: true, resizable: true },
+		            { field: 'dateFin', caption: 'Début', size: '80px', sortable: true, resizable: true },
+		            { field: 'dateDeb', caption: 'Fin', size: '80px', sortable: true, resizable: true },
+		            { field: 'nbLigne', caption: 'Nb. ligne', size: '65px', render: 'int', sortable: true, resizable: true },
+		            { field: 'nbVente', caption: 'Nb vente', size: '60px', render: 'int', sortable: true, resizable: true },
 		            ],
                 toolbar: {
                     items: [
-                        { id: 'export', type: 'button', caption: 'Supprimer', icon: 'fa-file' }
+		                { id: 'import', type: 'button', caption: 'Importer fichier de vente', icon: 'fa-cloud-upload' }
                     ],
                     onClick: function (event) {
-                        if (event.target == 'Supprimer') {
-							itemSelect = this.get(event.recid);
-                        	open(urlP+'export/datavente?idFic='+idFicImport,"_blank")
-                        }
+		                if (event.target == 'import') {
+		                	openPopupImportVente();
+		                }
                     }
                 },
                 onClick: function (event) {
                     itemSelect = this.get(event.recid);
-                    var g;           		           
-                }	    
+                    voirData(event.recid);
+               }	    
             },	   		    
             gridImportVenteData: { 
                 name: 'grid_ImportVenteData', 
@@ -1053,11 +1048,30 @@ function voirData(id){
 			    config.gridImportVenteData.records=js.rs;
 			    if(w2ui.grid_ImportVenteData)
 			    		w2ui.grid_ImportVenteData.destroy();        
-			    w2ui.layout_ImportVente.content('main', $().w2grid(config.gridImportVenteData));
+			    w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridImportVenteData));
        		},'json');		
 
 	//empèche la propagation de l'événement
 	e.preventDefault();
+}
+
+function getFichierImport(){
+
+    $.ajax({
+        // Uncomment the following to send cross-domain cookies:
+        //xhrFields: {withCredentials: true},
+        url: urlP+'/import/upload/',
+        dataType: 'json',
+    }).done(function (result) {
+    	rsFichierImport = result.files;
+	    config.gridFichierImport.records=rsFichierImport;
+	    if(w2ui.gridFichierImport)
+	    		w2ui.gridFichierImport.destroy();        
+	    w2ui.layout_<?php echo $idPage;?>_fichier.content('left', $().w2grid(config.gridFichierImport));
+    	
+    });
+
+		
 }
 
 </script>

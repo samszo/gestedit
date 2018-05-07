@@ -27,6 +27,7 @@ class CustomUploadHandler extends UploadHandler {
     			    ,"content_type"=>"inconnu","type"=>$f->type,"obj"=>$f->obj,"id_obj"=>$f->idObj
     			    ,"periode_debut"=>$f->dateDeb,"periode_fin"=>$f->dateFin),false,true);
             $f->id = $rs["id_importfic"];
+            $f->recid = $rs["id_importfic"];
             $f->nbLigne = $rs["nbLigne"];
             $f->nbVente = $rs["nbVente"];
         }
@@ -38,6 +39,7 @@ class CustomUploadHandler extends UploadHandler {
        	if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 	    	$rs = $this->db->findByUrl($file->url,array("periode_fin DESC"));
 			$file->id = $rs["id_importfic"];
+			$file->recid = $rs["id_importfic"];
 			//$file->name = $rs["nom"];
 			$file->type = $rs["type"];
             $file->obj = $rs["obj"];
