@@ -134,7 +134,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
      * Recherche des entrées avec la valeur spécifiée
      * et retourne cette entrée.
      *
-     * @param int $idFic
+     * @param int       $idFic
      *
      * @return array
      */
@@ -145,9 +145,41 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("idi" => "iste_importdata"),
                 'idi.id_importdata = id.id_importdata', array("recid"=>"id_importdata"))
-            ->where( "id.id_importfic = ?", $idFic );
+            ->where( "id.id_importfic = ?", $idFic );    
 
         return $this->fetchAll($query)->toArray(); 
+        
+    }    
+
+	/**
+     * Calcul le résumé pour les data d'un fichier
+     *
+     * @param int       $idFic
+     *
+     * @return array
+     */
+    public function getResumeByIdFic($idFic)
+    {
+        $sql = "SELECT 
+                COUNT(DISTINCT d.id_isbn) nbIsbn,
+                COUNT(DISTINCT la.id_auteur) nbAuteur,
+                COUNT(DISTINCT d.id_livre) nbLivre,
+                COUNT(DISTINCT v.id_vente) nbVente,
+                SUM(d.col3) qtyPaper,
+                SUM(d.col4) sumPaper,
+                SUM(d.col5) sumEbook
+            FROM
+                iste_importdata d
+                    INNER JOIN
+                iste_importfic f ON f.id_importfic = d.id_importfic
+                    INNER JOIN
+                iste_vente v ON v.id_importdata = d.id_importdata
+                    INNER JOIN
+                iste_livrexauteur la ON la.id_livre = d.id_livre
+            WHERE
+                d.id_importfic =".$idFic;    
+        $stmt = $this->_db->query($sql);
+        return $stmt->fetchAll();
         
     }    
 

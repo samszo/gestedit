@@ -17,6 +17,7 @@ if(!$this->ajax){
 		<script type="text/javascript" src="../js/global.js"></script>
 		<script type="text/javascript" src="../js/data.js"></script>
 		<script type="text/javascript" src="../js/log.js"></script>
+		<script type="text/javascript" src="../js/d3.js"></script>
 		<script type="text/javascript">
 			$(function () {
 				initAll(initDroit); 
@@ -162,14 +163,17 @@ function initDroit() {
 		            { field: 'typeVente', caption: 'Type vente', size: '80px', sortable: true, resizable: true},		            
 		            { field: 'type', caption: 'Type ISBN', size: '80px', sortable: true, resizable: true},		            
 		            { field: 'auteurs', caption: 'Auteurs', size: '200px', sortable: true, resizable: true},
-		            { field: 'mt_e_r', caption: 'Mt. roy. &pound;', size: '80px', sortable: true, resizable: true},
-		            { field: 'mt_rDue', caption: 'Mt. roy. due &pound;', size: '80px', sortable: true, resizable: true},
-		            { field: 'mt_rPaie', caption: 'Mt. roy. pay. &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'mt_e_r', caption: 'Mt. roy. &pound;', size: '80px', sortable: true, resizable: true, render: 'money'},
+		            { field: 'mt_rDue', caption: 'Mt. roy. due &pound;', size: '80px', sortable: true, resizable: true, render: 'money'},
+		            { field: 'mt_rPaie', caption: 'Mt. roy. pay. &pound;', size: '80px', sortable: true, resizable: true, render: 'money'},
 		            { field: 'boutiques', caption: 'Boutiques', size: '130px', sortable: true, resizable: true},
 		            { field: 'date_first', caption: 'Première vente', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_last', caption: 'Dernière vente', size: '80px', sortable: true, resizable: true},
 		            { field: 'nb_vente', caption: 'Nb vente', size: '100px', render: 'int', sortable: true, resizable: true},
-		            { field: 'mt_l', caption: 'Mt. &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'mt_l', caption: 'Mt. &pound;', size: '80px', sortable: true, resizable: true, render: function (record) {
+						return '<div>&pound;' + record.mt_l + '</div>';
+						}
+					},
 		        ],
 		        toolbar: {
 		            items: [
@@ -238,11 +242,11 @@ function initDroit() {
 		            { field: 'id_boutique', caption: 'Boutique', type: 'combo', options: { items: arrListes['boutique']} },
 		            { field: 'num', caption: 'ISBN', type: 'text' },
 		            { field: 'date_vente', caption: 'Date de vente', type: 'date' },
-		            { field: 'montant_euro', caption: 'Montant &euro;', type: 'float'},
-		            { field: 'montant_livre', caption: 'Montant &pound;', type: 'float'},
-		            { field: 'montant_dollar', caption: 'Montant $', type: 'float'},
-		            { field: 'mt_r', caption: 'Mt. roy. &pound;', type: 'float'},
-		            { field: 'mt_r_due', caption: 'Mt. roy. due &pound;', type: 'float'},
+		            { field: 'montant_euro', caption: 'Montant &euro;', type: 'float', render: 'money'},
+		            { field: 'montant_livre', caption: 'Montant &pound;', type: 'float', render: 'money'},
+		            { field: 'montant_dollar', caption: 'Montant $', type: 'float', render: 'money'},
+		            { field: 'mt_r', caption: 'Mt. roy. &pound;', type: 'float', render: 'money'},
+		            { field: 'mt_r_due', caption: 'Mt. roy. due &pound;', type: 'float', render: 'money'},
 		        ],
 		        columns: [         
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -321,7 +325,7 @@ function initDroit() {
                 	toolbarAdd      : false,
                 	toolbarDelete   : true,
                 	toolbarSave		: false,
-                	footer: true,
+                	footer			: true,
                 },
 		        columns: [         
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -356,11 +360,11 @@ function initDroit() {
                     toolbar			: true,
         			toolbarReload   : false,
         			toolbarColumns  : true,
-                    	toolbarSearch   : true,
-                    	toolbarAdd      : false,
-                    	toolbarDelete   : false,
-                    	toolbarSave		: false,
-                    	footer: true,
+					toolbarSearch   : true,
+					toolbarAdd      : false,
+					toolbarDelete   : false,
+					toolbarSave		: false,
+					footer			: true,
                 },
                 toolbar: {
                     items: [
@@ -374,7 +378,6 @@ function initDroit() {
                 },
                 onClick: function (event) {
                     itemSelect = this.get(event.recid);
-                    var g;           		           
                 }	    
             },	   
 		    
@@ -1044,16 +1047,42 @@ function voirData(id){
 	$.get(urlP+'import/getdataficvente',
 			{idFic:id},
         		function(js){
+				//ajoute la fonction de mis en forme des problèmes
+				js.col.forEach(function(d){
+					if(d.field=="commentaire")d.render=fn_render_probleme;
+					});
 				config.gridImportVenteData.columns=js.col;
-			    config.gridImportVenteData.records=js.rs;
+				//met en forme les lignes
+				js.rs.forEach(function(d) {
+					if(d.commentaire=='isbn introuvable')d.w2ui = {'style':'background-color:#C2F5B4'};
+				})
+				config.gridImportVenteData.records=js.rs;
+				
 			    if(w2ui.grid_ImportVenteData)
 			    		w2ui.grid_ImportVenteData.destroy();        
-			    w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridImportVenteData));
+				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridImportVenteData));
        		},'json');		
 
 	//empèche la propagation de l'événement
 	e.preventDefault();
 }
+
+function fn_render_probleme(record, ind, col_ind, data) {
+	//var $row = $("#grid_grid_ImportVenteData_rec_" + (ind + 1));
+	var r = d3.select("#grid_grid_ImportVenteData_rec_" + (ind + 1))
+    console.log(r);
+    if (record.commentaire =='isbn introuvable') {
+		r.style('background-color','yellow');
+      //$row.css({
+      //  'background-color': 'yellow'
+      //});
+    } else if (!record.commentaire) {
+      //$row.css({
+      //  'background-color': 'blue'
+      //});
+    }
+    return record.commentaire;
+  }
 
 function getFichierImport(){
 
@@ -1065,8 +1094,8 @@ function getFichierImport(){
     }).done(function (result) {
     	rsFichierImport = result.files;
 	    config.gridFichierImport.records=rsFichierImport;
-	    if(w2ui.gridFichierImport)
-	    		w2ui.gridFichierImport.destroy();        
+	    if(w2ui.grid_Droit_fichier_import)
+	    		w2ui.grid_Droit_fichier_import.destroy();        
 	    w2ui.layout_<?php echo $idPage;?>_fichier.content('left', $().w2grid(config.gridFichierImport));
     	
     });

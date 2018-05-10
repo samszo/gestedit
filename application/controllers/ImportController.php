@@ -105,22 +105,34 @@ class ImportController extends Zend_Controller_Action
     		$rsFic = $dbFic->findById_importfic($this->_getParam('idFic'));
     		$cols = json_decode($rsFic["coldesc"]);
     		$arrC = array(
-				array("field"=>"recid", "caption"=>"ID", "size"=>'50px', "sortable"=>1, "resizable"=>1)
+				array("field"=>"recid", "caption"=>"ID", "hidden"=>'true', "size"=>'50px', "sortable"=>1, "resizable"=>1)
 				,array("field"=>"numrow", "caption"=>"n° lig.", "size"=>'50px', "sortable"=>1, "resizable"=>1)
-				,array("field"=>"numsheet", "caption"=>"n° ong.", "size"=>'50px', "sortable"=>1, "resizable"=>1)
-				,array("field"=>"commentaire", "caption"=>"commentaire", "size"=>'50px', "sortable"=>1, "resizable"=>1)
-				,array("field"=>"id_livre", "caption"=>"Id. livre", "size"=>'50px', "sortable"=>1, "resizable"=>1)
-				,array("field"=>"id_isbn", "caption"=>"Id. isbn", "size"=>'50px', "sortable"=>1, "resizable"=>1)
+				,array("field"=>"numsheet", "caption"=>"n° ong.", "hidden"=>'true', "size"=>'50px', "sortable"=>1, "resizable"=>1)
+				,array("field"=>"commentaire", "caption"=>"commentaire", "size"=>'150px', "sortable"=>1, "resizable"=>1)
+				,array("field"=>"id_livre", "caption"=>"Id. livre","hidden"=>'true', "size"=>'50px', "sortable"=>1, "resizable"=>1)
+				,array("field"=>"id_isbn", "caption"=>"Id. isbn","hidden"=>'true', "size"=>'50px', "sortable"=>1, "resizable"=>1)
 				);
     		$i=1;
     		foreach ($cols as $k=>$c) {
-    			$arrC[]=array("field"=>$k, "caption"=>$c, "size"=>'50px', "sortable"=>1, "resizable"=>1);
+    			$arrC[]=array("caption"=>$k, "field"=>$c, "size"=>'100px', "sortable"=>1, "resizable"=>1);
     			$i++;
     		}
     		
     		//récupère les données
-    		$arrV = $dbData->findByIdFic($this->_getParam('idFic'));
-    		
+			$arrV = $dbData->findByIdFic($this->_getParam('idFic'));
+			
+			//calcul les résumés
+			$rsR = $dbData->getResumeByIdFic($this->_getParam('idFic'));
+			$i=1;
+			foreach ($rsR as $r) {
+				$arrV[]= array("summary"=>true,"recid"=>"S-".$i,"numrow"=>""
+					,"numsheet"=>"","commentaire"=>""
+					,"id_livre"=>$r["nbLivre"],"id_isbn"=>$r["nbIsbn"]
+					,"col1"=>$r["nbIsbn"],"col2"=>$r["nbAuteur"]
+					,"col3"=>$r["qtyPaper"],"col4"=>$r["sumPaper"],"col5"=>$r["sumEbook"]
+					);
+				$i++;
+			}
     		$this->view->json = json_encode(array("col"=>$arrC,"rs"=>$arrV));
     }    
     
