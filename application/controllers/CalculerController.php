@@ -12,7 +12,8 @@ class CalculerController extends Zend_Controller_Action
     {
     		$this->initInstance();
     		$s = new Flux_Vente(false,$this->_getParam('trace'));
-    		$s->updateTauxDevise();
+			//le taux des devises est mis à jour manuellement
+			//$s->updateTauxDevise();
     		$dbD = new Model_DbTable_Iste_devise();
         	$dbD->setMontantSansDevise();
         	$this->view->message = "Les prix sont actualisés.";		
@@ -59,7 +60,15 @@ class CalculerController extends Zend_Controller_Action
     			    		$rapport->creaPaiement($r);
     				}
     				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
-    				break;
+					break;
+				case "auteurFic":
+    				$rs = $dbRoy->paiementAuteurFic(implode(",", $this->_getParam('ids')));
+					foreach ($rs as $r) {
+						  $rapport->creaPaiementFic($r);
+						  $rapport->creaPaiementFic($r,"serie");
+					}
+					//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+					break;
     		}
     				
 		$this->view->rs = $result;
@@ -101,7 +110,7 @@ class CalculerController extends Zend_Controller_Action
     		$s->updateTauxDevise();    		
     }  
 
-    public function problemesAction()
+	public function problemesAction()
     {
         $this->initInstance();
         $s = new Flux_Vente(false,$this->_getParam('trace'));

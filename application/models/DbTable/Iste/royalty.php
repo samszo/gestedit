@@ -520,11 +520,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     		//récupère les royalty pour les auteurs sélectionnés
 	    	$sql = "SELECT 
 			GROUP_CONCAT(DISTINCT r.id_royalty) idsRoyalty
-            -- , MIN(r.taxe_taux) taxe_taux, MIN(r.taxe_deduction) taxe_deduction, MIN(r.date_paiement) date_paiement, MIN(r.date_edition) date_edition
 		    , SUM(v.nombre) vNb, SUM(v.montant_livre) vMtLivre, MIN(v.date_vente) minDateVente, MAX(v.date_vente) maxDateVente
 		    , a.id_auteur, a.nom autNom, a.prenom, a.adresse_1, a.adresse_2, a.civilite, a.code_postal, a.ville, a.pays
---		    , ac.pc_papier, ac.pc_ebook
---		    , c.nom contNom
             , MIN(i.date_parution) parution, GROUP_CONCAT(DISTINCT i.num SEPARATOR ' - ') isbns
 		    , l.id_livre, l.titre_en, l.titre_fr
             , d.base_contrat, DATE_FORMAT(d.date_taux,'%Y') annee, d.date_taux, d.date_taux_fin, d.taux_livre_euro, d.taux_livre_dollar, d.taxe_taux, d.taxe_deduction
@@ -533,12 +530,10 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 		    INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
 		    INNER JOIN iste_livre l ON l.id_livre = i.id_livre 
 		    INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_auteur IN (".$idsAuteur.")
---		    INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
---		    INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.role = c.type
 		    INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
 		    INNER JOIN iste_devise d ON d.id_devise = r.id_devise
 		WHERE r.date_paiement IS NULL
-		GROUP BY ac.id_auteur, l.id_livre, r.id_devise
+		GROUP BY ac.id_auteur, l.id_livre
         ORDER BY ac.id_auteur, l.id_livre";
 		//echo $sql;
     		$stmt = $this->_db->query($sql);
@@ -547,7 +542,54 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     		
     }    
     
-    
+	/**
+     * Calcule les paiements pour lancer les éditions
+     *
+     * @param string		$idsAuteur
+     * 
+     * @return array
+     */
+    function paiementAuteurFic($idsAuteur){
+    		
+        //récupère les royalty pour les auteurs sélectionnés
+        $sql = "SELECT 
+        GROUP_CONCAT(DISTINCT r.id_royalty) idsRoyalty,
+        GROUP_CONCAT(DISTINCT impD.id_importfic SEPARATOR '-') idsFicImport,
+        SUM(v.nombre) vNb,
+        SUM(v.montant_livre) vMtLivre,
+        MIN(v.date_vente) minDateVente,
+        MAX(v.date_vente) maxDateVente,
+        a.id_auteur,
+        a.nom autNom,
+        a.prenom,
+        a.adresse_1,
+        a.adresse_2,
+        a.civilite,
+        a.code_postal,
+        a.ville,
+        a.pays
+    FROM
+        iste_royalty r
+            INNER JOIN
+        iste_vente v ON v.id_vente = r.id_vente
+            INNER JOIN
+        iste_importdata impD ON impD.id_importdata = v.id_importdata 
+            INNER JOIN
+        iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat
+            AND ac.id_auteur IN (".$idsAuteur.")
+            INNER JOIN
+        iste_auteur a ON a.id_auteur = ac.id_auteur
+    WHERE
+        r.date_paiement IS NULL
+    GROUP BY a.id_auteur
+    ORDER BY a.nom, a.prenom";
+    //echo $sql;
+        $stmt = $this->_db->query($sql);
+        
+        return $stmt->fetchAll(); 
+        
+}    
+
 	/**
      * Récupère le détail des royalty
      *
@@ -561,7 +603,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 	    	$sql = "SELECT 
 			COUNT(DISTINCT r.id_royalty) nbRoy
 		    ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
-	    		,SUM(r.montant_livre) rMtRoy
+	    	,SUM(r.montant_livre) rMtRoy
 			,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
 			,i.id_isbn, i.date_parution, i.type typeIsbn, i.num
             ,c.type typeContrat
@@ -579,5 +621,108 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     		
     }    
     
+	/**
+     * Récupère le détail des royalty pour les livres
+     *
+     * @param string		$idsRoy
+     * 
+     * @return array
+     */
+    function getDetailsLivre($idsRoy){
+    		
+        //récupère les royalty pour les livres sélectionnés
+        $sql = "SELECT 
+            COUNT(DISTINCT r.id_royalty) nbRoy
+            ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
+            ,SUM(r.montant_livre) rMtRoy
+            ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
+            ,l.id_livre, l.titre_en, l.titre_fr
+            ,c.type typeContrat
+            ,MIN(d.taux_livre_euro) taux_livre_euro
+        FROM iste_royalty r 
+            INNER JOIN iste_devise d ON d.id_devise = r.id_devise
+            INNER JOIN iste_vente v ON v.id_vente = r.id_vente
+            INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+            INNER JOIN iste_livre l ON l.id_livre = i.id_livre
+            INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_livre = l.id_livre
+            INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+        WHERE r.id_royalty IN (".$idsRoy.")
+        GROUP BY l.id_livre";
+        //echo $sql;
+        $stmt = $this->_db->query($sql);
+        
+        return $stmt->fetchAll(); 
+        
+    }       
+
+	/**
+     * Récupère le détail des royalty pour les séries
+     *
+     * @param string		$idsRoy
+     * 
+     * @return array
+     */
+    function getDetailsSerie($idsRoy){
+    		
+        //récupère les royalty pour les livres sélectionnés
+        $sql = "SELECT 
+            COUNT(DISTINCT r.id_royalty) nbRoy
+            ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
+            ,SUM(r.montant_livre) rMtRoy
+            ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
+            ,l.id_livre, l.titre_en, l.titre_fr
+            ,c.type typeContrat
+            ,s.id_serie, s.titre_fr, s.titre_en
+        FROM iste_royalty r 
+            INNER JOIN iste_vente v ON v.id_vente = r.id_vente
+            INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+            INNER JOIN iste_livre l ON l.id_livre = i.id_livre
+            INNER JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
+            INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_serie = ls.id_serie
+            INNER JOIN iste_serie s ON s.id_serie = ac.id_serie
+            INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+        WHERE r.id_royalty IN (".$idsRoy.")
+        GROUP BY s.id_serie";
+        //echo $sql;
+        $stmt = $this->_db->query($sql);
+        
+        return $stmt->fetchAll(); 
+        
+    }       
+
+	/**
+     * Récupère le détail des royalty pour les comite
+     *
+     * @param string		$idsRoy
+     *  
+     * @return array
+     */
+    function getDetailsComite($idsRoy){
+    		
+        //récupère les royalty pour les livres sélectionnés
+        $sql = "SELECT 
+            COUNT(DISTINCT r.id_royalty) nbRoy
+            ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
+            ,SUM(r.montant_livre) rMtRoy
+            ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
+            ,l.id_livre, l.titre_en, l.titre_fr
+            ,c.type typeContrat
+            ,com.id_comite, com.titre_fr, com.titre_en
+        FROM iste_royalty r 
+            INNER JOIN iste_vente v ON v.id_vente = r.id_vente
+            INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+            INNER JOIN iste_livre l ON l.id_livre = i.id_livre
+            INNER JOIN iste_comitexlivre cl ON cl.id_livre = l.id_livre
+            INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_comite = cl.id_comite
+            INNER JOIN iste_comite com ON c.id_comite = ac.id_comite
+            INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+        WHERE r.id_royalty IN (".$idsRoy.")
+        GROUP BY com.id_comite";
+        //echo $sql;
+        $stmt = $this->_db->query($sql);
+        
+        return $stmt->fetchAll(); 
+        
+    }       
     
 }

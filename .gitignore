@@ -53,7 +53,9 @@ bdd/isteProcessus.sql
 
 bdd/isteDataTest.sql
 
-data/
+data/_/
+data/editions/
+data/export/
 
 tmp/
 

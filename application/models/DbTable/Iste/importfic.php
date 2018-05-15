@@ -181,10 +181,18 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    		//supprime les data liées
-    		$dbData = new Model_DbTable_Iste_importdata();
-    		$dbData->removeIdFic($id);
-    		$this->delete('iste_importfic.id_importfic = ' . $id);
+            //vérifier que le fichier peut être supprimé = pas de paiement effectué
+            $nb = $this->verifDeleteFic($id);
+            if($nb == 0){
+                //supprime les data liées
+                $dbData = new Model_DbTable_Iste_importdata();
+                $dbData->removeIdFic($id);
+                $this->delete('iste_importfic.id_importfic = ' . $id);
+                $message = "Données et fichier supprimés.";
+            }else{
+                $message = "Impossible de supprimer le fichier $nb rapports ont été envoyés.";
+            }
+        return $message;    
     }
     
     /**
@@ -222,6 +230,30 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
+
+    /**
+     * Vérifie si on peut supprimer un fichier d'import
+     *
+     * @param int $idFic
+     *
+     * @return string
+     */
+    public function verifDeleteFic($idFic)
+    {
+        $query = $this->select()
+            ->from( array("i" => "iste_importfic"),array("nb"=>"count(*)") )                           
+            ->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("id" => "iste_importdata"),'id.id_importfic = i.id_importfic',array())
+            ->joinInner(array("v" => "iste_vente"),'id.id_importdata = v.id_importdata',array())
+            ->joinInner(array("r" => "iste_royalty"),'v.id_vente = r.id_vente',array())
+            ->where( "r.date_envoi IS NOT NULL")
+            ->where( "i.id_importfic = ?", $idFic);
+        $rs = $this->fetchAll($query)->toArray();
+        //print_r($rs);    
+        return intval($rs[0]["nb"]);
+
+    }
+
 	/**
 	 * 
 	 * format une chaine de caractère comme nom de fichier valide
@@ -230,7 +262,7 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
 	 * 
 	 * @return string
 	 */
-	function valideChaine($chaineNonValide)
+	public function valideChaine($chaineNonValide)
 	{
 	  $chaineNonValide = preg_replace('`\s+`', '_', trim($chaineNonValide));
 	  $chaineNonValide = str_replace("'", "_", $chaineNonValide);

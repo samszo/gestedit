@@ -261,21 +261,6 @@ class Flux_Vente extends Flux_Site{
 	    $dbData = new Model_DbTable_Iste_importdata();
 	    $dbVente = new Model_DbTable_Iste_vente();
 	    $dbBout = new Model_DbTable_Iste_boutique();
-	    /*
-	     $dbLic = new Model_DbTable_Iste_licence();
-	     $dbRoy = new Model_DbTable_Iste_royalty();
-	     $dbPrix = new Model_DbTable_Iste_prix();
-	     $dbA = new Model_DbTable_Iste_auteur();
-	     $dbC = new Model_DbTable_Iste_contrat();
-	     $dbAC = new Model_DbTable_Iste_auteurxcontrat();
-	     */
-	    //récupération des références
-	    /*
-	     $idAuteurISTE = $dbA->ajouter(array("nom"=>"ISTE"));
-	     $idContratISTEWiley = $dbC->ajouter(array("nom"=>"Wiley - ISTE","type"=>"distribution"));
-	     $idContratISTEElsevier = $dbC->ajouter(array("nom"=>"Elsevier - ISTE","type"=>"distribution"));
-	     $idContratISTE = $dbC->ajouter(array("nom"=>"ISTE","type"=>"distribution"));
-	     */
 	    $idBoutISTE = $dbBout->ajouter(array("nom"=>"ISTE"));
 	    
 	    $this->trace("//charge les données du fichier");
@@ -388,7 +373,9 @@ class Flux_Vente extends Flux_Site{
 	    //récupère les lignes sans contrat
 	    $rs['data_sans_contrat']=$dbID->getDataSansContrat($idFic);
 	    
-	    //récupère les lignes sans royalties
+		//récupère les lignes sans base contrat
+	    $rs['data_sans_basecontrat']=$dbID->getDataSansBaseContrat($idFic);
+		
 	    
 	    return  $rs;
 	}

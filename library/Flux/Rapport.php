@@ -164,7 +164,150 @@ class Flux_Rapport extends Flux_Site{
 		
 		return $idRapport;
 	}
+
+	/**
+	 * création d'un paiement pour les livres d'un auteur
+	 *
+	 * @param array 		$data
+	 * @param string 		$type
+	 *
+	 * @return array
+	 */
+	public function creaPaiementFic($data, $type="livre"){
 	
+		$this->bTrace = false;
+		$this->temps_debut = microtime(true);
+		$this->trace(__METHOD__,$data);
+		
+		//initialisation des objets	
+		if(!$this->dbRapport) $this->dbRapport = new Model_DbTable_Iste_rapport();
+		if(!$this->dbRoyalty) $this->dbRoyalty = new Model_DbTable_Iste_royalty();
+		if(!$this->dbDevise) $this->dbDevise = new Model_DbTable_Iste_devise();
+		if(!$this->dbImportfic) $this->dbImportfic = new Model_DbTable_Iste_importfic();
+		
+		//$tauxPeriode = $this->dbDevise->getTauxPeriode($data['minDateVente'],$data['maxDateVente']);
+				
+		$date = new DateTime();
+		$refRapport = $data["autNom"].".".substr($data["prenom"],0,2)."."
+			.".".$type.".".$data["idsFicImport"]
+			.".".$data["minDateVente"].".".$data["maxDateVente"];
+		$refRapport = $this->dbImportfic->valideChaine($refRapport);
+		
+		//charge le modèle
+		//$mod = $this->dbImportfic->findByType("paiement droit ".$data["base_contrat"]);
+		$mod = $this->dbImportfic->findByType("paiement droits FR");
+		$this->trace("//charge le modèle ".$mod["url"]);
+		$config = array(
+		    	'ZIP_PROXY' => 'PhpZipProxy',
+		    	'DELIMITER_LEFT' => '{',
+		    	'DELIMITER_RIGHT' => '}',
+				'PATH_TO_TMP' => ROOT_PATH.'/tmp'
+		   		);
+		$this->odf = new odf(ROOT_PATH.$mod["url"], $config);		
+		/*dégugage du contenu xml
+		header("Content-Type:text/xml");
+		echo $this->odf->getContentXml();
+		return;
+		*/
+		
+		//ajout des infos de référence
+		$this->odf->setVars('roy_date_edition', $date->format('l d F Y'));
+		$this->odf->setVars('roy_reference', $refRapport);
+		$periode = $data["minDateVente"]." -> ".$data["maxDateVente"];
+		$this->odf->setVars('roy_periode', $periode);
+		//$this->odf->setVars('livre_roy_pc', $data["pc_papier"]." %");
+				
+		//ajout des infos d'auteur
+		$this->odf->setVars('aut_civilite', $data["civilite"]);
+		$this->odf->setVars('aut_nom', $data["autNom"]);
+		$this->odf->setVars('aut_prenom', $data["prenom"]);
+		$this->odf->setVars('aut_adresse1', $data["adresse_1"]);
+		$this->odf->setVars('aut_adresse2', $data["adresse_2"]);
+		$this->odf->setVars('aut_cp', $data["code_postal"]);
+		$this->odf->setVars('aut_ville', $data["ville"]);
+		$this->odf->setVars('aut_pays', $data["pays"]);
+		
+		//somme global des droits
+		$due = 0;
+		$revTot = 0;
+		$deduction = 0;
+	
+		//récupère les royalties suivant le type
+		if($type=="livre"){
+			$rsRoyalty = $this->dbRoyalty->getDetailsLivre($data["idsRoyalty"]);
+			$royTitre = "Droits pour les livres";
+		}
+		if($type=="serie"){
+			$rsRoyalty = $this->dbRoyalty->getDetailsSerie($data["idsRoyalty"]);
+			$royTitre = "Droits pour les séries";
+		}
+
+		if(count($rsRoyalty)){
+			$this->odf->setVars('roy_titre', $royTitre);
+				
+			//ajout des infos de royalty		
+			$roys = $this->odf->setSegment('roys');	
+			foreach ($rsRoyalty as $r) {
+				$this->trace("détail royalties Livre",$r);
+				
+				if($r["typeVente"]=="N")$r["typeVente"]="Book digital";
+				if($r["typeVente"]=="P")$r["typeVente"]="Book paper";
+				if($r["typeVente"]=="Licence num")$r["typeVente"]="E-Licence";
+				
+				$roys->setVars('roy_type', $r["typeVente"]." (".$r["typeContrat"].")");
+				$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]);
+				$roys->setVars('roy_unit', $r["unit"]);
+				$roys->setVars('roy_rev', round($r["rMtVente"],2));
+				$revTot += $r["rMtVente"];
+				$roys->setVars('roy_pc', $r["pc"]);
+				$roys->setVars('roy_livre', $r["rMtRoy"]);
+				$due += $r["rMtRoy"];
+				$taux_livre_euro = $r["taux_livre_euro"];
+				$deduction = $r["deduction"];
+			}
+			$roys->merge();
+			$this->odf->mergeSegment($roys);
+		}else{
+			//pas de données donc pas de rapport
+			return false;
+		}		
+		
+		//ajout les totaux
+		$this->odf->setVars('roy_rev_tot', $revTot);
+		$this->odf->setVars('roy_balance_due', $due);
+		$this->odf->setVars('roy_tax_deduc_pc', $deduction);
+		$deduc = $due*$r["deduction"]/100;
+		$this->odf->setVars('roy_tax_deduc', $deduc);
+		$this->odf->setVars('roy_net_due_livre', $due-$deduc);
+
+		$this->odf->setVars('roy_devise_date', $periode);
+		$this->odf->setVars('roy_devise_pc', $taux_livre_euro);
+		$this->odf->setVars('roy_net_due_euro', round(($due-$deduc)*$taux_livre_euro,2));
+		
+				
+		//on enregistre le fichier
+		$nomFic = utf8_encode($this->dbImportfic->valideChaine($refRapport)).".odt";
+		//copie le fichier dans le répertoire data
+		$newfile = ROOT_PATH."/data/editions/".$nomFic;
+		//copy($this->odf->tmpfile, $newfile);
+
+		$this->odf->saveToDisk($newfile);
+		$this->trace("//enregistre le fichier ".$newfile);
+		
+		//enregistrement du rapport
+		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic,"id_importfic"=>$mod["id_importfic"]
+			, "data"=>json_encode($data), "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
+			
+		//mise à jour de la date d'éditions
+		$this->dbRoyalty->edit(false,array("id_rapport"=>$idRapport,"date_edition"=>new Zend_Db_Expr('NOW()')),$data["idsRoyalty"]);
+
+		$this->trace("FIN");		
+		
+		return $idRapport;
+	}	
+
+
+
 	/**
 	 * création d'un etat de série
 	 *

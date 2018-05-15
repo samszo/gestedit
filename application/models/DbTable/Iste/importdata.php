@@ -93,14 +93,25 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
      *
      * @param integer $id
      *
-     * @return void
+     * @return string
      */
     public function removeIdFic($id)
     {
-    		//supprime les ventes du fichier
+            //supprime les rapports du fichier
+    		$sql = "DELETE r.* FROM iste_rapport r WHERE r.id_importfic = ".$id;
+    		$stmt = $this->_db->query($sql);
+
+            //supprime les royalties du fichier
+    		$sql = "DELETE r.*
+            FROM iste_royalty r
+            INNER JOIN iste_vente v ON v.id_vente = r.id_vente
+            INNER JOIN iste_importdata id ON id.id_importdata = v.id_importdata AND id.id_importfic = ".$id;
+    		$stmt = $this->_db->query($sql);
+
+            //supprime les ventes du fichier
     		$sql = "DELETE v.*
-		FROM iste_vente v
-		INNER JOIN iste_importdata id ON id.id_importdata = v.id_importdata AND id.id_importfic = ".$id;
+            FROM iste_vente v
+            INNER JOIN iste_importdata id ON id.id_importdata = v.id_importdata AND id.id_importfic = ".$id;
     		$stmt = $this->_db->query($sql);
 
     		//supprime les data du fichier
@@ -436,4 +447,37 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
         $stmt = $this->_db->query($sql);
         return $stmt->fetchAll();
     }   
+
+    /**
+     * Recherche les data sans base contrat
+     * et retourne ces entrées.
+     *
+     * @param int $idFic
+     *
+     * @return array
+     */
+    public function getDataSansBaseContrat($idFic){
+        
+        //calcul les sommes des ventes
+        $sql="SELECT DISTINCT
+                i.num,
+                i.id_livre
+            FROM
+            iste_importdata d
+                INNER JOIN
+                iste_importfic f ON f.id_importfic = d.id_importfic
+                INNER JOIN
+                iste_vente v ON v.id_importdata = d.id_importdata
+                INNER JOIN
+                iste_isbn i ON i.id_isbn = v.id_isbn
+                INNER JOIN
+                iste_proposition p ON p.id_livre = i.id_livre
+            WHERE
+                d.id_importfic = $idFic
+                AND p.base_contrat IS NULL
+            ORDER BY v.id_importdata";
+        $stmt = $this->_db->query($sql);
+        return $stmt->fetchAll();
+    }   
+
 }

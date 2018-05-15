@@ -55,10 +55,10 @@ class CustomUploadHandler extends UploadHandler {
         $response = parent::delete(false);
         foreach ($response as $name => $deleted) {
             if ($deleted) {
-	        		$url = $this->options["upload_url"].$name;
+                    $url = $this->options["upload_url"].rawurlencode($name);
 	        		$rs = $this->db->findByUrl($url);
-	        		//echo $rs["id_importfic"]." : ".$url;
-	            	$this->db->remove($rs["id_importfic"]);
+                    //echo $rs["id_importfic"]." : ".$url;
+                    $response['message']=$this->db->remove($rs["id_importfic"]);
             }
         } 
         return $this->generate_response($response, $print_response);

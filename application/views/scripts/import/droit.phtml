@@ -89,7 +89,24 @@ if($this->inc)
     </div>
     <!-- The container for the uploaded files -->
     <div id="files" class="files"></div>
-    <br>
+	<br>
+	
+	<div id="progCalcData" class="progress">
+		<div class="progress-bar progress-bar-success" >Importe les données</div>
+	</div>
+	<div id="progCalcVente" class="progress">
+		<div class="progress-bar progress-bar-success" >Calcule les ventes</div>
+	</div>
+	
+	<div id="progCalcPrixManquant" class="progress">
+		<div class="progress-bar progress-bar-success" >Ajoute les prix manquants</div>
+	</div>
+	<div id="progCalcRoyalyies" class="progress">
+		<div class="progress-bar progress-bar-success" >Calcule les royalties</div>
+	</div>
+	<div id="progCalcPaiement" class="progress">
+		<div class="progress-bar progress-bar-success" >Calcule les paiements</div>
+	</div>
 </div>
 
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
@@ -99,14 +116,15 @@ if($this->inc)
 <!-- The basic File Upload plugin -->
 <script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload.js"></script>
 
+
 <script type="text/javascript">
 var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
-var idFicImport;
+var idFicImport, ficId;
 fuVerif = true;
 function initImportDroit() {
 	//initialise les champs pour définir la période
-	$('input[type=dateDeb]').w2field('date', { format: 'yyyy-m-d', end: $('input[type=dateDeb]'), required: true });
-	$('input[type=dateFin]').w2field('date', { format: 'yyyy-m-d', start: $('input[type=dateFin]'), required: true });	
+	$('input[type=dateDeb]').w2field('date', { format: 'yyyy-m-d', end: $('input[type=dateFin]'), required: true });
+	$('input[type=dateFin]').w2field('date', { format: 'yyyy-m-d', start: $('input[type=dateDeb]'), required: true });	
 }
 
 function initFileUploadDroit(){
@@ -118,7 +136,9 @@ function initFileUploadDroit(){
 	        dataType: 'json',	        
 	        done: function (e, data) {
 	            $.each(data.result.files, function (index, file) {
-	                $('<p/>').text(file.name).appendTo('#files');
+					$('<p/>').text(file.name).appendTo('#files');
+					ficId = file.id;
+					importerData();
 	            });
 	        },
 	        progressall: function (e, data) {
@@ -152,6 +172,70 @@ function initFileUploadDroit(){
 	    })
 	    .prop('disabled', !$.support.fileInput)
 	    .parent().addClass($.support.fileInput ? undefined : 'disabled');
+}
+
+function importerData(){
+	$('#progCalcData .progress-bar').css('width',10 + '%');	
+	$.get(urlP+'import/setdataficvente',
+			{idFic:ficId, type:'global'},
+			function(html){
+				$('#progCalcData .progress-bar').css('width',100 + '%');		
+				calculerVente();
+       		});				
+}
+
+function calculerVente(){
+	$('#progCalcVente .progress-bar').css('width',10 + '%');		
+	$.get(urlP+'import/calculervente',
+			{idFic:ficId, type:'global'},
+			function(js){
+				$('#progCalcVente .progress-bar').css('width',100 + '%');		
+				calculerPrixVente();
+       		});				
+
+}
+
+function calculerPrixVente(){
+	$('#progCalcPrixManquant .progress-bar').css('width',10 + '%');		
+	$.ajax({
+		method: 'GET',
+		url: '<?php if(!$this->ajax) echo '../'; ?>calculer/prixvente',
+		dataType: 'json',
+		success: function(js) {
+			finsession(js);
+			$('#progCalcPrixManquant .progress-bar').css('width',100 + '%');		
+			calculerRoyalties()
+		},
+		error: function() { }
+	});		
+		
+
+}
+
+function calculerRoyalties(){
+	$('#progCalcRoyalyies .progress-bar').css('width',10 + '%');		
+	$.get('<?php if(!$this->ajax) echo '../'; ?>calculer/royalties',
+			{},
+	    function(js){
+			finsession(js);
+			$('#progCalcRoyalyies .progress-bar').css('width',100 + '%');		
+			var s = [];
+			js.rs.forEach(function(d) {
+				if(d.recid.substr(0,1)!='S')s.push(d.recid);
+			});
+    		calculerPaiements(s);
+	    },"json");           		           	
+}
+
+function calculerPaiements(s){
+	$('#progCalcPaiement .progress-bar').css('width',10 + '%');		
+	$.post('<?php if(!$this->ajax) echo '../'; ?>calculer/paiement',
+			{"type":"auteurFic","ids":s},
+		function(js){
+			$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
+			finsession(js);
+			if(parent)parent.finProcessImport(ficId);
+		},"json");           		           	
 }
 
 </script>

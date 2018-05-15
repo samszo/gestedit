@@ -319,6 +319,8 @@ class CrudController extends Zend_Controller_Action
 	    		$rs = $oBdd->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));
     	    if($this->_getParam('mod')=="paiement royalties")
 	    		$rs = $oBdd->findPaiementByAuteur($this->_getParam('idAuteur'));
+			if($this->_getParam('idFichier'))
+	    		$rs = $oBdd->findPaiementByAuteur($this->_getParam('idAuteur'));
 	    	$this->view->rs = $rs;
     }    
     

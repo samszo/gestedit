@@ -48,6 +48,26 @@ var pstyleDetail = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; paddin
 var config;
 var idPLU, idPCU, itemSelectAuteur, itemSelectVente, rsIsbnLivre, rsIsbnPrix;
 function initDroit() {
+	var tabsFichierVente = {
+		active: 'tab0',
+		tabs: [{ id: 'tab0', caption: "Rapports générés" },{ id: 'tab1', caption: "Détails des ventes" }
+			,{ id: 'tab2', caption: "Détails des royalties" }],
+		onClick: function (event) {
+			if(event.target=="tab0"){
+				w2ui['grid_<?php echo $idPage;?>_ficRapport'].destroy();
+				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridFicRapport));
+			}else if(event.target=="tab1"){
+				w2ui['grid_<?php echo $idPage;?>_ficVente'].destroy();
+				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridFicVente));
+			}else if(event.target=="tab2"){
+				if(w2ui['grid_<?php echo $idPage;?>_ficRoyalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
+				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridFicRoyalties));						        	
+			}
+		},
+		onClose: function (event) {
+			this.click('tab0');
+		}
+	};
 
 	config = {
 		    layoutVente: {
@@ -56,35 +76,36 @@ function initDroit() {
 		        panels: [
 		 		    { type: 'top', size: 400, style: pstyle},
 					{ type: 'main',  
-					    style: 'background-color: white; border: 1px solid silver; border-top: 0px; padding: 10px;',
-					    tabs: {
-					        active: 'tab0',
-					        tabs: [{ id: 'tab0', caption: "Problèmes pour le livre" },{ id: 'tab1', caption: "Détails des ventes pour le livre" }
-					        	,{ id: 'tab2', caption: "Détails des royalties pour le livre" }
-					        	,{ id: 'tab3', caption: "Problèmes pour l'auteur" },{ id: 'tab4', caption: "Détails des ventes pour l'auteur" }
-					        	,{ id: 'tab5', caption: "Détails des royalties pour l'auteur" },{ id: 'tab6', caption: "Paiements pour l'auteur" }],
-					        onClick: function (event) {
-						        if(event.target=="tab0"){
-						            w2ui['grid_<?php echo $idPage;?>_probleme'].destroy();
-						            w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteProbleme));
-						        }else if(event.target=="tab1"){
-						            w2ui['grid_<?php echo $idPage;?>_detail'].destroy();
-						            w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail));
-						        }else if(event.target=="tab2"){
-						            if(w2ui['grid_<?php echo $idPage;?>_royalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
-						            w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteRoyalties));						        	
-						        }
-							    getVenteData();						        
-					        },
-					        onClose: function (event) {
-					            this.click('tab0');
-					        }
-					    }
+						style: 'background-color: white; border: 1px solid silver; border-top: 0px; padding: 10px;',
+						tabs: tabsFichierVente
 					},		 		        
 		            { type: 'left', size: '100%', hidden:true, resizable: true, style: pstyleDetail},
 		            { type: 'right', size: '50%', hidden:true, resizable: true, style: pstyleDetail},
 		        ]
-		    },
+			},
+			tabsVenteISBN: {
+				active: 'tab0',
+				tabs: [{ id: 'tab0', caption: "Problèmes pour le livre" },{ id: 'tab1', caption: "Détails des ventes pour le livre" }
+					,{ id: 'tab2', caption: "Détails des royalties pour le livre" }
+					,{ id: 'tab3', caption: "Problèmes pour l'auteur" },{ id: 'tab4', caption: "Détails des ventes pour l'auteur" }
+					,{ id: 'tab5', caption: "Détails des royalties pour l'auteur" },{ id: 'tab6', caption: "Paiements pour l'auteur" }],
+				onClick: function (event) {
+					if(event.target=="tab0"){
+						w2ui['grid_<?php echo $idPage;?>_probleme'].destroy();
+						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteProbleme));
+					}else if(event.target=="tab1"){
+						w2ui['grid_<?php echo $idPage;?>_detail'].destroy();
+						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail));
+					}else if(event.target=="tab2"){
+						if(w2ui['grid_<?php echo $idPage;?>_royalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
+						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteRoyalties));						        	
+					}
+					getVenteData();						        
+				},
+				onClose: function (event) {
+					this.click('tab0');
+				}
+		    },			
 		    layoutVenteTop: {
 		        name: 'layout_<?php echo $idPage;?>_top',
 		        padding: 2,
@@ -92,12 +113,12 @@ function initDroit() {
 		 		    { type: 'main', 
 					    style: 'background-color: white; border: 1px solid silver; border-top: 0px; padding: 10px;',
 					    tabs: {
-					        active: 'tabTop0',
-					        tabs: [{ id: 'tabTop0', caption: "Ventes par ISBN" },{ id: 'tabTop1', caption: "Ventes par auteur" }
-					        	,{ id: 'tabTop2', caption: "Fichier de ventes" }],
+					        active: 'tabTop2',
+					        tabs: [{ id: 'tabTop2', caption: "Fichier de ventes" },{ id: 'tabTop0', caption: "Ventes par ISBN" },{ id: 'tabTop1', caption: "Ventes par auteur" }
+					        	,{ id: 'tabTop3', caption: "Taxes et taux" }],
 					        onClick: function (event) {
 						        if(event.target=="tabTop0"){
-						            w2ui['grid_<?php echo $idPage;?>_vente_isbn'].destroy();
+						            if(w2ui['grid_<?php echo $idPage;?>_vente_isbn'])w2ui['grid_<?php echo $idPage;?>_vente_isbn'].destroy();
 						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
 						        }else if(event.target=="tabTop1"){
 						            if(w2ui['grid_<?php echo $idPage;?>_vente_auteur'])w2ui['grid_<?php echo $idPage;?>_vente_auteur'].destroy();
@@ -108,15 +129,18 @@ function initDroit() {
 						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
 						            w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2layout(config.gridImportVenteData));
 						            getFichierImport();
+						        }else if(event.target=="tabTop3"){
+						            if(w2ui['grid_<?php echo $idPage;?>_devise'])w2ui['grid_<?php echo $idPage;?>_devise'].destroy();
+									w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteDevise));
 						        }
 					        },
 					        onClose: function (event) {
-					            this.click('tabTop0');
+					            this.click('tabTop2');
 					        }
 					    }
 
 			 		},
-		            { type: 'right', size: '400px', resizable: true, style: pstyleDetail},
+		            { type: 'right', size: '400px', hidden:true, resizable: true, style: pstyleDetail},
 		        ]
 		    },		    
 		    layoutVenteFichier: {
@@ -346,7 +370,17 @@ function initDroit() {
 		                	openPopupImportVente();
 		                }
                     }
-                },
+				},
+		        onDelete: function(event) {            
+					if(event.force){
+			            	$.post(itemSelect.deleteUrl,
+							null,
+			            		function(js){
+		            				finsession(js);
+			            			w2alert(js.message);
+			           		},"json");
+					}
+			    },				
                 onClick: function (event) {
                     itemSelect = this.get(event.recid);
                     voirData(event.recid);
@@ -775,9 +809,83 @@ function initDroit() {
 			                	}
 		                }
 		            }
+		        },			        
+			},		
+			gridFicRapport: { 
+		        name: 'grid_<?php echo $idPage;?>_ficRapport', 
+				header: 'Rapport pour le fichier de vente',		
+				show: {toolbar		: true,
+	    				toolbarReload   : false,
+	    				toolbarColumns  : false,
+	                	toolbarSearch   : false,
+	                	toolbarAdd      : false,
+	                	toolbarDelete   : true,
+	                	toolbarSave		: true,
+	                	header			: false, 
+	                	columnHeaders	: true},
+		        columns: [		  		           
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'royIds', caption: 'royId', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'auteurs', caption: "Auteurs", size: '10%', sortable: true, resizable: true},
+		            { field: 'titre_fr', caption: "Titre FR", size: '10%', sortable: true, resizable: true},
+		            { field: 'titre_en', caption: "Titre EN", size: '10%', sortable: true, resizable: true},
+		            { field: 'base_contrat', caption: "Base contrat", size: '80px', sortable: true, resizable: true},
+		            { field: 'periode', caption: "Periode", size: '80px', sortable: true, resizable: true},
+		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '120px', sortable: true, resizable: true},
+		            { field: 'date_edition', caption: 'Edition', size: '80px', sortable: true, resizable: true},
+		            { field: 'date_envoi', caption: 'Edition', size: '80px', sortable: true, resizable: true},
+		            { field: 'date_paiement', editable:{type:'date'}, caption: 'Paiement', size: '80px', sortable: true, resizable: true},
+		            { field: 'date_encaissement', editable:{type:'date'}, caption: 'Encaissement', size: '80px', sortable: true, resizable: true},		            
+		            { field: 'url', caption: 'URL', size: '30%', sortable: true, resizable: true},
+		            ],
+		        onDelete: function(event) {            
+					var p = {obj:'rapport'};
+					if(event.force){
+						var s = w2ui[event.target].getSelection();
+						p.id = s[0];
+						$.get('<?php if(!$this->ajax) echo '../'; ?>crud/delete',
+							p,
+							function(js){
+								finsession(js);
+								getVenteData();
+								w2alert(js.message);
+			           		},"json");
+					}
+			    },		
+		        onSave: function(event) {
+		            var changes = w2ui['grid_<?php echo $idPage;?>_rapport'].getChanges();
+		            changes.forEach(function(c, i){
+			            var r = w2ui[event.target].get(c.recid);
+			            c.royIds = r["royIds"];		            
+			            c.obj = 'royalty';
+			            if(c.date_paiement) c.date_paiement = w2utils.formatDate(c.date_paiement, 'yyyy-mm-dd');
+			            if(c.date_encaissement) c.date_encaissement = w2utils.formatDate(c.date_encaissement, 'yyyy-mm-dd');			            
+				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+			        			c,
+			        			function(js){
+			            			finsession(js);
+			        				if(changes.length==i+1)w2alert(js.message);
+			        			},"json");                        
+		            });
+		        },
+		        toolbar: {
+		            items: [
+		                { id: 'voirRapport', type: 'button', caption: "Voir le(s) édition(s)", icon: 'fa-file' }
+		            ],
+		            onClick: function (event) {
+		                if (event.target == 'voirRapport') {
+			                	var s = w2ui['grid_<?php echo $idPage;?>_rapport'].getSelection();
+			                	if(s){
+				                	s.forEach(function(r){
+				                		var item = w2ui['grid_<?php echo $idPage;?>_rapport'].get(r);
+				                		open(item["url"],"_blank");
+				                	})
+			                	}
+		                }
+		            }
 		        },
 			        
-			},			    
+			},					
 			gridVenteDevise: { 
 		        name: 'grid_<?php echo $idPage;?>_devise', 
 				header: 'Taxes et taux de conversion',		
@@ -797,7 +905,7 @@ function initDroit() {
 		            //{ field: 'date_taux', caption: 'Deb. période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            //{ field: 'date_taux_fin', caption: 'Fin période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 					{ field: 'taxe_taux', caption: 'Taxe taux',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
-					{ field: 'taxe_deduction', caption: 'Taxe déduction',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+					{ field: 'taxe_deduction', caption: 'Taxe déduction',editable: { type: 'float'}, size: '110px', sortable: true, resizable: true},
 		            { field: 'taux_livre_dollar', caption: '&pound; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'taux_livre_euro', caption: '&pound; -> &euro;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'taux_euro_livre', caption: '&euro; -> &pound;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
@@ -887,10 +995,17 @@ function initDroit() {
     $('#<?php echo $idPage;?>').w2layout(config.layoutVente);
     w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
     w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail)); 
-    w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
-    w2ui.layout_<?php echo $idPage;?>_top.content('right', $().w2grid(config.gridVenteDevise));
-     	
+	//charge les ventes par ISBN
+	//w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
+
+	//charge les fichiers de vente
+	w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
+	w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2layout(config.gridImportVenteData));
+	getFichierImport();
+
+
 }
+
 
 function getVenteData(){
     if(!itemSelectAuteur) return;   
@@ -943,8 +1058,8 @@ function getVenteData(){
 			{idAuteur:itemSelectAuteur.recid, mod:'paiement royalties'},
 	    		function(js){
     				finsession(js);
-	            g = w2ui['grid_<?php echo $idPage;?>_rapport'];
-	            g.clear();		            		
+					g = w2ui['grid_<?php echo $idPage;?>_rapport'];
+					g.clear();		            		
 	    			if(js.rs.length){
 	        			//mise à jour de la grille 			        
 		            g.add(js.rs);
@@ -1047,45 +1162,67 @@ function voirData(id){
 	$.get(urlP+'import/getdataficvente',
 			{idFic:id},
         		function(js){
-				//ajoute la fonction de mis en forme des problèmes
-				js.col.forEach(function(d){
-					if(d.field=="commentaire")d.render=fn_render_probleme;
-					});
+				//ajoute la définition des colonnes
 				config.gridImportVenteData.columns=js.col;
-				//met en forme les lignes
-				js.rs.forEach(function(d) {
-					if(d.commentaire=='isbn introuvable')d.w2ui = {'style':'background-color:#C2F5B4'};
+				//met en forme les lignes suivant les problèmes
+				var s = 'color:#3322b1;';
+				js.prob.data_sans_basecontrat.forEach(function(p) {
+					var arrf = js.rs.filter(function(e) {
+						return e.col1 == p.num;
+					  });
+					arrf.forEach(function(f){
+						if(f.w2ui)f.w2ui.style += s;
+						else f.w2ui = {'style':s};
+						var c = "pas de base contrat pour la proposition";
+						if(f.commentaire)f.commentaire += ", "+c;
+						else f.commentaire = c;	
+					});  
+				})				
+				var s = 'background-color:#34bf31;color:';
+				js.prob.data_sans_vente.forEach(function(p) {
+					var f = js.rs.find(function(e) {
+						return e.recid == p.recid;
+					  });
+					var sc = "black;";
+					if(f.col4=='0,00' && f.col5=='0,00') sc = "white;";
+					if(!f.col4 && !f.col5) sc = "white;";
+					if(f.w2ui)f.w2ui.style += s+sc;
+					else f.w2ui = {'style':s+sc};
+					var c = "pas de vente associée";						
+					if(f.commentaire)f.commentaire += ", "+c;
+					else f.commentaire = c;	
+				})				
+				var s = 'background-color:#dc0d20;';
+				js.prob.commentaires.forEach(function(p) {
+					var f = js.rs.find(function(e) {
+						return e.recid == p.recid;
+					  });
+					if(f.w2ui)f.w2ui.style += s;
+					else f.w2ui = {'style':s};
+				})
+				var s = 'background-color:#dc800d;';
+				js.prob.data_sans_contrat.forEach(function(p) {
+					var arrf = js.rs.filter(function(e) {
+						return e.col1 == p.num;
+					  });
+					arrf.forEach(function(f){
+						if(f.w2ui)f.w2ui.style += s;
+						else f.w2ui = {'style':s};
+						var c = "pas de contrat pour "+p.prenom+" "+p.nom;
+						if(f.commentaire)f.commentaire += ", "+c;
+						else f.commentaire = c;	
+					});  
 				})
 				config.gridImportVenteData.records=js.rs;
-				
-			    if(w2ui.grid_ImportVenteData)
-			    		w2ui.grid_ImportVenteData.destroy();        
-				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridImportVenteData));
+				if(w2ui.grid_ImportVenteData)
+					w2ui.grid_ImportVenteData.destroy();        
+				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridImportVenteData));				
        		},'json');		
 
 	//empèche la propagation de l'événement
 	e.preventDefault();
 }
-
-function fn_render_probleme(record, ind, col_ind, data) {
-	//var $row = $("#grid_grid_ImportVenteData_rec_" + (ind + 1));
-	var r = d3.select("#grid_grid_ImportVenteData_rec_" + (ind + 1))
-    console.log(r);
-    if (record.commentaire =='isbn introuvable') {
-		r.style('background-color','yellow');
-      //$row.css({
-      //  'background-color': 'yellow'
-      //});
-    } else if (!record.commentaire) {
-      //$row.css({
-      //  'background-color': 'blue'
-      //});
-    }
-    return record.commentaire;
-  }
-
 function getFichierImport(){
-
     $.ajax({
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
@@ -1099,9 +1236,29 @@ function getFichierImport(){
 	    w2ui.layout_<?php echo $idPage;?>_fichier.content('left', $().w2grid(config.gridFichierImport));
     	
     });
-
+}
+function finProcessImport(idFic){
+	w2popup.close();	
+	voirData(id);
+	getRapportFic(idFic);
+}
+function getRapportFic(idFic){
+	if(w2ui['grid_<?php echo $idPage;?>_ficRapport']){
+		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
+			{idFichier:idFic},
+	    		function(js){
+    				finsession(js);
+					g = w2ui['grid_<?php echo $idPage;?>_ficRapport'];
+					g.clear();		            		
+	    			if(js.rs.length){
+			            g.add(js.rs);
+	    			}
+	    },"json");           		           
+    }    
+		
 		
 }
+
 
 </script>
 

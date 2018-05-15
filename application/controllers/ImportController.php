@@ -51,7 +51,7 @@ class ImportController extends Zend_Controller_Action
     
     public function setdataficventeAction()
     {
-    		$this->initInstance();
+    	$this->initInstance();
 		switch ($this->_getParam('type',"")) {
 			case "Wiley":
 				$w = new Flux_Wiley(false,true);
@@ -99,8 +99,12 @@ class ImportController extends Zend_Controller_Action
     {
     		$this->initInstance();
     		$dbData = new Model_DbTable_Iste_importdata();
-    		$dbFic = new Model_DbTable_Iste_importfic();
-    		
+			$dbFic = new Model_DbTable_Iste_importfic();
+			
+			//récupère les problèmes
+			$v = new Flux_Vente(false,$this->_getParam('trace'));
+			$arrP =  $v->getProblemes($this->_getParam('idFic'));
+				
     		//calcul les colonnes 
     		$rsFic = $dbFic->findById_importfic($this->_getParam('idFic'));
     		$cols = json_decode($rsFic["coldesc"]);
@@ -108,13 +112,13 @@ class ImportController extends Zend_Controller_Action
 				array("field"=>"recid", "caption"=>"ID", "hidden"=>'true', "size"=>'50px', "sortable"=>1, "resizable"=>1)
 				,array("field"=>"numrow", "caption"=>"n° lig.", "size"=>'50px', "sortable"=>1, "resizable"=>1)
 				,array("field"=>"numsheet", "caption"=>"n° ong.", "hidden"=>'true', "size"=>'50px', "sortable"=>1, "resizable"=>1)
-				,array("field"=>"commentaire", "caption"=>"commentaire", "size"=>'150px', "sortable"=>1, "resizable"=>1)
+				,array("field"=>"commentaire", "caption"=>"commentaire", "size"=>'100%', "sortable"=>1, "resizable"=>1,"editable"=>array("type"=>'text'))
 				,array("field"=>"id_livre", "caption"=>"Id. livre","hidden"=>'true', "size"=>'50px', "sortable"=>1, "resizable"=>1)
 				,array("field"=>"id_isbn", "caption"=>"Id. isbn","hidden"=>'true', "size"=>'50px', "sortable"=>1, "resizable"=>1)
 				);
     		$i=1;
     		foreach ($cols as $k=>$c) {
-    			$arrC[]=array("caption"=>$k, "field"=>$c, "size"=>'100px', "sortable"=>1, "resizable"=>1);
+    			$arrC[]=array("caption"=>$k, "field"=>$c, "size"=>'100px', "sortable"=>1, "resizable"=>1,"editable"=>array("type"=>'text'));
     			$i++;
     		}
     		
@@ -133,7 +137,7 @@ class ImportController extends Zend_Controller_Action
 					);
 				$i++;
 			}
-    		$this->view->json = json_encode(array("col"=>$arrC,"rs"=>$arrV));
+    		$this->view->json = json_encode(array("col"=>$arrC,"rs"=>$arrV,"prob"=>$arrP));
     }    
     
     public function resultAction()

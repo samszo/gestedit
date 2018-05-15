@@ -146,7 +146,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 			, nom, prenom, id_auteur
 			, titre_fr, titre_en, id_livre    
 		    , SUM(roy.montant_livre) montant_livre
-		    , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement
+		    , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
 			, base_contrat, DATE_FORMAT(date_taux,'%Y') periode
 		FROM iste_rapport r
 			INNER JOIN (SELECT id_rapport  
@@ -165,6 +165,42 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
     		        
 		return $rs; 
     }          
+
+     /**
+     * Recherche une entrée avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int	 	$idFic
+     *
+     * @return array
+     */
+    public function findPaiementByFic($idFic)
+    {
+        $sql = "SELECT 
+			r.id_rapport recid, r.url, r.maj
+		    , ids.idAuteur, ids.idLivre
+			, nom, prenom, id_auteur
+			, titre_fr, titre_en, id_livre    
+		    , SUM(roy.montant_livre) montant_livre
+		    , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement
+			, base_contrat, DATE_FORMAT(date_taux,'%Y') periode
+		FROM iste_rapport r
+			INNER JOIN (SELECT id_rapport  
+				, SUBSTRING_INDEX(obj_id,'_',1) idAuteur
+				, SUBSTRING_INDEX(SUBSTRING_INDEX(obj_id,'_',-2),'_',1) idLivre
+				FROM iste_rapport) ids ON ids.id_rapport = r.id_rapport
+			INNER JOIN iste_auteur a ON a.id_auteur = ids.idAuteur
+		    INNER JOIN iste_livre l ON l.id_livre = ids.idLivre
+		    INNER JOIN iste_royalty roy ON roy.id_rapport = r.id_rapport
+		    INNER JOIN iste_devise d  ON d.id_devise = roy.id_devise
+		WHERE a.id_auteur = ".$idAuteur."
+		GROUP BY r.id_rapport ";          
+            
+		$stmt = $this->_db->query($sql);
+    		$rs = $stmt->fetchAll();
+    		        
+		return $rs; 
+    }              
     
     	/**
      * Recherche une entrée avec la valeur spécifiée
