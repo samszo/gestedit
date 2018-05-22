@@ -1,3 +1,4 @@
+
 /*!
  *  Font Awesome 3.0.2
  *  the iconic font designed for use with Twitter Bootstrap
@@ -551,3 +552,4 @@ ajout samszo
 .fa-compress:before			   { content: "\f066"; }
 .fa-users:before				   { content: "\f0c0"; }
 .fa-file-excel-o:before		   { content: "\f1c3"; }
+.fa-object-group:before      { content: "\f247"; }

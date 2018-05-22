@@ -55,13 +55,13 @@ function initDroit() {
 		onClick: function (event) {
 			if(event.target=="tab0"){
 				w2ui['grid_<?php echo $idPage;?>_ficRapport'].destroy();
-				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridFicRapport));
+				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicRapport));
 			}else if(event.target=="tab1"){
 				w2ui['grid_<?php echo $idPage;?>_ficVente'].destroy();
-				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridFicVente));
+				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicVente));
 			}else if(event.target=="tab2"){
 				if(w2ui['grid_<?php echo $idPage;?>_ficRoyalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
-				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridFicRoyalties));						        	
+				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicRoyalties));
 			}
 		},
 		onClose: function (event) {
@@ -383,7 +383,8 @@ function initDroit() {
 			    },				
                 onClick: function (event) {
                     itemSelect = this.get(event.recid);
-                    voirData(event.recid);
+					voirData(event.recid);
+					getRapportFic(event.recid);
                }	    
             },	   		    
             gridImportVenteData: { 
@@ -826,14 +827,13 @@ function initDroit() {
 		        columns: [		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'royIds', caption: 'royId', size: '50px', hidden:true, sortable: true, resizable: true },
-		            { field: 'auteurs', caption: "Auteurs", size: '10%', sortable: true, resizable: true},
-		            { field: 'titre_fr', caption: "Titre FR", size: '10%', sortable: true, resizable: true},
-		            { field: 'titre_en', caption: "Titre EN", size: '10%', sortable: true, resizable: true},
+		            { field: 'nom', caption: "Nom", size: '10%', sortable: true, resizable: true},
+		            { field: 'prenom', caption: "Prenom", size: '10%', sortable: true, resizable: true},
 		            { field: 'base_contrat', caption: "Base contrat", size: '80px', sortable: true, resizable: true},
-		            { field: 'periode', caption: "Periode", size: '80px', sortable: true, resizable: true},
+		            { field: 'periode', caption: "Periode", size: '170px', sortable: true, resizable: true},
 		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '120px', sortable: true, resizable: true},
 		            { field: 'date_edition', caption: 'Edition', size: '80px', sortable: true, resizable: true},
-		            { field: 'date_envoi', caption: 'Edition', size: '80px', sortable: true, resizable: true},
+		            { field: 'date_envoi', caption: 'Envoi', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_paiement', editable:{type:'date'}, caption: 'Paiement', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_encaissement', editable:{type:'date'}, caption: 'Encaissement', size: '80px', sortable: true, resizable: true},		            
 		            { field: 'url', caption: 'URL', size: '30%', sortable: true, resizable: true},
@@ -870,14 +870,16 @@ function initDroit() {
 		        },
 		        toolbar: {
 		            items: [
-		                { id: 'voirRapport', type: 'button', caption: "Voir le(s) édition(s)", icon: 'fa-file' }
+		                { id: 'voirRapport', type: 'button', caption: "Voir", icon: 'fa-file' }
+		                ,{ id: 'impRapport', type: 'button', caption: "Envoyer", icon: 'fa-envelope' }
+		                ,{ id: 'groupRapport', type: 'button', caption: "Grouper", icon: 'fa-object-group' }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'voirRapport') {
-			                	var s = w2ui['grid_<?php echo $idPage;?>_rapport'].getSelection();
+			                	var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
 			                	if(s){
 				                	s.forEach(function(r){
-				                		var item = w2ui['grid_<?php echo $idPage;?>_rapport'].get(r);
+				                		var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
 				                		open(item["url"],"_blank");
 				                	})
 			                	}
@@ -994,13 +996,14 @@ function initDroit() {
     // initialisation
     $('#<?php echo $idPage;?>').w2layout(config.layoutVente);
     w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
-    w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail)); 
+    //w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail)); 
+	w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicRapport));
 	//charge les ventes par ISBN
 	//w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
 
 	//charge les fichiers de vente
 	w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
-	w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2layout(config.gridImportVenteData));
+	//w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2layout(config.gridImportVenteData));
 	getFichierImport();
 
 
@@ -1218,9 +1221,6 @@ function voirData(id){
 					w2ui.grid_ImportVenteData.destroy();        
 				w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2grid(config.gridImportVenteData));				
        		},'json');		
-
-	//empèche la propagation de l'événement
-	e.preventDefault();
 }
 function getFichierImport(){
     $.ajax({
@@ -1239,24 +1239,20 @@ function getFichierImport(){
 }
 function finProcessImport(idFic){
 	w2popup.close();	
-	voirData(id);
+	voirData(idFic);
 	getRapportFic(idFic);
 }
 function getRapportFic(idFic){
-	if(w2ui['grid_<?php echo $idPage;?>_ficRapport']){
-		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
-			{idFichier:idFic},
-	    		function(js){
-    				finsession(js);
-					g = w2ui['grid_<?php echo $idPage;?>_ficRapport'];
-					g.clear();		            		
-	    			if(js.rs.length){
-			            g.add(js.rs);
-	    			}
-	    },"json");           		           
-    }    
-		
-		
+	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
+		{idFichier:idFic},
+			function(js){
+				finsession(js);
+				g = w2ui['grid_<?php echo $idPage;?>_ficRapport'];
+				g.clear();		            		
+				if(js.rs.length){
+					g.add(js.rs);
+				}
+	},"json");           		           		
 }
 
 
