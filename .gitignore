@@ -233,3 +233,7 @@ bdd/.DS_Store
 .DS_Store
 application/configs/configInfomaniak1.php
 bdd/gesteditNewDroit.sql
+bdd/iste_exportContrat.csv
+bdd/iste_exportContrat.xlsx
+bdd/lyor_iste_admin_dump_sql_2018-05-22_16-47-07.sql
+bdd/lyor_iste_admin_dump_sql_2018-05-22_16-47-07.sql.gz

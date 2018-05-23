@@ -870,9 +870,11 @@ function initDroit() {
 		        },
 		        toolbar: {
 		            items: [
-		                { id: 'voirRapport', type: 'button', caption: "Voir", icon: 'fa-file' }
+		                { id: 'voirRapport', type: 'button', caption: "Télécharger", icon: 'fa-file' }
 		                ,{ id: 'impRapport', type: 'button', caption: "Envoyer", icon: 'fa-envelope' }
 		                ,{ id: 'groupRapport', type: 'button', caption: "Grouper", icon: 'fa-object-group' }
+		                ,{ id: 'payerRapport', type: 'button', caption: "Payer", icon: 'fa-money' }
+		                ,{ id: 'encaisserRapport', type: 'button', caption: "Encaisser", icon: 'fa-pencil' }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'voirRapport') {
@@ -1239,6 +1241,7 @@ function getFichierImport(){
 }
 function finProcessImport(idFic){
 	w2popup.close();	
+	getFichierImport();
 	voirData(idFic);
 	getRapportFic(idFic);
 }
