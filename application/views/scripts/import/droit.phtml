@@ -223,10 +223,11 @@ function calculerRoyalties(){
 			js.rs.forEach(function(d) {
 				if(d.recid.substr(0,1)!='S')s.push(d.recid);
 			});
-			if(s.lenght)
+			if(s.length)
 				calculerPaiements(s);
 			else{
 				$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
+				w2alert('Pas de rapport généré car pas de nouveaux royalties');				
 				if(parent)parent.finProcessImport(ficId);		
 			}
 	    },"json");           		           	
