@@ -9,6 +9,7 @@ arrListes['contratBase'] = ['GB','FR'];
 //arrListes['roles'] = ['auteur','coordinateur','préfacier'];
 //arrListes['traduction'] = ['français -> anglais', 'anglais -> français'];
 arrListes['alerte'] = ['1 semaine avant', '10 jours avant','2 jours avant','le jour même'];
+arrListes['mois'] = ['janvier', 'février','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','décembre'];
 //arrListes['boutique'] = ['Amazon', 'NBN', 'Elsevier','Wiley'];
 //var arrData = ['auteur','livre','traduction','production','vente'];
 arrListes['role_uti'] = ["agent","admin","direction","lecteur","gestion","usager"]                      

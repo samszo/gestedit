@@ -40,6 +40,7 @@ var rsVenteISBN = <?php echo $this->jsonISBN; ?>;
 var rsVenteAuteur = <?php echo $this->jsonAuteur; ?>;
 var rsFichierImport;
 var rsDev = <?php echo $this->rsDev; ?>;
+var rsDroitParam = <?php echo $this->rsDroitParam; ?>;
 
 
 //widget configuration
@@ -83,6 +84,15 @@ function initDroit() {
 		            { type: 'right', size: '50%', hidden:true, resizable: true, style: pstyleDetail},
 		        ]
 			},
+		    layoutParam: {
+		        name: 'layout_<?php echo $idPage;?>_param',
+		        padding: 4,
+		        panels: [
+					{ type: 'main',size: '70%', hidden:false, resizable: true, style: pstyleDetail},		 		        
+		            { type: 'left', size: '30%', hidden:false, resizable: true, style: pstyleDetail},
+		        ]
+			},
+			/*
 			tabsVenteISBN: {
 				active: 'tab0',
 				tabs: [{ id: 'tab0', caption: "Problèmes pour le livre" },{ id: 'tab1', caption: "Détails des ventes pour le livre" }
@@ -105,7 +115,8 @@ function initDroit() {
 				onClose: function (event) {
 					this.click('tab0');
 				}
-		    },			
+			},
+			*/			
 		    layoutVenteTop: {
 		        name: 'layout_<?php echo $idPage;?>_top',
 		        padding: 2,
@@ -115,7 +126,7 @@ function initDroit() {
 					    tabs: {
 					        active: 'tabTop2',
 					        tabs: [{ id: 'tabTop2', caption: "Fichier de ventes" },{ id: 'tabTop0', caption: "Ventes par ISBN" },{ id: 'tabTop1', caption: "Ventes par auteur" }
-					        	,{ id: 'tabTop3', caption: "Taxes et taux" }],
+					        	,{ id: 'tabTop3', caption: "Paramètres" }],
 					        onClick: function (event) {
 						        if(event.target=="tabTop0"){
 						            if(w2ui['grid_<?php echo $idPage;?>_vente_isbn'])w2ui['grid_<?php echo $idPage;?>_vente_isbn'].destroy();
@@ -130,8 +141,12 @@ function initDroit() {
 						            w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2layout(config.gridImportVenteData));
 						            getFichierImport();
 						        }else if(event.target=="tabTop3"){
-						            if(w2ui['grid_<?php echo $idPage;?>_devise'])w2ui['grid_<?php echo $idPage;?>_devise'].destroy();
-									w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteDevise));
+						            if(w2ui['layout_<?php echo $idPage;?>_param'])w2ui['layout_<?php echo $idPage;?>_param'].destroy();
+									if(w2ui['grid_<?php echo $idPage;?>_devise'])w2ui['grid_<?php echo $idPage;?>_devise'].destroy();
+									if(w2ui['grid_<?php echo $idPage;?>_param'])w2ui['grid_<?php echo $idPage;?>_param'].destroy();
+									w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutParam));
+									w2ui.layout_<?php echo $idPage;?>_param.content('main', $().w2grid(config.gridVenteDevise));
+									w2ui.layout_<?php echo $idPage;?>_param.content('left', $().w2grid(config.gridDroitParam));
 						        }
 					        },
 					        onClose: function (event) {
@@ -415,7 +430,6 @@ function initDroit() {
                     itemSelect = this.get(event.recid);
                 }	    
             },	   
-		    
 		    formVente: { 
 		        name: 'form_<?php echo $idPage;?>',
 		        fields: [
@@ -901,6 +915,7 @@ function initDroit() {
 	                	toolbarDelete   : true,
 	                	toolbarSave		: true,
 	                	header			: true, 
+	                	footer			: true, 
 	                	columnHeaders	: true},
 		        columns: [		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -992,13 +1007,46 @@ function initDroit() {
 		            }
 		        }
 		    },	
-			
+			gridDroitParam: { 
+                name: 'grid_<?php echo $idPage;?>_param', 
+        		header: 'Paramètres des droits',		
+                show: { 
+        			header			: true,		
+                    toolbar			: false,
+        			toolbarReload   : false,
+        			toolbarColumns  : true,
+                	toolbarSearch   : false,
+                	toolbarAdd      : false,
+                	toolbarDelete   : false,
+                	toolbarSave		: true,
+                	footer			: true,
+				},
+				records: rsDroitParam,
+		        columns: [         
+		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
+		            { field: 'nom', caption: 'Nom du contrat', size: '150px', sortable: true, resizable: true },
+		            { field: 'base_contrat', caption: 'Base contrat', size: '56px', sortable: true, resizable: true },
+					{ field: 'moisDeb', caption: 'Mois début exercice', size: '150px', sortable: true, resizable: true, 
+							editable: { type: 'list', items: arrListes['mois'], showAll: true },
+						render: function (record, index, col_index) {
+							var html = this.getCellValue(index, col_index);
+							return html.text ? html.text : html;
+						}
+					},		            
+
+					//{ field: 'dateDeb', caption: 'Date début exercice', size: '150px', editable: { type: 'text' }, sortable: true, resizable: true },
+		            //{ field: 'dateFin', caption: 'Date fin exercice', size: '150px', editable: { type: 'text' }, sortable: true, resizable: true },
+		            ],
+				onSave: function(event) {
+			        console.log(event);            
+			    },
+            },	   			    
+
 		};
 	
     // initialisation
     $('#<?php echo $idPage;?>').w2layout(config.layoutVente);
     w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
-    //w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail)); 
 	w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicRapport));
 	//charge les ventes par ISBN
 	//w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));

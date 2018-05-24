@@ -69,7 +69,46 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
    	
     	$this->update($data, 'iste_contrat.id_contrat = ' . $id);
     }
+
+    /**
+     * renvoie les paramètres formaté pour un grid
+     * 
+     * @param integer $idContrat
+     *
+     *
+     * @return array
+     */
+    public function getParams($idContrat=null)
+    {       
+        $result = array();
+        if($idContrat){
+            $arr = $this->findById_contrat($idContrat);
+        }else{
+            $arr = $this->getAll();
+        }
+        foreach ($arr as $r) {
+            if($r['param']){
+                $o = json_decode($r['param']);
+                foreach ($o->params as $r) {
+                    $result[] = $r;       
+                }                 
+            }else{
+                //initialisation des paramètres de contrat
+                $this->edit($r["id_contrat"],array("param"=>
+                    json_encode(array("params"=>array(                
+                        array("nom"=>$r["nom"],"id_contrat"=>$r["id_contrat"],"recid"=>($r["id_contrat"]+1),'base_contrat'=>"FR","moisDeb"=>"janvier","dateDeb"=>"01/01","dateFin"=>"31/12")        
+                        ,array("nom"=>$r["nom"],"id_contrat"=>$r["id_contrat"],"recid"=>($r["id_contrat"]+2),'base_contrat'=>"EN","moisDeb"=>"janvier","dateDeb"=>"01/01","dateFin"=>"31/12")
+                    )))
+                ));
+                array_merge($result,$this->getParams($r["id_contrat"]));
+            }
+        }        
+
+        return $result;
+
+    }
     
+
     /**
      * Recherche une entrée Iste_contrat avec la clef primaire spécifiée
      * et supprime cette entrée.

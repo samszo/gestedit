@@ -223,7 +223,12 @@ function calculerRoyalties(){
 			js.rs.forEach(function(d) {
 				if(d.recid.substr(0,1)!='S')s.push(d.recid);
 			});
-    		calculerPaiements(s);
+			if(s.lenght)
+				calculerPaiements(s);
+			else{
+				$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
+				if(parent)parent.finProcessImport(ficId);		
+			}
 	    },"json");           		           	
 }
 

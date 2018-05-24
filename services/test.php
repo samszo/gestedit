@@ -257,7 +257,8 @@ $iste_serie = array(
 	$json = json_encode($descColo);
 	$rs =  $v->getProblemes(4065);
   */
-  
+
+  /*
   $dbRoy = new Model_DbTable_Iste_royalty();
   $rapport = new Flux_Rapport();    		
   $ids = "1 , 8,
@@ -544,6 +545,10 @@ $iste_serie = array(
         $rapport->creaPaiementFic($r);
         $rapport->creaPaiementFic($r,"serie");
   }
+*/
+
+$dbC = new Model_DbTable_Iste_contrat;
+$rsDroitParam = json_encode($dbC->getParams());
 
 			
 	$s->trace("FIN TEST");		
