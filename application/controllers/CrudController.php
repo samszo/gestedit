@@ -214,10 +214,10 @@ class CrudController extends Zend_Controller_Action
     		if($params['pdf'])$params['pdf']=="true" ? $params['pdf']=1 : $params['pdf']=0;  
     		//traitement des données liées
     		if($params['instNom']){
-			$dbInst = new Model_DbTable_Iste_institution();
-			$idInst = $dbInst->ajouter(array("nom"=>$params["instNom"]));
-			$params['id_institution'] = $idInst;				
-			unset($params['instNom']);				    			
+				$dbInst = new Model_DbTable_Iste_institution();
+				$idInst = $dbInst->ajouter(array("nom"=>$params["instNom"]));
+				$params['id_institution'] = $idInst;				
+				unset($params['instNom']);				    			
     		}
     		//traitement des sauvegardes
 		switch ($this->_getParam('obj')) {
@@ -226,6 +226,9 @@ class CrudController extends Zend_Controller_Action
 			break;			
 			case 'prevision':
 				$this->view->rs = $oBdd->edit($id,$params,true);
+			break;			
+			case 'contrat':
+				$this->view->rs = $oBdd->editParams($params['id_contrat'],$id,$params['nom'],$params['val']);
 			break;			
 			case 'isbn':
 				$this->view->rs = false;

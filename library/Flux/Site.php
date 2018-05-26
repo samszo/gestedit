@@ -160,7 +160,8 @@ class Flux_Site{
      */
     public function csvToArray($file, $tailleCol="0", $sep=";"){
 		ini_set("memory_limit",'1024M');
-    		$this->trace("DEBUT ".__METHOD__);     	
+			$this->trace("DEBUT ".__METHOD__);  
+			$file = urldecode($file);   	
 	    if (($handle = fopen($file, "rb")) !== FALSE) {
     		$this->trace("Traitement des lignes : ".ini_get("memory_limit"));     	
 	    	$i=0;

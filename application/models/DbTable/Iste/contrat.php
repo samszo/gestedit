@@ -108,6 +108,35 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
 
     }
     
+    /**
+     * met à jour les paramètres formaté pour un grid
+     * 
+     * @param integer   $idContrat
+     * @param integer   $idParam
+     * @param string    $nom
+     * @param string    $val
+     *
+     *
+     * @return array
+     */
+    public function editParams($idContrat, $idParam, $nom, $val)
+    {       
+        $arr = $this->findById_contrat($idContrat);
+        foreach ($arr as $r) {
+            $o = json_decode($r['param']);
+            foreach ($o->params as $r) {
+                if("recid"==$idParam){
+                    $o->params[$nom]=$val;
+                    $this->edit($id_contrat,array("param"=>json_encode($o)));
+                    return $this->findById_contrat($idContrat);
+                }          
+            }
+        }        
+
+        return array();                 
+
+    }
+
 
     /**
      * Recherche une entrée Iste_contrat avec la clef primaire spécifiée

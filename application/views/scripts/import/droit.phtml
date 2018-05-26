@@ -240,7 +240,7 @@ function calculerPaiements(s){
 		function(js){
 			$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
 			finsession(js);
-			if(parent)parent.finProcessImport(ficId);
+			if(parent!=window)parent.finProcessImport(ficId);
 		},"json");           		           	
 }
 
