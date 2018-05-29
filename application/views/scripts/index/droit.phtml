@@ -33,9 +33,13 @@ if(!$this->ajax){
 }
 $idPage = "Droit";
 ?>
+
 <div id="<?php echo $idPage;?>" style="width: 100%; height: 1000px;"></div>
 
 <script type="text/javascript">
+
+
+
 var rsVenteISBN = <?php echo $this->jsonISBN; ?>;
 var rsVenteAuteur = <?php echo $this->jsonAuteur; ?>;
 var rsFichierImport;
@@ -47,7 +51,8 @@ var rsDroitParam = <?php echo $this->rsDroitParam; ?>;
 var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
 var pstyleDetail = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
 var config;
-var idPLU, idPCU, itemSelectAuteur, itemSelectVente, rsIsbnLivre, rsIsbnPrix;
+var idPLU, idPCU, itemSelectAuteur, itemSelectVente, rsIsbnLivre, rsIsbnPrix, urlPDF=false;
+
 function initDroit() {
 	var tabsFichierVente = {
 		active: 'tab0',
@@ -56,7 +61,9 @@ function initDroit() {
 		onClick: function (event) {
 			if(event.target=="tab0"){
 				w2ui['grid_<?php echo $idPage;?>_ficRapport'].destroy();
-				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicRapport));
+				w2ui['layout_<?php echo $idPage;?>_fic'].destroy();
+				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));				
+				w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
 			}else if(event.target=="tab1"){
 				w2ui['grid_<?php echo $idPage;?>_ficVente'].destroy();
 				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicVente));
@@ -91,6 +98,21 @@ function initDroit() {
 					{ type: 'main',size: '70%', hidden:false, resizable: true, style: pstyleDetail},		 		        
 		            { type: 'left', size: '30%', hidden:false, resizable: true, style: pstyleDetail},
 		        ]
+			},
+		    layoutFic: {
+		        name: 'layout_<?php echo $idPage;?>_fic',
+		        padding: 4,
+		        panels: [
+					{ type: 'main',size: '70%', hidden:false, resizable: true, style: pstyleDetail},		 		        
+		            { type: 'right', size: '30%', hidden:false, resizable: true, style: pstyleDetail},
+				],
+				onRender : function (event) {
+					event.onComplete = function () {
+						console.log(event);
+						//if(urlPDF)PDFViewerApplication.open(urlPDF);
+					}
+				},
+				
 			},
 			/*
 			tabsVenteISBN: {
@@ -850,7 +872,7 @@ function initDroit() {
 		            { field: 'date_envoi', caption: 'Envoi', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_paiement', editable:{type:'date'}, caption: 'Paiement', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_encaissement', editable:{type:'date'}, caption: 'Encaissement', size: '80px', sortable: true, resizable: true},		            
-		            { field: 'url', caption: 'URL', size: '30%', sortable: true, resizable: true},
+		            { field: 'url', caption: 'URL', hidden:true, size: '30%', sortable: true, resizable: true},
 		            ],
 		        onDelete: function(event) {            
 					var p = {obj:'rapport'};
@@ -880,8 +902,12 @@ function initDroit() {
 			            			finsession(js);
 			        				if(changes.length==i+1)w2alert(js.message);
 			        			},"json");                        
-		            });
-		        },
+					});					
+				},
+		        onClick: function (event) {
+					var item = this.get(event.recid);
+					showPdf(item.url);
+		        },	    
 		        toolbar: {
 		            items: [
 		                { id: 'voirRapport', type: 'button', caption: "Télécharger", icon: 'fa-file' }
@@ -1046,14 +1072,12 @@ function initDroit() {
 	
     // initialisation
     $('#<?php echo $idPage;?>').w2layout(config.layoutVente);
+	//charge les données
     w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
-	w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicRapport));
-	//charge les ventes par ISBN
-	//w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
-
-	//charge les fichiers de vente
+	w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));				
+	w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
 	w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
-	//w2ui.layout_<?php echo $idPage;?>_fichier.content('main', $().w2layout(config.gridImportVenteData));
+	initPdf();
 	getFichierImport();
 
 
@@ -1276,7 +1300,8 @@ function getFichierImport(){
     $.ajax({
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
-        url: urlP+'/import/upload/',
+		url: urlP+'/import/upload/',
+		data:{'type':'vente','obj':'import'},
         dataType: 'json',
     }).done(function (result) {
     	rsFichierImport = result.files;
@@ -1324,6 +1349,19 @@ function saveParam(event){
 				if(changes.length==i+1)w2alert(js.message);
 			},"json");                        
 	});	
+}
+
+function initPdf(){
+	var urlLoad = 'http://localhost/gestedit/admin/js/pdfjs/web/viewer.html';
+	w2ui.layout_<?php echo $idPage;?>_fic.load('right', urlLoad, null, function (event) {
+		console.log('pdf chargé :'+urlLoad);
+	});	
+}
+
+function showPdf(url){
+	//url = "../../../../data/editions/Barthn©s-Labrousse.Ma..livre.3012-3013.2018-05-31.2018-06-30.pdf";
+	var urlLoad = 'http://localhost/gestedit/admin/js/pdfjs/web/viewer.html?file='+encodeURIComponent(url);
+	PDFViewerApplication.open(url);
 }
 
 </script>

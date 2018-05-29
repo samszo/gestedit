@@ -548,7 +548,8 @@ $iste_serie = array(
 */
 
 $dbC = new Model_DbTable_Iste_contrat;
-$rsDroitParam = json_encode($dbC->getParams());
+//$rsDroitParam = json_encode($dbC->getParams());
+$periodes = $dbC->getPeriodes();
 
 			
 	$s->trace("FIN TEST");		

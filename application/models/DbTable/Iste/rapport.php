@@ -197,7 +197,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 		GROUP BY r.id_rapport ";          
             
 		$stmt = $this->_db->query($sql);
-    		$rs = $stmt->fetchAll();
+    	$rs = $stmt->fetchAll();
     		        
 		return $rs; 
     }              

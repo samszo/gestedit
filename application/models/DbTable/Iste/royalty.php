@@ -633,21 +633,24 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         //récupère les royalty pour les livres sélectionnés
         $sql = "SELECT 
             COUNT(DISTINCT r.id_royalty) nbRoy
-            ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
+            ,DATE_FORMAT(v.date_vente,'%Y') annee, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
             ,l.id_livre, l.titre_en, l.titre_fr
-            ,c.type typeContrat
+            ,p.base_contrat
+            ,c.type typeContrat, c.param, c.id_contrat
             ,MIN(d.taux_livre_euro) taux_livre_euro
         FROM iste_royalty r 
             INNER JOIN iste_devise d ON d.id_devise = r.id_devise
             INNER JOIN iste_vente v ON v.id_vente = r.id_vente
             INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
             INNER JOIN iste_livre l ON l.id_livre = i.id_livre
+            INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
             INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_livre = l.id_livre
             INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
         WHERE r.id_royalty IN (".$idsRoy.")
-        GROUP BY l.id_livre";
+        GROUP BY CONCAT(p.base_contrat, DATE_FORMAT(v.date_vente,'%Y')), l.id_livre
+        ";
         //echo $sql;
         $stmt = $this->_db->query($sql);
         
@@ -671,7 +674,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
             ,l.id_livre, l.titre_en, l.titre_fr
-            ,c.type typeContrat
+            ,c.type typeContrat, c.param
             ,s.id_serie, s.titre_fr, s.titre_en
         FROM iste_royalty r 
             INNER JOIN iste_vente v ON v.id_vente = r.id_vente

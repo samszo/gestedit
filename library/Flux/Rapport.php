@@ -184,11 +184,12 @@ class Flux_Rapport extends Flux_Site{
 		if(!$this->dbRoyalty) $this->dbRoyalty = new Model_DbTable_Iste_royalty();
 		if(!$this->dbDevise) $this->dbDevise = new Model_DbTable_Iste_devise();
 		if(!$this->dbImportfic) $this->dbImportfic = new Model_DbTable_Iste_importfic();
+		if(!$this->dbContrat) $this->dbContrat = new Model_DbTable_Iste_contrat();
 		
 		//$tauxPeriode = $this->dbDevise->getTauxPeriode($data['minDateVente'],$data['maxDateVente']);
 				
 		$date = new DateTime();
-		$refRapport = $data["autNom"].".".substr($data["prenom"],0,2)."."
+		$refRapport = $data["autNom"].".".substr($data["prenom"],0,2)
 			.".".$type.".".$data["idsFicImport"]
 			.".".$data["minDateVente"].".".$data["maxDateVente"];
 		$refRapport = $this->dbImportfic->valideChaine($refRapport);
@@ -213,8 +214,9 @@ class Flux_Rapport extends Flux_Site{
 		//ajout des infos de référence
 		$this->odf->setVars('roy_date_edition', $date->format('l d F Y'));
 		$this->odf->setVars('roy_reference', $refRapport);
-		$periode = $data["minDateVente"]." -> ".$data["maxDateVente"];
-		$this->odf->setVars('roy_periode', $periode);
+		//les périodes sont différentes suivant les contrats on affiche à la fin
+		//$periode = $data["minDateVente"]." -> ".$data["maxDateVente"];
+		//$this->odf->setVars('roy_periode', $periode);
 		//$this->odf->setVars('livre_roy_pc', $data["pc_papier"]." %");
 				
 		//ajout des infos d'auteur
@@ -231,6 +233,8 @@ class Flux_Rapport extends Flux_Site{
 		$due = 0;
 		$revTot = 0;
 		$deduction = 0;
+		$perDeb = mktime(0, 0, 0, date("m"),   date("d"),   date("Y"));;
+		$perFin = 0;
 	
 		//récupère les royalties suivant le type
 		if($type=="livre"){
@@ -247,8 +251,24 @@ class Flux_Rapport extends Flux_Site{
 				
 			//ajout des infos de royalty		
 			$roys = $this->odf->setSegment('roys');	
+			$oPeriode = "";
 			foreach ($rsRoyalty as $r) {
 				$this->trace("détail royalties Livre",$r);
+
+				//période
+				$contrats = $this->dbContrat->getPeriodes($r["annee"],$r["id_contrat"]);
+
+				//if($perDeb > $this->contrats[$r["id_contrat"]][$r["base_contrat"]]["deb"])
+				$perDeb = $contrats[$r["id_contrat"]][$r["base_contrat"]]["deb"];
+				//if($perFin < $this->contrats[$r["id_contrat"]][$r["base_contrat"]]["fin"])
+				$perFin = $contrats[$r["id_contrat"]][$r["base_contrat"]]["fin"];
+				$periode = "Contrats ".$r["base_contrat"]." pour la période : ".strftime("%d %b %Y", $perDeb)." -> ".strftime("%d %b %Y", $perFin);
+				if($oPeriode!=$periode){
+					$roys->setVars('roy_periode', $periode);
+					$oPeriode = $periode;
+				} else
+					$roys->setVars('roy_periode', "-");
+				
 				
 				if($r["typeVente"]=="N")$r["typeVente"]="Book digital";
 				if($r["typeVente"]=="P")$r["typeVente"]="Book paper";
@@ -264,6 +284,7 @@ class Flux_Rapport extends Flux_Site{
 				$due += $r["rMtRoy"];
 				$taux_livre_euro = $r["taux_livre_euro"];
 				$deduction = $r["deduction"];
+
 			}
 			$roys->merge();
 			$this->odf->mergeSegment($roys);
@@ -286,16 +307,22 @@ class Flux_Rapport extends Flux_Site{
 		
 				
 		//on enregistre le fichier
-		$nomFic = utf8_encode($this->dbImportfic->valideChaine($refRapport)).".odt";
+		$nomFic = utf8_encode($this->dbImportfic->valideChaine($refRapport));
 		//copie le fichier dans le répertoire data
-		$newfile = ROOT_PATH."/data/editions/".$nomFic;
+		$newfile = ROOT_PATH."/data/editions/tmp/".$nomFic.".odt";
 		//copy($this->odf->tmpfile, $newfile);
 
 		$this->odf->saveToDisk($newfile);
 		$this->trace("//enregistre le fichier ".$newfile);
 		
+		//ATTENTION  très gourmant d'ouvrir et de fermet libre office
+		//la création des pdf se fait globalement 
+		//$this->convertOdtToPdf($newfile, ROOT_PATH."/data/editions");
+		//$this->trace("//enregistre le pdf ".$newfile);
+
 		//enregistrement du rapport
-		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic,"id_importfic"=>$mod["id_importfic"]
+		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic.".pdf"
+			,"id_importfic"=>$mod["id_importfic"]
 			, "data"=>json_encode($data), "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
 			
 		//mise à jour de la date d'éditions
@@ -306,7 +333,23 @@ class Flux_Rapport extends Flux_Site{
 		return $idRapport;
 	}	
 
+	/**
+	 * création de pdf à partir d'un odt ou de plusieurs *.odt
+	 *
+	 * @param string 	$odtPath
+	 * @param string 	$pdfPath
+	 *
+	 * @return string
+	 */
+	public function convertOdtToPdf($odtPath, $pdfPath){
 
+		$cmd = "export HOME=/tmp; ".LIBREOFFICE_PATH.' --headless ';
+		$cmd3_5_4 = LIBREOFFICE_PATH.' -env:UserInstallation=file:///$HOME/.libreoffice-headless/ --headless ';
+		$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
+		
+		return exec($cmd);
+
+	}
 
 	/**
 	 * création d'un etat de série
@@ -439,5 +482,14 @@ class Flux_Rapport extends Flux_Site{
 		
 		return $oOdf;
 	}   
-  	
+	  
+	
+	function delTree($dir) { 
+		$files = array_diff(scandir($dir), array('.','..')); 
+		 foreach ($files as $file) { 
+		   (is_dir("$dir/$file")) ? delTree("$dir/$file") : unlink("$dir/$file"); 
+		 } 
+		 return rmdir($dir); 
+	} 
+
 }	

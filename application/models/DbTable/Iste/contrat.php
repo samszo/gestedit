@@ -137,6 +137,34 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
 
     }
 
+    /**
+     * calcul les période pour chaque contrat
+     * 
+     * @param int $annee
+     * @param int $idContrat
+     *
+     * @return array
+     */
+    public function getPeriodes($annee=false, $idContrat=false)
+    {   
+        $arrMois = array('janvier'=>1, 'février'=>2,'mars'=>3,'avril'=>4,'mai'=>5,'juin'=>6,'juillet'=>7,'aout'=>8,'septembre'=>9,'octobre'=>10,'novembre'=>11,'décembre'=>12);
+        if(!$annee)$annee==date("Y");
+        if($idContrat) $contrats = $this->findById_contrat($idContrat);
+        else  $contrats = $this->getAll();
+        $result = array();
+        for ($i=0; $i < count($contrats); $i++) {
+            $c = json_decode($contrats[$i]['param']);
+            foreach ($c->params as $p) {
+                //le jour de début
+                $deb  = mktime(0, 0, 0, $arrMois[$p->moisDeb],   1,   $annee);
+                //le dernier jour du mois précédent, un an plus tard
+                $fin  = mktime(0, 0, 0, $arrMois[$p->moisDeb],   0,   $annee+1);
+                $result[$contrats[$i]['id_contrat']][$p->base_contrat]['deb']=$deb;//strftime("%c", $deb);
+                $result[$contrats[$i]['id_contrat']][$p->base_contrat]['fin']=$fin;//strftime("%c", $fin);
+            } 
+        }
+        return $result;
+    }
 
     /**
      * Recherche une entrée Iste_contrat avec la clef primaire spécifiée

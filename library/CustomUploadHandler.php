@@ -23,7 +23,7 @@ class CustomUploadHandler extends UploadHandler {
             $index = null, $content_range = null) {
         $f = parent::handle_file_upload($uploaded_file, $name, $size, $type, $error, $index, $content_range);
         if (empty($f->error)) {        	
-    			$rs =$this->db->ajouter(array("nom"=>$f->name,"url"=>$f->url,"size"=>$f->size
+    		$rs =$this->db->ajouter(array("nom"=>$f->name,"url"=>$f->url,"size"=>$f->size
     			    ,"content_type"=>"inconnu","type"=>$f->type,"obj"=>$f->obj,"id_obj"=>$f->idObj
     			    ,"periode_debut"=>$f->dateDeb,"periode_fin"=>$f->dateFin),false,true);
             $f->id = $rs["id_importfic"];

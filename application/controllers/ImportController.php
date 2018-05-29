@@ -158,6 +158,8 @@ class ImportController extends Zend_Controller_Action
 			$aFic = new Zend_File_Transfer_Adapter_Http();   		
 			$dbFic = new Model_DbTable_Iste_importfic();						
 			$ssUpload = new Zend_Session_Namespace('upload');
+			if($this->_getParam('type'))$ssUpload->typeObj=$this->_getParam('type');
+			if($this->_getParam('obj'))$ssUpload->idObj=$this->_getParam('obj');
 			
 			$path = "/data/".$ssUpload->typeObj."_".$ssUpload->idObj."/";
 			$options = array('upload_dir' => ROOT_PATH.$path,'upload_url' => WEB_ROOT.$path

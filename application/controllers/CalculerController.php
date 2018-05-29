@@ -62,11 +62,21 @@ class CalculerController extends Zend_Controller_Action
     				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
 					break;
 				case "auteurFic":
+					//on supprime le répertoire tmp
+					$rapport->delTree(ROOT_PATH."/data/editions/tmp");
+					//on le recrée
+					mkdir(ROOT_PATH."/data/editions/tmp", 0775);
+					//on récupère les paiements
     				$rs = $dbRoy->paiementAuteurFic(implode(",", $this->_getParam('ids')));
+					$next = true;
 					foreach ($rs as $r) {
-						  $rapport->creaPaiementFic($r);
-						  $rapport->creaPaiementFic($r,"serie");
+						if($next){
+							$rapport->creaPaiementFic($r);
+							$rapport->creaPaiementFic($r,"serie");  
+							//$next = false;
+						}
 					}
+					$rapport->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/*.odt", ROOT_PATH."/data/editions");
 					//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
 					break;
     		}
