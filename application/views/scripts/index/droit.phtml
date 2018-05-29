@@ -917,8 +917,8 @@ function initDroit() {
 		                ,{ id: 'encaisserRapport', type: 'button', caption: "Encaisser", icon: 'fa-pencil' }
 		            ],
 		            onClick: function (event) {
+						var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
 		                if (event.target == 'voirRapport') {
-			                	var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
 			                	if(s){
 				                	s.forEach(function(r){
 				                		var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
@@ -926,6 +926,48 @@ function initDroit() {
 				                	})
 			                	}
 		                }
+						else if (event.target == 'impRapport'){
+							if (s){
+								var arraySel = [];
+								s.forEach(function(r){
+									var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
+									arraySel.push({
+										recid : item["recid"],
+										idAuteur: item["idAuteur"],
+										url: item["url"]
+									});
+								})
+								$.get('<?php if(!$this->ajax) echo '../'; ?>import/envoimail',
+							{"data":arraySel},
+			            		function(js){
+			            			// w2alert("Mails supposés envoyés !"+JSON.stringify(js));
+									var strVar="";
+									strVar += "<div id=\"grid\" style=\"width: 100%; height: 350px;\"><\/div>";
+									strVar += "";
+									strVar += "<script type=\"text\/javascript\">";
+									strVar += "$(function () {";
+									strVar += "if(w2ui['grid']) w2ui['grid'].destroy();";
+									strVar += "    $('#grid').w2grid({ ";
+									strVar += "        name: 'grid', ";
+									strVar += "        columns: [                ";
+									strVar += "            { field: 'recid', caption: 'ID', size: '50px' },";
+									strVar += "            { field: 'nom', caption: 'Nom', size: '30%' },";
+									strVar += "            { field: 'prenom', caption: 'Prénom', size: '30%' },";
+									strVar += "            { field: 'etat', caption: 'Etat', size: '70%' }";
+									strVar += "        ],";
+									strVar += "        records: "+JSON.stringify(js);
+									strVar += "    });    ";
+									strVar += "});";
+									strVar += "<\/script>";
+
+
+									w2popup.open({ 
+										title: "Résumé des mails envoyés",
+										body: strVar
+									});
+			           		},"json");
+							}
+						}
 		            }
 		        },
 			        

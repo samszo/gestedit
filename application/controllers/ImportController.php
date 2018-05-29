@@ -1608,8 +1608,103 @@ class ImportController extends Zend_Controller_Action
     		return $rIsbn;
     }
     
+	public function envoimailAction(){
+		
+		$this->initInstance();
+		$dbAut = new Model_DbTable_Iste_auteur();
+
+		//récupérer les données de sélection {recid(rapport_id), idAuteur}
+		$data = $this->_getParam("data");
+
+		//config mail
+		function recipientFilename($transport)
+		{
+			return $transport->recipients . '_' . mt_rand() . '.eml';
+		}
+ 
+
+		//log
+		$log = array();
+
+		//envoi de mail pour chaque sélection 
+		foreach ($data as $ligne ) {
+		
+			//récupérer mail auteur 
+			$auteur = $dbAut->findById_auteur($ligne["idAuteur"]);
+			//si mail valide (simple check au cas où pas de mail)
+			if (strpos($auteur["mail_1"],"@") !== false){
+				
+
+
+				
+				//récupérer odt
+				$filePath = ROOT_PATH.substr($ligne["url"],strpos($ligne["url"],"/data"));
+				$fileName = substr($ligne["url"],strpos($ligne["url"],"editions/")+strlen("editions/"));
+				//conversion odt en pdf
+				
+				//conversion qui marche (avec trace)
+				// $cmd= shell_exec("export HOME=/tmp && strace -f -o trace.txt soffice --headless -convert-to pdf --outdir ../data/editions ".$filePath);
+				//conversion qui marche (sans trace)
+				$cmd= shell_exec("export HOME=/tmp && soffice --headless -convert-to pdf --outdir ../data/editions ".$filePath);
+
+				if (file_exists(substr($filePath,0,(strlen($filePath)-3))."pdf")){
+					
+					$mail = new Zend_Mail();
+					//TODO: construire le mail avec les informations nécessaires (texte, mail envoyeur)
+					$mail->setBodyText("Bonjour,\nCi-joint vos royalties.\n Cordialement,\nXYZ .");
+					$mail->setFrom('somebody@iste.com', 'ISTE Bot');
+					$mail->addTo($auteur["mail_1"], $auteur["nom"]." ".$auteur["prenom"]);
+					$mail->setSubject('Royalties');
+					$filePath = substr($filePath,0,(strlen($filePath)-3))."pdf";
+					//attacher le pdf
+					$content = file_get_contents($filePath); // e.g. ("attachment/abc.pdf")
+					$attachment = new Zend_Mime_Part($content);
+					$attachment->type = 'application/pdf';
+					$attachment->disposition = Zend_Mime::DISPOSITION_ATTACHMENT;
+					$attachment->encoding = Zend_Mime::ENCODING_BASE64;
+					$attachment->filename = substr($fileName,0,(strlen($fileName)-3))."pdf"; // name of file
+	
+					$mail->addAttachment($attachment); 
+	
+	
+					$tr = new Zend_Mail_Transport_File(array("path" => ROOT_PATH."/tmp",'callback' => 'recipientFilename'));
+					$mail->send($tr);
+	
+					//si mail envoyé màj bdd
+					if ($mail){
+
+						//TODO: ajouter date envoi à la bdd 
+						array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Email préparé !"));
+					}
+					else{
+						array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème envoi email "));
+					}
+
+				}
+				else{ //pdf non crée ou inaccessible
+					array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème création rapport pdf"));
+				}
+
+
+			}
+			//si il y a un problème avec le mail de l'auteur 
+			else{
+				array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème avec l'email de l'auteur"));
+			}
+
+	
+			
+
+		}
+
+
+
+		
+		$this->view->json = json_encode($log);
+	}
     
 }
+
 
 
 
