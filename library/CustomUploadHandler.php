@@ -8,15 +8,27 @@ class CustomUploadHandler extends UploadHandler {
 
     protected function handle_form_data($file, $index) {
         //$file->name = @$_REQUEST['nameObj'][$index];
-    	$file->idObj = @$_REQUEST['idObj'][$index];
-        $file->obj = @$_REQUEST['obj'][$index];
-        $file->type = @$_REQUEST['type'][$index];
-        //on ne précise que l'année
-        //$file->dateFin = @$_REQUEST['date_fin'][$index]."-01-01";
-        //$file->dateDeb = (@$_REQUEST['date_fin'][$index]-1)."-01-01";
-        //les dates sont explicitement choisies
-        $file->dateFin = @$_REQUEST['dateFin'];
-        $file->dateDeb = @$_REQUEST['dateDeb'];
+        if(is_array(@$_REQUEST['idObj'])){
+            $file->idObj = @$_REQUEST['idObj'][$index];
+            $file->obj = @$_REQUEST['obj'][$index];
+            $file->type = @$_REQUEST['type'][$index];
+            //on ne précise que l'année
+            //$file->dateFin = @$_REQUEST['date_fin'][$index]."-01-01";
+            //$file->dateDeb = (@$_REQUEST['date_fin'][$index]-1)."-01-01";
+            //les dates sont explicitement choisies
+            $file->dateFin = @$_REQUEST['dateFin'][$index];
+            $file->dateDeb = @$_REQUEST['dateDeb'][$index];    
+        }else{
+            $file->idObj = @$_REQUEST['idObj'];
+            $file->obj = @$_REQUEST['obj'];
+            $file->type = @$_REQUEST['type'];
+            $file->dateFin = @$_REQUEST['dateFin'];
+            $file->dateDeb = @$_REQUEST['dateDeb'];    
+        }
+        if($file->idObj)$path = "/data/".$file->obj."_".$file->idObj."/";
+        else $path = "/data/".$file->obj."_".$file->type."/";
+        $this->options['upload_dir']=ROOT_PATH.$path;    
+        $this->options['upload_url']=WEB_ROOT.$path;    
     }
 
     protected function handle_file_upload($uploaded_file, $name, $size, $type, $error,

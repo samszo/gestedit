@@ -165,6 +165,7 @@ class UploadHandler
         if ($initialize) {
             $this->initialize();
         }
+        //print_r($this->options);
     }
 
     protected function initialize() {
@@ -1049,19 +1050,19 @@ class UploadHandler
     }
 
     protected function handle_file_upload($uploaded_file, $name, $size, $type, $error,
-            $index = null, $content_range = null) {
+        $index = null, $content_range = null) {
         $file = new \stdClass();
         $file->name = $this->get_file_name($uploaded_file, $name, $size, $type, $error,
             $index, $content_range);
         $file->size = $this->fix_integer_overflow((int)$size);
         $file->type = $type;
-        //$file->obj = $obj;
-        //$file->idObj = $idObj;
         if ($this->validate($uploaded_file, $file, $error, $index)) {
             $this->handle_form_data($file, $index);
             $upload_dir = $this->get_upload_path();
+            //echo "upload_dir =".$upload_dir;
             if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, $this->options['mkdir_mode'], true);
+                $r = mkdir($upload_dir, $this->options['mkdir_mode'], true);
+                //echo "mkdir =".(boolval($r) ? 'true' : 'false');
             }
             $file_path = $this->get_upload_path($file->name);
             $append_file = $content_range && is_file($file_path) &&
@@ -1095,7 +1096,9 @@ class UploadHandler
                 $file->size = $file_size;
                 if (!$content_range && $this->options['discard_aborted_uploads']) {
                     unlink($file_path);
-                    $file->error = $this->get_error_message('abort');
+                    $file->error = $this->get_error_message('abort')
+                        ." file_size=".$file_size." content_range=".$content_range
+                        ." file_path=".$file_path." options['upload_dir']=".$this->options['upload_dir'];
                 }
             }
             $this->set_additional_file_properties($file);

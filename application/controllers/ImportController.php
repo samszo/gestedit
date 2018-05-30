@@ -31,7 +31,7 @@ class ImportController extends Zend_Controller_Action
 	
     public function indexAction()
     {
-    		$this->initInstance();        						
+    	$this->initInstance();        						
 		$ssUpload = new Zend_Session_Namespace('upload');
 		$ssUpload->idObj = $this->view->idObj;
 		$ssUpload->typeObj = $this->view->typeObj;
@@ -156,15 +156,13 @@ class ImportController extends Zend_Controller_Action
     		$auth = Zend_Auth::getInstance();
 		if ($auth->hasIdentity()) {
 			$aFic = new Zend_File_Transfer_Adapter_Http();   		
-			$dbFic = new Model_DbTable_Iste_importfic();						
-			$ssUpload = new Zend_Session_Namespace('upload');
-			if($this->_getParam('type'))$ssUpload->typeObj=$this->_getParam('type');
-			if($this->_getParam('obj'))$ssUpload->idObj=$this->_getParam('obj');
-			
-			$path = "/data/".$ssUpload->typeObj."_".$ssUpload->idObj."/";
-			$options = array('upload_dir' => ROOT_PATH.$path,'upload_url' => WEB_ROOT.$path
-				,'print_response'=>false);
-			//$upload_handler = new UploadHandler($options);
+            $dbFic = new Model_DbTable_Iste_importfic();	
+            $options = array('print_response'=>false);
+            if($this->_getParam('dir')){
+                $path = "/data/".$this->_getParam('obj')."_".$this->_getParam('type')."/";
+                $options['upload_dir'] = ROOT_PATH.$path;
+                $options['upload_url'] = WEB_ROOT.$path;                    
+            }
 			$upload_handler = new CustomUploadHandler($options);
     		$response = $upload_handler->get_response();
     		$this->view->json = json_encode($response);

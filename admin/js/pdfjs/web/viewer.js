@@ -10050,8 +10050,6 @@ exports.ViewHistory = ViewHistory;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
-
 var DEFAULT_URL = 'http://localhost/gestedit/admin/js/pdfjs/web/iste.pdf';
 ;
 var pdfjsWebApp = void 0;

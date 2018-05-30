@@ -138,6 +138,7 @@ function initFileUploadDroit(){
 	            $.each(data.result.files, function (index, file) {
 					$('<p/>').text(file.name).appendTo('#files');
 					ficId = file.id;
+					if(file.error)w2alert(file.error);
 					importerData();
 	            });
 	        },

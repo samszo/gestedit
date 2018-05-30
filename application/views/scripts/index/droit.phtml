@@ -1343,7 +1343,7 @@ function getFichierImport(){
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
 		url: urlP+'/import/upload/',
-		data:{'type':'vente','obj':'import'},
+		data:{'type':'vente','obj':'import','dir':'droit'},
         dataType: 'json',
     }).done(function (result) {
     	rsFichierImport = result.files;
@@ -1394,7 +1394,7 @@ function saveParam(event){
 }
 
 function initPdf(){
-	var urlLoad = 'http://localhost/gestedit/admin/js/pdfjs/web/viewer.html';
+	var urlLoad = '../js/pdfjs/web/viewer.html';
 	w2ui.layout_<?php echo $idPage;?>_fic.load('right', urlLoad, null, function (event) {
 		console.log('pdf chargé :'+urlLoad);
 	});	
