@@ -134,11 +134,11 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
      * Recherche une entrée avec la valeur spécifiée
      * et retourne cette entrée.
      *
-     * @param int	 	$idLivre
+     * @param string	 	$idsAuteur
      *
      * @return array
      */
-    public function findPaiementByAuteur($idAuteur)
+    public function findPaiementByAuteur($idsAuteur)
     {
         $sql = "SELECT 
 			r.id_rapport recid, r.url, r.maj
@@ -157,7 +157,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 		    INNER JOIN iste_livre l ON l.id_livre = ids.idLivre
 		    INNER JOIN iste_royalty roy ON roy.id_rapport = r.id_rapport
 		    INNER JOIN iste_devise d  ON d.id_devise = roy.id_devise
-		WHERE a.id_auteur = ".$idAuteur."
+		WHERE a.id_auteur IN (".$idsAuteur.")
 		GROUP BY r.id_rapport ";          
             
 		$stmt = $this->_db->query($sql);
@@ -166,6 +166,80 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 		return $rs; 
     }          
 
+     /**
+     * Recherche une entrée avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param string	 	$idsISBN
+     *
+     * @return array
+     */
+    public function findPaiementByISBN($idsISBN)
+    {
+        $sql = "SELECT 
+            r.id_rapport recid, r.url, r.maj
+            , ids.idAuteur
+            , a.nom, a.prenom, a.id_auteur
+            , SUM(roy.montant_livre) montant_livre
+            , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
+            , base_contrat, CONCAT(ific.periode_debut, ' -> ',ific.periode_fin) periode
+        FROM iste_rapport r
+            INNER JOIN (SELECT id_rapport  
+                , SUBSTRING_INDEX(obj_id,'_',1) idAuteur
+                FROM iste_rapport) ids ON ids.id_rapport = r.id_rapport
+            INNER JOIN iste_auteur a ON a.id_auteur = ids.idAuteur
+            INNER JOIN iste_royalty roy ON roy.id_rapport = r.id_rapport
+            INNER JOIN iste_vente v ON v.id_vente = roy.id_vente
+            INNER JOIN iste_importdata idfic ON idfic.id_importdata = v.id_importdata
+            INNER JOIN iste_importfic ific ON ific.id_importfic = idfic.id_importfic
+            INNER JOIN iste_devise d  ON d.id_devise = roy.id_devise
+        WHERE v.id_isbn IN(".$idsISBN.")
+        GROUP BY r.id_rapport ";          
+     
+            
+		$stmt = $this->_db->query($sql);
+    		$rs = $stmt->fetchAll();
+    		        
+		return $rs; 
+    }              
+
+
+     /**
+     * Recherche une entrée avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param string	 	$idsAuteur
+     *
+     * @return array
+     */
+    public function findPaiementByIdsAuteur($idsAuteur)
+    {
+        $sql = "SELECT 
+            r.id_rapport recid, r.url, r.maj
+            , ids.idAuteur
+            , a.nom, a.prenom, a.id_auteur
+            , SUM(roy.montant_livre) montant_livre
+            , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
+            , base_contrat, CONCAT(ific.periode_debut, ' -> ',ific.periode_fin) periode
+        FROM iste_rapport r
+            INNER JOIN (SELECT id_rapport  
+                , SUBSTRING_INDEX(obj_id,'_',1) idAuteur
+                FROM iste_rapport) ids ON ids.id_rapport = r.id_rapport
+            INNER JOIN iste_auteur a ON a.id_auteur = ids.idAuteur
+            INNER JOIN iste_royalty roy ON roy.id_rapport = r.id_rapport
+            INNER JOIN iste_vente v ON v.id_vente = roy.id_vente
+            INNER JOIN iste_importdata idfic ON idfic.id_importdata = v.id_importdata
+            INNER JOIN iste_importfic ific ON ific.id_importfic = idfic.id_importfic
+            INNER JOIN iste_devise d  ON d.id_devise = roy.id_devise
+        WHERE a.id_auteur IN (".$idsAuteur.")
+        GROUP BY r.id_rapport ";  
+        //echo $sql;
+            
+		$stmt = $this->_db->query($sql);
+    		$rs = $stmt->fetchAll();
+    		        
+		return $rs; 
+    }              
      /**
      * Recherche une entrée avec la valeur spécifiée
      * et retourne cette entrée.

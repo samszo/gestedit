@@ -313,15 +313,19 @@ class CrudController extends Zend_Controller_Action
 
     public function rapportdataAction()
     {
-    		$this->initInstance();
-    	
+			$this->initInstance();
+			$rs = array();    	
     		//création de l'objet BDD
     		$oBdd = new Model_DbTable_Iste_rapport();
     	    //récupère les données
     	    if($this->_getParam('idLivre'))
 	    		$rs = $oBdd->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));
     	    if($this->_getParam('mod')=="paiement royalties")
-	    		$rs = $oBdd->findPaiementByAuteur($this->_getParam('idAuteur'));
+				$rs = $oBdd->findPaiementByAuteur($this->_getParam('idAuteur'));
+			if($this->_getParam('idsISBN'))
+				$rs = $oBdd->findPaiementByISBN(implode(",",$this->_getParam('idsISBN')));			
+			if($this->_getParam('idsAuteur'))
+				$rs = $oBdd->findPaiementByIdsAuteur(implode(",",$this->_getParam('idsAuteur')));
 			if($this->_getParam('idFichier'))
 	    		$rs = $oBdd->findPaiementByFic($this->_getParam('idFichier'));
 	    	$this->view->rs = $rs;
