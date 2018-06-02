@@ -191,6 +191,22 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_royalty avec la valeur spécifiée
      * et retourne cette entrée.
      *
+     * @param int $id_rapport
+     *
+     * @return array
+     */
+    public function findById_rapport($id_rapport)
+    {
+        $query = $this->select()
+                    ->from( array("i" => "iste_royalty") )                           
+                    ->where( "i.id_rapport = ?", $id_rapport );
+
+        return $this->fetchAll($query)->toArray(); 
+    }
+    	/**
+     * Recherche une entrée Iste_royalty avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
      * @param int $idAuteur
      *
      * @return array

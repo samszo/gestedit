@@ -918,16 +918,15 @@ function initDroit() {
 		            ],
 		            onClick: function (event) {
 						var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
-		                if (event.target == 'voirRapport') {
-			                	if(s){
-				                	s.forEach(function(r){
-				                		var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
-				                		open(item["url"],"_blank");
-				                	})
-			                	}
-		                }
-						else if (event.target == 'impRapport'){
-							if (s){
+						if(s.length){
+							if (event.target == 'voirRapport') {
+									s.forEach(function(r){
+										var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
+										open(item["url"],"_blank");
+									})
+							}
+							else if (event.target == 'impRapport'){
+								w2ui['grid_<?php echo $idPage;?>_ficRapport'].lock('Veuillez patientez',true);
 								var arraySel = [];
 								s.forEach(function(r){
 									var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
@@ -938,37 +937,101 @@ function initDroit() {
 									});
 								})
 								$.get('<?php if(!$this->ajax) echo '../'; ?>import/envoimail',
-							{"data":arraySel},
-			            		function(js){
-			            			// w2alert("Mails supposés envoyés !"+JSON.stringify(js));
-									var strVar="";
-									strVar += "<div id=\"grid\" style=\"width: 100%; height: 350px;\"><\/div>";
-									strVar += "";
-									strVar += "<script type=\"text\/javascript\">";
-									strVar += "$(function () {";
-									strVar += "if(w2ui['grid']) w2ui['grid'].destroy();";
-									strVar += "    $('#grid').w2grid({ ";
-									strVar += "        name: 'grid', ";
-									strVar += "        columns: [                ";
-									strVar += "            { field: 'recid', caption: 'ID', size: '50px' },";
-									strVar += "            { field: 'nom', caption: 'Nom', size: '30%' },";
-									strVar += "            { field: 'prenom', caption: 'Prénom', size: '30%' },";
-									strVar += "            { field: 'etat', caption: 'Etat', size: '70%' }";
-									strVar += "        ],";
-									strVar += "        records: "+JSON.stringify(js);
-									strVar += "    });    ";
-									strVar += "});";
-									strVar += "<\/script>";
+								{"data":arraySel},
+									function(js){
+										var strVar="";
+										strVar += "<div id=\"grid\" style=\"width: 100%; height: 350px;\"><\/div>";
+										strVar += "";
+										strVar += "<script type=\"text\/javascript\">";
+										strVar += "$(function () {";
+										strVar += "if(w2ui['grid']) w2ui['grid'].destroy();";
+										strVar += "    $('#grid').w2grid({ ";
+										strVar += "        name: 'grid', ";
+										strVar += "        columns: [                ";
+										strVar += "            { field: 'recid', caption: 'ID', size: '50px' },";
+										strVar += "            { field: 'nom', caption: 'Nom', size: '30%' },";
+										strVar += "            { field: 'prenom', caption: 'Prénom', size: '30%' },";
+										strVar += "            { field: 'etat', caption: 'Etat', size: '70%' }";
+										strVar += "        ],";
+										strVar += "        records: "+JSON.stringify(js);
+										strVar += "    });    ";
+										strVar += "});";
+										strVar += "<\/script>";
 
-
-									w2popup.open({ 
-										title: "Résumé des mails envoyés",
-										body: strVar
-									});
-			           		},"json");
+										w2popup.open({ 
+											title: "Résumé des mails envoyés",
+											body: strVar
+										});
+										w2ui['grid_<?php echo $idPage;?>_ficRapport'].unlock();
+										getRapportFic(w2ui['grid_<?php echo $idPage;?>_fichier_import'].getSelection()[0]);
+								},"json");
 							}
-						}
-		            }
+							else if (event.target=="groupRapport"){
+								var rapport = "";
+								for (var i = 0; i < s.length; i++) {
+									var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(s[i]);
+									rapport += item["recid"]+".";
+								}
+								rapport = rapport.substr(0,rapport.length-1);
+								//TODO: Vérifier pour le php if(!$this->ajax) echo '../';
+								var urlGroupe =  window.location.href + "../../../import/grouperpdf?data=" + rapport;
+								
+
+								var mapForm = document.createElement("form");
+								mapForm.target = "Map";
+								mapForm.method = "POST"; // or "post" if appropriate
+								mapForm.action = window.location.href + "../../../import/grouperpdf";
+
+								var mapInput = document.createElement("input");
+								mapInput.type = "text";
+								mapInput.name = "data";
+								mapInput.value = rapport;
+								mapForm.appendChild(mapInput);
+
+								document.body.appendChild(mapForm);
+
+								map = window.open("", "Map");
+
+								if (map) {
+									mapForm.submit();
+								} else {
+									alert('Veuillez autoriser les popups sur cette page.');
+								}
+							}
+							else if(event.target =='payerRapport'){
+								var strVar =  '   <div class="w2ui-field" >  '  + 
+									'       <label>Date de paiement :</label>  '  + 
+									'       <div> <input type="date" id="dateP"> </div>  '  + 
+									'   </div>  '  + 
+									'   <script>  '  + 
+									"     $('input[type=date]').w2field('date',{ format: 'yyyy-mm-dd' });  "  + 
+									'  <\/script>    ' ;
+
+								w2popup.open({ 
+											title: "Veuillez choisir la date de paiement pour la sélection",
+											body: strVar,
+											buttons: '<button class="w2ui-btn" onclick="validerPaiement()">Valider</button>'
+								});
+							}
+							else if (event.target == "encaisserRapport"){
+								
+								var strVar =  '   <div class="w2ui-field" >  '  + 
+									"       <label>Date d'encaissement :</label>  "  + 
+									'       <div> <input type="date" id="dateE" > </div>  '  + 
+									'   </div>  '  + 
+									'   <script>  '  + 
+									"     $('input[type=date]').w2field('date',{ format: 'yyyy-mm-dd' });  "  + 
+									'  <\/script>    ' ;
+
+								w2popup.open({ 
+											title: "Veuillez choisir la date d'encaissement pour la sélection",
+											body: strVar,
+											buttons: '<button class="w2ui-btn" onclick="validerEncaissement()">Valider</button>'
+								});
+								
+							}
+						}	
+					}
 		        },
 			        
 			},					
@@ -1405,6 +1468,59 @@ function showPdf(url){
 	var urlLoad = 'http://localhost/gestedit/admin/js/pdfjs/web/viewer.html?file='+encodeURIComponent(url);
 	PDFViewerApplication.open(url);
 }
+
+function validerPaiement (){
+	var date = document.getElementById("dateP").value;
+	if (date){
+		var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
+		var arraySel = [];
+		s.forEach(function(r){
+			var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
+			arraySel.push({
+				recid : item["recid"]
+			});
+		})
+		console.log("arraySel: "+JSON.stringify(arraySel));
+		$.get('<?php if(!$this->ajax) echo '../'; ?>import/paiement',
+								{"data":arraySel,"date":date},
+									function(js){
+										w2alert(js);
+										w2ui['grid_<?php echo $idPage;?>_ficRapport'].unlock();
+										getRapportFic(w2ui['grid_<?php echo $idPage;?>_fichier_import'].getSelection()[0]);
+								},"json");
+		w2popup.close();
+	}
+	else{
+		w2alert("Veuillez sélectionner une date avant de valider")
+	}
+}
+
+function validerEncaissement (){
+	var date = document.getElementById("dateE").value;
+	if (date){
+		var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
+		var arraySel = [];
+		s.forEach(function(r){
+			var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
+			arraySel.push({
+				recid : item["recid"]
+			});
+		})
+		console.log("arraySel: "+JSON.stringify(arraySel));
+		$.get('<?php if(!$this->ajax) echo '../'; ?>import/encaissement',
+								{"data":arraySel,"date":date},
+									function(js){
+										w2alert(js);
+										w2ui['grid_<?php echo $idPage;?>_ficRapport'].unlock();
+										getRapportFic(w2ui['grid_<?php echo $idPage;?>_fichier_import'].getSelection()[0]);
+								},"json");
+		w2popup.close();
+	}
+	else{
+		w2alert("Veuillez sélectionner une date avant de valider")
+	}
+}
+
 
 </script>
 

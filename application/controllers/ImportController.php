@@ -1610,6 +1610,7 @@ class ImportController extends Zend_Controller_Action
 		
 		$this->initInstance();
 		$dbAut = new Model_DbTable_Iste_auteur();
+		$dbr = new Model_DbTable_Iste_royalty();
 
 		//récupérer les données de sélection {recid(rapport_id), idAuteur}
 		$data = $this->_getParam("data");
@@ -1619,8 +1620,6 @@ class ImportController extends Zend_Controller_Action
 		{
 			return $transport->recipients . '_' . mt_rand() . '.eml';
 		}
- 
-
 		//log
 		$log = array();
 
@@ -1631,9 +1630,6 @@ class ImportController extends Zend_Controller_Action
 			$auteur = $dbAut->findById_auteur($ligne["idAuteur"]);
 			//si mail valide (simple check au cas où pas de mail)
 			if (strpos($auteur["mail_1"],"@") !== false){
-				
-
-
 				
 				//récupérer odt
 				$filePath = ROOT_PATH.substr($ligne["url"],strpos($ligne["url"],"/data"));
@@ -1670,37 +1666,88 @@ class ImportController extends Zend_Controller_Action
 	
 					//si mail envoyé màj bdd
 					if ($mail){
-
-						//TODO: ajouter date envoi à la bdd 
 						array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Email préparé !"));
+						//ajouter date envoi à la bdd 
+						$royalties = $dbr->findById_rapport($ligne["recid"]);
+						foreach ($royalties as $roy ) {
+							$dbr->edit($roy["id_royalty"],array("date_envoi"=>date("Y-m-d")));
+						}
 					}
 					else{
 						array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème envoi email "));
 					}
-
 				}
 				else{ //pdf non crée ou inaccessible
 					array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème création rapport pdf"));
 				}
-
-
 			}
 			//si il y a un problème avec le mail de l'auteur 
 			else{
 				array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème avec l'email de l'auteur"));
 			}
-
-	
-			
-
 		}
-
-
-
-		
 		$this->view->json = json_encode($log);
 	}
+
+	public function grouperpdfAction(){
+		$this->initInstance();
+		$dbr = new Model_DbTable_Iste_rapport();
+
+		$data = explode(".",$this->_getParam("data"));
+
+
+		$pdf = new \setasign\Fpdi\Fpdi();
+
+		foreach ($data as $id ) {
+			$url = $dbr->findById_rapport($id);
+			$filePath = ROOT_PATH.substr($url["url"],strpos($url["url"],"/data"));
+			$this->ajouteFichier($pdf,$filePath);
+
+		}
+		$fileName = '/data/editions/fichier'.mt_rand().'.pdf';
+		
+		$pdf->Output('I','nouveau_fichier.pdf');
+	}
     
+	function ajouteFichier($pdf,$file)
+	{
+		$pageCount = $pdf->setSourceFile($file);
+		for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+			$pageId = $pdf->ImportPage($pageNo);
+			$s = $pdf->getTemplatesize($pageId);
+			$pdf->AddPage($s['orientation'], $s);
+			$pdf->useImportedPage($pageId);
+		}
+	}
+
+	public function paiementAction(){
+		$this->initInstance();
+		$dbr = new Model_DbTable_Iste_royalty();
+		$data = $this->_getParam("data");
+		$date = $this->_getParam("date");
+		foreach ($data as $ligne) {
+			$royalties = $dbr->findById_rapport($ligne["recid"]);
+			foreach ($royalties as $roy ) {
+				$dbr->edit($roy["id_royalty"],array("date_paiement"=>$date));
+			}
+		}
+		$this->view->json = json_encode("Date de paiement enregistrée avec succès");
+		
+	}
+
+	public function encaissementAction(){
+		$this->initInstance();
+		$dbr = new Model_DbTable_Iste_royalty();
+		$data = $this->_getParam("data");
+		$date = $this->_getParam("date");
+		foreach ($data as $ligne) {
+			$royalties = $dbr->findById_rapport($ligne["recid"]);
+			foreach ($royalties as $roy ) {
+				$dbr->edit($roy["id_royalty"],array("date_encaissement"=>$date));
+			}
+		}
+		$this->view->json = json_encode("Date d'encaissement enregistrée avec succès");
+	}
 }
 
 
