@@ -345,16 +345,17 @@ class CrudController extends Zend_Controller_Action
     
     public function ventedataAction()
     {
-    		$this->initInstance();
-    	
-    		//création de l'objet BDD
-    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
-    		$oBdd = new $oName();
-    	    //récupère les données
-    		//$rs = $oBdd->findById_livre($this->_getParam('id'));
-    		$rs = $oBdd->findById_auteur($this->_getParam('id'));
-    		
-		//ajoute les résumés
+		$this->initInstance();
+	
+		//création de l'objet BDD
+		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
+		$oBdd = new $oName();
+		//récupère les données
+		//$rs = $oBdd->findById_livre($this->_getParam('id'));
+		//$rs = $oBdd->findById_auteur($this->_getParam('id'));
+		$rs = $oBdd->findDetails($this->_getParam('table'),implode(",",$this->_getParam('ids')));
+			
+		/*ajoute les résumés
 		$rsR = $oBdd->getTotaux($this->_getParam('id'));
 		if($this->_getParam('obj')=="vente"){
 			$i=1;
@@ -392,7 +393,8 @@ class CrudController extends Zend_Controller_Action
 					);
 				$i++;
 			}			
-		}  
+		} 
+		*/ 
 		$this->view->json = json_encode($rs);		
 		$this->view->rs = $rs;
     }        

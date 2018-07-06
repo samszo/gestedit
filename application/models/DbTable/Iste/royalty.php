@@ -187,7 +187,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    	/**
+    /**
      * Recherche une entrée Iste_royalty avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -216,6 +216,44 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     	
         return $this->fetchAll($query)->toArray(); 
     }
+
+    /**
+     * Recherche une entrée Iste_royalty avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param string $table
+     * @param string $ids
+     *
+     * @return array
+     */
+    public function findDetails($table, $ids)
+    {
+        $query = $this->select()
+			->from( array("r" => "iste_royalty"),array("recid"=>"id_royalty","montant_livre","montant_euro","montant_dollar","taxe_taux","taxe_deduction","pourcentage","date_paiement","date_encaissement","date_edition"))                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+			->joinInner(array("d" => "iste_devise"),
+                'd.id_devise = r.id_devise', array("id_devise","base_contrat",'annee'=>"DATE_FORMAT(date_taux,'%Y')"))
+            ->joinInner(array("v" => "iste_vente"),
+                'v.id_vente = r.id_vente', array("date_vente","montant_vente"=>"v.montant_livre"))
+			->joinInner(array("i" => "iste_isbn"),
+                'v.id_isbn = i.id_isbn', array("type_isbn"=>"type"))
+			->joinInner(array("l" => "iste_livre"),
+                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''))"))
+			->joinInner(array("ac" => "iste_auteurxcontrat"),
+                'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
+			->joinInner(array("c" => "iste_contrat"),
+                'c.id_contrat = ac.id_contrat', array("type_contrat"=>"type"));
+        if($table=='auteur')
+           $query->where( "ac.id_auteur IN (".$ids.")");
+        if($table=='isbn')
+            $query->where( "i.id_isbn IN (".$ids.")");    	
+        if($table=='fichier'){
+            $query->joinInner(array("imp" => "iste_importdata"),
+                'imp.id_importdata = v.id_importdata', array())
+                ->where( "imp.id_importfic IN (".$ids.")");    	
+        }
+        return $this->fetchAll($query)->toArray(); 
+    }    
     
     	/**
      * Recherche une entrée Iste_royalty avec la valeur spécifiée

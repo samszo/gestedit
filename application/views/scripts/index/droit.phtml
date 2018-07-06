@@ -60,17 +60,32 @@ function initDroit() {
 			,{ id: 'tab2', caption: "Détails des royalties" }],
 		onClick: function (event) {
 			if(event.target=="tab0"){
-				w2ui['grid_<?php echo $idPage;?>_ficRapport'].destroy();
-				w2ui['layout_<?php echo $idPage;?>_fic'].destroy();
-				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));				
-				w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
+				clearTabs();
+				initPdf();
 			}else if(event.target=="tab1"){
-				w2ui['grid_<?php echo $idPage;?>_ficVente'].destroy();
-				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicVente));
+				if(w2ui['grid_<?php echo $idPage;?>_detail'])w2ui['grid_<?php echo $idPage;?>_detail'].destroy();
+				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail));
 			}else if(event.target=="tab2"){
-				if(w2ui['grid_<?php echo $idPage;?>_ficRoyalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
-				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicRoyalties));
+				if(w2ui['grid_<?php echo $idPage;?>_royalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
+				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteRoyalties));				
 			}
+
+			//récupère les identifiants sélectionnés
+			var ids, table, c =  w2ui.layout_<?php echo $idPage;?>_top.content('main');
+			if(c.name=='layout_<?php echo $idPage;?>_fichier'){
+				table = 'fichier';
+				ids = w2ui['grid_<?php echo $idPage;?>_fichier_import'].getSelection();
+			}
+			if(c.name=='grid_<?php echo $idPage;?>_vente_isbn'){
+				table = 'isbn';
+				ids = w2ui['grid_<?php echo $idPage;?>_vente_isbn'].getSelection();
+			}
+			if(c.name=='grid_<?php echo $idPage;?>_vente_auteur'){
+				table = 'auteur';
+				ids = w2ui['grid_<?php echo $idPage;?>_vente_auteur'].getSelection();
+			}
+			//affiche les données			
+			getVenteData(ids, table);
 		},
 		onClose: function (event) {
 			this.click('tab0');
@@ -109,36 +124,10 @@ function initDroit() {
 				onRender : function (event) {
 					event.onComplete = function () {
 						console.log(event);
-						//if(urlPDF)PDFViewerApplication.open(urlPDF);
 					}
 				},
 				
 			},
-			/*
-			tabsVenteISBN: {
-				active: 'tab0',
-				tabs: [{ id: 'tab0', caption: "Problèmes pour le livre" },{ id: 'tab1', caption: "Détails des ventes pour le livre" }
-					,{ id: 'tab2', caption: "Détails des royalties pour le livre" }
-					,{ id: 'tab3', caption: "Problèmes pour l'auteur" },{ id: 'tab4', caption: "Détails des ventes pour l'auteur" }
-					,{ id: 'tab5', caption: "Détails des royalties pour l'auteur" },{ id: 'tab6', caption: "Paiements pour l'auteur" }],
-				onClick: function (event) {
-					if(event.target=="tab0"){
-						w2ui['grid_<?php echo $idPage;?>_probleme'].destroy();
-						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteProbleme));
-					}else if(event.target=="tab1"){
-						w2ui['grid_<?php echo $idPage;?>_detail'].destroy();
-						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail));
-					}else if(event.target=="tab2"){
-						if(w2ui['grid_<?php echo $idPage;?>_royalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
-						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteRoyalties));						        	
-					}
-					getVenteData();						        
-				},
-				onClose: function (event) {
-					this.click('tab0');
-				}
-			},
-			*/			
 		    layoutVenteTop: {
 		        name: 'layout_<?php echo $idPage;?>_top',
 		        padding: 2,
@@ -150,6 +139,7 @@ function initDroit() {
 					        tabs: [{ id: 'tabTop2', caption: "Fichier de ventes" },{ id: 'tabTop0', caption: "Ventes par ISBN" },{ id: 'tabTop1', caption: "Ventes par auteur" }
 					        	,{ id: 'tabTop3', caption: "Paramètres" }],
 					        onClick: function (event) {
+								initTabs();
 								clearTabs();
 						        if(event.target=="tabTop0"){
 						            if(w2ui['grid_<?php echo $idPage;?>_vente_isbn'])w2ui['grid_<?php echo $idPage;?>_vente_isbn'].destroy();
@@ -530,7 +520,7 @@ function initDroit() {
 		    },		    
 		    gridVenteDetail: { 
 		        name: 'grid_<?php echo $idPage;?>_detail',
-		        header: "Détails des ventes pour l'auteur",		
+		        header: "Détails des ventes",		
 				show: {toolbar		: true,
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
@@ -617,7 +607,7 @@ function initDroit() {
 		    },			    	    		    
 		    gridVenteRoyalties: { 
 		        name: 'grid_<?php echo $idPage;?>_royalties', 
-				header: "Royalties pour l'auteur",		
+				header: "Détail des royalties",		
 				show: {toolbar		: true,
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
@@ -1145,66 +1135,39 @@ function clearTabs(){
 }
 
 
-function getVenteData(){
-    if(!itemSelectAuteur) return;   
+function getVenteData(ids, table){
+    if(!ids.length) return;   
     //récupère le infos liées
     if(w2ui['grid_<?php echo $idPage;?>_detail']){
 		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/ventedata',
-			{id:itemSelectAuteur.recid, obj:'vente'},
+			{'ids':ids, 'table':table, 'obj':'vente'},
 	    		function(js){
     				finsession(js);
-	            var g = w2ui['grid_<?php echo $idPage;?>_detail'];
-	            g.clear();		            		
+					var g = w2ui['grid_<?php echo $idPage;?>_detail'];
+					g.clear();		            		
 	    			if(js.rs.length){
 	        			//mise à jour de la grille 			        
-		            g.add(js.rs);
+						g.add(js.rs);
+					}else{
+            			w2alert("Pas de royalty.");		    			
 	    			}
 	    },"json");
     }
     if(w2ui['grid_<?php echo $idPage;?>_royalties']){
 		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/ventedata',
-			{id:itemSelectAuteur.recid, obj:'royalty'},
+			{'ids':ids, 'table':table, 'obj':'royalty'},
 	    		function(js){
     				finsession(js);
-	            g = w2ui['grid_<?php echo $idPage;?>_royalties'];
-	            g.clear();		            		
-	    			if(js.rs.length){
-	        			//mise à jour de la grille 			        
-		            g.add(js.rs);
-	    			}else{
-            			w2alert("Pas de royalty pour le participant.<br/>Vérifiez :<br/>- vous avez lancé le calcul des royalties<br/>- la base contractuelle de la proposition est définie<br/>- il existe un contrat avec une date de signature<br/>- il existe un ISBN avec une date de publication");		    			
-	    			}
-	    },"json");           		           
-    }
-    /*
-    if(w2ui['grid_<?php echo $idPage;?>_prix']){
-		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
-			{id:itemSelectAuteur.recid, obj:'prix'},
-	    		function(js){
-    				finsession(js);
-	            g = w2ui['grid_<?php echo $idPage;?>_prix'];
-	            g.clear();		            		
-	    			if(js.rs.length){
-	        			//mise à jour de la grille 			        
-		            g.add(js.rs);
-	    			}
-	    },"json");           		           
-    } 
-    */   
-    if(w2ui['grid_<?php echo $idPage;?>_rapport']){
-		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
-			{idAuteur:itemSelectAuteur.recid, mod:'paiement royalties'},
-	    		function(js){
-    				finsession(js);
-					g = w2ui['grid_<?php echo $idPage;?>_rapport'];
+					g = w2ui['grid_<?php echo $idPage;?>_royalties'];
 					g.clear();		            		
 	    			if(js.rs.length){
 	        			//mise à jour de la grille 			        
-		            g.add(js.rs);
+			            g.add(js.rs);
+	    			}else{
+            			w2alert("Pas de royalty.");		    			
 	    			}
 	    },"json");           		           
-    }    
-
+    }
 }
 
 
