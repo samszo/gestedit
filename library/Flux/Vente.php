@@ -349,7 +349,7 @@ class Flux_Vente extends Flux_Site{
 	 *
 	 * @return array
 	 */
-	public function getProblemes($idFic){
+	public function getProblemesFic($idFic){
 	    
 	    //récupère la définition du fichier
 	    $dbFic = new Model_DbTable_Iste_importfic();
@@ -379,4 +379,23 @@ class Flux_Vente extends Flux_Site{
 	    
 	    return  $rs;
 	}
+
+	/**
+	 * méthode pour calculer les problèmes de vente
+	 *
+	 *
+	 * @return array
+	 */
+	public function getProblemes(){
+	    //TODO:faire les requête pour les erreurs possibles	    
+	    //récupère les lignes sans contrat
+	    $rs['data_sans_contrat']=$dbID->getDataSansContrat($idFic);
+	    
+		//récupère les lignes sans base contrat
+	    $rs['data_sans_basecontrat']=$dbID->getDataSansBaseContrat($idFic);
+		
+	    
+	    return  $rs;
+	}
+
 }

@@ -51,7 +51,7 @@ var rsDroitParam = <?php echo $this->rsDroitParam; ?>;
 var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
 var pstyleDetail = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
 var config;
-var idPLU, idPCU, itemSelectAuteur, itemSelectVente, rsIsbnLivre, rsIsbnPrix, urlPDF=false;
+var idPLU, idPCU, itemSelectAuteur, itemSelectISBN, itemSelectVente, rsIsbnLivre, rsIsbnPrix, urlPDF=false;
 
 function initDroit() {
 	var tabsFichierVente = {
@@ -60,17 +60,32 @@ function initDroit() {
 			,{ id: 'tab2', caption: "Détails des royalties" }],
 		onClick: function (event) {
 			if(event.target=="tab0"){
-				w2ui['grid_<?php echo $idPage;?>_ficRapport'].destroy();
-				w2ui['layout_<?php echo $idPage;?>_fic'].destroy();
-				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));				
-				w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
+				clearTabs();
+				initPdf();
 			}else if(event.target=="tab1"){
-				w2ui['grid_<?php echo $idPage;?>_ficVente'].destroy();
-				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicVente));
+				if(w2ui['grid_<?php echo $idPage;?>_detail'])w2ui['grid_<?php echo $idPage;?>_detail'].destroy();
+				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail));
 			}else if(event.target=="tab2"){
-				if(w2ui['grid_<?php echo $idPage;?>_ficRoyalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
-				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridFicRoyalties));
+				if(w2ui['grid_<?php echo $idPage;?>_royalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
+				w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteRoyalties));				
 			}
+
+			//récupère les identifiants sélectionnés
+			var ids, table, c =  w2ui.layout_<?php echo $idPage;?>_top.content('main');
+			if(c.name=='layout_<?php echo $idPage;?>_fichier'){
+				table = 'fichier';
+				ids = w2ui['grid_<?php echo $idPage;?>_fichier_import'].getSelection();
+			}
+			if(c.name=='grid_<?php echo $idPage;?>_vente_isbn'){
+				table = 'isbn';
+				ids = w2ui['grid_<?php echo $idPage;?>_vente_isbn'].getSelection();
+			}
+			if(c.name=='grid_<?php echo $idPage;?>_vente_auteur'){
+				table = 'auteur';
+				ids = w2ui['grid_<?php echo $idPage;?>_vente_auteur'].getSelection();
+			}
+			//affiche les données			
+			getVenteData(ids, table);
 		},
 		onClose: function (event) {
 			this.click('tab0');
@@ -103,42 +118,16 @@ function initDroit() {
 		        name: 'layout_<?php echo $idPage;?>_fic',
 		        padding: 4,
 		        panels: [
-					{ type: 'main',size: '70%', hidden:false, resizable: true, style: pstyleDetail},		 		        
-		            { type: 'right', size: '30%', hidden:false, resizable: true, style: pstyleDetail},
+					{ type: 'main',size: '50%', hidden:false, resizable: true, style: pstyleDetail},		 		        
+		            { type: 'right', size: '740px', hidden:false, resizable: true, style: pstyleDetail},
 				],
 				onRender : function (event) {
 					event.onComplete = function () {
 						console.log(event);
-						//if(urlPDF)PDFViewerApplication.open(urlPDF);
 					}
 				},
 				
 			},
-			/*
-			tabsVenteISBN: {
-				active: 'tab0',
-				tabs: [{ id: 'tab0', caption: "Problèmes pour le livre" },{ id: 'tab1', caption: "Détails des ventes pour le livre" }
-					,{ id: 'tab2', caption: "Détails des royalties pour le livre" }
-					,{ id: 'tab3', caption: "Problèmes pour l'auteur" },{ id: 'tab4', caption: "Détails des ventes pour l'auteur" }
-					,{ id: 'tab5', caption: "Détails des royalties pour l'auteur" },{ id: 'tab6', caption: "Paiements pour l'auteur" }],
-				onClick: function (event) {
-					if(event.target=="tab0"){
-						w2ui['grid_<?php echo $idPage;?>_probleme'].destroy();
-						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteProbleme));
-					}else if(event.target=="tab1"){
-						w2ui['grid_<?php echo $idPage;?>_detail'].destroy();
-						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteDetail));
-					}else if(event.target=="tab2"){
-						if(w2ui['grid_<?php echo $idPage;?>_royalties'])w2ui['grid_<?php echo $idPage;?>_royalties'].destroy();
-						w2ui.layout_<?php echo $idPage;?>.content('main', $().w2grid(config.gridVenteRoyalties));						        	
-					}
-					getVenteData();						        
-				},
-				onClose: function (event) {
-					this.click('tab0');
-				}
-			},
-			*/			
 		    layoutVenteTop: {
 		        name: 'layout_<?php echo $idPage;?>_top',
 		        padding: 2,
@@ -150,6 +139,8 @@ function initDroit() {
 					        tabs: [{ id: 'tabTop2', caption: "Fichier de ventes" },{ id: 'tabTop0', caption: "Ventes par ISBN" },{ id: 'tabTop1', caption: "Ventes par auteur" }
 					        	,{ id: 'tabTop3', caption: "Paramètres" }],
 					        onClick: function (event) {
+								initTabs();
+								clearTabs();
 						        if(event.target=="tabTop0"){
 						            if(w2ui['grid_<?php echo $idPage;?>_vente_isbn'])w2ui['grid_<?php echo $idPage;?>_vente_isbn'].destroy();
 						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
@@ -247,10 +238,11 @@ function initDroit() {
 		            }
 		        },
 		        records: rsVenteISBN,
-		        onClick: function (event) {
-					if(itemSelect && itemSelect.recid == event.recid) return;
-		        		itemSelectAuteur = this.get(event.recid);
-		            getVenteData();
+		        onSelect: function (event) {
+					event.onComplete = function () {
+						var s = w2ui['grid_<?php echo $idPage;?>_vente_isbn'].getSelection();
+			            getRapportFic(null,s,null)
+					}
 		        },	    
 		        onAdd: function(event) {
 			        openPopupAjoutVente();            
@@ -339,10 +331,11 @@ function initDroit() {
 		            }
 		        },
 		        records: rsVenteAuteur,
-		        onClick: function (event) {
-					if(itemSelect && itemSelect.recid == event.recid) return;
-		        		itemSelectAuteur = this.get(event.recid);
-		            getVenteData();
+		        onSelect: function (event) {
+					event.onComplete = function () {
+						var s = w2ui['grid_<?php echo $idPage;?>_vente_auteur'].getSelection();
+			            getRapportFic(null,null,s)
+					}
 		        },	    
 		        onAdd: function(event) {
 			        	openPopupAjoutVente();            
@@ -527,7 +520,7 @@ function initDroit() {
 		    },		    
 		    gridVenteDetail: { 
 		        name: 'grid_<?php echo $idPage;?>_detail',
-		        header: "Détails des ventes pour l'auteur",		
+		        header: "Détails des ventes",		
 				show: {toolbar		: true,
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
@@ -614,7 +607,7 @@ function initDroit() {
 		    },			    	    		    
 		    gridVenteRoyalties: { 
 		        name: 'grid_<?php echo $idPage;?>_royalties', 
-				header: "Royalties pour l'auteur",		
+				header: "Détail des royalties",		
 				show: {toolbar		: true,
 	    				toolbarReload   : false,
 	    				toolbarColumns  : false,
@@ -863,11 +856,11 @@ function initDroit() {
 		        columns: [		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'royIds', caption: 'royId', size: '50px', hidden:true, sortable: true, resizable: true },
-		            { field: 'nom', caption: "Nom", size: '10%', sortable: true, resizable: true},
-		            { field: 'prenom', caption: "Prenom", size: '10%', sortable: true, resizable: true},
-		            { field: 'base_contrat', caption: "Base contrat", size: '80px', sortable: true, resizable: true},
-		            { field: 'periode', caption: "Periode", size: '170px', sortable: true, resizable: true},
-		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '120px', sortable: true, resizable: true},
+		            { field: 'nom', caption: "Nom", size: '80px', sortable: true, resizable: true},
+		            { field: 'prenom', caption: "Prénom", size: '80px', sortable: true, resizable: true},
+		            { field: 'base_contrat', caption: "Base contrat", size: '10%', sortable: true, resizable: true},
+		            { field: 'periode', caption: "Periode", size: '100px', sortable: true, resizable: true},
+		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '100px', sortable: true, resizable: true},
 		            { field: 'date_edition', caption: 'Edition', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_envoi', caption: 'Envoi', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_paiement', editable:{type:'date'}, caption: 'Paiement', size: '80px', sortable: true, resizable: true},
@@ -1175,80 +1168,69 @@ function initDroit() {
 
 		};
 	
-    // initialisation
-    $('#<?php echo $idPage;?>').w2layout(config.layoutVente);
-	//charge les données
-    w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
-	w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));				
-	w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
-	w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
+	//initialisation
+	initTabs();	
 	initPdf();
+	//charge les données
 	getFichierImport();
 
 
 }
 
+function initTabs(){
+    // initialisation
+	$('#<?php echo $idPage;?>').w2layout(config.layoutVente);	
+    w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
+	w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));				
+	w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
+	w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
 
-function getVenteData(){
-    if(!itemSelectAuteur) return;   
+}
+
+function clearTabs(){
+
+    if(w2ui['layout_<?php echo $idPage;?>_fic'])w2ui['layout_<?php echo $idPage;?>_fic'].destroy();
+	w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));
+	if(w2ui['grid_<?php echo $idPage;?>_ficRapport'])w2ui['grid_<?php echo $idPage;?>_ficRapport'].destroy();				
+	w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
+	initPdf();
+	
+}
+
+
+function getVenteData(ids, table){
+    if(!ids.length) return;   
     //récupère le infos liées
     if(w2ui['grid_<?php echo $idPage;?>_detail']){
 		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/ventedata',
-			{id:itemSelectAuteur.recid, obj:'vente'},
+			{'ids':ids, 'table':table, 'obj':'vente'},
 	    		function(js){
     				finsession(js);
-	            var g = w2ui['grid_<?php echo $idPage;?>_detail'];
-	            g.clear();		            		
+					var g = w2ui['grid_<?php echo $idPage;?>_detail'];
+					g.clear();		            		
 	    			if(js.rs.length){
 	        			//mise à jour de la grille 			        
-		            g.add(js.rs);
+						g.add(js.rs);
+					}else{
+            			w2alert("Pas de royalty.");		    			
 	    			}
 	    },"json");
     }
     if(w2ui['grid_<?php echo $idPage;?>_royalties']){
 		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/ventedata',
-			{id:itemSelectAuteur.recid, obj:'royalty'},
+			{'ids':ids, 'table':table, 'obj':'royalty'},
 	    		function(js){
     				finsession(js);
-	            g = w2ui['grid_<?php echo $idPage;?>_royalties'];
-	            g.clear();		            		
-	    			if(js.rs.length){
-	        			//mise à jour de la grille 			        
-		            g.add(js.rs);
-	    			}else{
-            			w2alert("Pas de royalty pour le participant.<br/>Vérifiez :<br/>- vous avez lancé le calcul des royalties<br/>- la base contractuelle de la proposition est définie<br/>- il existe un contrat avec une date de signature<br/>- il existe un ISBN avec une date de publication");		    			
-	    			}
-	    },"json");           		           
-    }
-    /*
-    if(w2ui['grid_<?php echo $idPage;?>_prix']){
-		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/livredata',
-			{id:itemSelectAuteur.recid, obj:'prix'},
-	    		function(js){
-    				finsession(js);
-	            g = w2ui['grid_<?php echo $idPage;?>_prix'];
-	            g.clear();		            		
-	    			if(js.rs.length){
-	        			//mise à jour de la grille 			        
-		            g.add(js.rs);
-	    			}
-	    },"json");           		           
-    } 
-    */   
-    if(w2ui['grid_<?php echo $idPage;?>_rapport']){
-		$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
-			{idAuteur:itemSelectAuteur.recid, mod:'paiement royalties'},
-	    		function(js){
-    				finsession(js);
-					g = w2ui['grid_<?php echo $idPage;?>_rapport'];
+					g = w2ui['grid_<?php echo $idPage;?>_royalties'];
 					g.clear();		            		
 	    			if(js.rs.length){
 	        			//mise à jour de la grille 			        
-		            g.add(js.rs);
+			            g.add(js.rs);
+	    			}else{
+            			w2alert("Pas de royalty.");		    			
 	    			}
 	    },"json");           		           
-    }    
-
+    }
 }
 
 
@@ -1423,9 +1405,9 @@ function finProcessImport(idFic){
 	voirData(idFic);
 	getRapportFic(idFic);
 }
-function getRapportFic(idFic){
+function getRapportFic(idFic,idsISBN,idsAuteur){
 	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
-		{idFichier:idFic},
+		{'idFichier':idFic,'idsISBN':idsISBN,'idsAuteur':idsAuteur},
 			function(js){
 				finsession(js);
 				g = w2ui['grid_<?php echo $idPage;?>_ficRapport'];

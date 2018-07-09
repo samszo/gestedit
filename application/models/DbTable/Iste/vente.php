@@ -241,6 +241,53 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }    
+
+    	/**
+     * Recherche une entrée Iste_vente avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param string $table
+     * @param string $ids
+     *
+     * @return array
+     */
+    public function findDetails($table, $ids)
+    {
+        $query = $this->select()
+			->from( array("v" => "iste_vente") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("vid" => "iste_vente"),
+                'vid.id_vente = v.id_vente', array("recid"=>"id_vente"))
+            ->joinInner(array("i" => "iste_isbn"),
+                'v.id_isbn = i.id_isbn', array("num","type","date_parution"))
+            ->joinInner(array("pro" => "iste_proposition"),
+                'pro.id_livre = i.id_livre', array("base_contrat"))
+            ->joinInner(array("l" => "iste_livre"),
+                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''))"))
+            ->joinInner(array("la" => "iste_livrexauteur"),
+                'la.id_livre = l.id_livre', array())
+            ->joinInner(array("b" => "iste_boutique"),
+                'b.id_boutique = v.id_boutique', array("boutique"=>"b.nom"))
+            ->joinLeft(array("p" => "iste_prix"),
+                'p.id_prix = v.id_prix', array("prix_euro","prix_livre","prix_dollar"))
+            ->joinLeft(array("li" => "iste_licence"),
+                'li.id_licence = v.id_licence', array("id_licence","licence"=>"CONCAT(li.nom,' ',IFNULL(licence_unitaire,''),' ',IFNULL(licence_coef,'- '),'% ',IFNULL(licence_illimite,''),' ',IFNULL(mutiplicateur,''))"))
+            ->joinLeft(array("ac" => "iste_auteurxcontrat"),
+                'ac.id_auteur = la.id_auteur AND ac.id_livre = la.id_livre', array("date_contrat"=>"MIN(ac.date_signature)"))
+			->group("v.id_vente");
+        if($table=='auteur')
+            $query->where( "ac.id_auteur IN (".$ids.")");
+        if($table=='isbn')
+             $query->where( "i.id_isbn IN (".$ids.")");    	
+        if($table=='fichier'){
+             $query->joinInner(array("imp" => "iste_importdata"),
+                 'imp.id_importdata = v.id_importdata', array())
+                 ->where( "imp.id_importfic IN (".$ids.")");    	
+         }
+ 
+        return $this->fetchAll($query)->toArray(); 
+    }    
+
     /**
      * Recherche une entrée Iste_vente avec la valeur spécifiée
      * et retourne cette entrée.

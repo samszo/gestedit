@@ -366,7 +366,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
         $sql = "SELECT
 			i.id_isbn recid, l.titre_fr, l.titre_en
 			, ca.auteurs
-			, i.num, i.type, v.type typeVente
+			, i.num, i.type, GROUP_CONCAT(DISTINCT v.type) typeVente
 			, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d, GROUP_CONCAT(DISTINCT(b.nom)) boutiques
 			, MAX(v.date_vente) date_last , MIN(v.date_vente) date_first
 			, SUM(r.montant_livre) mt_e_r
@@ -382,7 +382,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 				INNER JOIN iste_boutique b ON b.id_boutique = v.id_boutique
 				LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente
 				LEFT JOIN iste_prix p ON p.id_prix = v.id_prix
-			GROUP BY i.id_isbn, v.type
+			GROUP BY i.id_isbn
             ORDER BY l.titre_fr, l.titre_en";
         $db = $this->_db->query($sql);
         $rs = $db->fetchAll();

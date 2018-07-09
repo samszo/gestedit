@@ -313,15 +313,19 @@ class CrudController extends Zend_Controller_Action
 
     public function rapportdataAction()
     {
-    		$this->initInstance();
-    	
+			$this->initInstance();
+			$rs = array();    	
     		//création de l'objet BDD
     		$oBdd = new Model_DbTable_Iste_rapport();
     	    //récupère les données
     	    if($this->_getParam('idLivre'))
 	    		$rs = $oBdd->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));
     	    if($this->_getParam('mod')=="paiement royalties")
-	    		$rs = $oBdd->findPaiementByAuteur($this->_getParam('idAuteur'));
+				$rs = $oBdd->findPaiementByAuteur($this->_getParam('idAuteur'));
+			if($this->_getParam('idsISBN'))
+				$rs = $oBdd->findPaiementByISBN(implode(",",$this->_getParam('idsISBN')));			
+			if($this->_getParam('idsAuteur'))
+				$rs = $oBdd->findPaiementByIdsAuteur(implode(",",$this->_getParam('idsAuteur')));
 			if($this->_getParam('idFichier'))
 	    		$rs = $oBdd->findPaiementByFic($this->_getParam('idFichier'));
 	    	$this->view->rs = $rs;
@@ -341,16 +345,17 @@ class CrudController extends Zend_Controller_Action
     
     public function ventedataAction()
     {
-    		$this->initInstance();
-    	
-    		//création de l'objet BDD
-    		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
-    		$oBdd = new $oName();
-    	    //récupère les données
-    		//$rs = $oBdd->findById_livre($this->_getParam('id'));
-    		$rs = $oBdd->findById_auteur($this->_getParam('id'));
-    		
-		//ajoute les résumés
+		$this->initInstance();
+	
+		//création de l'objet BDD
+		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
+		$oBdd = new $oName();
+		//récupère les données
+		//$rs = $oBdd->findById_livre($this->_getParam('id'));
+		//$rs = $oBdd->findById_auteur($this->_getParam('id'));
+		$rs = $oBdd->findDetails($this->_getParam('table'),implode(",",$this->_getParam('ids')));
+			
+		/*ajoute les résumés
 		$rsR = $oBdd->getTotaux($this->_getParam('id'));
 		if($this->_getParam('obj')=="vente"){
 			$i=1;
@@ -388,7 +393,8 @@ class CrudController extends Zend_Controller_Action
 					);
 				$i++;
 			}			
-		}  
+		} 
+		*/ 
 		$this->view->json = json_encode($rs);		
 		$this->view->rs = $rs;
     }        

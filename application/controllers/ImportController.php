@@ -103,7 +103,7 @@ class ImportController extends Zend_Controller_Action
 			
 			//récupère les problèmes
 			$v = new Flux_Vente(false,$this->_getParam('trace'));
-			$arrP =  $v->getProblemes($this->_getParam('idFic'));
+			$arrP =  $v->getProblemesFic($this->_getParam('idFic'));
 				
     		//calcul les colonnes 
     		$rsFic = $dbFic->findById_importfic($this->_getParam('idFic'));
