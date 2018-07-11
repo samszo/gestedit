@@ -94,6 +94,9 @@ ALTER TABLE `iste_royalty`
 -- changed table 'iste_histomodif'
 ALTER TABLE `iste_histomodif` CHANGE `data` `data` TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;
 
+INSERT INTO `iste_importfic` (`nom`, `reception`, `url`, `type`, `periode_debut`, `periode_fin`, `reference`, `coldesc`, `content_type`, `size`, `obj`, `id_obj`) VALUES
+(NULL, NULL, '/data/modeles/droitFR.odt', 'paiement droits FR', NULL, NULL, NULL, NULL, NULL, NULL, '', 0);
+
 
 # New Tables
 
