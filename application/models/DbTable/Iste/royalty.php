@@ -463,34 +463,35 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     {
     		//met à jour les proposition qui n'ont pas de base contrat et qui ne sont pas null
     		$dbP = new Model_DbTable_Iste_proposition();
-    		$dbP->update(array("base_contrat"=>null), "base_contrat=''");
+    		$dbP->update(array("base_contrat"=>null), "base_contrat='GB'");
     	
 	    	//récupère les vente qui n'ont pas de royalty
 	    	$sql = "SELECT 
-		ac.id_auteurxcontrat
-		, ac.id_isbn, ac.pc_papier, ac.pc_ebook
-        , a.prenom, a.nom, la.role, c.type
-		 ,i.num
-         , v.id_vente, v.date_vente, v.montant_livre, v.id_boutique
-		 , i.id_editeur, i.type
-         , d.base_contrat, d.id_devise, d.taux_livre_dollar, d.taux_livre_euro, d.date_taux, d.date_taux_fin, d.taxe_taux, d.taxe_deduction
-         
-		FROM iste_auteurxcontrat ac
-		 INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
-		 INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
-		 INNER JOIN iste_livre l ON l.id_livre = ac.id_livre
-		 INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
-		 INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
-		 INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
-		 INNER JOIN iste_livrexauteur la ON la.id_livre = i.id_livre AND la.id_auteur = ac.id_auteur AND la.role = c.type
-		 INNER JOIN iste_devise d ON d.base_contrat = IFNULL(p.base_contrat,'GB')
-				    AND DATE_FORMAT(date_vente, '%Y') = DATE_FORMAT(date_taux, '%Y')
-		 LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
-		WHERE pc_papier is not null AND pc_ebook is not null AND pc_papier != 0 AND pc_ebook != 0
-			AND v.montant_livre > 0
-		    AND r.id_royalty is null";
+                ac.id_auteurxcontrat
+                , ac.id_isbn, ac.pc_papier, ac.pc_ebook
+                , a.prenom, a.nom, la.role, c.type
+                ,i.num
+                , v.id_vente, v.date_vente, v.montant_livre, v.id_boutique
+                , i.id_editeur, i.type
+                , d.base_contrat, d.id_devise, d.taux_livre_dollar, d.taux_livre_euro, d.date_taux, d.date_taux_fin, d.taxe_taux, d.taxe_deduction
+                
+                FROM iste_auteurxcontrat ac
+                INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
+                INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+                INNER JOIN iste_livre l ON l.id_livre = ac.id_livre
+                INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
+                INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
+                INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
+                INNER JOIN iste_livrexauteur la ON la.id_livre = i.id_livre AND la.id_auteur = ac.id_auteur AND la.role = c.type
+                INNER JOIN iste_devise d ON d.base_contrat = IFNULL(p.base_contrat,'GB')
+                            AND DATE_FORMAT(date_vente, '%Y') = DATE_FORMAT(date_taux, '%Y')
+                LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
+                WHERE pc_papier is not null AND pc_ebook is not null AND pc_papier != 0 AND pc_ebook != 0
+                    AND v.montant_livre > 0
+                    AND r.id_royalty is null";
 
-    		$stmt = $this->_db->query($sql);
+            $stmt = $this->_db->query($sql);
+            
     		$rs = $stmt->fetchAll(); 
     		$arrResult = array();
     		foreach ($rs as $r) {
@@ -765,5 +766,41 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         return $stmt->fetchAll(); 
         
     }       
+
     
+	/**
+     * Modifie la date pour les royalti
+     *
+     * @param string		$idsRoy
+     *  
+     * @return array
+     */
+    function setDateForRapport($idsRoy){
+    		
+        //récupère les royalty pour les livres sélectionnés
+        $sql = "SELECT 
+            COUNT(DISTINCT r.id_royalty) nbRoy
+            ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
+            ,SUM(r.montant_livre) rMtRoy
+            ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
+            ,l.id_livre, l.titre_en, l.titre_fr
+            ,c.type typeContrat
+            ,com.id_comite, com.titre_fr, com.titre_en
+        FROM iste_royalty r 
+            INNER JOIN iste_vente v ON v.id_vente = r.id_vente
+            INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+            INNER JOIN iste_livre l ON l.id_livre = i.id_livre
+            INNER JOIN iste_comitexlivre cl ON cl.id_livre = l.id_livre
+            INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_comite = cl.id_comite
+            INNER JOIN iste_comite com ON c.id_comite = ac.id_comite
+            INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+        WHERE r.id_royalty IN (".$idsRoy.")
+        GROUP BY com.id_comite";
+        //echo $sql;
+        $stmt = $this->_db->query($sql);
+        
+        return $stmt->fetchAll(); 
+        
+    }       
+
 }

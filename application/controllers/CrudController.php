@@ -183,12 +183,12 @@ class CrudController extends Zend_Controller_Action
 		
 		$this->view->message="Les données ont été ajoutées.".$mess;
 		if(is_array($result))    		    		
-	    		$this->view->rs = $result;
-	    	else		
+			$this->view->rs = $result;
+		else		
 			$this->view->message="Les données existent déjà.".$mess;
-			
+
 		$dbHM = new Model_DbTable_Iste_histomodif();
-		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"data"=>json_encode($params)));   		
+		$dbHM->ajouter(array("action"=>__METHOD__,"id_uti"=>$this->ssUti->uti["id_uti"],"obj"=>$this->_getParam('obj'),"data"=>json_encode($params)));   		
 			
     }
 
@@ -283,7 +283,7 @@ class CrudController extends Zend_Controller_Action
 		if($r["message"])$this->view->message = $r["message"]; 
 		else $this->view->message = "Les données sont supprimées.";
 		$dbHM = new Model_DbTable_Iste_histomodif();
-		$dbHM->ajouter(array("action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id));   		
+		$dbHM->ajouter(array("id_uti"=>$this->ssUti->uti["id_uti"],"action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id));   		
 		
     }    
 

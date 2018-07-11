@@ -94,7 +94,15 @@ class ImportController extends Zend_Controller_Action
 				break;			
 		}
     }    
-    
+	
+    public function verifdeviseAction()
+    {
+		$this->initInstance();
+		$db = new Model_DbTable_Iste_devise();
+		$arr = $db->getTauxPeriode($this->_getParam('dateDeb'),$this->_getParam('dateFin'));
+		$this->view->json = json_encode($arr);
+	}
+	
     public function getdataficventeAction()
     {
     		$this->initInstance();

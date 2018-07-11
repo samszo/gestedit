@@ -236,7 +236,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
         //echo $sql;
             
 		$stmt = $this->_db->query($sql);
-    		$rs = $stmt->fetchAll();
+    	$rs = $stmt->fetchAll();
     		        
 		return $rs; 
     }              

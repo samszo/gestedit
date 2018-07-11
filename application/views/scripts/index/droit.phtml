@@ -911,6 +911,11 @@ function initDroit() {
 		            ],
 		            onClick: function (event) {
 						var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
+		                if (event.target == 'payerRapport') {
+							if(s){
+								setPaiement(s);
+							}
+		                }
 		                if (event.target == 'voirRapport') {
 			                	if(s){
 				                	s.forEach(function(r){
@@ -982,8 +987,8 @@ function initDroit() {
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'base_contrat', caption: 'Base contrat', size: '80px', sortable: true, resizable: true},
 		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true},
-		            //{ field: 'date_taux', caption: 'Deb. période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
-		            //{ field: 'date_taux_fin', caption: 'Fin période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'date_taux', caption: 'Deb. période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'date_taux_fin', caption: 'Fin période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 					{ field: 'taxe_taux', caption: 'Taxe taux',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
 					{ field: 'taxe_deduction', caption: 'Taxe déduction',editable: { type: 'float'}, size: '110px', sortable: true, resizable: true},
 		            { field: 'taux_livre_dollar', caption: '&pound; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
@@ -1034,6 +1039,9 @@ function initDroit() {
 				    {required: true,  name: 'annee', type: 'int', options:{min: '2000',autoFormat:false}, required: true,  html: {caption: 'Année'} },
 		            //{required: true,  name: 'date_taux', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
 		            //{required: true,  name: 'date_taux_fin', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
+					
+		            { name: 'taxe_taux', type: 'float', html: { caption: 'Taux des taxes' } },
+		            { name: 'taxe_deduction', type: 'float', html: { caption: 'Taux de déduction' } },
 		            { name: 'taux_livre_dollar', type: 'float', html: { caption: '&pound; -> $' } },
 		            { name: 'taux_livre_euro', type: 'float', html: { caption: '&pound; -> &euro;' } },
 		            { name: 'taux_euro_livre', type: 'float', html: { caption: '&euro; -> &pound;' } },
@@ -1386,6 +1394,18 @@ function showPdf(url){
 	//url = "../../../../data/editions/Barthn©s-Labrousse.Ma..livre.3012-3013.2018-05-31.2018-06-30.pdf";
 	var urlLoad = 'http://localhost/gestedit/admin/js/pdfjs/web/viewer.html?file='+encodeURIComponent(url);
 	PDFViewerApplication.open(url);
+}
+function setPaiement(idsRapport){
+	$.get('<?php if(!$this->ajax) echo '../'; ?>calculer/paiement',
+		{'type':'rapport','idsRapport':idsRapport},
+			function(js){
+				finsession(js);
+				g = w2ui['grid_<?php echo $idPage;?>_ficRapport'];
+				g.clear();		            		
+				if(js.rs.length){
+					g.add(js.rs);
+				}
+	},"json");           		           		
 }
 
 </script>

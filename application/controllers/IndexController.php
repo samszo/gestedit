@@ -124,7 +124,7 @@ class IndexController extends Zend_Controller_Action
         $rs = $bdd->getAllVente(true);
         $this->view->jsonAuteur = json_encode($rs);
         $dbD = new Model_DbTable_Iste_devise();
-        $this->view->rsDev = json_encode($dbD->getAll());
+        $this->view->rsDev = json_encode($dbD->getAll('date_taux'));
         $dbC = new Model_DbTable_Iste_contrat;
         $this->view->rsDroitParam = json_encode($dbC->getParams());
         
