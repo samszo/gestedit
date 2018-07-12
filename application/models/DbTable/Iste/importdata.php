@@ -317,9 +317,9 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("f" => "iste_importfic"),
                 'f.id_importfic = d.id_importfic', array("periode_debut","periode_fin"))
-            ->where( "d.commentaire IS NULL")
             ->where( "d.id_importfic = ?", $idFic )
             ->order("d.id_importdata");
+        echo $query->__toString();    
 
         return $this->fetchAll($query)->toArray(); 
         

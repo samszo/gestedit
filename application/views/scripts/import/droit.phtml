@@ -124,7 +124,28 @@ fuVerif = true;
 function initImportDroit() {
 	//initialise les champs pour définir la période
 	$('input[type=dateDeb]').w2field('date', { format: 'yyyy-m-d', end: $('input[type=dateFin]'), required: true });
-	$('input[type=dateFin]').w2field('date', { format: 'yyyy-m-d', start: $('input[type=dateDeb]'), required: true });	
+	$('input[type=dateFin]').w2field('date', { format: 'yyyy-m-d', start: $('input[type=dateDeb]'), required: true})
+		.on('change',function(e){
+			var dates = {
+	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
+	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
+		    	    		};
+			//vérifie la présence de devise
+			$.ajax({
+					data: dates,
+					url: urlP+'import/verifdevise',
+					success: function (result) {
+						if (result.length < 2){
+							w2alert("Il manque des dévises pour la période définie.<br/>Merci de les renseigner dans l'onglet paramètres.");
+							return false;
+						}
+					},
+					dataType:'json',
+					async: false
+				});
+		});	
+
+
 }
 
 function initFileUploadDroit(){
@@ -166,7 +187,7 @@ function initFileUploadDroit(){
 	    		}
                 var fileType = data.files[0].name.split('.').pop(), allowdtypes = 'csv,CSV';
                 if (allowdtypes.indexOf(fileType) < 0) {
-                		w2alert("Le type de fichier n'est pas bon");
+                	w2alert("Le type de fichier n'est pas bon");
                     return false;
                 }
 	    		

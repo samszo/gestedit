@@ -47,6 +47,10 @@ class CalculerController extends Zend_Controller_Action
     		
     		$type = $this->_getParam('type');
     		switch ($type) {
+				case "rapport":
+					//marque les ventes des rapport comme payée
+    				$rs = $dbRoy->setDatePaiement(implode(",", $this->_getParam('ids')));
+    				break;
     			case "livre":
     				$rs = $dbRoy->paiementLivre(implode(",", $this->_getParam('ids')));
     				foreach ($rs as $r) {
@@ -101,11 +105,11 @@ class CalculerController extends Zend_Controller_Action
     				break;
     			case "auteur":
     				$rs = $dbRoy->paiementAuteur(implode(",", $this->_getParam('ids')));
-				foreach ($rs as $r) {
-			    		$rapport->creaPaiement($r);
-				}
+					foreach ($rs as $r) {
+							$rapport->creaPaiement($r);
+					}
 		    		$this->view->message = "Les paiements sont édités.";		
-				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+					//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
     				break;
     		}
     				

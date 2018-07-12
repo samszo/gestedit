@@ -94,7 +94,15 @@ class ImportController extends Zend_Controller_Action
 				break;			
 		}
     }    
-    
+	
+    public function verifdeviseAction()
+    {
+		$this->initInstance();
+		$db = new Model_DbTable_Iste_devise();
+		$arr = $db->getTauxPeriode($this->_getParam('dateDeb'),$this->_getParam('dateFin'));
+		$this->view->json = json_encode($arr);
+	}
+	
     public function getdataficventeAction()
     {
     		$this->initInstance();
@@ -148,21 +156,29 @@ class ImportController extends Zend_Controller_Action
     
     public function uploadAction()
     {
-    		$this->initInstance();
-    	
+		$this->initInstance();
+			
 		if (($stream = fopen('php://delete', "r")) !== FALSE)
     			var_dump(stream_get_contents($stream));
         	
     		$auth = Zend_Auth::getInstance();
 		if ($auth->hasIdentity()) {
 			$aFic = new Zend_File_Transfer_Adapter_Http();   		
-            $dbFic = new Model_DbTable_Iste_importfic();	
+			$dbFic = new Model_DbTable_Iste_importfic();	
+			
+			$ssUpload = new Zend_Session_Namespace('upload');
+			
+			$path = "/data/".$ssUpload->typeObj."_".$ssUpload->idObj."/";
+			$options = array('upload_dir' => ROOT_PATH.$path,'upload_url' => WEB_ROOT.$path
+				,'print_response'=>false);
+			/*	
             $options = array('print_response'=>false);
             if($this->_getParam('dir')){
                 $path = "/data/".$this->_getParam('obj')."_".$this->_getParam('type')."/";
                 $options['upload_dir'] = ROOT_PATH.$path;
                 $options['upload_url'] = WEB_ROOT.$path;                    
-            }
+			}
+			*/
 			$upload_handler = new CustomUploadHandler($options);
     		$response = $upload_handler->get_response();
     		$this->view->json = json_encode($response);

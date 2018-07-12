@@ -52,11 +52,11 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
 	    	$id=false;
     		if(isset($data["annee"])){
     			if ($data["base_contrat"]=="FR"){
-    				$data["date_taux"]=$data["annee"]."/04/01";
-    				$data["date_taux_fin"]=(intval($data["annee"])+1)."/03/31";
+    				$data["date_taux"]=$data["annee"]."/01/01";
+    				$data["date_taux_fin"]=(intval($data["annee"])+1)."/12/31";
     			}else{
-    				$data["date_taux"]=$data["annee"]."/07/01";
-    				$data["date_taux_fin"]=(intval($data["annee"])+1)."/06/30";	    				
+    				$data["date_taux"]=$data["annee"]."/01/01";
+    				$data["date_taux_fin"]=(intval($data["annee"])+1)."/12/30";	    				
     			}
 	    		unset($data['annee']);	    			
     		}
@@ -120,10 +120,10 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     {
    	
     	$query = $this->select()
-                    ->from( array("iste_devise" => "iste_devise"),array('recid'=>'id_devise','id_devise'
-                    		,'annee'=>"DATE_FORMAT(date_taux,'%Y')",'date_taux','date_taux_fin','base_contrat'
-                    		,'taxe_taux', 'taxe_deduction'
-                    		,'taux_euro_livre','taux_livre_euro','taux_dollar_livre','taux_livre_dollar','taux_euro_dollar','taux_dollar_euro') );
+            ->from( array("iste_devise" => "iste_devise"),array('recid'=>'id_devise','id_devise'
+                    ,'annee'=>"DATE_FORMAT(date_taux,'%Y')",'date_taux','date_taux_fin','base_contrat'
+                    ,'taxe_taux', 'taxe_deduction'
+                    ,'taux_euro_livre','taux_livre_euro','taux_dollar_livre','taux_livre_dollar','taux_euro_dollar','taux_dollar_euro') );
                     
         if($order != null)
         {
@@ -150,7 +150,10 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     public function findById_devise($id_devise)
     {
         $query = $this->select()
-                    ->from( array("i" => "iste_devise"),array('recid'=>'id_devise','id_devise','date_taux','date_taux_fin','taux_euro_livre','taux_livre_euro','taux_dollar_livre','taux_livre_dollar','taux_euro_dollar','taux_dollar_euro') )                           
+                    ->from( array("i" => "iste_devise")
+                        ,array('recid'=>'id_devise','id_devise','base_contrat','taxe_taux','taxe_deduction'
+                        ,'annee'=>'DATE_FORMAT(date_taux, "%Y")','date_taux','date_taux_fin'
+                        ,'taux_euro_livre','taux_livre_euro','taux_dollar_livre','taux_livre_dollar','taux_euro_dollar','taux_dollar_euro') )                           
                     ->where( "i.id_devise = ?", $id_devise );
 
         return $this->fetchAll($query)->toArray(); 
@@ -238,17 +241,26 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     
 	/**
      * Récupère les dates de vente sans devise
+     * 
+     * @param integer $idFic
+     * 
+     * @return array
+     * 
      */
-    public function getDateSansDevise()
+    public function getDateSansDevise($idFic="")
     {
-	    	$query = $this->select()
-        		->from( array("v" => "iste_vente"),array("dv"=>"DATE_FORMAT(date_vente, '%Y-%m-%d')"))
-        		->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
-        		->joinInner(array("i" => "iste_isbn"),"i.id_isbn = v.id_isbn")        		
-        		->joinInner(array("p" => "iste_proposition"),"p.id_livre = i.id_livre")        		
-        		->joinLeft(array("d" => "iste_devise"),"d.base_contrat = p.base_contrat AND date_vente BETWEEN date_taux AND date_taux_fin")        		
-        		->where("date_taux is null")
-        		->group(array("date_vente"));
+        $query = $this->select()
+            ->from( array("v" => "iste_vente"),array("dv"=>"DATE_FORMAT(date_vente, '%Y-%m-%d')"))
+            ->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("i" => "iste_isbn"),"i.id_isbn = v.id_isbn")        		
+            ->joinInner(array("p" => "iste_proposition"),"p.id_livre = i.id_livre")        		
+            ->joinLeft(array("d" => "iste_devise"),"d.base_contrat = p.base_contrat AND date_vente BETWEEN date_taux AND date_taux_fin")        		
+            ->where("date_taux is null")
+            ->group(array("date_vente"));
+        
+        if($idFic){
+            $query->joinInner(array("id" => "iste_importdata"),"id.id_importfic = ".$idFic." AND id.id_importdata = v.id_importdata"); 
+        }
                     
         return $this->fetchAll($query)->toArray();
     }    
@@ -346,18 +358,20 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
     function getTauxPeriode($deb, $fin){
     		
     		//récupère les royalty pour les livres sélectionnés
-	    	$sql = "SELECT 
-		    SUM(d.taux_livre_euro) tle, SUM(d.taux_livre_dollar) tld, SUM(taux_euro_livre) tel
-		    , SUM(d.taux_dollar_livre) tdl, SUM(d.taux_euro_dollar) ted, SUM(taux_dollar_euro) tde 
-	    	    , COUNT(d.id_devise) nb
-		FROM iste_devise d 
-		WHERE d.date_taux BETWEEN '".$deb."' AND '".$fin."'";
+        $sql = "SELECT 
+            SUM(d.taux_livre_euro) tle, SUM(d.taux_livre_dollar) tld, SUM(taux_euro_livre) tel
+            , SUM(d.taux_dollar_livre) tdl, SUM(d.taux_euro_dollar) ted, SUM(taux_dollar_euro) tde 
+            , COUNT(d.id_devise) nb, d.base_contrat
+            FROM iste_devise d 
+            WHERE d.date_taux <= '".$deb."' AND d.date_taux_fin >= '".$fin."'
+            GROUP BY d.base_contrat";
 		//echo $sql;
-    		$stmt = $this->_db->query($sql);
-    		$rs = $stmt->fetchAll();
-    		return $rs[0]; 
+        $stmt = $this->_db->query($sql);
+        $rs = $stmt->fetchAll();
+        return $rs; 
     		
-    }        
-    
+    }         
+
+
 }
 
