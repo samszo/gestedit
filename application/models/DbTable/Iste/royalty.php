@@ -469,7 +469,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 	    	$sql = "SELECT 
                 ac.id_auteurxcontrat
                 , ac.id_isbn, ac.pc_papier, ac.pc_ebook
-                , a.prenom, a.nom, la.role, c.type
+                , a.prenom, a.nom, c.type
                 ,i.num
                 , v.id_vente, v.date_vente, v.montant_livre, v.id_boutique
                 , i.id_editeur, i.type
@@ -482,7 +482,6 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
                 INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
                 INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
-                INNER JOIN iste_livrexauteur la ON la.id_livre = i.id_livre AND la.id_auteur = ac.id_auteur AND la.role = c.type
                 INNER JOIN iste_devise d ON d.base_contrat = IFNULL(p.base_contrat,'GB')
                             AND DATE_FORMAT(date_vente, '%Y') = DATE_FORMAT(date_taux, '%Y')
                 LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
@@ -512,6 +511,9 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     		return $arrResult;
     }
     
+
+	
+
 	/**
      * Calcule les paiements pour lancer les éditions
      *

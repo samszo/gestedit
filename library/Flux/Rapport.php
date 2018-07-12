@@ -322,8 +322,8 @@ class Flux_Rapport extends Flux_Site{
 
 		//enregistrement du rapport
 		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic.".pdf"
-			,"id_importfic"=>$mod["id_importfic"]
-			, "data"=>json_encode($data), "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
+			,"id_importfic_modele"=>$mod["id_importfic"]
+			, "data"=>json_encode($data),"type"=>$type, "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
 			
 		//mise à jour de la date d'éditions
 		$this->dbRoyalty->edit(false,array("id_rapport"=>$idRapport,"date_edition"=>new Zend_Db_Expr('NOW()')),$data["idsRoyalty"]);
