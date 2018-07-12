@@ -397,7 +397,37 @@ class CrudController extends Zend_Controller_Action
 		*/ 
 		$this->view->json = json_encode($rs);		
 		$this->view->rs = $rs;
-    }        
+	} 
+	
+	function saveformparammailAction()
+    {
+		$this->initInstance();
+		$dbP = new Model_DbTable_Iste_parammail();
+		//récupère les paramètres
+		$params = $this->_request->getParams();
+		$request = json_decode($params[request]);
+		foreach ($request->{record} as $key => $value) {
+			$dbP->ajouter(array("champ"=>$key,"contenu"=>$value));
+		}
+		$this->view->status="success";
+		$this->view->message="Les paramètres ont été enregistrés.";
+	}
+
+	function getformparammailAction()
+    {
+		$this->initInstance();
+		$dbP = new Model_DbTable_Iste_parammail();
+		
+		$paramform = $dbP->getListe();
+		$record = array();
+		foreach ($paramform as $key => $value) {
+			$record[$value[champ]]= $value[contenu];
+		}
+
+		
+		$this->view->status="success";
+		$this->view->record= $record;
+	}
 
 	function initInstance(){
     		$auth = Zend_Auth::getInstance();
