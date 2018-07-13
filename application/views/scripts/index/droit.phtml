@@ -403,7 +403,7 @@ function initDroit() {
 				},
 		        onDelete: function(event) {            
 					if(event.force){
-			            	$.post(itemSelect.deleteUrl,
+			            	$.post(itemSelect.deleteUrl+"&type=vente&obj=import&dir=1",
 							null,
 			            		function(js){
 		            				finsession(js);
@@ -786,8 +786,8 @@ function initDroit() {
 		            { field: 'royIds', caption: 'royId', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'titre_fr', caption: "Titre FR", size: '10%', sortable: true, resizable: true},
 		            { field: 'titre_en', caption: "Titre EN", size: '10%', sortable: true, resizable: true},
-		            { field: 'base_contrat', caption: "Base contrat", size: '80px', sortable: true, resizable: true},
-		            { field: 'periode', caption: "Periode", size: '80px', sortable: true, resizable: true},
+		            { field: 'base_contrat', caption: "Base contrat", size: '40px', sortable: true, resizable: true},
+		            { field: 'periode', caption: "Periode", size: '170px', sortable: true, resizable: true},
 		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '120px', sortable: true, resizable: true},
 		            { field: 'date_edition', caption: 'Edition', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_paiement', editable:{type:'date'}, caption: 'Paiement', size: '80px', sortable: true, resizable: true},
@@ -858,8 +858,8 @@ function initDroit() {
 		            { field: 'royIds', caption: 'royId', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'nom', caption: "Nom", size: '80px', sortable: true, resizable: true},
 		            { field: 'prenom', caption: "Prénom", size: '80px', sortable: true, resizable: true},
-		            { field: 'base_contrat', caption: "Base contrat", size: '10%', sortable: true, resizable: true},
-		            { field: 'periode', caption: "Periode", size: '100px', sortable: true, resizable: true},
+		            { field: 'base_contrat', caption: "Base contrat", size: '40px', sortable: true, resizable: true},
+		            { field: 'periode', caption: "Periode", size: '170px', sortable: true, resizable: true},
 		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '100px', sortable: true, resizable: true},
 		            { field: 'date_edition', caption: 'Edition', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_envoi', caption: 'Envoi', size: '80px', sortable: true, resizable: true},
@@ -1317,7 +1317,7 @@ function voirData(id){
 					arrf.forEach(function(f){
 						if(f.w2ui)f.w2ui.style += s;
 						else f.w2ui = {'style':s};
-						var c = "pas de contrat pour "+p.prenom+" "+p.nom;
+						var c = "pas de contrat pour "+p.prenom+" "+p.nom+" "+p.role;
 						if(f.commentaire)f.commentaire += ", "+c;
 						else f.commentaire = c;	
 					});  
@@ -1349,6 +1349,7 @@ function finProcessImport(idFic){
 	getFichierImport();
 	voirData(idFic);
 	getRapportFic(idFic);
+	getVenteAuteurISBN();
 }
 function getRapportFic(idFic,idsISBN,idsAuteur){
 	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
@@ -1359,6 +1360,23 @@ function getRapportFic(idFic,idsISBN,idsAuteur){
 				g.clear();		            		
 				if(js.rs.length){
 					g.add(js.rs);
+				}
+	},"json");           		           		
+}
+function getVenteAuteurISBN(){
+	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/rapportdata',
+		{'getDatas':1},
+			function(js){
+				finsession(js);
+				rsVenteISBN = js.rs.isbn;				
+				config.gridVenteISBN.records=rsVenteISBN
+				if(w2ui['grid_<?php echo $idPage;?>_vente_isbn']){
+					w2ui.grid_<?php echo $idPage;?>_vente_isbn.destroy();        
+				};
+				rsVenteAuteur = js.rs.auteur;
+				config.gridVenteAuteur.records=rsVenteAuteur;
+				if(w2ui['grid_<?php echo $idPage;?>_vente_auteur']){
+					w2ui.grid_<?php echo $idPage;?>_vente_auteur.destroy();        
 				}
 	},"json");           		           		
 }

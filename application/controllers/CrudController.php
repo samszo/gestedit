@@ -327,7 +327,13 @@ class CrudController extends Zend_Controller_Action
 			if($this->_getParam('idsAuteur'))
 				$rs = $oBdd->findPaiementByIdsAuteur(implode(",",$this->_getParam('idsAuteur')));
 			if($this->_getParam('idFichier'))
-	    		$rs = $oBdd->findPaiementByFic($this->_getParam('idFichier'));
+				$rs = $oBdd->findPaiementByFic($this->_getParam('idFichier'));
+			if($this->_getParam('getDatas')){
+				$bdd = new Model_DbTable_Iste_livre();
+				$rs["isbn"] = $bdd->getAllVenteISBN(true);
+				$bdd = new Model_DbTable_Iste_auteur();
+				$rs["auteur"] = $bdd->getAllVente(true);
+			}
 	    	$this->view->rs = $rs;
     }    
     

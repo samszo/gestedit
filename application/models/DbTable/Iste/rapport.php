@@ -256,7 +256,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 			, a.nom, a.prenom, a.id_auteur
 		    , SUM(roy.montant_livre) montant_livre
 		    , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
-			, base_contrat, CONCAT(ific.periode_debut, ' -> ',ific.periode_fin) periode
+			, base_contrat, CONCAT(MIN(v.date_vente), ' -> ',MAX(v.date_vente)) periode
 		FROM iste_rapport r
 			INNER JOIN (SELECT id_rapport  
 				, SUBSTRING_INDEX(obj_id,'_',1) idAuteur

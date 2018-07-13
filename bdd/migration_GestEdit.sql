@@ -99,7 +99,6 @@ INSERT INTO `iste_importfic` (`nom`, `reception`, `url`, `type`, `periode_debut`
 
 ALTER TABLE `iste_rapport` CHANGE `obj_id` `obj_id` VARCHAR(300) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
 
-ALTER TABLE `iste_rapport` CHANGE `id_importfic` `id_importfic_modele` INT(11) NOT NULL;
 ALTER TABLE `iste_rapport` ADD `type` VARCHAR(50) NOT NULL AFTER `maj`;
 
 # New Tables

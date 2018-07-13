@@ -168,17 +168,16 @@ class ImportController extends Zend_Controller_Action
 			
 			$ssUpload = new Zend_Session_Namespace('upload');
 			
-			$path = "/data/".$ssUpload->typeObj."_".$ssUpload->idObj."/";
-			$options = array('upload_dir' => ROOT_PATH.$path,'upload_url' => WEB_ROOT.$path
-				,'print_response'=>false);
-			/*	
-            $options = array('print_response'=>false);
             if($this->_getParam('dir')){
+	            $options = array('print_response'=>false);
                 $path = "/data/".$this->_getParam('obj')."_".$this->_getParam('type')."/";
                 $options['upload_dir'] = ROOT_PATH.$path;
                 $options['upload_url'] = WEB_ROOT.$path;                    
+			}else{
+				$path = "/data/".$ssUpload->typeObj."_".$ssUpload->idObj."/";
+				$options = array('upload_dir' => ROOT_PATH.$path,'upload_url' => WEB_ROOT.$path
+					,'print_response'=>false);	
 			}
-			*/
 			$upload_handler = new CustomUploadHandler($options);
     		$response = $upload_handler->get_response();
     		$this->view->json = json_encode($response);

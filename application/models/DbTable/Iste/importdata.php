@@ -420,6 +420,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
                 a.id_auteur,
                 a.nom,
                 a.prenom,
+                la.role,
                 l.id_livre,
                 l.titre_en,
                 l.titre_fr
