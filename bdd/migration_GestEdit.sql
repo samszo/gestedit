@@ -103,6 +103,41 @@ ALTER TABLE `iste_rapport` ADD `type` VARCHAR(50) NOT NULL AFTER `maj`;
 
 # New Tables
 
+--
+-- Déchargement des données de la table `iste_parammail`
+--
+
+INSERT INTO `iste_parammail` (`id_parammail`, `champ`, `contenu`) VALUES
+(48, 'sans_redevance', '%Cher% %Auteur%,\n\nVous trouverez ci-joint votre relevé de droits ISTE Wiley pour la période allant du %periode1% au %periode2%.\n\n \nLe montant étant inférieur à cent euros, celui-ci est automatiquement reporté sur l’année suivante. \n\nNous vous prions d’agréer, %Agreer%, l’expression de nos salutations distinguées.\n\nLe service de comptabilité des Droits d’auteurs.'),
+(49, 'avec_redevance', '%Cher% %Auteur%,\n\nVous trouverez ci-joint votre relevé de droits ISTE Wiley pour la période allant du %periode1% au %periode2%.\n \n\nNous vous prions d’agréer, %Agreer%, l’expression de nos salutations distinguées.\n\nLe service de comptabilité des Droits d’auteurs.'),
+(50, 'email', 'toumia.amri@gmail.com'),
+(51, 'nom', 'Amri'),
+(52, 'periode1', '01-07-2018'),
+(53, 'periode2', '19-07-2018'),
+(54, 'password', 'password'),
+(55, 'sujet', 'Royalties');
+
+--
+-- Index pour les tables déchargées
+--
+
+--
+-- Index pour la table `iste_parammail`
+--
+ALTER TABLE `iste_parammail`
+  ADD PRIMARY KEY (`id_parammail`);
+
+--
+-- AUTO_INCREMENT pour les tables déchargées
+--
+
+--
+-- AUTO_INCREMENT pour la table `iste_parammail`
+--
+ALTER TABLE `iste_parammail`
+  MODIFY `id_parammail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+
+
 # Disable Foreign Keys Check
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -93,7 +93,7 @@ class Model_DbTable_Iste_parammail extends Zend_Db_Table_Abstract
      *
      * @param int	$id
      *
-     * @return void
+     * @return array
      */
     public function getListe($id=false)
     {
@@ -104,6 +104,26 @@ class Model_DbTable_Iste_parammail extends Zend_Db_Table_Abstract
         if($id)$query->where( "l.id_parammail = ?", $id);        
         return $this->fetchAll($query)->toArray();
 	} 
+
+    /**
+     * Renvoie la liste des entrée pour le formulaire
+     *
+     * @param int	$id
+     *
+     * @return array
+     */
+    public function getListeForm($id=false)
+    {
+        $paramform = $this->getListe($id);
+        $record = array();
+        foreach ($paramform as $key => $value) {
+            $record[$value[champ]]= $value[contenu];
+        }
+        $record['recid']=1;
+        return $record;
+	} 
+
+
     /**
      * Récupère toutes les entrées Iste_parammail avec certains critères
      * de tri, intervalles
