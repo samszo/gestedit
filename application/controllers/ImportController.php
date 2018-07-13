@@ -1625,6 +1625,8 @@ class ImportController extends Zend_Controller_Action
 		
 		$this->initInstance();
 		$dbAut = new Model_DbTable_Iste_auteur();
+		$dbr = new Model_DbTable_Iste_royalty();
+		$dbP = new Model_DbTable_Iste_parammail();
 
 		//récupérer les données de sélection {recid(rapport_id), idAuteur}
 		$data = $this->_getParam("data");
@@ -1634,8 +1636,6 @@ class ImportController extends Zend_Controller_Action
 		{
 			return $transport->recipients . '_' . mt_rand() . '.eml';
 		}
- 
-
 		//log
 		$log = array();
 
@@ -1646,9 +1646,6 @@ class ImportController extends Zend_Controller_Action
 			$auteur = $dbAut->findById_auteur($ligne["idAuteur"]);
 			//si mail valide (simple check au cas où pas de mail)
 			if (strpos($auteur["mail_1"],"@") !== false){
-				
-
-
 				
 				//récupérer odt
 				$filePath = ROOT_PATH.substr($ligne["url"],strpos($ligne["url"],"/data"));
@@ -1663,9 +1660,41 @@ class ImportController extends Zend_Controller_Action
 				if (file_exists(substr($filePath,0,(strlen($filePath)-3))."pdf")){
 					
 					$mail = new Zend_Mail();
-					//TODO: construire le mail avec les informations nécessaires (texte, mail envoyeur)
-					$mail->setBodyText("Bonjour,\nCi-joint vos royalties.\n Cordialement,\nXYZ .");
-					$mail->setFrom('somebody@iste.com', 'ISTE Bot');
+					//construire le mail avec les informations nécessaires (texte, mail envoyeur)
+
+					$royalties = $dbr->findById_rapport($ligne["recid"]);
+					$textmail = "";
+					if ($royalties[0]["montant_euro"] > 100){
+						$textmail = $dbP->findByChamp_parammail("avec_redevance");
+					}
+					else{
+						$textmail = $dbP->findByChamp_parammail("sans_redevance");
+					}
+
+					//remplacer les % dans le texte par ce qui correspond (nom,civilité...)
+					if ($auteur["civilite"] == "M." || $auteur["civilite"] == "Mr"){
+						$textmail = str_replace("%Cher%","Cher Monsieur", $textmail);
+						$textmail = str_replace("%Agreer%", "Monsieur", $textmail);
+					}
+					else if ($auteur["civilite"] == "Mme" ){
+						$textmail = str_replace("%Cher%","Chère Madame", $textmail);
+						$textmail = str_replace("%Agreer%", "Madame", $textmail);
+					}
+					else{
+						$textmail = str_replace("%Cher%","Cher(e)", $textmail);
+						$textmail = str_replace("%Agreer%", "Madame, Monsieur", $textmail);
+					}
+					$textmail = str_replace("%Auteur%",$auteur["nom"]." ".$auteur["prenom"],$textmail);
+					$textmail = str_replace("%periode1%",$dbP->findByChamp_parammail("periode1"),$textmail);
+					$textmail = str_replace("%periode2%",$dbP->findByChamp_parammail("periode2"),$textmail);
+					
+					//TODO: problème d'encodage !!! 
+					$mail->setBodyText($textmail);
+					// $mail->setBodyText(mb_convert_encoding(htmlspecialchars($textmail, ENT_QUOTES), 'ISO-8859-1', 'UTF-8'),
+										// null,
+										// Zend_Mime::ENCODING_BASE64
+										// );
+					$mail->setFrom($dbP->findByChamp_parammail('email'), $dbP->findByChamp_parammail('nom'));
 					$mail->addTo($auteur["mail_1"], $auteur["nom"]." ".$auteur["prenom"]);
 					$mail->setSubject('Royalties');
 					$filePath = substr($filePath,0,(strlen($filePath)-3))."pdf";
@@ -1685,37 +1714,89 @@ class ImportController extends Zend_Controller_Action
 	
 					//si mail envoyé màj bdd
 					if ($mail){
-
-						//TODO: ajouter date envoi à la bdd 
 						array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Email préparé !"));
+						//ajouter date envoi à la bdd 
+						
+						foreach ($royalties as $roy ) {
+							$dbr->edit($roy["id_royalty"],array("date_envoi"=>date("Y-m-d")));
+						}
 					}
 					else{
 						array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème envoi email "));
 					}
-
 				}
 				else{ //pdf non crée ou inaccessible
 					array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème création rapport pdf"));
 				}
-
-
 			}
 			//si il y a un problème avec le mail de l'auteur 
 			else{
 				array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Problème avec l'email de l'auteur"));
 			}
-
-	
-			
-
 		}
-
-
-
-		
 		$this->view->json = json_encode($log);
 	}
+
+
+	public function grouperpdfAction(){
+		$this->initInstance();
+		$dbr = new Model_DbTable_Iste_rapport();
+
+		$data = explode(".",$this->_getParam("data"));
+
+
+		$pdf = new \setasign\Fpdi\Fpdi();
+
+		foreach ($data as $id ) {
+			$url = $dbr->findById_rapport($id);
+			$filePath = ROOT_PATH.substr($url["url"],strpos($url["url"],"/data"));
+			$this->ajouteFichier($pdf,$filePath);
+
+		}
+		$fileName = '/data/editions/fichier'.mt_rand().'.pdf';
+		
+		$pdf->Output('I','nouveau_fichier.pdf');
+	}
     
+	function ajouteFichier($pdf,$file)
+	{
+		$pageCount = $pdf->setSourceFile($file);
+		for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+			$pageId = $pdf->ImportPage($pageNo);
+			$s = $pdf->getTemplatesize($pageId);
+			$pdf->AddPage($s['orientation'], $s);
+			$pdf->useImportedPage($pageId);
+		}
+	}
+
+	public function paiementAction(){
+		$this->initInstance();
+		$dbr = new Model_DbTable_Iste_royalty();
+		$data = $this->_getParam("data");
+		$date = $this->_getParam("date");
+		foreach ($data as $ligne) {
+			$royalties = $dbr->findById_rapport($ligne["recid"]);
+			foreach ($royalties as $roy ) {
+				$dbr->edit($roy["id_royalty"],array("date_paiement"=>$date));
+			}
+		}
+		$this->view->json = json_encode("Date de paiement enregistrée avec succès");
+		
+	}
+
+	public function encaissementAction(){
+		$this->initInstance();
+		$dbr = new Model_DbTable_Iste_royalty();
+		$data = $this->_getParam("data");
+		$date = $this->_getParam("date");
+		foreach ($data as $ligne) {
+			$royalties = $dbr->findById_rapport($ligne["recid"]);
+			foreach ($royalties as $roy ) {
+				$dbr->edit($roy["id_royalty"],array("date_encaissement"=>$date));
+			}
+		}
+		$this->view->json = json_encode("Date d'encaissement enregistrée avec succès");
+	}
 }
 
 

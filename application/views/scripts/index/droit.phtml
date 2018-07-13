@@ -93,6 +93,66 @@ function initDroit() {
 	};
 
 	config = {
+
+			formParam : {
+				name   : 'form_<?php echo $idPage;?>_param',
+				recid    : 0, //TODO: mettre recid et trouver une solution au get
+				url    : //'server/post',
+				{
+					get : urlP+'crud/getformparammail',
+					save : urlP+'crud/saveformparammail'
+				},
+				
+				fields : [
+					{ field: 'sans_redevance',   type: 'textarea', html: { caption: 'Email <br><br> sans <br><br> redevance :', page: 0, column: 0, attr: 'style="height: 200px;width:400px"' }, required: true},
+					{ field: 'avec_redevance',   type: 'textarea', html: { caption: 'Email <br><br> avec <br><br> redevance :', page: 0, column: 1, attr: 'style="height: 200px;width:400px"' }, required: true },
+					{ field: 'email', type: 'email', html: { caption: "Email de l'envoyeur :", page: 0, column: 2 }, required: true },
+					{ field: 'password', type: 'password', html: { caption: "Mot de passe email :", page: 0, column: 2 }, required: true },
+					{ field: 'nom', type: 'text', html: { caption: "Nom de l'envoyeur :", page: 0, column: 2 }, required: true },
+					{ field: 'sujet', type: 'text', html: { caption: "Sujet de l'email :", page: 0, column: 2 }, required: true },
+					{ field: 'periode1', type: 'date', options:{ end: $('input[name=periode2]'),format: 'dd-mm-yyyy'},  html: {   caption: 'Début période :', page: 0, column: 2 }, required: true },
+					{ field: 'periode2', type: 'date', options:{ start: $('input[name=periode1]'),format: 'dd-mm-yyyy'},  html: {  caption: 'Fin période :', page: 0, column: 2 }, required: true }
+
+				],
+				actions: {
+					'Effacer': function () {
+						this.clear();
+					},
+					'Enregistrer': function () {
+						this.validate();
+						this.save(function (data) {
+							 	if (data.status == "success")
+								 	w2alert(data.message); 
+								else
+									w2alert('Erreur : '+data.message);
+							 });
+					}
+				},
+				// record: {
+				// 	sans_redevance : 'à remplir',
+				// 	avec_redevance : 'à remplir',
+				// 	email :  'à remplir',
+				// 	nom : 'à remplir',
+				// 	sujet : 'à remplir',
+				// 	periode1 : 'à remplir',
+				// 	periode2 : 'à remplir'
+				// },
+				onLoad : function (event){
+					w2utils.settings.dataType = 'JSON'
+					console.log(event.xhr);
+					console.log(this);
+					console.log("changes ::::"+this.getChanges());
+					// this.formHTML = this.generateHTML(); 
+					this.refresh();
+					// this.unlock();
+					// this.
+				}
+				// onLoad: function(event) {
+				// 		console.log(event);
+						
+				// 	}
+			},
+
 		    layoutVente: {
 		        name: 'layout_<?php echo $idPage;?>',
 		        padding: 4,
@@ -139,15 +199,21 @@ function initDroit() {
 					        tabs: [{ id: 'tabTop2', caption: "Fichier de ventes" },{ id: 'tabTop0', caption: "Ventes par ISBN" },{ id: 'tabTop1', caption: "Ventes par auteur" }
 					        	,{ id: 'tabTop3', caption: "Paramètres" }],
 					        onClick: function (event) {
-								initTabs();
-								clearTabs();
+								// initTabs();
+								// clearTabs();
 						        if(event.target=="tabTop0"){
+									initTabs();
+									clearTabs();
 						            if(w2ui['grid_<?php echo $idPage;?>_vente_isbn'])w2ui['grid_<?php echo $idPage;?>_vente_isbn'].destroy();
 						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteISBN));
 						        }else if(event.target=="tabTop1"){
+									initTabs();
+									clearTabs();
 						            if(w2ui['grid_<?php echo $idPage;?>_vente_auteur'])w2ui['grid_<?php echo $idPage;?>_vente_auteur'].destroy();
 						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2grid(config.gridVenteAuteur));
 						        }else if(event.target=="tabTop2"){
+									initTabs();
+									clearTabs();
 						            if(w2ui['layout_<?php echo $idPage;?>_fichier'])w2ui['layout_<?php echo $idPage;?>_fichier'].destroy();
 						            if(w2ui['grid_ImportVenteData'])w2ui['grid_ImportVenteData'].destroy();
 						            w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
@@ -160,6 +226,19 @@ function initDroit() {
 									w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutParam));
 									w2ui.layout_<?php echo $idPage;?>_param.content('main', $().w2grid(config.gridVenteDevise));
 									w2ui.layout_<?php echo $idPage;?>_param.content('left', $().w2grid(config.gridDroitParam));
+									
+									//ajout tab paramètres en bas
+									if (!w2ui.layout_<?php echo $idPage;?>_main_tabs.get('tab3'))
+										w2ui.layout_<?php echo $idPage;?>_main_tabs.add({ id: 'tab3', text: 'Paramètres mails' });
+									w2ui.layout_<?php echo $idPage;?>.content('main', '<div id="form" style="width: 100%;">');
+									w2ui.layout_<?php echo $idPage;?>_main_tabs.hide('tab0','tab1','tab2');
+									
+									if (w2ui.form_<?php echo $idPage;?>_param)
+										w2ui.form_<?php echo $idPage;?>_param.destroy();
+
+									w2ui.layout_<?php echo $idPage;?>_fic.content('main', $('#form').w2form(config.formParam));
+									
+									
 						        }
 					        },
 					        onClose: function (event) {
@@ -911,21 +990,15 @@ function initDroit() {
 		            ],
 		            onClick: function (event) {
 						var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
-		                if (event.target == 'payerRapport') {
-							if(s){
-								setPaiement(s);
+						if(s.length){
+							if (event.target == 'voirRapport') {
+									s.forEach(function(r){
+										var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
+										open(item["url"],"_blank");
+									})
 							}
-		                }
-		                if (event.target == 'voirRapport') {
-			                	if(s){
-				                	s.forEach(function(r){
-				                		var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
-				                		open(item["url"],"_blank");
-				                	})
-			                	}
-		                }
-						else if (event.target == 'impRapport'){
-							if (s){
+							else if (event.target == 'impRapport'){
+								w2ui['grid_<?php echo $idPage;?>_ficRapport'].lock('Veuillez patientez',true);
 								var arraySel = [];
 								s.forEach(function(r){
 									var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
@@ -936,37 +1009,107 @@ function initDroit() {
 									});
 								})
 								$.get('<?php if(!$this->ajax) echo '../'; ?>import/envoimail',
-							{"data":arraySel},
-			            		function(js){
-			            			// w2alert("Mails supposés envoyés !"+JSON.stringify(js));
-									var strVar="";
-									strVar += "<div id=\"grid\" style=\"width: 100%; height: 350px;\"><\/div>";
-									strVar += "";
-									strVar += "<script type=\"text\/javascript\">";
-									strVar += "$(function () {";
-									strVar += "if(w2ui['grid']) w2ui['grid'].destroy();";
-									strVar += "    $('#grid').w2grid({ ";
-									strVar += "        name: 'grid', ";
-									strVar += "        columns: [                ";
-									strVar += "            { field: 'recid', caption: 'ID', size: '50px' },";
-									strVar += "            { field: 'nom', caption: 'Nom', size: '30%' },";
-									strVar += "            { field: 'prenom', caption: 'Prénom', size: '30%' },";
-									strVar += "            { field: 'etat', caption: 'Etat', size: '70%' }";
-									strVar += "        ],";
-									strVar += "        records: "+JSON.stringify(js);
-									strVar += "    });    ";
-									strVar += "});";
-									strVar += "<\/script>";
+								{"data":arraySel},
+									function(js){
+										var strVar="";
+										strVar += "<div id=\"grid\" style=\"width: 100%; height: 350px;\"><\/div>";
+										strVar += "";
+										strVar += "<script type=\"text\/javascript\">";
+										strVar += "$(function () {";
+										strVar += "if(w2ui['grid']) w2ui['grid'].destroy();";
+										strVar += "    $('#grid').w2grid({ ";
+										strVar += "        name: 'grid', ";
+										strVar += "        columns: [                ";
+										strVar += "            { field: 'recid', caption: 'ID', size: '50px' },";
+										strVar += "            { field: 'nom', caption: 'Nom', size: '30%' },";
+										strVar += "            { field: 'prenom', caption: 'Prénom', size: '30%' },";
+										strVar += "            { field: 'etat', caption: 'Etat', size: '70%' }";
+										strVar += "        ],";
+										strVar += "        records: "+JSON.stringify(js);
+										strVar += "    });    ";
+										strVar += "});";
+										strVar += "<\/script>";
 
-
-									w2popup.open({ 
-										title: "Résumé des mails envoyés",
-										body: strVar
-									});
-			           		},"json");
+										w2popup.open({ 
+											title: "Résumé des mails envoyés",
+											body: strVar
+										});
+										w2ui['grid_<?php echo $idPage;?>_ficRapport'].unlock();
+										getRapportFic(w2ui['grid_<?php echo $idPage;?>_fichier_import'].getSelection()[0]);
+								},"json");
 							}
-						}
-		            }
+							else if (event.target=="groupRapport"){
+								var rapport = "";
+								for (var i = 0; i < s.length; i++) {
+									var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(s[i]);
+									rapport += item["recid"]+".";
+								}
+								rapport = rapport.substr(0,rapport.length-1);
+								//TODO: Vérifier pour le php if(!$this->ajax) echo '../';
+								var urlGroupe =  window.location.href + "../../../import/grouperpdf?data=" + rapport;
+								
+
+								var mapForm = document.createElement("form");
+								mapForm.target = "Map";
+								mapForm.method = "POST"; // or "post" if appropriate
+								mapForm.action = window.location.href + "../../../import/grouperpdf";
+
+								var mapInput = document.createElement("input");
+								mapInput.type = "text";
+								mapInput.name = "data";
+								mapInput.value = rapport;
+								mapForm.appendChild(mapInput);
+
+								document.body.appendChild(mapForm);
+
+								map = window.open("", "Map");
+
+								if (map) {
+									mapForm.submit();
+								} else {
+									alert('Veuillez autoriser les popups sur cette page.');
+								}
+							}
+							else if(event.target =='payerRapport'){
+								// if(s){
+								// 	setPaiement(s);
+								// }
+
+								//TODO: vérifier avec samuel cette modification 
+								// en bas c'est la mienne , en haut celle de samuel
+								var strVar =  '   <div class="w2ui-field" >  '  + 
+									'       <label>Date de paiement :</label>  '  + 
+									'       <div> <input type="date" id="dateP"> </div>  '  + 
+									'   </div>  '  + 
+									'   <script>  '  + 
+									"     $('input[type=date]').w2field('date',{ format: 'yyyy-mm-dd' });  "  + 
+									'  <\/script>    ' ;
+
+								w2popup.open({ 
+											title: "Veuillez choisir la date de paiement pour la sélection",
+											body: strVar,
+											buttons: '<button class="w2ui-btn" onclick="validerPaiement()">Valider</button>'
+								});
+							}
+							else if (event.target == "encaisserRapport"){
+								
+								var strVar =  '   <div class="w2ui-field" >  '  + 
+									"       <label>Date d'encaissement :</label>  "  + 
+									'       <div> <input type="date" id="dateE" > </div>  '  + 
+									'   </div>  '  + 
+									'   <script>  '  + 
+									"     $('input[type=date]').w2field('date',{ format: 'yyyy-mm-dd' });  "  + 
+									'  <\/script>    ' ;
+
+								w2popup.open({ 
+											title: "Veuillez choisir la date d'encaissement pour la sélection",
+											body: strVar,
+											buttons: '<button class="w2ui-btn" onclick="validerEncaissement()">Valider</button>'
+								});
+								
+							}
+						}	
+					}
 		        },
 			        
 			},					
@@ -1124,11 +1267,18 @@ function initDroit() {
 
 function initTabs(){
     // initialisation
-	$('#<?php echo $idPage;?>').w2layout(config.layoutVente);	
-    w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
-	w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));				
-	w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
-	w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
+	if(!w2ui.layout_<?php echo $idPage;?>){
+		$('#<?php echo $idPage;?>').w2layout(config.layoutVente);	
+		w2ui.layout_<?php echo $idPage;?>.content('top', $().w2layout(config.layoutVenteTop));
+		w2ui.layout_<?php echo $idPage;?>.content('main', $().w2layout(config.layoutFic));				
+		w2ui.layout_<?php echo $idPage;?>_fic.content('main', $().w2grid(config.gridFicRapport));
+		w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutVenteFichier));
+	}
+
+	if (w2ui.layout_<?php echo $idPage;?>_main_tabs.get('tab0').hidden){
+		w2ui.layout_<?php echo $idPage;?>_main_tabs.show('tab0','tab1','tab2');
+		w2ui.layout_<?php echo $idPage;?>_main_tabs.remove('tab3');
+	}
 
 }
 
@@ -1425,6 +1575,59 @@ function setPaiement(idsRapport){
 				}
 	},"json");           		           		
 }
+
+function validerPaiement (){
+	var date = document.getElementById("dateP").value;
+	if (date){
+		var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
+		var arraySel = [];
+		s.forEach(function(r){
+			var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
+			arraySel.push({
+				recid : item["recid"]
+			});
+		})
+		console.log("arraySel: "+JSON.stringify(arraySel));
+		$.get('<?php if(!$this->ajax) echo '../'; ?>import/paiement',
+								{"data":arraySel,"date":date},
+									function(js){
+										w2alert(js);
+										w2ui['grid_<?php echo $idPage;?>_ficRapport'].unlock();
+										getRapportFic(w2ui['grid_<?php echo $idPage;?>_fichier_import'].getSelection()[0]);
+								},"json");
+		w2popup.close();
+	}
+	else{
+		w2alert("Veuillez sélectionner une date avant de valider")
+	}
+}
+
+function validerEncaissement (){
+	var date = document.getElementById("dateE").value;
+	if (date){
+		var s = w2ui['grid_<?php echo $idPage;?>_ficRapport'].getSelection();
+		var arraySel = [];
+		s.forEach(function(r){
+			var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
+			arraySel.push({
+				recid : item["recid"]
+			});
+		})
+		console.log("arraySel: "+JSON.stringify(arraySel));
+		$.get('<?php if(!$this->ajax) echo '../'; ?>import/encaissement',
+								{"data":arraySel,"date":date},
+									function(js){
+										w2alert(js);
+										w2ui['grid_<?php echo $idPage;?>_ficRapport'].unlock();
+										getRapportFic(w2ui['grid_<?php echo $idPage;?>_fichier_import'].getSelection()[0]);
+								},"json");
+		w2popup.close();
+	}
+	else{
+		w2alert("Veuillez sélectionner une date avant de valider")
+	}
+}
+
 
 </script>
 
