@@ -103,6 +103,9 @@ if($this->inc)
 	</div>
 	<div id="progCalcRoyalyies" class="progress">
 		<div class="progress-bar progress-bar-success" >Calcule les royalties</div>
+	</div>	
+	<div id="progSupPaiement" class="progress">
+		<div class="progress-bar progress-bar-success" >Supprime les paiements obsoletes</div>
 	</div>
 	<div id="progCalcPaiement" class="progress">
 		<div class="progress-bar progress-bar-success" >Calcule les paiements</div>
@@ -246,13 +249,24 @@ function calculerRoyalties(){
 				if(d.recid.substr(0,1)!='S')s.push(d.recid);
 			});
 			if(s.length)
-				calculerPaiements(s);
+				supprimerPaiements(s);
 			else{
 				$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
 				w2alert('Pas de rapport généré car pas de nouveaux royalties');				
 				if(parent)parent.finProcessImport(ficId);		
 			}
 	    },"json");           		           	
+}
+
+function supprimerPaiements(s){
+	$('#progSupPaiement .progress-bar').css('width',10 + '%');		
+	$.post('<?php if(!$this->ajax) echo '../'; ?>calculer/paiementobsolete',
+			{"type":"auteurFic","ids":s},
+		function(js){
+			$('#progSupPaiement .progress-bar').css('width',100 + '%');		
+			finsession(js);
+			calculerPaiements(s);
+		},"json");           		           	
 }
 
 function calculerPaiements(s){

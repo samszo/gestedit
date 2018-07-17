@@ -184,10 +184,20 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
             //vérifier que le fichier peut être supprimé = pas de paiement effectué
             $nb = $this->verifDeleteFic($id);
             if($nb == 0){
+                //suprime les rapports obsoletes
+                $dbRap = new Model_DbTable_Iste_rapport();
+                $rs = $dbRap->findObsoleteByIdFic($id);
+                foreach ($rs as $r) {
+                    $dbRap->remove($r["id_rapport"]);
+                }        
                 //supprime les data liées
                 $dbData = new Model_DbTable_Iste_importdata();
                 $dbData->removeIdFic($id);
                 $this->delete('iste_importfic.id_importfic = ' . $id);
+                //reclacule les rapports
+                $rapport = new Flux_Rapport();
+                $rapport->setAll();
+
                 $message = "Données et fichier supprimés.";
             }else{
                 $message = "Impossible de supprimer le fichier $nb rapports ont été envoyés.";

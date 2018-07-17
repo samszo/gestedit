@@ -479,7 +479,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     {
     		//met à jour les proposition qui n'ont pas de base contrat et qui ne sont pas null
     		$dbP = new Model_DbTable_Iste_proposition();
-    		$dbP->update(array("base_contrat"=>null), "base_contrat='GB'");
+    		$dbP->update(array("base_contrat"=>null), "base_contrat=''");
     	
 	    	//récupère les vente qui n'ont pas de royalty
 	    	$sql = "SELECT 
@@ -610,12 +610,12 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     		
         //récupère les royalty pour les auteurs sélectionnés
         $sql = "SELECT 
-        GROUP_CONCAT(DISTINCT r.id_royalty) idsRoyalty,
-        GROUP_CONCAT(DISTINCT impD.id_importfic SEPARATOR '-') idsFicImport,
+        GROUP_CONCAT(DISTINCT r.id_royalty) idsRoyalty, r.id_auteurxcontrat,
+        GROUP_CONCAT(DISTINCT impD.id_importfic SEPARATOR ',') idsFicImport,
         SUM(v.nombre) vNb,
         SUM(v.montant_livre) vMtLivre,
-        MIN(v.date_vente) minDateVente,
-        MAX(v.date_vente) maxDateVente,
+        MIN(impF.periode_debut) minDateVente,
+        MAX(impF.periode_fin) maxDateVente,
         a.id_auteur,
         a.nom autNom,
         a.prenom,
@@ -632,12 +632,14 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             INNER JOIN
         iste_importdata impD ON impD.id_importdata = v.id_importdata 
             INNER JOIN
+        iste_importfic impF ON impF.id_importfic = impD.id_importfic 
+            INNER JOIN
         iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat
-            AND ac.id_auteur IN (".$idsAuteur.")
+            -- AND ac.id_auteur IN (".$idsAuteur.")
             INNER JOIN
         iste_auteur a ON a.id_auteur = ac.id_auteur
     WHERE
-        r.date_paiement IS NULL
+        r.date_envoi IS NULL
     GROUP BY a.id_auteur
     ORDER BY a.nom, a.prenom";
     //echo $sql;
@@ -690,11 +692,11 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         //récupère les royalty pour les livres sélectionnés
         $sql = "SELECT 
             COUNT(DISTINCT r.id_royalty) nbRoy
-            ,DATE_FORMAT(v.date_vente,'%Y') annee, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
+            ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
             ,l.id_livre, l.titre_en, l.titre_fr
-            ,p.base_contrat
+            ,p.base_contrat, la.role
             ,c.type typeContrat, c.param, c.id_contrat
             ,MIN(d.taux_livre_euro) taux_livre_euro
         FROM iste_royalty r 
@@ -704,9 +706,10 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             INNER JOIN iste_livre l ON l.id_livre = i.id_livre
             INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
             INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_livre = l.id_livre
+            INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.id_auteur = ac.id_auteur
             INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
         WHERE r.id_royalty IN (".$idsRoy.")
-        GROUP BY CONCAT(p.base_contrat, DATE_FORMAT(v.date_vente,'%Y')), l.id_livre
+        GROUP BY l.id_livre
         ";
         //echo $sql;
         $stmt = $this->_db->query($sql);
@@ -727,6 +730,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         //récupère les royalty pour les livres sélectionnés
         $sql = "SELECT 
             COUNT(DISTINCT r.id_royalty) nbRoy
+            ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin
             ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc

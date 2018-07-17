@@ -189,10 +189,14 @@ class Flux_Rapport extends Flux_Site{
 		//$tauxPeriode = $this->dbDevise->getTauxPeriode($data['minDateVente'],$data['maxDateVente']);
 				
 		$date = new DateTime();
+		/*
 		$refRapport = $data["autNom"].".".substr($data["prenom"],0,2)
 			.".".$type.".".$data["idsFicImport"]
 			.".".$data["minDateVente"].".".$data["maxDateVente"];
+		*/
+		$refRapport = $data["autNom"]."_".substr($data["prenom"],0,2)."_".uniqid()."_".$date->format('Y-m-d');
 		$refRapport = $this->dbImportfic->valideChaine($refRapport);
+
 		
 		//charge le modèle
 		//$mod = $this->dbImportfic->findByType("paiement droit ".$data["base_contrat"]);
@@ -215,8 +219,8 @@ class Flux_Rapport extends Flux_Site{
 		$this->odf->setVars('roy_date_edition', $date->format('l d F Y'));
 		$this->odf->setVars('roy_reference', $refRapport);
 		//les périodes sont différentes suivant les contrats on affiche à la fin
-		//$periode = $data["minDateVente"]." -> ".$data["maxDateVente"];
-		//$this->odf->setVars('roy_periode', $periode);
+		$periode = $data["minDateVente"]." -> ".$data["maxDateVente"];
+		$this->odf->setVars('roy_periode', $periode);
 		//$this->odf->setVars('livre_roy_pc', $data["pc_papier"]." %");
 				
 		//ajout des infos d'auteur
@@ -255,9 +259,8 @@ class Flux_Rapport extends Flux_Site{
 			foreach ($rsRoyalty as $r) {
 				$this->trace("détail royalties Livre",$r);
 
-				//période
+				/*période
 				$contrats = $this->dbContrat->getPeriodes($r["annee"],$r["id_contrat"]);
-
 				//if($perDeb > $this->contrats[$r["id_contrat"]][$r["base_contrat"]]["deb"])
 				$perDeb = $contrats[$r["id_contrat"]][$r["base_contrat"]]["deb"];
 				//if($perFin < $this->contrats[$r["id_contrat"]][$r["base_contrat"]]["fin"])
@@ -268,13 +271,16 @@ class Flux_Rapport extends Flux_Site{
 					$oPeriode = $periode;
 				} else
 					$roys->setVars('roy_periode', "-");
-				
+				*/
 				
 				if($r["typeVente"]=="N")$r["typeVente"]="Book digital";
 				if($r["typeVente"]=="P")$r["typeVente"]="Book paper";
 				if($r["typeVente"]=="Licence num")$r["typeVente"]="E-Licence";
 				
-				$roys->setVars('roy_type', $r["typeVente"]." (".$r["typeContrat"].")");
+				if($type=="livre")
+					$roys->setVars('roy_type', $r["typeVente"]." (".$r["role"].")");
+				else
+					$roys->setVars('roy_type', $r["typeVente"]." (".$r["typeContrat"].")");
 				$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]);
 				$roys->setVars('roy_unit', $r["unit"]);
 				$roys->setVars('roy_rev', round($r["rMtVente"],2));
@@ -303,7 +309,8 @@ class Flux_Rapport extends Flux_Site{
 
 		$this->odf->setVars('roy_devise_date', $periode);
 		$this->odf->setVars('roy_devise_pc', $taux_livre_euro);
-		$this->odf->setVars('roy_net_due_euro', round(($due-$deduc)*$taux_livre_euro,2));
+		$montant = round(($due-$deduc)*$taux_livre_euro,2);
+		$this->odf->setVars('roy_net_due_euro', $montant);
 		
 				
 		//on enregistre le fichier
@@ -322,7 +329,7 @@ class Flux_Rapport extends Flux_Site{
 
 		//enregistrement du rapport
 		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic.".pdf"
-			,"id_importfic"=>$mod["id_importfic"]
+			,"id_importfic"=>$mod["id_importfic"], "periode_deb"=>$data["minDateVente"], "periode_fin"=>$data["maxDateVente"], 'montant'=>$montant
 			, "data"=>json_encode($data),"type"=>$type, "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
 			
 		//mise à jour de la date d'éditions
@@ -491,5 +498,28 @@ class Flux_Rapport extends Flux_Site{
 		 } 
 		 return rmdir($dir); 
 	} 
+
+
+	/**
+	 * création de tous les rapports
+	 *
+	 *
+	 */
+	public function setAll(){
+		$dbRoy = new Model_DbTable_Iste_royalty();
+		$dbRap = new Model_DbTable_Iste_rapport();
+
+		//on supprime le répertoire tmp
+		$this->delTree(ROOT_PATH."/data/editions/tmp");
+		//on le recrée
+		mkdir(ROOT_PATH."/data/editions/tmp", 0775);
+		//on récupère les paiements
+		$rs = $dbRoy->paiementAuteurFic("");
+		foreach ($rs as $r) {
+			$this->creaPaiementFic($r);
+			$this->creaPaiementFic($r,"serie");  
+		}
+		$this->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/*.odt", ROOT_PATH."/data/editions");
+	}
 
 }	

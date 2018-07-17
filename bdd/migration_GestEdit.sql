@@ -65,6 +65,7 @@ CHANGE  `id_obj`  `id_obj` INT( 11 ) NULL;
 
 # Deleted Tables
 
+
 # Changed Tables
 
 
@@ -101,12 +102,17 @@ ALTER TABLE `iste_rapport` CHANGE `obj_id` `obj_id` VARCHAR(300) CHARACTER SET u
 
 ALTER TABLE `iste_rapport` ADD `type` VARCHAR(50) NOT NULL AFTER `maj`;
 
+ALTER TABLE `iste_rapport` ADD `periode_deb` DATE NULL AFTER `type`, ADD `periode_fin` DATE NULL AFTER `periode_deb`;
+
+ALTER TABLE `iste_rapport` ADD `montant` DECIMAL NULL AFTER `periode_fin`;
+
 # New Tables
 
 --
 -- Structure de la table `iste_parammail`
 --
 
+DROP TABLE IF EXISTS `iste_parammail`;
 CREATE TABLE `iste_parammail` (
   `id_parammail` int(11) NOT NULL,
   `champ` varchar(45) NOT NULL,
@@ -144,6 +150,55 @@ ALTER TABLE `iste_parammail`
 ALTER TABLE `iste_parammail`
   MODIFY `id_parammail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
+
+--
+-- Structure de la table `iste_devise`
+--
+
+DROP TABLE IF EXISTS `iste_devise`;
+CREATE TABLE `iste_devise` (
+  `id_devise` int(11) NOT NULL,
+  `date_taux` date DEFAULT NULL,
+  `date_taux_fin` date NOT NULL,
+  `taux_euro_livre` decimal(10,4) DEFAULT NULL,
+  `taux_livre_euro` decimal(10,4) DEFAULT NULL,
+  `taux_dollar_livre` decimal(10,4) DEFAULT NULL,
+  `taux_livre_dollar` decimal(10,4) DEFAULT NULL,
+  `taux_euro_dollar` decimal(10,4) NOT NULL,
+  `taux_dollar_euro` decimal(10,4) NOT NULL,
+  `base_contrat` varchar(2) NOT NULL,
+  `taxe_taux` decimal(4,2) NOT NULL,
+  `taxe_deduction` decimal(4,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Déchargement des données de la table `iste_devise`
+--
+
+INSERT INTO `iste_devise` (`id_devise`, `date_taux`, `date_taux_fin`, `taux_euro_livre`, `taux_livre_euro`, `taux_dollar_livre`, `taux_livre_dollar`, `taux_euro_dollar`, `taux_dollar_euro`, `base_contrat`, `taxe_taux`, `taxe_deduction`) VALUES
+(8, '2018-01-01', '2019-12-30', '1.0000', '1.0000', '1.0000', '1.0000', '1.0000', '1.0000', 'GB', '1.00', '1.00'),
+(9, '2018-01-01', '2019-12-31', '0.1000', '0.1000', '0.1000', '0.1000', '0.1000', '0.1000', 'FR', '0.10', '0.10');
+
+--
+-- Index pour les tables déchargées
+--
+
+--
+-- Index pour la table `iste_devise`
+--
+ALTER TABLE `iste_devise`
+  ADD PRIMARY KEY (`id_devise`),
+  ADD KEY `base_contrat` (`base_contrat`);
+
+--
+-- AUTO_INCREMENT pour les tables déchargées
+--
+
+--
+-- AUTO_INCREMENT pour la table `iste_devise`
+--
+ALTER TABLE `iste_devise`
+  MODIFY `id_devise` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 # Disable Foreign Keys Check
 SET FOREIGN_KEY_CHECKS = 1;

@@ -37,6 +37,21 @@ class CalculerController extends Zend_Controller_Action
 		
     }
 
+    public function paiementobsoleteAction()
+    {
+    	$this->initInstance();
+    		
+		$dbRap = new Model_DbTable_Iste_rapport();
+		
+		$rs = $dbRap->findObsoleteByIdsAuteur(implode(",", $this->_getParam('ids')));
+		foreach ($rs as $r) {
+			$dbRap->remove($r["id_rapport"]);
+		}
+
+		$this->view->message = "Les paiement obsolètes sont supprimés.";		
+		
+    }
+
     public function paiementAction()
     {
     		$this->initInstance();
@@ -66,22 +81,21 @@ class CalculerController extends Zend_Controller_Action
     				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
 					break;
 				case "auteurFic":
+					$rapport->setAll();
+					/*
 					//on supprime le répertoire tmp
 					$rapport->delTree(ROOT_PATH."/data/editions/tmp");
 					//on le recrée
 					mkdir(ROOT_PATH."/data/editions/tmp", 0775);
 					//on récupère les paiements
     				$rs = $dbRoy->paiementAuteurFic(implode(",", $this->_getParam('ids')));
-					$next = true;
 					foreach ($rs as $r) {
-						if($next){
-							$rapport->creaPaiementFic($r);
-							$rapport->creaPaiementFic($r,"serie");  
-							//$next = false;
-						}
+						$rapport->creaPaiementFic($r);
+						$rapport->creaPaiementFic($r,"serie");  
 					}
 					$rapport->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/*.odt", ROOT_PATH."/data/editions");
-					//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
+					//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));	
+					*/			
 					break;
     		}
     				

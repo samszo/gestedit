@@ -458,10 +458,12 @@ function initDroit() {
 				},
 		        onDelete: function(event) {            
 					if(event.force){
+							w2popup.lock('Merci de patienter pendant la suppression des données.', true);
 			            	$.post(itemSelect.deleteUrl+"&type=vente&obj=import&dir=1",
 							null,
 			            		function(js){
-		            				finsession(js);
+									finsession(js);
+									w2popup.unlock();
 			            			w2alert(js.message);
 			           		},"json");
 					}
@@ -1106,8 +1108,8 @@ function initDroit() {
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'base_contrat', caption: 'Base contrat', size: '80px', sortable: true, resizable: true},
 		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true},
-		            { field: 'date_taux', caption: 'Deb. période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
-		            { field: 'date_taux_fin', caption: 'Fin période',editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'date_taux', caption: 'Deb. période',hidden:true, editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
+		            { field: 'date_taux_fin', caption: 'Fin période', hidden:true,editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 					{ field: 'taxe_taux', caption: 'Taxe taux',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
 					{ field: 'taxe_deduction', caption: 'Taxe déduction',editable: { type: 'float'}, size: '110px', sortable: true, resizable: true},
 		            { field: 'taux_livre_dollar', caption: '&pound; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
