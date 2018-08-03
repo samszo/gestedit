@@ -231,7 +231,7 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
      *
      * @return array
      */
-    public function findByNomPrenom($nom, $prenom)
+    public function findByNomPrenom($nom, $prenom="")
     {
         $query = $this->select()
                     ->from( array("i" => "iste_auteur") )                           

@@ -71,30 +71,7 @@ class ImportController extends Zend_Controller_Action
 				break;			
 		}
     }
-    
-    public function calculerventeAction()
-    {
-    		$this->initInstance();    		
-		switch ($this->_getParam('type',"")) {
-			case "Wiley":
-				$w = new Flux_Wiley(false,true);
-				$w->calculerVentes($this->_getParam('idFic'));
-				break;			
-			case "NBN":
-				$nbn = new Flux_Nbn(false,true);
-				$nbn->calculerVentes($this->_getParam('idFic'));
-				break;			
-			case "global":
-				$v = new Flux_Vente(false,true);
-				//$v->calculerVentes($this->_getParam('idFic'));
-				$v->calculerVentesNew($this->_getParam('idFic'));
-				break;			
-			default:
-				echo "pas de processus de calcule pour ce type de fichier";
-				break;			
-		}
-    }    
-	
+    	
     public function verifdeviseAction()
     {
 		$this->initInstance();
@@ -579,6 +556,93 @@ class ImportController extends Zend_Controller_Action
 		$this->s->trace("FIN ".__METHOD__);		
     }    
 
+
+
+	public function contratsauteursAction(){
+
+		$s = new Flux_Site();
+		$s->bTrace = true;
+		$s->bTraceFlush = true;
+		$dbL = new Model_DbTable_Iste_livre();
+		$dbI = new Model_DbTable_Iste_isbn();
+		$dbA = new Model_DbTable_Iste_auteur();
+		$dbCont = new Model_DbTable_Iste_contrat();
+		$dbAutCont = new Model_DbTable_Iste_auteurxcontrat();
+
+		$csvISBN = $s->csvToArray("../data/historiques/export_ISBN.csv");
+		$arrDroit = $s->csvToArray("../data/historiques/export_pourcentage.csv");
+
+		$idContAut = $dbCont->ajouter(array("nom"=>"Contrat auteur","type"=>"auteur"));			
+		$idContDir = $dbCont->ajouter(array("nom"=>"Contrat directeur","type"=>"directeur"));
+		//conversion des rule en % de contrat
+		$arrRule = array("Ebook"=>"pc_ebook","Paper"=>"pc_papier","Print"=>"pc_papier","Translation"=>"pc_trad");			
+		$s->trace("DEBUT ".__METHOD__);		
+		$nbC = count($arrDroit);
+		$cols = array('Title'=>3,'AuthorDisplayName'=>4,'Rule'=>5,'RateDetails'=>10);
+		for ($i=1; $i < $nbC; $i++) { 
+			$findISBN = false;
+			$arrISBN = array();
+			$d = $arrDroit[$i];
+			//recherche la référence du livre
+			$titre = $d[$cols['Title']];
+			$arrL = $dbL->findByTitreLike($titre);
+			if(!count($arrL)){
+				$s->trace($i."|ERREUR|titre du livre non trouvé : ".$titre);
+				//recherche dans le csv des isbn
+				$findISBN = true;
+				foreach ($csvISBN as $isbn) {
+					if($isbn[7]==$titre){
+						$num = $dbI->findByNum($isbn[20]);
+						if(!$num)$s->trace($i."|ERREUR|num ISBN non trouvé : ".$isbn[20]);
+						else $arrISBN[] = $num;
+					}
+				}
+				if(!count($arrISBN)){
+					$s->trace($i."|ERREUR|titre non trouvé dans liste ISBN : ".$titre);
+				}				
+			}elseif(count($arrL)>1)
+				$s->trace($i."|ERREUR|titre du livre non discriminant : ".count($arrL)." = ".$titre);
+			else{
+				$s->trace($i." titre trouvé : ".$titre);
+			}
+			if(count($arrL))
+				//recherches les isbn
+				if(!$findISBN)	$arrISBN = $dbI->findById_livre($arrL[0]['id_livre']);
+				//vérification des isbn
+				if(!count($arrISBN))
+					$s->trace($i."|ERREUR|ISBN du livre non trouvé : ".$titre);
+				else{
+					$s->trace($i." ISBN trouvé = ".count($arrISBN));
+					//recherche les auteurs
+					$a = explode(", ",$d[$cols['AuthorDisplayName']]);
+					if(!$a[1])$a[1]="";
+					$arrA = $dbA->findByNomPrenom($a[0],$a[1]);
+					if(!$arrA)
+						$s->trace($i."|ERREUR|Auteur non trouvé : ".implode(" ", $a));
+					/*
+					elseif(count($arrA)>1)
+						$s->trace($i." Auteur non discriminant : ".count($arrA)." = ".implode(" ", $a));
+					*/
+					else{
+						$s->trace($i." Auteur trouvé : ".implode(" ", $a));
+						$pc = explode("%",$d[$cols['RateDetails']]);
+						//ajoute un contrat poru chaque ISBN
+						foreach ($arrISBN as $isbn) {
+							$data = array("id_auteur"=>$arrA["id_auteur"], "id_livre"=>$isbn["id_livre"], "id_isbn"=>$isbn["id_isbn"]
+							,$arrRule[$d[$cols['Rule']]]=>floatval($pc[0]), "id_contrat"=>$idContAut);
+							$dbAutCont->ajouter($data, true, false,true);
+							$s->trace($i." contrat auteur ajouté");
+						}
+		
+					}	
+				}
+
+		}
+		
+		$s->trace("FIN ".__METHOD__);		
+	}
+
+
     function importAuteurs($r, $i){
 		//gestion des lignes vides
 		if(!$r[1]){$this->s->trace($i." ligne vide");return;}
@@ -658,6 +722,8 @@ class ImportController extends Zend_Controller_Action
 		
 		$this->s->trace("FIN ".__METHOD__);		
 	}
+
+	
 	
 	function importGlobalElsevier($r, $i){
 		$this->s->trace("DEBUT ".__METHOD__);		

@@ -97,10 +97,6 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
      */
     public function removeIdFic($id)
     {
-            //supprime les rapports du fichier
-    		$sql = "DELETE r.* FROM iste_rapport r WHERE r.id_importfic = ".$id;
-    		$stmt = $this->_db->query($sql);
-
             //supprime les royalties du fichier
     		$sql = "DELETE r.*
             FROM iste_royalty r
@@ -115,7 +111,8 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
     		$stmt = $this->_db->query($sql);
 
     		//supprime les data du fichier
-    		$this->delete('iste_importdata.id_importfic = ' . $id);
+            $this->delete('iste_importdata.id_importfic = ' . $id);    
+
     }
         
     /**
@@ -316,7 +313,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
             ->from( array("d" => "iste_importdata") )                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("f" => "iste_importfic"),
-                'f.id_importfic = d.id_importfic', array("periode_debut","periode_fin"))
+                'f.id_importfic = d.id_importfic', array("periode_debut","periode_fin","conversion_livre_euro"))
             ->where( "d.id_importfic = ?", $idFic )
             ->order("d.id_importdata");
         echo $query->__toString();    

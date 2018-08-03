@@ -158,7 +158,7 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    	/**
+    /**
      * Recherche une entrée Iste_devise avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -174,6 +174,23 @@ class Model_DbTable_Iste_devise extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
+    /**
+     * Recherche une entrée Iste_devise avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param integer $annee
+     *
+     * @return array
+     */
+    public function findByAnnee($annee)
+    {
+        $query = $this->select()
+                    ->from( array("i" => "iste_devise") )                           
+                    ->where( "YEAR(i.date_taux) = ?", $annee);
+
+        return $this->fetchAll($query)->toArray()[0]; 
+    }
+
     	/**
      * Recherche une entrée Iste_devise avec la valeur spécifiée
      * et retourne cette entrée.

@@ -60,8 +60,12 @@ ALTER TABLE `iste_contrat`
 ALTER TABLE `iste_contrat`
   MODIFY `id_contrat` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
+ALTER TABLE `iste_auteurxcontrat` CHANGE `id_isbn` `id_isbn` INT(11) NULL;
+
+
 ALTER TABLE  `iste_importfic` CHANGE  `obj`  `obj` VARCHAR( 40 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,
 CHANGE  `id_obj`  `id_obj` INT( 11 ) NULL;
+ALTER TABLE `iste_importfic` ADD `conversion_livre_euro` DECIMAL(4,2) NULL ;
 
 # Deleted Tables
 
@@ -91,6 +95,8 @@ ALTER TABLE `iste_royalty`
   CHANGE COLUMN `date_encaissement` `date_encaissement` date  NULL AFTER `date_paiement`,
   CHANGE COLUMN `date_edition` `date_edition` date  NULL AFTER `date_encaissement`,
   CHANGE COLUMN `id_rapport` `id_rapport` int(11)  NULL AFTER `date_edition`;
+ALTER TABLE `iste_royalty` ADD `conversion_livre_euro` DECIMAL(4,2) NULL ;
+ALTER TABLE `iste_royalty` CHANGE `id_devise` `id_devise` INT(11) NULL;
 
 -- changed table 'iste_histomodif'
 ALTER TABLE `iste_histomodif` CHANGE `data` `data` TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;
@@ -104,7 +110,7 @@ ALTER TABLE `iste_rapport` ADD `type` VARCHAR(50) NOT NULL AFTER `maj`;
 
 ALTER TABLE `iste_rapport` ADD `periode_deb` DATE NULL AFTER `type`, ADD `periode_fin` DATE NULL AFTER `periode_deb`;
 
-ALTER TABLE `iste_rapport` ADD `montant` DECIMAL NULL AFTER `periode_fin`;
+ALTER TABLE `iste_rapport` ADD `montant` DECIMAL(10,2) NULL AFTER `periode_fin`;
 
 # New Tables
 
@@ -164,10 +170,10 @@ CREATE TABLE `iste_devise` (
   `taux_livre_euro` decimal(10,4) DEFAULT NULL,
   `taux_dollar_livre` decimal(10,4) DEFAULT NULL,
   `taux_livre_dollar` decimal(10,4) DEFAULT NULL,
-  `taux_euro_dollar` decimal(10,4) NOT NULL,
-  `taux_dollar_euro` decimal(10,4) NOT NULL,
+  `taux_euro_dollar` decimal(10,4)  NULL,
+  `taux_dollar_euro` decimal(10,4)  NULL,
   `base_contrat` varchar(2) NOT NULL,
-  `taxe_taux` decimal(4,2) NOT NULL,
+  `taxe_taux` decimal(4,2) NULL,
   `taxe_deduction` decimal(4,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -176,8 +182,7 @@ CREATE TABLE `iste_devise` (
 --
 
 INSERT INTO `iste_devise` (`id_devise`, `date_taux`, `date_taux_fin`, `taux_euro_livre`, `taux_livre_euro`, `taux_dollar_livre`, `taux_livre_dollar`, `taux_euro_dollar`, `taux_dollar_euro`, `base_contrat`, `taxe_taux`, `taxe_deduction`) VALUES
-(8, '2018-01-01', '2019-12-30', '1.0000', '1.0000', '1.0000', '1.0000', '1.0000', '1.0000', 'GB', '1.00', '1.00'),
-(9, '2018-01-01', '2019-12-31', '0.1000', '0.1000', '0.1000', '0.1000', '0.1000', '0.1000', 'FR', '0.10', '0.10');
+(9, '2018-01-01', '2019-12-31', '0.1000', '0.1000', '0.1000', '0.1000', '0.1000', '0.1000', 'GB', '0.10', '0.10');
 
 --
 -- Index pour les tables déchargées
@@ -199,6 +204,15 @@ ALTER TABLE `iste_devise`
 --
 ALTER TABLE `iste_devise`
   MODIFY `id_devise` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+
+-- AJOUT nouveau contrat
+ALTER TABLE `iste_auteurxcontrat` ADD `pc_trad` DECIMAL(6,2) NULL AFTER `pc_ebook`;
+ALTER TABLE `iste_auteurxcontrat` CHANGE `id_comite` `id_comite` INT(11) NULL;
+
+ALTER TABLE `iste_auteur` ADD `taxe_uk` VARCHAR(3) NULL AFTER `commentaire`;
+ALTER TABLE `iste_auteur` ADD `paiement_euro` VARCHAR(3) NULL AFTER `taxe_uk`;
+
 
 # Disable Foreign Keys Check
 SET FOREIGN_KEY_CHECKS = 1;

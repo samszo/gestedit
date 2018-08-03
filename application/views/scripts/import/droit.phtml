@@ -17,7 +17,7 @@ if(!$this->ajax){
 			var fctInit;			
 		</script>		
 		<script type="text/javascript" src="'.$urlP.'js/jquery.min.js"></script>
-		<script type="text/javascript" src="'.$urlP.'js/w2ui.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/w2ui-1.5.rc1.js"></script>
 		<script type="text/javascript" src="'.$urlP.'js/global.js"></script>
 		<script type="text/javascript" src="'.$urlP.'js/data.js"></script>
 		<script type="text/javascript" src="'.$urlP.'js/log.js"></script>		
@@ -73,6 +73,10 @@ if($this->inc)
     <div class="w2ui-field">
         <label>Période :</label>
         <div> <input type="dateDeb"> - <input type="dateFin"> </div>
+	</div>
+	<div class="w2ui-field">
+		<label style="width: 230px;">Taux de conversion Livre -> Euro : </label>
+		<div><input id="livreToEuro" value="0"></div>
 	</div>
     <!-- The fileinput-button span is used to style the file input field as button -->
     <span class="btn btn-success fileinput-button">
@@ -133,13 +137,13 @@ function initImportDroit() {
 	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
 	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
 		    	    		};
-			//vérifie la présence de devise
+			//vérifie la présence du taux de réduction
 			$.ajax({
 					data: dates,
 					url: urlP+'import/verifdevise',
 					success: function (result) {
-						if (result.length < 2){
-							w2alert("Il manque des dévises pour la période définie.<br/>Merci de les renseigner dans l'onglet paramètres.");
+						if (result.length < 1){
+							w2alert("Il manque des taux de réduction pour la période définie.<br/>Merci de les renseigner dans l'onglet paramètres.");
 							return false;
 						}
 					},
@@ -147,8 +151,8 @@ function initImportDroit() {
 					async: false
 				});
 		});	
-
-
+	//initialise le champ pour le taux de conversion
+	$('#livreToEuro').w2field('percent', { precision: 2, min: 0, max: 100 });
 }
 
 function initFileUploadDroit(){
@@ -179,6 +183,7 @@ function initFileUploadDroit(){
 	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
 	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
 	    	    		,'type':'vente','obj':'import','dir':1
+						,'conversion':$('#livreToEuro').w2field().get().replace('%','')
 		    	    		};
 	    		if(!data.formData.dateDeb ){
 	    		    w2alert('Veuillez sélectionner une date de début');
@@ -186,6 +191,10 @@ function initFileUploadDroit(){
 	    		}
 	    		if(!data.formData.dateFin ){
 	    		    w2alert('Veuillez sélectionner une date de fin');
+	    		    return false;
+	    		}
+	    		if(!data.formData.conversion ){
+	    		    w2alert('Veuillez sélectionner un taux de conversion livre -> euro');
 	    		    return false;
 	    		}
                 var fileType = data.files[0].name.split('.').pop(), allowdtypes = 'csv,CSV';
@@ -211,7 +220,7 @@ function importerData(){
 
 function calculerVente(){
 	$('#progCalcVente .progress-bar').css('width',10 + '%');		
-	$.get(urlP+'import/calculervente',
+	$.get(urlP+'calculer/vente',
 			{idFic:ficId, type:'global'},
 			function(js){
 				$('#progCalcVente .progress-bar').css('width',100 + '%');		

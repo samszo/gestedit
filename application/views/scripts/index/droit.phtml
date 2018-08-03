@@ -13,7 +13,7 @@ if(!$this->ajax){
 			var fctInit;			
 		</script>		
 		<script type="text/javascript" src="../js/jquery.min.js"></script>
-		<script type="text/javascript" src="../js/w2ui.js"></script>
+		<script type="text/javascript" src="../js/w2ui-1.5.rc1.js"></script>
 		<script type="text/javascript" src="../js/global.js"></script>
 		<script type="text/javascript" src="../js/data.js"></script>
 		<script type="text/javascript" src="../js/log.js"></script>
@@ -201,7 +201,7 @@ function initDroit() {
 									if(w2ui['grid_<?php echo $idPage;?>_param'])w2ui['grid_<?php echo $idPage;?>_param'].destroy();
 									w2ui.layout_<?php echo $idPage;?>_top.content('main', $().w2layout(config.layoutParam));
 									w2ui.layout_<?php echo $idPage;?>_param.content('main', $().w2grid(config.gridVenteDevise));
-									w2ui.layout_<?php echo $idPage;?>_param.content('left', $().w2grid(config.gridDroitParam));
+									//w2ui.layout_<?php echo $idPage;?>_param.content('left', $().w2grid(config.gridDroitParam));
 									
 									//ajout tab paramètres en bas
 									if (!w2ui.layout_<?php echo $idPage;?>_main_tabs.get('tab3'))
@@ -600,7 +600,7 @@ function initDroit() {
 		                    var html = this.getCellValue(index, col_index);
 		                    return html.text ? html.text : html;
 		                }},		                
-		            { field: 'base_contrat', caption: 'Base contractuelle', size: '80px', sortable: true, resizable: true },
+		            { field: 'base_contrat', caption: 'Base contractuelle', hidden:true, size: '80px', sortable: true, resizable: true },
 			        { field: 'date_contrat', caption: 'Signature contrat', size: '100px', sortable: true, resizable: true},
 		            { field: 'date_vente', caption: 'Date de vente', size: '100px', sortable: true, resizable: true 
 		            		,editable: { type: 'date'}},
@@ -680,7 +680,7 @@ function initDroit() {
 		            { field: 'livre', caption: 'Livre', size: '10%', sortable: true, resizable: true },
 		            { field: 'type_isbn', caption: 'Type', size: '80px', sortable: true, resizable: true },
 		            { field: 'type_contrat', caption: 'Type de contrat', size: '100px', sortable: true, resizable: true},
-		            { field: 'base_contrat', caption: 'Base contrat', size: '80px', sortable: true, resizable: true },
+		            { field: 'base_contrat', hidden:true, caption: 'Base contrat', size: '80px', sortable: true, resizable: true },
 		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true },
 		            { field: 'date_vente', caption: 'Date de vente', size: '80px', sortable: true, resizable: true },
 		            { field: 'montant_vente', editable:{type:'float'}, caption: 'Vente &pound;', size: '80px', sortable: true, resizable: true},
@@ -843,9 +843,10 @@ function initDroit() {
 		            { field: 'royIds', caption: 'royId', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'titre_fr', caption: "Titre FR", size: '10%', sortable: true, resizable: true},
 		            { field: 'titre_en', caption: "Titre EN", size: '10%', sortable: true, resizable: true},
-		            { field: 'base_contrat', caption: "Base contrat", size: '40px', sortable: true, resizable: true},
+		            { field: 'base_contrat', hidden:true, caption: "Base contrat", size: '40px', sortable: true, resizable: true},
 		            { field: 'periode', caption: "Periode", size: '170px', sortable: true, resizable: true},
-		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '120px', sortable: true, resizable: true},
+		            { field: 'montant_livre', caption: "Montant Roy. &pound;", type:'float', size: '120px', sortable: true, resizable: true},
+		            { field: 'type', caption: 'Type', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_edition', caption: 'Edition', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_paiement', editable:{type:'date'}, caption: 'Paiement', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_encaissement', editable:{type:'date'}, caption: 'Encaissement', size: '80px', sortable: true, resizable: true},		            
@@ -915,8 +916,9 @@ function initDroit() {
 		            { field: 'royIds', caption: 'royId', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'nom', caption: "Nom", size: '80px', sortable: true, resizable: true},
 		            { field: 'prenom', caption: "Prénom", size: '80px', sortable: true, resizable: true},
-		            { field: 'base_contrat', caption: "Base contrat", size: '40px', sortable: true, resizable: true},
+		            { field: 'base_contrat', hidden:true, caption: "Base contrat", size: '40px', sortable: true, resizable: true},
 		            { field: 'periode', caption: "Periode", size: '170px', sortable: true, resizable: true},
+		            { field: 'type', caption: 'Type', size: '80px', sortable: true, resizable: true},
 		            { field: 'montant_livre', caption: "Montant Roy. &pound;", size: '100px', sortable: true, resizable: true},
 		            { field: 'date_edition', caption: 'Edition', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_envoi', caption: 'Envoi', size: '80px', sortable: true, resizable: true},
@@ -1106,18 +1108,18 @@ function initDroit() {
 	                	columnHeaders	: true},
 		        columns: [		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
-		            { field: 'base_contrat', caption: 'Base contrat', size: '80px', sortable: true, resizable: true},
+		            { field: 'base_contrat', hidden:true, caption: 'Base contrat', size: '80px', sortable: true, resizable: true},
 		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true},
 		            { field: 'date_taux', caption: 'Deb. période',hidden:true, editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
 		            { field: 'date_taux_fin', caption: 'Fin période', hidden:true,editable: { type: 'date'}, size: '80px', sortable: true, resizable: true},
-					{ field: 'taxe_taux', caption: 'Taxe taux',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+					{ hidden:true, field: 'taxe_taux', caption: 'Taxe taux',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
 					{ field: 'taxe_deduction', caption: 'Taxe déduction',editable: { type: 'float'}, size: '110px', sortable: true, resizable: true},
-		            { field: 'taux_livre_dollar', caption: '&pound; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
-		            { field: 'taux_livre_euro', caption: '&pound; -> &euro;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
-		            { field: 'taux_euro_livre', caption: '&euro; -> &pound;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
-		            { field: 'taux_dollar_livre', caption: '$ -> &pound;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
-		            { field: 'taux_euro_dollar', caption: '&euro; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
-		            { field: 'taux_dollar_euro', caption: '$ -> &euro;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taux_livre_dollar', caption: '&pound; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taux_livre_euro', caption: '&pound; -> &euro;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taux_euro_livre', caption: '&euro; -> &pound;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taux_dollar_livre', caption: '$ -> &pound;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taux_euro_dollar', caption: '&euro; -> $',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taux_dollar_euro', caption: '$ -> &euro;',editable: { type: 'float'}, size: '80px', sortable: true, resizable: true},
 		        ],
 		        records:rsDev,
 		        onDelete: function(event) {            
@@ -1155,20 +1157,22 @@ function initDroit() {
 			formDevise: { 
 		        name: 'form_<?php echo $idPage;?>_devise',
 		        fields: [
+					/*
 				    { name: 'base_contrat', type: 'list', required: false, html: { caption: 'Base contrat'}
 		            		,options: { items: arrListes['contratBase']}} , 
-				    {required: true,  name: 'annee', type: 'int', options:{min: '2000',autoFormat:false}, required: true,  html: {caption: 'Année'} },
-		            //{required: true,  name: 'date_taux', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
-		            //{required: true,  name: 'date_taux_fin', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
-					
-		            { name: 'taxe_taux', type: 'float', html: { caption: 'Taux des taxes' } },
-		            { name: 'taxe_deduction', type: 'float', html: { caption: 'Taux de déduction' } },
+				    {required: true,  name: 'date_taux', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
+		            {required: true,  name: 'date_taux_fin', type: 'date', options:{format: 'yyyy-mm-dd',openOnFocus: true}, required: true,  html: {caption: 'Date du prix'} },
+					{ name: 'taxe_taux', type: 'float', html: { caption: 'Taux des taxes' } },
 		            { name: 'taux_livre_dollar', type: 'float', html: { caption: '&pound; -> $' } },
 		            { name: 'taux_livre_euro', type: 'float', html: { caption: '&pound; -> &euro;' } },
 		            { name: 'taux_euro_livre', type: 'float', html: { caption: '&euro; -> &pound;' } },
 		            { name: 'taux_euro_dollar', type: 'float', html: { caption: '&euro; -> $' } },
 		            { name: 'taux_dollar_livre', type: 'float', html: { caption: '$ -> &pound;' } },
 		            { name: 'taux_dollar_euro', type: 'float', html: { caption: '$ -> &euro;' } },
+					*/
+					{required: true,  name: 'annee', type: 'int', options:{min: '2000',autoFormat:false}, required: true,  html: {caption: 'Année'} },		            
+		            { name: 'taxe_deduction', type: 'float', html: { caption: 'Taux de déduction' } },
+		            
 	            ],
 		        actions: {
 		            Reset: function () {
@@ -1180,7 +1184,7 @@ function initDroit() {
 		                if (errors.length > 0) return;
 		                var data = this.record;
 			            data.obj = "devise";
-			            if(data.base_contrat)data.base_contrat=data.base_contrat.text;			            
+			            data.base_contrat='GB';//if(data.base_contrat)data.base_contrat=data.base_contrat.text;			            
 			            if(data.date_taux) data.date_taux = w2utils.formatDate(data.date_taux, 'yyyy-mm-dd');
 			            if(data.date_taux_fin) data.date_taux_fin = w2utils.formatDate(data.date_taux_fin, 'yyyy-mm-dd');
 			            	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
@@ -1215,7 +1219,7 @@ function initDroit() {
 		        columns: [         
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'nom', caption: 'Nom du contrat', size: '150px', sortable: true, resizable: true },
-		            { field: 'base_contrat', caption: 'Base contrat', size: '56px', sortable: true, resizable: true },
+		            { field: 'base_contrat', hidden:true, caption: 'Base contrat', size: '56px', sortable: true, resizable: true },
 					{ field: 'moisDeb', caption: 'Mois début exercice', size: '150px', sortable: true, resizable: true, 
 							editable: { type: 'list', items: arrListes['mois'], showAll: true },
 						render: function (record, index, col_index) {
@@ -1403,6 +1407,7 @@ function voirData(id){
 				config.gridImportVenteData.columns=js.col;
 				//met en forme les lignes suivant les problèmes
 				var s = 'color:#3322b1;';
+				/*
 				js.prob.data_sans_basecontrat.forEach(function(p) {
 					var arrf = js.rs.filter(function(e) {
 						return e.col1 == p.num;
@@ -1414,7 +1419,8 @@ function voirData(id){
 						if(f.commentaire)f.commentaire += ", "+c;
 						else f.commentaire = c;	
 					});  
-				})				
+				})
+				*/				
 				var s = 'background-color:#34bf31;color:';
 				js.prob.data_sans_vente.forEach(function(p) {
 					var f = js.rs.find(function(e) {

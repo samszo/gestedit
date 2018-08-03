@@ -18,12 +18,14 @@ class CustomUploadHandler extends UploadHandler {
             //les dates sont explicitement choisies
             $file->dateFin = @$_REQUEST['dateFin'][$index];
             $file->dateDeb = @$_REQUEST['dateDeb'][$index];    
+            $file->conversion = @$_REQUEST['conversion'][$index];    
         }else{
             $file->idObj = @$_REQUEST['idObj'];
             $file->obj = @$_REQUEST['obj'];
             $file->type = @$_REQUEST['type'];
             $file->dateFin = @$_REQUEST['dateFin'];
             $file->dateDeb = @$_REQUEST['dateDeb'];    
+            $file->conversion = @$_REQUEST['conversion'];    
         }
         if($file->idObj)$path = "/data/".$file->obj."_".$file->idObj."/";
         else $path = "/data/".$file->obj."_".$file->type."/";
@@ -37,7 +39,7 @@ class CustomUploadHandler extends UploadHandler {
         if (empty($f->error)) {        	
     		$rs =$this->db->ajouter(array("nom"=>$f->name,"url"=>$f->url,"size"=>$f->size
     			    ,"content_type"=>"inconnu","type"=>$f->type,"obj"=>$f->obj,"id_obj"=>$f->idObj
-    			    ,"periode_debut"=>$f->dateDeb,"periode_fin"=>$f->dateFin),false,true);
+    			    ,"periode_debut"=>$f->dateDeb,"periode_fin"=>$f->dateFin,"conversion_livre_euro"=>$f->conversion),false,true);
             $f->id = $rs["id_importfic"];
             $f->recid = $rs["id_importfic"];
             $f->nbLigne = $rs["nbLigne"];

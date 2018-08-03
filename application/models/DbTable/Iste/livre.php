@@ -586,7 +586,24 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    	/**
+    /**
+     * Recherche une entrée Iste_livre avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param varchar $titre_en
+     *
+     * @return array
+     */
+    public function findByTitreLike($titre)
+    {
+        $query = $this->select()
+                    ->from( array("i" => "iste_livre") )                           
+					->where( 'i.titre_en LIKE "%'.$titre.'%"')
+					->orWhere( 'i.titre_fr LIKE "%'.$titre.'%"');
+
+        return $this->fetchAll($query)->toArray(); 
+    }
+    /**
      * Recherche une entrée Iste_livre avec la valeur spécifiée
      * et retourne cette entrée.
      *

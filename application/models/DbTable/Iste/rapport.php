@@ -254,6 +254,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
                 r.id_rapport recid,
                 r.url,
                 r.maj,
+                r.type,
                 ids.idsImpFic,
                 ids.idAuteur,
                 a.nom,
@@ -264,7 +265,6 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
                 MIN(date_edition) date_edition,
                 MIN(date_encaissement) date_encaissement,
                 MIN(date_envoi) date_envoi,
-                base_contrat,
                 CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
             FROM
                 iste_rapport r
@@ -286,8 +286,6 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
                     AND idfic.id_importfic IN (ids.idsImpFic)
                     INNER JOIN
                 iste_importfic impFic ON impFic.id_importfic = ".$idFic."
-                    INNER JOIN
-                iste_devise d ON d.id_devise = roy.id_devise
             GROUP BY r.id_rapport ";          
             
 		$stmt = $this->_db->query($sql);

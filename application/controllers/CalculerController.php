@@ -7,7 +7,31 @@ class CalculerController extends Zend_Controller_Action
     {
     		$this->initInstance();
     }
-    
+	
+    public function venteAction()
+    {
+    		$this->initInstance();    		
+		switch ($this->_getParam('type',"")) {
+			case "Wiley":
+				$w = new Flux_Wiley(false,true);
+				$w->calculerVentes($this->_getParam('idFic'));
+				break;			
+			case "NBN":
+				$nbn = new Flux_Nbn(false,true);
+				$nbn->calculerVentes($this->_getParam('idFic'));
+				break;			
+			case "global":
+				$v = new Flux_Vente(false,true);
+				//$v->calculerVentes($this->_getParam('idFic'));
+				$v->calculerVentesNew($this->_getParam('idFic'));
+				break;			
+			default:
+				echo "pas de processus de calcule pour ce type de fichier";
+				break;			
+		}
+    }    
+	
+
     public function prixventeAction()
     {
     		$this->initInstance();
@@ -82,20 +106,6 @@ class CalculerController extends Zend_Controller_Action
 					break;
 				case "auteurFic":
 					$rapport->setAll();
-					/*
-					//on supprime le répertoire tmp
-					$rapport->delTree(ROOT_PATH."/data/editions/tmp");
-					//on le recrée
-					mkdir(ROOT_PATH."/data/editions/tmp", 0775);
-					//on récupère les paiements
-    				$rs = $dbRoy->paiementAuteurFic(implode(",", $this->_getParam('ids')));
-					foreach ($rs as $r) {
-						$rapport->creaPaiementFic($r);
-						$rapport->creaPaiementFic($r,"serie");  
-					}
-					$rapport->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/*.odt", ROOT_PATH."/data/editions");
-					//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));	
-					*/			
 					break;
     		}
     				

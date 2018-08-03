@@ -273,11 +273,12 @@ class Flux_Vente extends Flux_Site{
 					$nbVente = $r["col3"] ? $r["col3"] : 1;
 					$type = "papier";
 					$mt = $this->tofloat($r["col4"]);
+					$mtE = $mt*floatval($r["conversion_livre_euro"])/100;
 					$idBout = $idBoutISTE;
 					//enregistre la vente
 					$idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"]
 						, "date_vente"=>$r["periode_fin"], "id_boutique"=>$idBout, "type"=>$type
-						, "nombre"=>$nbVente, "montant_livre"=>$mt, "id_licence"=>-1, "id_prix"=>-1));
+						, "nombre"=>$nbVente, "montant_euro"=>$mtE, "montant_livre"=>$mt, "id_licence"=>-1, "id_prix"=>-1));
 					$this->trace("ajout vente : ".$idVente."=".$mt);
 				}
 				//création des lignes pour les ebook
@@ -285,11 +286,12 @@ class Flux_Vente extends Flux_Site{
 					$nbVente = 1;
 					$type = "ebook";
 					$mt = $this->tofloat($r["col5"]);
+					$mtE = $mt*floatval($r["conversion_livre_euro"])/100;
 					$idBout = $idBoutISTE;
 					//enregistre la vente
 					$idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"]
 						, "date_vente"=>$r["periode_fin"], "id_boutique"=>$idBout, "type"=>$type
-						, "nombre"=>$nbVente, "montant_livre"=>$mt, "id_licence"=>-1, "id_prix"=>-1));
+						, "nombre"=>$nbVente, "montant_euro"=>$mtE, "montant_livre"=>$mt, "id_licence"=>-1, "id_prix"=>-1));
 					$this->trace("ajout vente : ".$idVente."=".$mt);
 				}
 			}
@@ -376,7 +378,7 @@ class Flux_Vente extends Flux_Site{
 	    $rs['data_sans_contrat']=$dbID->getDataSansContrat($idFic);
 	    
 		//récupère les lignes sans base contrat		
-	    $rs['data_sans_basecontrat']=$dbID->getDataSansBaseContrat($idFic);
+	    //$rs['data_sans_basecontrat']=$dbID->getDataSansBaseContrat($idFic);
 		
 	    return  $rs;
 	}

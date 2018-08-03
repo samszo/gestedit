@@ -31,6 +31,7 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
 		$select->from($this, array('id_auteurxcontrat'));
 		if($data["id_livre"])$select->where('id_livre = ?', $data["id_livre"]);
 		if($data["id_serie"])$select->where('id_serie = ?', $data["id_serie"]);
+		if($data["id_isbn"])$select->where('id_isbn = ?', $data["id_isbn"]);
 		$select->where('id_auteur = ?', $data["id_auteur"]);
 		$select->where('id_contrat = ?', $data["id_contrat"]);
 		
@@ -54,12 +55,12 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
     	
     	$id=false;
     	
-	if(isset($data["type"])){
-		//récupère l'identifiant du contrat
-		$dbC = new Model_DbTable_Iste_contrat();
-		$item = $dbC->findByType($data["type"]);
-		$data["id_contrat"] = $item[0]["id_contrat"];
-	    	unset($data['type']);	    			
+    	if(isset($data["type"])){
+            //récupère l'identifiant du contrat
+            $dbC = new Model_DbTable_Iste_contrat();
+            $item = $dbC->findByType($data["type"]);
+            $data["id_contrat"] = $item[0]["id_contrat"];
+            unset($data['type']);	    			
     	}
     	
     	if($existe)$id = $this->existe($data);

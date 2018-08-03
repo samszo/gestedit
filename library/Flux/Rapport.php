@@ -170,10 +170,11 @@ class Flux_Rapport extends Flux_Site{
 	 *
 	 * @param array 		$data
 	 * @param string 		$type
+	 * @param number 		$taux_reduction
 	 *
 	 * @return array
 	 */
-	public function creaPaiementFic($data, $type="livre"){
+	public function creaPaiementFic($data, $type="livre", $taux_reduction=0){
 	
 		$this->bTrace = false;
 		$this->temps_debut = microtime(true);
@@ -239,6 +240,8 @@ class Flux_Rapport extends Flux_Site{
 		$deduction = 0;
 		$perDeb = mktime(0, 0, 0, date("m"),   date("d"),   date("Y"));;
 		$perFin = 0;
+		$taux_livre_euro = 0;
+		$nbRoy = 0;
 	
 		//récupère les royalties suivant le type
 		if($type=="livre"){
@@ -281,6 +284,7 @@ class Flux_Rapport extends Flux_Site{
 					$roys->setVars('roy_type', $r["typeVente"]." (".$r["role"].")");
 				else
 					$roys->setVars('roy_type', $r["typeVente"]." (".$r["typeContrat"].")");
+
 				$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]);
 				$roys->setVars('roy_unit', $r["unit"]);
 				$roys->setVars('roy_rev', round($r["rMtVente"],2));
@@ -288,8 +292,10 @@ class Flux_Rapport extends Flux_Site{
 				$roys->setVars('roy_pc', $r["pc"]);
 				$roys->setVars('roy_livre', $r["rMtRoy"]);
 				$due += $r["rMtRoy"];
-				$taux_livre_euro = $r["taux_livre_euro"];
-				$deduction = $r["deduction"];
+				$taux_livre_euro += $r["taux_livre_euro"];
+				$nbRoy += $r["nbRoy"];
+				
+				
 
 			}
 			$roys->merge();
@@ -302,14 +308,27 @@ class Flux_Rapport extends Flux_Site{
 		//ajout les totaux
 		$this->odf->setVars('roy_rev_tot', $revTot);
 		$this->odf->setVars('roy_balance_due', $due);
-		$this->odf->setVars('roy_tax_deduc_pc', $deduction);
-		$deduc = $due*$r["deduction"]/100;
-		$this->odf->setVars('roy_tax_deduc', $deduc);
-		$this->odf->setVars('roy_net_due_livre', $due-$deduc);
 
-		$this->odf->setVars('roy_devise_date', $periode);
-		$this->odf->setVars('roy_devise_pc', $taux_livre_euro);
-		$montant = round(($due-$deduc)*$taux_livre_euro,2);
+		if($data['taxe_uk']=='oui'){
+			$this->odf->setVars('roy_tax_deduc_pc', $taux_reduction);
+			$deduc = $due*$r["deduction"]/100;
+			$this->odf->setVars('roy_tax_deduc', $deduc);
+			$due -= $deduc; 
+		}else{
+			$this->odf->setVars('roy_tax_deduc_pc', 'no');
+			$this->odf->setVars('roy_tax_deduc', '0');
+		}
+		$this->odf->setVars('roy_net_due_livre', $due);
+		if($data['paiement_euro']=='oui'){
+			$moyenneTaux = round($taux_livre_euro/$nbRoy,2);
+			$this->odf->setVars('roy_devise_date', $periode);
+			$this->odf->setVars('roy_devise_pc', $moyenneTaux);
+			$montant = round($due*$moyenneTaux,2);
+		}else{
+			$this->odf->setVars('roy_devise_date', 'no');
+			$this->odf->setVars('roy_devise_pc', 'no');
+			$montant = $due;
+		}
 		$this->odf->setVars('roy_net_due_euro', $montant);
 		
 				
@@ -329,7 +348,7 @@ class Flux_Rapport extends Flux_Site{
 
 		//enregistrement du rapport
 		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic.".pdf"
-			,"id_importfic"=>$mod["id_importfic"], "periode_deb"=>$data["minDateVente"], "periode_fin"=>$data["maxDateVente"], 'montant'=>$montant
+			,"id_importfic"=>$mod["id_importfic"], "periode_deb"=>$data["minDateVente"], "periode_fin"=>$data["maxDateVente"], 'montant'=>$due
 			, "data"=>json_encode($data),"type"=>$type, "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
 			
 		//mise à jour de la date d'éditions
@@ -508,16 +527,19 @@ class Flux_Rapport extends Flux_Site{
 	public function setAll(){
 		$dbRoy = new Model_DbTable_Iste_royalty();
 		$dbRap = new Model_DbTable_Iste_rapport();
+		$dbDev = new Model_DbTable_Iste_devise();
 
 		//on supprime le répertoire tmp
 		$this->delTree(ROOT_PATH."/data/editions/tmp");
 		//on le recrée
 		mkdir(ROOT_PATH."/data/editions/tmp", 0775);
+		//récupère le taux actuel
+		$taux_reduction = $dbDev->findByAnnee(date('Y'))["taxe_deduction"];
 		//on récupère les paiements
 		$rs = $dbRoy->paiementAuteurFic("");
 		foreach ($rs as $r) {
-			$this->creaPaiementFic($r);
-			$this->creaPaiementFic($r,"serie");  
+			$this->creaPaiementFic($r,"livre",$taux_reduction);
+			$this->creaPaiementFic($r,"serie",$taux_reduction);  
 		}
 		$this->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/*.odt", ROOT_PATH."/data/editions");
 	}

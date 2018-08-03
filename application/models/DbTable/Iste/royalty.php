@@ -472,25 +472,27 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     
 	/**
      * Calcule les royalties pour les auteurs
+     * 
      *
      * @return array
      */
     public function setForAuteur()
     {
-    		//met à jour les proposition qui n'ont pas de base contrat et qui ne sont pas null
+            //met à jour les proposition qui n'ont pas de base contrat et qui ne sont pas null
+            /*PLUS BESOIN DE BASE CONTRAT
     		$dbP = new Model_DbTable_Iste_proposition();
     		$dbP->update(array("base_contrat"=>null), "base_contrat=''");
-    	
+            */
 	    	//récupère les vente qui n'ont pas de royalty
 	    	$sql = "SELECT 
                 ac.id_auteurxcontrat
                 , ac.id_isbn, ac.pc_papier, ac.pc_ebook
-                , a.prenom, a.nom, c.type
+                , a.prenom, a.nom, c.type, IFNULL(a.taxe_uk,'oui') taxe_uk
                 ,i.num
                 , v.id_vente, v.date_vente, v.montant_livre, v.id_boutique
                 , i.id_editeur, i.type
-                , d.base_contrat, d.id_devise, d.taux_livre_dollar, d.taux_livre_euro, d.date_taux, d.date_taux_fin, d.taxe_taux, d.taxe_deduction
-                
+                , impF.conversion_livre_euro
+                -- , d.base_contrat, d.id_devise, d.taux_livre_dollar, d.taux_livre_euro, d.date_taux, d.date_taux_fin, d.taxe_taux, d.taxe_deduction                
                 FROM iste_auteurxcontrat ac
                 INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
                 INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
@@ -498,8 +500,10 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
                 INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
                 INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
-                INNER JOIN iste_devise d ON d.base_contrat = IFNULL(p.base_contrat,'GB')
-                            AND DATE_FORMAT(date_vente, '%Y') = DATE_FORMAT(date_taux, '%Y')
+                INNER JOIN iste_importdata impD ON impD.id_importdata = v.id_importdata
+                INNER JOIN iste_importfic impF ON impF.id_importfic = impD.id_importfic
+                -- INNER JOIN iste_devise d ON d.base_contrat = IFNULL(p.base_contrat,'GB')
+                --            AND DATE_FORMAT(date_vente, '%Y') = DATE_FORMAT(date_taux, '%Y')
                 LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
                 WHERE pc_papier is not null AND pc_ebook is not null AND pc_papier != 0 AND pc_ebook != 0
                     AND v.montant_livre > 0
@@ -515,13 +519,18 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     			//$mtE *= floatval($r["pc_papier"])/100;
     			if(substr($r["type"], 0, 6)=="E-Book")$pc = $r["pc_ebook"];
     			else $pc = $r["pc_papier"];
-    			$mtL = floatval($r["montant_livre"])*floatval($pc)/100;
-    			$mtD = $mtL*floatval($r["taux_livre_dollar"]);
-    			$mtE = $mtL*floatval($r["taux_livre_euro"]);
-    			//ajoute les royalties pour l'auteur et la vente
-	    		$arrResult[]= $this->ajouter(array("pourcentage"=>$pc,"id_devise"=>$r["id_devise"],"id_vente"=>$r["id_vente"]
-	    			,"id_auteurxcontrat"=>$r["id_auteurxcontrat"],"montant_euro"=>$mtE,"montant_livre"=>$mtL,"montant_dollar"=>$mtD
-	    			,"taxe_taux"=>$r["taxe_taux"],"taxe_deduction"=>$r["taxe_deduction"]),true,true);
+                $mtL = floatval($r["montant_livre"])*floatval($pc)/100;
+                //ATTENTION le taux de conversion est passé en paramètre à l'import et le montant des ventes est calculé à ce moment
+    			//$mtD = $mtL*floatval($r["taux_livre_dollar"]);
+    			$mtE = floatval($r["montant_euro"])*floatval($pc)/100;;
+                //ajoute les royalties pour l'auteur et la vente
+                //ATTENTION les taxes de déduction sont calculer lors de l'édition avec le taux de l'année en cours
+	    		$arrResult[]= $this->ajouter(array("pourcentage"=>$pc,"id_vente"=>$r["id_vente"]
+                    ,"id_auteurxcontrat"=>$r["id_auteurxcontrat"],"montant_euro"=>$mtE,"montant_livre"=>$mtL
+                    //,"id_devise"=>$r["id_devise"],"montant_dollar"=>$mtD
+                    //,"taxe_taux"=>$r["taxe_taux"],"taxe_deduction"=>$r["taxe_deduction"]
+                    ,"conversion_livre_euro"=>$r['conversion_livre_euro'])
+                    ,true,true);
     		}
     		
     		return $arrResult;
@@ -617,6 +626,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         MIN(impF.periode_debut) minDateVente,
         MAX(impF.periode_fin) maxDateVente,
         a.id_auteur,
+        a.taxe_uk,
+        a.paiement_euro,
         a.nom autNom,
         a.prenom,
         a.adresse_1,
@@ -694,17 +705,15 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             COUNT(DISTINCT r.id_royalty) nbRoy
             ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
-            ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
+            ,MIN(r.pourcentage) pc
             ,l.id_livre, l.titre_en, l.titre_fr
-            ,p.base_contrat, la.role
+            ,la.role
             ,c.type typeContrat, c.param, c.id_contrat
-            ,MIN(d.taux_livre_euro) taux_livre_euro
+            ,SUM(r.conversion_livre_euro) taux_livre_euro
         FROM iste_royalty r 
-            INNER JOIN iste_devise d ON d.id_devise = r.id_devise
             INNER JOIN iste_vente v ON v.id_vente = r.id_vente
             INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
             INNER JOIN iste_livre l ON l.id_livre = i.id_livre
-            INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
             INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_livre = l.id_livre
             INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.id_auteur = ac.id_auteur
             INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat

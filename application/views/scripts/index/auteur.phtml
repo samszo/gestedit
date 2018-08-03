@@ -128,6 +128,20 @@ function initAuteur() {
 		            { field: 'nom', caption: 'Nom', size: '120px', sortable: true, resizable: true, 
 		                editable: { type: 'text' }
 		            },
+		            { field: 'taxe_uk', caption: 'Taxe UK', size: '60px', sortable: true, resizable: true, 
+						editable: { type: 'list', items: ['oui','non'], showAll: true },
+						render: function (record, index, col_index) {
+		                    var html = this.getCellValue(index, col_index);
+		                    return html.text ? html.text : html;
+		                }
+		            },
+		            { field: 'paiement_euro', caption: '€', size: '60px', sortable: true, resizable: true, 
+						editable: { type: 'list', items: ['oui','non'], showAll: true },
+						render: function (record, index, col_index) {
+		                    var html = this.getCellValue(index, col_index);
+		                    return html.text ? html.text : html;
+		                }
+		            },
 		            { field: 'instNom', caption: 'Appartenance', size: '100%', sortable: true, resizable: true, 
 		                editable: { type: 'combo', items: arrListes['institution'], showAll: true },
 		            },		            
@@ -150,14 +164,16 @@ function initAuteur() {
 		            changes.forEach(function(c, i){
 			            c.obj = 'auteur';
 			            if(c.civilite)c.civilite=c.civilite.text;			            
-				        	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
-				        			c,
-				        			function(js){
-		            					finsession(js);		
-				            			js.rs.text = js.rs.nom+" "+js.rs.prenom;
-					    	        		setListe(js.rs,'auteur');			            				            						        			
-				        				if(changes.length==i+1)w2alert(js.message);
-				        			},"json");                        
+			            if(c.taxe_uk)c.taxe_uk=c.taxe_uk.text;			            
+			            if(c.paiement_euro)c.paiement_euro=c.paiement_euro.text;			            
+						$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
+								c,
+								function(js){
+									finsession(js);		
+									js.rs.text = js.rs.nom+" "+js.rs.prenom;
+									setListe(js.rs,'auteur');			            				            						        			
+									if(changes.length==i+1)w2alert(js.message);
+								},"json");                        
 		            });
 		        },
 		        onDelete: function(event) {            
