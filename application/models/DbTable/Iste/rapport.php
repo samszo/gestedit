@@ -182,7 +182,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
             , a.nom, a.prenom, a.id_auteur
             , r.montant montant_livre
             , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
-            , base_contrat, CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode 
+            , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode 
         FROM iste_rapport r
             INNER JOIN (SELECT id_rapport  
                 , SUBSTRING_INDEX(obj_id,'_',1) idAuteur
@@ -192,7 +192,6 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
             INNER JOIN iste_vente v ON v.id_vente = roy.id_vente
             INNER JOIN iste_importdata idfic ON idfic.id_importdata = v.id_importdata
             INNER JOIN iste_importfic ific ON ific.id_importfic = idfic.id_importfic
-            INNER JOIN iste_devise d  ON d.id_devise = roy.id_devise
         WHERE v.id_isbn IN(".$idsISBN.")
         GROUP BY r.id_rapport ";          
      
@@ -220,7 +219,8 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
             , a.nom, a.prenom, a.id_auteur
             , r.montant montant_livre
             , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
-            , base_contrat, CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
+            , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
+            , r.type
         FROM iste_rapport r
             INNER JOIN (SELECT id_rapport  
                 , SUBSTRING_INDEX(obj_id,'_',1) idAuteur
@@ -230,7 +230,6 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
             INNER JOIN iste_vente v ON v.id_vente = roy.id_vente
             INNER JOIN iste_importdata idfic ON idfic.id_importdata = v.id_importdata
             INNER JOIN iste_importfic ific ON ific.id_importfic = idfic.id_importfic
-            INNER JOIN iste_devise d  ON d.id_devise = roy.id_devise
         WHERE a.id_auteur IN (".$idsAuteur.")
         GROUP BY r.id_rapport ";  
         //echo $sql;

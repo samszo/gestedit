@@ -246,7 +246,7 @@ function initDroit() {
 	            	toolbarAdd      	: true,
 	            	toolbarDelete   	: false,
 	            	toolbarSave		: false,
-		            selectColumn		: true,
+		            selectColumn		: false,
 		            footer			: true,
 		        },
 		        multiSearch: true,
@@ -340,7 +340,7 @@ function initDroit() {
 		            	toolbarAdd      	: true,
 		            	toolbarDelete   	: false,
 		            	toolbarSave		: false,
-		            selectColumn		: true,
+		            selectColumn		: false,
 		            	footer			: true,
 		        },
 		        multiSearch: true,
@@ -434,6 +434,7 @@ function initDroit() {
                 	toolbarAdd      : false,
                 	toolbarDelete   : true,
                 	toolbarSave		: false,
+		            selectColumn		: false,
                 	footer			: true,
                 },
 		        columns: [         
@@ -487,6 +488,7 @@ function initDroit() {
 					toolbarDelete   : false,
 					toolbarSave		: false,
 					footer			: true,
+		            selectColumn		: false,
                 },
                 toolbar: {
                     items: [
@@ -580,12 +582,13 @@ function initDroit() {
 		        header: "Détails des ventes",		
 				show: {toolbar		: true,
 	    				toolbarReload   : false,
-	    				toolbarColumns  : false,
+	    				toolbarColumns  : true,
 	                	toolbarSearch   : false,
 	                	toolbarAdd      : true,
 	                	toolbarDelete   : true,
 	                	toolbarSave		: true,
 	                	header			: false, 
+						selectColumn		: false,
 	                	columnHeaders	: true},
 		        columns: [      		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -615,9 +618,9 @@ function initDroit() {
 			                }},
 		            { field: 'prix_euro', caption: 'Prix &euro;', size: '80px', sortable: true, resizable: true 
 				    		,editable:{type:'float'}},
-				    	{ field: 'prix_livre', caption: 'Prix &pound;', size: '80px', sortable: true, resizable: true 
+				    { field: 'prix_livre', caption: 'Prix &pound;', size: '80px', sortable: true, resizable: true 
 					    		,editable:{type:'float'}},
-				    	{ field: 'prix_dollar', caption: 'Prix $', size: '80px', sortable: true, resizable: true 
+				    { hidden:true, field: 'prix_dollar', caption: 'Prix $', size: '80px', sortable: true, resizable: true 
 				    		,editable:{type:'float'}},
 		            { field: 'nombre', caption: 'Nombre', size: '80px', sortable: true, resizable: true 
 				    		,editable:{type:'int'}},
@@ -625,13 +628,13 @@ function initDroit() {
 		            		,editable:{type:'float'}},
 		            { field: 'montant_livre', caption: 'Montant &pound;', size: '80px', sortable: true, resizable: true
 			            	,editable:{type:'float'}},
-			        { field: 'montant_dollar', caption: 'Montant $', size: '80px', sortable: true, resizable: true
+			        { hidden:true, field: 'montant_dollar', caption: 'Montant $', size: '80px', sortable: true, resizable: true
 			        		,editable:{type:'float'}},
-		            { field: 'avec_droit', caption: 'Droit', size: '60px', sortable: true, resizable: true
+		            { hidden:true, field: 'avec_droit', caption: 'Droit', size: '60px', sortable: true, resizable: true
 		            		,editable:{type:'checkbox'}},
-		            { field: 'prealable', caption: 'Préalable', size: '80px', sortable: true, resizable: true
+		            { hidden:true, field: 'prealable', caption: 'Préalable', size: '80px', sortable: true, resizable: true
 		            		,editable:{type:'checkbox'}},
-		            { field: 'acheteur', caption: 'Acheteur', size: '80px', sortable: true, resizable: true
+		            { hidden:true, field: 'acheteur', caption: 'Acheteur', size: '80px', sortable: true, resizable: true
 		    		        ,editable:{type:'text'}},
 		        ],
 		        onSave: function(event) {
@@ -667,12 +670,13 @@ function initDroit() {
 				header: "Détail des royalties",		
 				show: {toolbar		: true,
 	    				toolbarReload   : false,
-	    				toolbarColumns  : false,
+	    				toolbarColumns  : true,
 	                	toolbarSearch   : false,
 	                	toolbarAdd      : false,
 	                	toolbarDelete   : true,
 	                	toolbarSave		: true,
 	                	header			: false, 
+						selectColumn		: false,
 	                	columnHeaders	: true},
 		        columns: [      		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -684,11 +688,12 @@ function initDroit() {
 		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true },
 		            { field: 'date_vente', caption: 'Date de vente', size: '80px', sortable: true, resizable: true },
 		            { field: 'montant_vente', editable:{type:'float'}, caption: 'Vente &pound;', size: '80px', sortable: true, resizable: true},
-		            { field: 'montant_euro', editable:{type:'float'}, caption: 'Montant &euro;', size: '80px', sortable: true, resizable: true},
 		            { field: 'montant_livre', editable:{type:'float'}, caption: 'Montant &pound;', size: '80px', sortable: true, resizable: true},
-		            { field: 'montant_dollar', editable:{type:'float'}, caption: 'Montant $', size: '80px', sortable: true, resizable: true},
-		            { field: 'taxe_taux', editable:{type:'float'}, caption: 'Taxe taux', size: '80px', sortable: true, resizable: true},
-		            { field: 'taxe_deduction', editable:{type:'float'}, caption: 'Taxe déduction', size: '100px', sortable: true, resizable: true},
+		            { field: 'conversion_livre_euro', caption: '&pound; -> &euro;', size: '200px', sortable: true, resizable: true},
+		            { field: 'montant_euro', editable:{type:'float'}, caption: 'Montant &euro;', size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'montant_dollar', editable:{type:'float'}, caption: 'Montant $', size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taxe_taux', editable:{type:'float'}, caption: 'Taxe taux', size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taxe_deduction', editable:{type:'float'}, caption: 'Taxe déduction', size: '100px', sortable: true, resizable: true},
 		            { field: 'pourcentage', editable:{type:'float'}, caption: '%', size: '200px', sortable: true, resizable: true},
 		            { field: 'date_edition', caption: 'Edition', size: '100px', sortable: true, resizable: true},
 		            { field: 'date_paiement', caption: 'Paiement', size: '100px', sortable: true, resizable: true},
@@ -736,6 +741,7 @@ function initDroit() {
 	                	toolbarDelete   : true,
 	                	toolbarSave		: true,
 	                	header			: false, 
+						selectColumn		: true,
 	                	columnHeaders	: true},
 		        columns: [		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -836,6 +842,7 @@ function initDroit() {
 	                	toolbarAdd      : false,
 	                	toolbarDelete   : true,
 	                	toolbarSave		: true,
+						selectColumn		: false,
 	                	header			: false, 
 	                	columnHeaders	: true},
 		        columns: [		  		           
@@ -909,6 +916,7 @@ function initDroit() {
 	                	toolbarAdd      : false,
 	                	toolbarDelete   : true,
 	                	toolbarSave		: true,
+						selectColumn		: true,
 	                	header			: false, 
 	                	columnHeaders	: true},
 		        columns: [		  		           
@@ -962,8 +970,8 @@ function initDroit() {
 		        },	    
 		        toolbar: {
 		            items: [
-		                { id: 'voirRapport', type: 'button', caption: "Télécharger", icon: 'fa-file' }
-		                ,{ id: 'impRapport', type: 'button', caption: "Envoyer", icon: 'fa-envelope' }
+		                //{ id: 'voirRapport', type: 'button', caption: "Télécharger", icon: 'fa-file' },
+		                { id: 'impRapport', type: 'button', caption: "Envoyer", icon: 'fa-envelope' }
 		                ,{ id: 'groupRapport', type: 'button', caption: "Grouper", icon: 'fa-object-group' }
 		                ,{ id: 'payerRapport', type: 'button', caption: "Payer", icon: 'fa-money' }
 		                ,{ id: 'encaisserRapport', type: 'button', caption: "Encaisser", icon: 'fa-pencil' }
@@ -1105,6 +1113,7 @@ function initDroit() {
 	                	toolbarSave		: true,
 	                	header			: true, 
 	                	footer			: true, 
+						selectColumn		: true,
 	                	columnHeaders	: true},
 		        columns: [		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -1261,6 +1270,7 @@ function initTabs(){
 		w2ui.layout_<?php echo $idPage;?>_main_tabs.show('tab0','tab1','tab2');
 		w2ui.layout_<?php echo $idPage;?>_main_tabs.remove('tab3');
 	}
+	w2ui.layout_<?php echo $idPage;?>_main_tabs.select('tab0');
 
 }
 

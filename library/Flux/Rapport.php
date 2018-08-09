@@ -246,11 +246,15 @@ class Flux_Rapport extends Flux_Site{
 		//récupère les royalties suivant le type
 		if($type=="livre"){
 			$rsRoyalty = $this->dbRoyalty->getDetailsLivre($data["idsRoyalty"]);
-			$royTitre = "Droits pour les livres";
+			$royTitre = "Author Royalty";
 		}
 		if($type=="serie"){
 			$rsRoyalty = $this->dbRoyalty->getDetailsSerie($data["idsRoyalty"]);
-			$royTitre = "Droits pour les séries";
+			$royTitre = "Droits série";
+		}
+		if($type=="editoriaux"){
+			$rsRoyalty = $this->dbRoyalty->getDetailsEditoriaux($data["idsRoyalty"]);
+			$royTitre = "Editor Royalty";
 		}
 
 		if(count($rsRoyalty)){
@@ -324,12 +328,13 @@ class Flux_Rapport extends Flux_Site{
 			$this->odf->setVars('roy_devise_date', $periode);
 			$this->odf->setVars('roy_devise_pc', $moyenneTaux);
 			$montant = round($due*$moyenneTaux,2);
+			$this->odf->setVars('roy_net_due_euro', $montant);
 		}else{
 			$this->odf->setVars('roy_devise_date', 'no');
 			$this->odf->setVars('roy_devise_pc', 'no');
+			$this->odf->setVars('roy_net_due_euro', 'no');
 			$montant = $due;
 		}
-		$this->odf->setVars('roy_net_due_euro', $montant);
 		
 				
 		//on enregistre le fichier
@@ -539,7 +544,7 @@ class Flux_Rapport extends Flux_Site{
 		$rs = $dbRoy->paiementAuteurFic("");
 		foreach ($rs as $r) {
 			$this->creaPaiementFic($r,"livre",$taux_reduction);
-			$this->creaPaiementFic($r,"serie",$taux_reduction);  
+			$this->creaPaiementFic($r,"editoriaux",$taux_reduction);  
 		}
 		$this->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/*.odt", ROOT_PATH."/data/editions");
 	}

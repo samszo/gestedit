@@ -245,10 +245,12 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     public function findDetails($table, $ids)
     {
         $query = $this->select()
-			->from( array("r" => "iste_royalty"),array("recid"=>"id_royalty","montant_livre","montant_euro","montant_dollar","taxe_taux","taxe_deduction","pourcentage","date_paiement","date_encaissement","date_edition"))                           
-			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+			->from( array("r" => "iste_royalty"),array("recid"=>"id_royalty","montant_livre","montant_euro","montant_dollar","taxe_taux","taxe_deduction","pourcentage","date_paiement","date_encaissement","date_edition","conversion_livre_euro"))                           
+            ->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            /*
 			->joinInner(array("d" => "iste_devise"),
                 'd.id_devise = r.id_devise', array("id_devise","base_contrat",'annee'=>"DATE_FORMAT(date_taux,'%Y')"))
+            */
             ->joinInner(array("v" => "iste_vente"),
                 'v.id_vente = r.id_vente', array("date_vente","montant_vente"=>"v.montant_livre"))
 			->joinInner(array("i" => "iste_isbn"),
@@ -522,7 +524,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 $mtL = floatval($r["montant_livre"])*floatval($pc)/100;
                 //ATTENTION le taux de conversion est passé en paramètre à l'import et le montant des ventes est calculé à ce moment
     			//$mtD = $mtL*floatval($r["taux_livre_dollar"]);
-    			$mtE = floatval($r["montant_euro"])*floatval($pc)/100;;
+    			$mtE = $mtL*floatval($r['conversion_livre_euro'])/100;;
                 //ajoute les royalties pour l'auteur et la vente
                 //ATTENTION les taxes de déduction sont calculer lors de l'édition avec le taux de l'année en cours
 	    		$arrResult[]= $this->ajouter(array("pourcentage"=>$pc,"id_vente"=>$r["id_vente"]
@@ -763,6 +765,40 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         
     }       
 
+    	/**
+     * Récupère le détail des royalty pour les séries
+     *
+     * @param string		$idsRoy
+     * 
+     * @return array
+     */
+    function getDetailsEditoriaux($idsRoy){
+    		
+        //récupère les royalty pour les livres sélectionnés
+        $sql = "SELECT
+                COUNT(DISTINCT r.id_royalty) nbRoy
+                ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
+                ,SUM(r.montant_livre) rMtRoy
+                ,MIN(r.pourcentage) pc
+                ,l.id_livre, l.titre_en, l.titre_fr
+                ,la.role
+                ,c.type typeContrat, c.param, c.id_contrat
+                ,SUM(r.conversion_livre_euro) taux_livre_euro
+            FROM iste_royalty r 
+                INNER JOIN iste_vente v ON v.id_vente = r.id_vente
+                INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
+                INNER JOIN iste_livre l ON l.id_livre = i.id_livre
+                INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat 
+                INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat AND c.type != 'auteur'
+                INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.id_auteur = ac.id_auteur
+            WHERE r.id_royalty IN (".$idsRoy.")
+            GROUP BY l.id_livre";
+        //echo $sql;
+        $stmt = $this->_db->query($sql);
+        
+        return $stmt->fetchAll(); 
+        
+    }     
 	/**
      * Récupère le détail des royalty pour les comite
      *
