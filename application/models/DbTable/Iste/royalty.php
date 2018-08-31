@@ -252,13 +252,15 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 'd.id_devise = r.id_devise', array("id_devise","base_contrat",'annee'=>"DATE_FORMAT(date_taux,'%Y')"))
             */
             ->joinInner(array("v" => "iste_vente"),
-                'v.id_vente = r.id_vente', array("date_vente","montant_vente"=>"v.montant_livre"))
+                'v.id_vente = r.id_vente', array("type","nombre","date_vente","montant_vente"=>"v.montant_livre"))
 			->joinInner(array("i" => "iste_isbn"),
                 'v.id_isbn = i.id_isbn', array("type_isbn"=>"type"))
 			->joinInner(array("l" => "iste_livre"),
                 'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''))"))
 			->joinInner(array("ac" => "iste_auteurxcontrat"),
                 'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
+            ->joinInner(array("a" => "iste_auteur"),
+                'a.id_auteur = ac.id_auteur', array("signataire"=>"CONCAT(a.prenom, ' ', a.nom)"))
 			->joinInner(array("c" => "iste_contrat"),
                 'c.id_contrat = ac.id_contrat', array("type_contrat"=>"type"));
         if($table=='auteur')
@@ -491,8 +493,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 , ac.id_isbn, ac.pc_papier, ac.pc_ebook
                 , a.prenom, a.nom, c.type, IFNULL(a.taxe_uk,'oui') taxe_uk
                 ,i.num
-                , v.id_vente, v.date_vente, v.montant_livre, v.id_boutique
-                , i.id_editeur, i.type
+                , v.id_vente, v.date_vente, v.montant_livre, v.id_boutique, v.type typeVente
+                , i.id_editeur, i.type typeISBN
                 , impF.conversion_livre_euro
                 -- , d.base_contrat, d.id_devise, d.taux_livre_dollar, d.taux_livre_euro, d.date_taux, d.date_taux_fin, d.taxe_taux, d.taxe_deduction                
                 FROM iste_auteurxcontrat ac
@@ -519,7 +521,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 			//calcule les royalties
     			//$mtE = floatval($r["montant_euro"]) / intval($r["nbA"]);
     			//$mtE *= floatval($r["pc_papier"])/100;
-    			if(substr($r["type"], 0, 6)=="E-Book")$pc = $r["pc_ebook"];
+    			if($r["typeVente"]=="ebook")$pc = $r["pc_ebook"];
     			else $pc = $r["pc_papier"];
                 $mtL = floatval($r["montant_livre"])*floatval($pc)/100;
                 //ATTENTION le taux de conversion est passé en paramètre à l'import et le montant des ventes est calculé à ce moment
@@ -708,8 +710,9 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.pourcentage) pc
+            ,GROUP_CONCAT(DISTINCT i.num) isbns
             ,l.id_livre, l.titre_en, l.titre_fr
-            ,la.role
+            ,IFNULL(la.role,' ... ') role
             ,c.type typeContrat, c.param, c.id_contrat
             ,SUM(r.conversion_livre_euro) taux_livre_euro
         FROM iste_royalty r 
@@ -717,10 +720,10 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
             INNER JOIN iste_livre l ON l.id_livre = i.id_livre
             INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_livre = l.id_livre
-            INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.id_auteur = ac.id_auteur
             INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+            LEFT JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.id_auteur = ac.id_auteur
         WHERE r.id_royalty IN (".$idsRoy.")
-        GROUP BY l.id_livre
+        GROUP BY l.id_livre, v.type
         ";
         //echo $sql;
         $stmt = $this->_db->query($sql);

@@ -259,7 +259,7 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
             ->joinInner(array("vid" => "iste_vente"),
                 'vid.id_vente = v.id_vente', array("recid"=>"id_vente"))
             ->joinInner(array("i" => "iste_isbn"),
-                'v.id_isbn = i.id_isbn', array("num","type","date_parution"))
+                'v.id_isbn = i.id_isbn', array("num","type_isbn"=>"type","date_parution"))
             ->joinInner(array("pro" => "iste_proposition"),
                 'pro.id_livre = i.id_livre', array("base_contrat"))
             ->joinInner(array("l" => "iste_livre"),

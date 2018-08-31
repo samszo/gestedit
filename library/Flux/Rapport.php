@@ -263,6 +263,7 @@ class Flux_Rapport extends Flux_Site{
 			//ajout des infos de royalty		
 			$roys = $this->odf->setSegment('roys');	
 			$oPeriode = "";
+			$oTitre = "";
 			foreach ($rsRoyalty as $r) {
 				$this->trace("détail royalties Livre",$r);
 
@@ -279,28 +280,42 @@ class Flux_Rapport extends Flux_Site{
 				} else
 					$roys->setVars('roy_periode', "-");
 				*/
+				$titre = $r["titre_en"]." - ".$r["titre_fr"];
+				if($oTitre!=$titre){
+					if($oTitre!=""){
+						$roys->merge();
+					}
+					$oTitre=$titre;	
+					$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]);
+					if($type=="livre"){
+						$roys->setVars('roy_role', $r["role"]);
+						$roys->setVars('roy_isbn', " ISBN : ".$r["isbns"]);
+					}else{
+						$roys->setVars('roy_role', $r["typeContrat"]);
+						$roys->setVars('roy_isbn', "");
+					}
+				}
 				
-				if($r["typeVente"]=="N")$r["typeVente"]="Book digital";
-				if($r["typeVente"]=="P")$r["typeVente"]="Book paper";
-				if($r["typeVente"]=="Licence num")$r["typeVente"]="E-Licence";
+				if($r["typeVente"]=="ebook")$typeVente="Book digital";
+				if($r["typeVente"]=="papier")$typeVente="Book paper";
+				if($r["typeVente"]=="Licence num")$typeVente="E-Licence";
+				$roys->details->setVars('roy_type', $typeVente);
 				
-				if($type=="livre")
-					$roys->setVars('roy_type', $r["typeVente"]." (".$r["role"].")");
-				else
-					$roys->setVars('roy_type', $r["typeVente"]." (".$r["typeContrat"].")");
 
-				$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]);
-				$roys->setVars('roy_unit', $r["unit"]);
-				$roys->setVars('roy_rev', round($r["rMtVente"],2));
+				if($typeVente=="Book digital")
+					$roys->details->setVars('roy_unit', " ");
+				else
+					$roys->details->setVars('roy_unit', $r["unit"]);
+
+				$roys->details->setVars('roy_rev', round($r["rMtVente"],2));
 				$revTot += $r["rMtVente"];
-				$roys->setVars('roy_pc', $r["pc"]);
-				$roys->setVars('roy_livre', $r["rMtRoy"]);
+				$roys->details->setVars('roy_pc', $r["pc"]);
+				$roys->details->setVars('roy_livre', $r["rMtRoy"]);
 				$due += $r["rMtRoy"];
 				$taux_livre_euro += $r["taux_livre_euro"];
 				$nbRoy += $r["nbRoy"];
+				$roys->details->merge();
 				
-				
-
 			}
 			$roys->merge();
 			$this->odf->mergeSegment($roys);
@@ -315,7 +330,7 @@ class Flux_Rapport extends Flux_Site{
 
 		if($data['taxe_uk']=='oui'){
 			$this->odf->setVars('roy_tax_deduc_pc', $taux_reduction);
-			$deduc = $due*$r["deduction"]/100;
+			$deduc = $due*$taux_reduction;
 			$this->odf->setVars('roy_tax_deduc', $deduc);
 			$due -= $deduc; 
 		}else{
@@ -539,7 +554,7 @@ class Flux_Rapport extends Flux_Site{
 		//on le recrée
 		mkdir(ROOT_PATH."/data/editions/tmp", 0775);
 		//récupère le taux actuel
-		$taux_reduction = $dbDev->findByAnnee(date('Y'))["taxe_deduction"];
+		$taux_reduction = floatval($dbDev->findByAnnee(date('Y'))["taxe_deduction"]);
 		//on récupère les paiements
 		$rs = $dbRoy->paiementAuteurFic("");
 		foreach ($rs as $r) {

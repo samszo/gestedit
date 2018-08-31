@@ -1183,6 +1183,9 @@ function initLivre() {
 		        name: 'form_<?php echo $idPage;?>_contrat',
 		        fields: [
 		            { name: 'date_signature', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date signature' } },
+					{required: true, name: 'type', type: 'list', options: { items: arrListes['contrat'] }
+			            		, html: { caption: 'type', attr: 'size="20"' } 
+			            		},
 		            { name: 'pc_papier', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier', attr: 'size="10"' } },
 		            { name: 'pc_ebook', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook', attr: 'size="10"' } },
 		            { name: 'commentaire', type: 'textarea', html: { caption: 'Commentaire', attr: 'style="width: 100%; height: 80px; resize: none"' } },
@@ -1203,8 +1206,8 @@ function initLivre() {
 							data,
 			            		function(js){
 		            				finsession(js);
-								g.add(js.rs);
-								g.selectNone();
+									g.add(js.rs);
+									g.selectNone();
 			            			w2alert(js.message);
 			           		},"json");
 		            }
