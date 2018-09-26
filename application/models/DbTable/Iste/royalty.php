@@ -710,7 +710,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.pourcentage) pc
-            ,GROUP_CONCAT(DISTINCT i.num) isbns
+            , i.num num, i.type typeISBN
             ,l.id_livre, l.titre_en, l.titre_fr
             ,IFNULL(la.role,' ... ') role
             ,c.type typeContrat, c.param, c.id_contrat
@@ -723,7 +723,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
             LEFT JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.id_auteur = ac.id_auteur
         WHERE r.id_royalty IN (".$idsRoy.")
-        GROUP BY l.id_livre, v.type
+        GROUP BY l.id_livre, i.id_isbn, v.type
         ";
         //echo $sql;
         $stmt = $this->_db->query($sql);

@@ -32,6 +32,7 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
 		if($data["id_livre"])$select->where('id_livre = ?', $data["id_livre"]);
 		if($data["id_serie"])$select->where('id_serie = ?', $data["id_serie"]);
 		if($data["id_isbn"])$select->where('id_isbn = ?', $data["id_isbn"]);
+		if($data["type_isbn"])$select->where('type_isbn = ?', $data["type_isbn"]);
 		$select->where('id_auteur = ?', $data["id_auteur"]);
 		$select->where('id_contrat = ?', $data["id_contrat"]);
 		
@@ -86,9 +87,104 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {           		
-	    	$this->update($data, 'iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
+    {   
+	    $this->update($data, 'iste_auteurxcontrat.id_auteurxcontrat = ' . $id);
     }
+
+    /**
+     * modifie l'isbn des contrats pour les types d'isbn
+     *
+     * @param integer   $id
+     * @param string    $type
+     *
+     * @return array
+     */
+    public function changeISBN($id, $type)
+    {   
+        if($type=="Hardback EN" || $type=="Papier FR"){
+            //récupère les contrats pour le livre et le type associés à l'isbn
+            $sql = "SELECT 
+                    ac.id_auteurxcontrat
+                FROM
+                    iste_auteurxcontrat ac
+                        INNER JOIN
+                    iste_isbn i ON i.id_livre = ac.id_livre
+                        AND i.id_isbn = ".$id."
+                WHERE
+                    ac.type_isbn = '".$type."'";
+            $db = $this->_db->query($sql);
+            $rows = $db->fetchAll();
+            $ids = "";        
+            foreach ($rows as $r) {
+                $this->update(array("id_isbn"=>$id), 'iste_auteurxcontrat.id_auteurxcontrat = ' . $r['id_auteurxcontrat']);
+                $ids .= $r['id_auteurxcontrat'].",";        
+            }
+            //récupère les lignes affectée
+    		if($ids){
+                $dbC = new Model_DbTable_Iste_contrat();
+                $ids .= '-1';
+                return $dbC->getAllContratAuteur("","","",$ids);
+            } 
+        }        		
+    }
+
+    /**
+     * création des contrat ou mis à jour des existants
+     *
+     *
+     * @return void
+     */
+    public function correctionsISBN()
+    {   
+        /*
+        Si PAS d'ISBN dans le contrat (264 livres)
+            pour chaque ISBN du livre PAPIER FR ou HARDBACK EN 
+            - mettre à jour le numéro ISBN du contrat
+            et si 2 ISBN créer un nouveau contrat pour la même personne avec le même taux 
+        Si ISBN dans le contrat (724 livres)
+            pour chaque ISBN du livre différent de celui du contrat 
+            créer un nouveau contrat pour la même personne avec le même taux 
+        */
+        //récupère les contrats et les ISBN associés au livre du contrat
+        $sql = "SELECT 
+            ac.id_auteurxcontrat,
+            ac.id_auteur,
+            ac.id_contrat,
+            ac.id_livre,
+            ac.id_isbn acISBN,
+            ac.type_isbn,
+            ac.pc_papier,
+            ac.pc_ebook,
+            ac.date_signature,
+            i.id_livre,
+            i.id_isbn ISBN,
+            i.type
+        FROM
+            iste_auteurxcontrat ac
+                LEFT JOIN
+            iste_isbn i ON i.id_livre = ac.id_livre
+        WHERE
+            ac.id_livre IS NOT NULL AND i.type != 'E-Book FR' AND i.type != 'E-Book EN'
+        ORDER BY ac.id_livre";
+        $db = $this->_db->query($sql);
+        $rows = $db->fetchAll();
+        $idLivreO = -1;
+        foreach ($rows as $r) {
+            if($r['acISBN']==$r['ISBN'])
+                $this->update(array("type_isbn"=>$r['type']), 'iste_auteurxcontrat.id_auteurxcontrat = ' . $r['id_auteurxcontrat']);
+            else{
+                if($r['date_signature']=='0000-00-00')$r['date_signature']=null;
+                if($idLivreO != $r['id_livre'] && $r['acISBN']==0)
+                    $this->update(array("type_isbn"=>$r['type'],"id_isbn"=>$r['ISBN']), 'iste_auteurxcontrat.id_auteurxcontrat = ' . $r['id_auteurxcontrat']);
+                else
+                    $this->ajouter(array("type_isbn"=>$r['type'],"id_auteur"=>$r['id_auteur'],"id_contrat"=>$r['id_contrat'],"id_livre"=>$r['id_livre']
+                    ,"id_isbn"=>$r['ISBN'],"pc_papier"=>$r['pc_papier'],"pc_ebook"=>$r['pc_ebook'],"date_signature"=>$r['date_signature']));
+                $idLivreO = $r['id_livre'];
+            }
+        }
+    }        		
+
+    
     /**
      * Recherche des entrée Iste_auteurxcontrat avec l'identifiant ISBN
      * et modifie ces entrées avec les nouvelles données.

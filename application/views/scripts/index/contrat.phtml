@@ -98,7 +98,7 @@ function initContrat() {
 		                       { caption: 'Contrat', span: 5 },
 		                       { caption: 'Signataire', span: 2 },
 		                       { caption: 'Livre', span: 2 },
-		                       { caption: 'ISBN', span: 3 },
+		                       { caption: 'ISBN', span: 4 },
 		                   ],
 		       columns: [  		  		        
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -108,8 +108,7 @@ function initContrat() {
 		            		,editable: { type: 'percent' }},
 		            { field: 'pc_ebook', caption: '% ebook', size: '80px', sortable: true, resizable: true
 			            	,editable: { type: 'percent' }},
-		            { field: 'cnom', caption: 'Nom du contrat', size: '100px', sortable: true, resizable: true
-			            ,editable: { type: 'text' }},    		
+		            { field: 'cnom', caption: 'Nom du contrat', size: '100px', sortable: true, resizable: true},    		
 		            //{ field: 'ctype', caption: 'Type du contrat', size: '60px', sortable: true, resizable: true
 			        //    		,editable: { type: 'text' }},
 		            { field: 'commentaire', caption: 'Commentaire', size: '100px', sortable: true, resizable: true
@@ -120,20 +119,14 @@ function initContrat() {
 		            { field: 'titre_fr', caption: 'Titre fr', size: '120px', sortable: true, resizable: true},
 		            { field: 'type_1', hidden:true, caption: 'Type 1', size: '60px', sortable: true, resizable: true},		            		            
 		            { field: 'type_2', hidden:true, caption: 'Type 2', size: '60px', sortable: true, resizable: true},		            		            
+		            { field: 'type_isbn', caption: 'Type ISBN', size: '80px', sortable: true, resizable: true},		            
 		            { field: 'date_parution', caption: 'Parution', size: '80px', sortable: true, resizable: true},		            
 		            { field: 'isbn', caption: 'N°', size: '100px', sortable: true, resizable: true},		            
-/*
-		            { field: 'isbn_auteur', caption: 'ISBN auteur', size: '100px', sortable: true, resizable: true},		            
-		            { field: 'col_en', hidden:true, caption: 'Col. en', size: '80px', sortable: true, resizable: true},		            
-		            { field: 'col_fr', hidden:true, caption: 'Col. fr', size: '80px', sortable: true, resizable: true},		            
-		            { field: 'serie_en', caption: 'Série en', size: '80px', sortable: true, resizable: true},		            
-		            { field: 'serie_fr', caption: 'Série fr', size: '80px', sortable: true, resizable: true},		            
-*/
 		            ],
 		        toolbar: {
 		            items: [
 		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' },
-		                { id: 'lien-ouvrage', type: 'button', caption: 'Lier une nouvelle édition', icon: 'fa-link' }
+		                //{ id: 'lien-ouvrage', type: 'button', caption: 'Lier une nouvelle édition', icon: 'fa-link' }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
@@ -195,7 +188,7 @@ function initContrat() {
 					{ caption: 'Contrat', span: 5 },
                        { caption: 'Signataire', span: 2 },
                        { caption: 'Livre', span: 2 },
-                       { caption: 'ISBN', span: 3 },
+                       { caption: 'ISBN', span: 4 },
 		                   ],
 		       columns: [  		  		        
 				{ field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -215,6 +208,7 @@ function initContrat() {
 		            { field: 'titre_fr', caption: 'Titre fr', size: '120px', sortable: true, resizable: true},
 		            { field: 'type_1', hidden:true, caption: 'Type 1', size: '60px', sortable: true, resizable: true},		            		            
 		            { field: 'type_2', hidden:true, caption: 'Type 2', size: '60px', sortable: true, resizable: true},		            		            
+		            { field: 'type_isbn', caption: 'Type ISBN', size: '80px', sortable: true, resizable: true},		            
 		            { field: 'isbn', caption: 'N°', size: '100px', sortable: true, resizable: true},		            
 		            { field: 'date_parution', caption: 'Parution', size: '80px', sortable: true, resizable: true},		            
 		            ],
@@ -276,7 +270,7 @@ function initContrat() {
 					{ caption: 'Contrat', span: 5 },
                        { caption: 'Signataire', span: 2 },
                        { caption: 'Livre', span: 2 },
-                       { caption: 'ISBN', span: 3 },
+                       { caption: 'ISBN', span: 4 },
 		                   ],
 		       columns: [  		  		        
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -286,8 +280,7 @@ function initContrat() {
 		            		,editable: { type: 'percent' }},
 		            { field: 'pc_ebook', caption: '% ebook', size: '80px', sortable: true, resizable: true
 			            	,editable: { type: 'percent' }},
-		            { field: 'cnom', caption: 'Nom du contrat', size: '100px', sortable: true, resizable: true
-			            ,editable: { type: 'text' }},    		
+		            { field: 'cnom', caption: 'Nom du contrat', size: '100px', sortable: true, resizable: true},    		
 		            { field: 'commentaire', caption: 'Commentaire', size: '100px', sortable: true, resizable: true
 				        ,editable: { type: 'textarea' }},
 		            { field: 'prenom', caption: 'Prénom', size: '60px', sortable: true, resizable: true},
@@ -296,6 +289,7 @@ function initContrat() {
 		            { field: 'titre_fr', caption: 'Titre fr', size: '120px', sortable: true, resizable: true},
 		            { field: 'type_1', hidden:true, caption: 'Type 1', size: '60px', sortable: true, resizable: true},		            		            
 		            { field: 'type_2', hidden:true, caption: 'Type 2', size: '60px', sortable: true, resizable: true},		            		            
+		            { field: 'type_isbn', caption: 'Type ISBN', size: '80px', sortable: true, resizable: true},		            
 		            { field: 'isbn', caption: 'N°', size: '100px', sortable: true, resizable: true},		            
 		            { field: 'date_parution', caption: 'Parution', size: '80px', sortable: true, resizable: true},		            
 		            ],
@@ -436,8 +430,10 @@ function initContrat() {
 		        			, html: { caption: 'Livre', attr: 'size="60"' }
 		           	},	           		
 		            { name: 'date_signature', type: 'date', options:{format: 'yyyy-mm-dd'}, html: { caption: 'Date signature' } },
-		            { name: 'pc_papier', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier', attr: 'size="10"' } },
-		            { name: 'pc_ebook', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook', attr: 'size="10"' } },
+		            { name: 'pc_papier_fr', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier FR', attr: 'size="10"' } },
+		            { name: 'pc_ebook_fr', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook FR', attr: 'size="10"' } },
+		            { name: 'pc_papier_en', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier FR', attr: 'size="10"' } },
+		            { name: 'pc_ebook_en', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook FR', attr: 'size="10"' } },
 		            { name: 'commentaire', type: 'textarea', html: { caption: 'Commentaire', attr: 'style="width: 100%; height: 80px; resize: none"' } },
 					/*
 		            { name: 'nom', type: 'enum'
@@ -502,7 +498,7 @@ function initContrat() {
 								g.selectNone();
 					            w2ui['layout_<?php echo $idPage;?>'].toggle('main', true);
 					            w2ui['layout_<?php echo $idPage;?>'].hide('left', true);
-			            			w2alert(js.message);
+			            		w2alert(js.message);
 			           		},"json");
 		            }
 		        }

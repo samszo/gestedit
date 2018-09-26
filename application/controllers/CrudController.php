@@ -95,24 +95,26 @@ class CrudController extends Zend_Controller_Action
 				unset($params['id_livre']);				
 				unset($params['num']);				
 			break;
-			/*			
 			case 'auteurxcontrat':
-				//création/récupération du contrat;
-				$dbCont = new Model_DbTable_Iste_contrat();
-				$idCont = $dbCont->ajouter(array("nom"=>$params["nom"],"type"=>$params["type"]));
-				$params['id_contrat'] = $idCont;			
-				//récupération de l'isbn
-				if($params['isbn']){
-					$dbI = new Model_DbTable_Iste_isbn();
-					$rIsbn = $dbI->findByNum($params['isbn']);
-					if($rIsbn)$params['id_isbn'] = $rIsbn['id_isbn'];	
-					else $mess = "ISBN non trouvé !";
-				}	
-				unset($params['nom']);				
-				unset($params['type']);				
-				unset($params['isbn']);				
+				//création/récupération du contrat pour chaque langue renseignées;
+				if($params['type_isbn']){
+					$idCont = $oBdd->ajouter(array("id_livre"=>$params["id_livre"],"id_auteur"=>$params["id_auteur"],"id_contrat"=>$params["id_contrat"]
+					,"pc_papier"=>$params["pc_papier"],"pc_ebook"=>$params["pc_ebook"],"type_isbn"=>$params["type_isbn"]
+					,"id_isbn"=>$params["id_isbn"]
+					),true, false,true);
+				}
+				if($params["pc_papier_fr"] || $params["pc_ebook_fr"]){
+					$idCont = $oBdd->ajouter(array("id_livre"=>$params["id_livre"],"id_auteur"=>$params["id_auteur"],"id_contrat"=>$params["id_contrat"]
+					,"pc_papier"=>$params["pc_papier_fr"],"pc_ebook"=>$params["pc_ebook_fr"],"type_isbn"=>"Papier FR"
+						),true, false,true);
+				}
+				if($params["pc_papier_en"] || $params["pc_ebook_en"]){
+					$idCont = $oBdd->ajouter(array("id_livre"=>$params["id_livre"],"id_auteur"=>$params["id_auteur"],"id_contrat"=>$params["id_contrat"]
+					,"pc_papier"=>$params["pc_papier_en"],"pc_ebook"=>$params["pc_ebook_en"],"type_isbn"=>"Hardback EN"
+						),true, false,true);
+				}
+				$oBdd = false;	
 			break;
-			*/
 			case 'vente':
 				$idLivre = $params['id_livre'];
 				unset($params['id_livre']);						
@@ -144,7 +146,7 @@ class CrudController extends Zend_Controller_Action
 		}
 		//print_r($params);
 		//ajout de la donnée
-		$result = $oBdd->ajouter($params,true,true);
+		if($oBdd)$result = $oBdd->ajouter($params,true,true);
     		
 		//post traitement de l'ajout
 		switch ($this->_getParam('obj')) {
@@ -163,7 +165,14 @@ class CrudController extends Zend_Controller_Action
 				$dbIsbn = new Model_DbTable_Iste_isbn();
 				$dbIsbn->ajouter(array("id_livre"=> $idLivre,"num"=>"000"));
 				break;
-			case 'processusxchapitre':
+			case 'isbn':
+				if($result['type']){
+					//met à jour le n° isbn pour les contrats correspondant
+					$dbAC = new Model_DbTable_Iste_auteurxcontrat();
+					$this->view->impact = $dbAC->changeISBN($result['id_isbn'], $result['type']);
+				}
+			break;			
+				case 'processusxchapitre':
 				//création des prévisions
 				$dbProce = new Model_DbTable_Iste_processus();
 				$result = $dbProce->setProcessusForChapitre("Traduction chapitre",$idChap, $params["id_uti"]);
@@ -237,8 +246,15 @@ class CrudController extends Zend_Controller_Action
 					$dbI = new Model_DbTable_Iste_isbn();
 					$this->view->rs = $dbI->findByNum($params["num"]);					
 				}
-				if(!$this->view->rs)$this->view->rs = $oBdd->edit($id,$params);
-				else $this->view->message = "Le numéro ISNB est déjà attribué.";
+				if($params['type']){
+					//met à jour le n° isbn pour les contrats correspondant
+					$type = $this->_getParam('type');
+					$dbAC = new Model_DbTable_Iste_auteurxcontrat();
+					$this->view->impact = $dbAC->changeISBN($id, $type);
+				}
+				if(!$this->view->rs){
+					$this->view->rs = $oBdd->edit($id,$params);
+				}else $this->view->message = "Le numéro ISNB est déjà attribué.";
 			break;			
 			default:
 				$this->view->rs = $oBdd->edit($id,$params);

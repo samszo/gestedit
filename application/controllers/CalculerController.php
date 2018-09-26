@@ -170,7 +170,15 @@ class CalculerController extends Zend_Controller_Action
 		$this->view->ajax = $this->_getParam('ajax');
 		$this->view->idObj = $this->_getParam('idObj');
 		$this->view->typeObj = $this->_getParam('typeObj');
-    }    
+	}    
+	
+	public function correctionsAction()
+	{
+        $this->initInstance();
+        $db = new Model_DbTable_Iste_auteurxcontrat();
+		$db->correctionsISBN();
+		$this->view->message = "Corrections effectuées.";
+	}
     
 }
 

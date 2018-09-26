@@ -289,16 +289,16 @@ class Flux_Rapport extends Flux_Site{
 					$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]);
 					if($type=="livre"){
 						$roys->setVars('roy_role', $r["role"]);
-						$roys->setVars('roy_isbn', " ISBN : ".$r["isbns"]);
+						$roys->setVars('roy_isbn', "");
 					}else{
 						$roys->setVars('roy_role', $r["typeContrat"]);
 						$roys->setVars('roy_isbn', "");
 					}
 				}
-				
-				if($r["typeVente"]=="ebook")$typeVente="Book digital";
-				if($r["typeVente"]=="papier")$typeVente="Book paper";
-				if($r["typeVente"]=="Licence num")$typeVente="E-Licence";
+				$isbn = "ISBN : ".$r["num"]." (".$r["typeISBN"].")";
+				if($r["typeVente"]=="ebook")$typeVente="Book digital   ".$isbn;
+				if($r["typeVente"]=="papier")$typeVente="Book paper    ".$isbn;
+				if($r["typeVente"]=="Licence num")$typeVente="E-Licence    ".$isbn;
 				$roys->details->setVars('roy_type', $typeVente);
 				
 

@@ -272,3 +272,6 @@ data/import_vente/importessaiMini (13).csv
 data/import_vente/importessaiMini (9).csv
 data/modeles/droitFR2.odt
 data/import_vente/monaco 2 csv point virg.csv
+bdd/gesteditPreProd.sql
+bdd/lyor_iste_admin24-9_18.sql
+bdd/verifIsbnContrat.csv

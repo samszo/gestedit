@@ -275,13 +275,14 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
      * @param int 		$idAutCont
      * @param string 	$type
      * @param int 		$idLivre
+     * @param string 	$inAutCont
      *
      * @return array
      */
-    public function getAllContratAuteur($idAutCont=false,$type="",$idLivre=false)
+    public function getAllContratAuteur($idAutCont=false,$type="",$idLivre=false, $inAutCont=false)
     {
 	 	$sql = "SELECT 
-			id_auteurxcontrat recid, date_signature, pc_papier, pc_ebook, ac.commentaire
+			id_auteurxcontrat recid, date_signature, pc_papier, pc_ebook, ac.commentaire, ac.type_isbn
 			, a.id_auteur, a.prenom, a.nom
 			, c.id_contrat, c.nom cnom, c.type ctype, c.url curl
 			, l.titre_en, l.titre_fr, l.type_1, l.type_2
@@ -300,6 +301,7 @@ class Model_DbTable_Iste_contrat extends Zend_Db_Table_Abstract
 	 	if($idAutCont)$sql .= "  WHERE ac.id_auteurxcontrat=".$idAutCont;
 	 	if($idLivre)$sql .= "  WHERE ac.id_livre=".$idLivre;
 	 	if($type)$sql .= "  WHERE c.type='".$type."'";
+	 	if($inAutCont)$sql .= "  WHERE ac.id_auteurxcontrat IN (".$inAutCont.")";
 	 	//echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
 	    	return $db->fetchAll();
