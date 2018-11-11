@@ -179,7 +179,45 @@ class CalculerController extends Zend_Controller_Action
 		$db->correctionsISBN();
 		$this->view->message = "Corrections effectuées.";
 	}
-    
+
+	public function contratpardefautAction()
+	{
+		$this->initInstance();
+		$s = new Flux_Site();
+		$s->bTrace = true;
+		$s->bTraceFlush = true;
+        $dbLA = new Model_DbTable_Iste_livrexauteur;
+        $dbAC = new Model_DbTable_Iste_auteurxcontrat();
+		$dbI = new Model_DbTable_Iste_isbn();
+		$refContrat = array('resp. série'=>array(1,5),'directeur'=>array(3,2));
+		//récupère tout les auteurs pour chaque livre
+		$arrLA = $dbLA->getAll();
+		foreach ($arrLA as $la) {
+			if($la['role']=='resp. série' || $la['role']=='directeur'){
+				//récupère les isbn du livre
+				$arrI = $dbI->findById_livre($la['id_livre']);
+				foreach ($arrI as $i) {
+					$data = array(
+					'id_auteur'=>$la['id_auteur'],
+					'id_contrat'=>$refContrat[$la['role']][0],
+					'id_isbn'=>$i['id_isbn'],
+					'id_livre'=>$la['id_livre'],
+					'pc_papier'=>$refContrat[$la['role']][1],
+					'pc_ebook'=>$refContrat[$la['role']][1],
+					'type_isbn'=>$i['type'],
+					'commentaire'=>'contrat par défaut créer automatiquement'
+					);			
+					$dbAC->ajouter($data);	
+					$s->trace('contrat traité pour :'.$la['id_livre'].' - '.$la['id_auteur'].' - '.$la['role'].' - '.$i['id_isbn'].' - '.$i['type']);						
+				}
+			}
+		}
+
+
+		$this->view->message = "création effectuée";
+	}
+	
+
 }
 
 

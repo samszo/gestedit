@@ -66,6 +66,7 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
     	
     	if($existe)$id = $this->existe($data);
     	if(!$id){
+            if(!isset($data['date_signature']))$data['date_signature']= new Zend_Db_Expr('NOW()');
     	 	$id = $this->insert($data);
     	}elseif ($edit){
     		$this->edit($id, $data);

@@ -275,3 +275,9 @@ data/import_vente/monaco 2 csv point virg.csv
 bdd/gesteditPreProd.sql
 bdd/lyor_iste_admin24-9_18.sql
 bdd/verifIsbnContrat.csv
+bdd/iste_prod11-11-18.sql
+bdd/iste_prod11-11-18new.sql
+bdd/iste_prod22-10-18.sql
+admin/js/pdfjs/web/viewerProd.html
+admin/js/pdfjs/web/viewerProd.js
+bdd/iste_prod11-11-18new.sql.zip

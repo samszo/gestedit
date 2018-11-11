@@ -48,7 +48,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      */
     public function ajouter($data, $existe=true, $rs=false)
     {    	
-	    	$id=false;
+            $id=false;
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
@@ -529,12 +529,12 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     			$mtE = $mtL*floatval($r['conversion_livre_euro'])/100;;
                 //ajoute les royalties pour l'auteur et la vente
                 //ATTENTION les taxes de déduction sont calculer lors de l'édition avec le taux de l'année en cours
-	    		$arrResult[]= $this->ajouter(array("pourcentage"=>$pc,"id_vente"=>$r["id_vente"]
-                    ,"id_auteurxcontrat"=>$r["id_auteurxcontrat"],"montant_euro"=>$mtE,"montant_livre"=>$mtL
-                    //,"id_devise"=>$r["id_devise"],"montant_dollar"=>$mtD
-                    //,"taxe_taux"=>$r["taxe_taux"],"taxe_deduction"=>$r["taxe_deduction"]
-                    ,"conversion_livre_euro"=>$r['conversion_livre_euro'])
+                $dt = array("pourcentage"=>$pc,"id_vente"=>$r["id_vente"]
+                ,"id_auteurxcontrat"=>$r["id_auteurxcontrat"],"montant_euro"=>$mtE,"montant_livre"=>$mtL
+                ,"conversion_livre_euro"=>$r['conversion_livre_euro']);
+	    		$arrResult[]= $this->ajouter($dt
                     ,true,true);
+                //print_r($dt);
     		}
     		
     		return $arrResult;

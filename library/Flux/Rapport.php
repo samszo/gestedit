@@ -389,12 +389,22 @@ class Flux_Rapport extends Flux_Site{
 	 */
 	public function convertOdtToPdf($odtPath, $pdfPath){
 
+		/*pour localhot 
 		$cmd = "export HOME=/tmp; ".LIBREOFFICE_PATH.' --headless ';
-		$cmd3_5_4 = LIBREOFFICE_PATH.' -env:UserInstallation=file:///$HOME/.libreoffice-headless/ --headless ';
+		$result = exec($cmd);
+		*/
+		//pour prod
+		$cmd .= LIBREOFFICE_PATH.' -env:UserInstallation=file:///$HOME/.libreoffice-headless/ --headless ';
 		$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
+		$connection = ssh2_connect(SSH2_PATH);
+		ssh2_auth_password($connection, SSH2_USER, SSH2_MDP);		
+		$result = ssh2_exec($connection, $cmd);
+		//				
+		$this->bTrace = false;
+		$this->trace($cmd);
+		$this->trace("result=".$result);
+		return $result;
 		
-		return exec($cmd);
-
 	}
 
 	/**
