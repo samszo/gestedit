@@ -239,8 +239,8 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
                     ->where( "i.nom = ?", $nom );
 		$rs = $this->fetchAll($query)->toArray(); 
         return count($rs) ? $rs[0] : false;
-    }    
-    	/**
+    }
+    /**
      * Recherche une entrée Iste_auteur avec la valeur spécifiée
      * et retourne cette entrée.
      *

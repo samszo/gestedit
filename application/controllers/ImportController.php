@@ -566,6 +566,7 @@ class ImportController extends Zend_Controller_Action
 		$dbL = new Model_DbTable_Iste_livre();
 		$dbI = new Model_DbTable_Iste_isbn();
 		$dbA = new Model_DbTable_Iste_auteur();
+		$dbLA = new Model_DbTable_Iste_livrexauteur();
 		$dbCont = new Model_DbTable_Iste_contrat();
 		$dbAutCont = new Model_DbTable_Iste_auteurxcontrat();
 
@@ -574,6 +575,7 @@ class ImportController extends Zend_Controller_Action
 
 		$idContAut = $dbCont->ajouter(array("nom"=>"Contrat auteur","type"=>"auteur"));			
 		$idContDir = $dbCont->ajouter(array("nom"=>"Contrat directeur","type"=>"directeur"));
+		$idContRes = $dbCont->ajouter(array("nom"=>"Contrat de resp. série","type"=>"resp. série"));		
 		//conversion des rule en % de contrat
 		$arrRule = array("Ebook"=>"pc_ebook","Paper"=>"pc_papier","Print"=>"pc_papier","Translation"=>"pc_trad");			
 		$s->trace("DEBUT ".__METHOD__);		
@@ -626,14 +628,42 @@ class ImportController extends Zend_Controller_Action
 					else{
 						$s->trace($i." Auteur trouvé : ".implode(" ", $a));
 						$pc = explode("%",$d[$cols['RateDetails']]);
-						//ajoute un contrat poru chaque ISBN
-						foreach ($arrISBN as $isbn) {
-							$data = array("id_auteur"=>$arrA["id_auteur"], "id_livre"=>$isbn["id_livre"], "id_isbn"=>$isbn["id_isbn"]
-							,$arrRule[$d[$cols['Rule']]]=>floatval($pc[0]), "id_contrat"=>$idContAut);
-							$dbAutCont->ajouter($data, true, false,true);
-							$s->trace($i." contrat auteur ajouté");
+						//récupère le role de l'auteur dans le livre
+						$arrLA = $dbLA->findByLivreAuteur($arrISBN[0]['id_livre'], $arrA["id_auteur"]);						
+						if(count(arrLA)){
+							foreach ($arrLA as $la) {
+								switch ($la['role']) {
+									case 'auteur':
+										$idContrat = $idContAut;
+										break;
+									case 'directeur':
+										$idContrat = $idContDir;
+										break;
+									case 'resp. série':
+										$idContrat = $idContRes;
+										break;
+									case 'coordonnateur':
+										$idContrat = $idContAut;
+										break;										
+								}
+								//ajoute un contrat poru chaque ISBN
+								foreach ($arrISBN as $isbn) {
+									$data = array("id_auteur"=>$arrA["id_auteur"], "id_livre"=>$isbn["id_livre"], "id_isbn"=>$isbn["id_isbn"]
+									,$arrRule[$d[$cols['Rule']]]=>floatval($pc[0]), "id_contrat"=>$idContrat, "type_isbn"=>$isbn["type"], 'commentaire'=>'export ancien logiciel');
+									$dbAutCont->ajouter($data, true, false,true);
+									$s->trace($i." : ".$isbn["num"]." : ".$isbn["type"]." : contrat ".$la['role']." ajouté pour : ".$arrA['id_auteur']." : ".$arrA['nom']." : ".$arrA['prenom']);
+								}
+							}		
+						}else{
+							//ajoute un contrat poru chaque ISBN
+							foreach ($arrISBN as $isbn) {
+								$data = array("id_auteur"=>$arrA["id_auteur"], "id_livre"=>$isbn["id_livre"], "id_isbn"=>$isbn["id_isbn"]
+								,$arrRule[$d[$cols['Rule']]]=>floatval($pc[0]), "id_contrat"=>$idContrat, "type_isbn"=>$isbn["type"], 'commentaire'=>'export ancien logiciel');
+								$dbAutCont->ajouter($data, true, false,true);
+								$s->trace($i." : contrat auteur sans role ajouté pour : ".$arrA['id_auteur']." : ".$arrA['nom']." : ".$arrA['prenom']);
+							}
 						}
-		
+
 					}	
 				}
 
