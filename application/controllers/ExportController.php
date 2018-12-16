@@ -152,6 +152,33 @@ class ExportController extends Zend_Controller_Action
 		}
 	    
 	}  
+
+
+	function zipAction(){
+
+		if($this->_getParam('ids')){
+			$dbFic = new Model_DbTable_Iste_rapport();
+			$arrFic = $dbFic->findByIdsRapport(implode(",", $this->_getParam('ids')));
+			$this->view->nomFicZip = 'iste'.uniqid().'.zip';
+			$this->view->zipname = ROOT_PATH.'/data/export/'.$this->view->nomFicZip;
+			$this->view->zipurl = WEB_ROOT.'/data/export/'.$this->view->nomFicZip;
+			$zip = new ZipArchive;
+			$message = "Le fichier zip est crée.";
+			if ($zip->open($this->view->zipname, ZipArchive::CREATE)!==TRUE) {
+				$message = "Impossible d'ouvrir le fichier : ".$this->view->zipname;
+			}
+			foreach ($arrFic as $key => $fic) {			
+				$path = str_replace(WEB_ROOT,ROOT_PATH,$fic['url']);
+				$localName = basename($path);
+				$zip->addFile($path, $localName);
+			}
+			$zip->close();			
+		}
+		$this->view->data = array("message"=>$message,"lien"=>$this->view->zipurl);
+		//pour renvoyer directement le zip commenter la ligne ci-dessous
+		$this->view->zipname = false;
+	}
+
     
 	function initInstance(){
     		$auth = Zend_Auth::getInstance();

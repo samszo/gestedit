@@ -287,3 +287,13 @@ data/historiques/export_ISBN.xlsx
 data/historiques/export_pourcentage.xlsx
 data/historiques/result_import_droits.ods
 data/historiques/result_import_droits.xlsx
+admin/js/pdfjs/web/viewerGapaii.html
+admin/js/pdfjs/web/viewerGapaii.js
+bdd/iste_prod01-12-18-export.zip
+bdd/iste_prod01-12-18.zip
+bdd/lyor_iste_admin 2.sql
+data/historiques/excelFR2018cor.csv
+data/historiques/excelFR2018ok.csv
+data/historiques/importDroit.csv
+data/import_vente/excelFR2018cor.csv
+bdd/lyor_iste_admin05-12-2018.sql.zip

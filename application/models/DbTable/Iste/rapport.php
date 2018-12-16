@@ -83,6 +83,25 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
         else return false; 
     }      
 
+    /**
+     * Recherche une entrée Flux_rapport avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param string $ids
+     *
+     * @return array
+     */
+    public function findByIdsRapport($ids)
+    {
+        $query = $this->select()
+                    ->from( array("f" => "iste_rapport") )                           
+                    ->where( "f.id_rapport IN (".$ids.")");
+
+        return $this->fetchAll($query)->toArray(); 
+    }
+
+
+
  	/**
      * Recherche une entrée avec la valeur spécifiée
      * et retourne cette entrée.

@@ -102,16 +102,28 @@ class CrudController extends Zend_Controller_Action
 					,"pc_papier"=>$params["pc_papier"],"pc_ebook"=>$params["pc_ebook"],"type_isbn"=>$params["type_isbn"]
 					,"id_isbn"=>$params["id_isbn"]
 					),true, false,true);
-				}
-				if($params["pc_papier_fr"] || $params["pc_ebook_fr"]){
-					$idCont = $oBdd->ajouter(array("id_livre"=>$params["id_livre"],"id_auteur"=>$params["id_auteur"],"id_contrat"=>$params["id_contrat"]
-					,"pc_papier"=>$params["pc_papier_fr"],"pc_ebook"=>$params["pc_ebook_fr"],"type_isbn"=>"Papier FR"
-						),true, false,true);
-				}
-				if($params["pc_papier_en"] || $params["pc_ebook_en"]){
-					$idCont = $oBdd->ajouter(array("id_livre"=>$params["id_livre"],"id_auteur"=>$params["id_auteur"],"id_contrat"=>$params["id_contrat"]
-					,"pc_papier"=>$params["pc_papier_en"],"pc_ebook"=>$params["pc_ebook_en"],"type_isbn"=>"Hardback EN"
-						),true, false,true);
+					$result[]=$idCont;
+				}else{
+					$dbI = new Model_DbTable_Iste_isbn();
+					$idIsbn = null;
+					if($params["pc_papier_fr"] || $params["pc_ebook_fr"]){					
+						$arrI = $dbI->findById_livreType($params["id_livre"],"Papier FR");
+						if(count($arrI))$idIsbn = $arrI[0]['id_isbn'];
+						$idCont = $oBdd->ajouter(array("id_livre"=>$params["id_livre"],"id_auteur"=>$params["id_auteur"],"id_contrat"=>$params["id_contrat"]
+						,"pc_papier"=>$params["pc_papier_fr"],"pc_ebook"=>$params["pc_ebook_fr"],"type_isbn"=>"Papier FR"
+						,"id_isbn"=>$idIsbn
+							),true, false,true);
+						$result[]=$idCont;
+					}
+					if($params["pc_papier_en"] || $params["pc_ebook_en"]){
+						$arrI = $dbI->findById_livreType($params["id_livre"],"Hardback EN");
+						if(count($arrI))$idIsbn = $arrI[0]['id_isbn'];
+						$idCont = $oBdd->ajouter(array("id_livre"=>$params["id_livre"],"id_auteur"=>$params["id_auteur"],"id_contrat"=>$params["id_contrat"]
+						,"pc_papier"=>$params["pc_papier_en"],"pc_ebook"=>$params["pc_ebook_en"],"type_isbn"=>"Hardback EN"
+						,"id_isbn"=>$idIsbn
+							),true, false,true);
+						$result[]=$idCont;
+					}		
 				}
 				$oBdd = false;	
 			break;

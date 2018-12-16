@@ -15,10 +15,11 @@ class Flux_Rapport extends Flux_Site{
 	var $dbImportfic;
 	var $dbSerie;
 	
-    function __construct($idBase=false,$idTrace=false){    	
+    function __construct($idBase=false,$bTrace=false){    	
     	    	
-    		parent::__construct($idBase,$idTrace);
+    	parent::__construct($idBase,$bTrace);
 		$this->pathPaiement = ROOT_PATH."/data/editions/modeles/royalty.odt";		
+		$this->temps_debut = microtime(true);
     		
     }
 	
@@ -47,8 +48,6 @@ class Flux_Rapport extends Flux_Site{
 	 */
 	public function creaPaiement($data){
 	
-		$this->bTrace = false;
-		$this->temps_debut = microtime(true);
 		$this->trace("creaPaiement",$data);
 		
 		//initialisation des objets	
@@ -171,13 +170,12 @@ class Flux_Rapport extends Flux_Site{
 	 * @param array 		$data
 	 * @param string 		$type
 	 * @param number 		$taux_reduction
+	 * @param int 			$ordreGen -- pour gérer trop de génération
 	 *
 	 * @return array
 	 */
-	public function creaPaiementFic($data, $type="livre", $taux_reduction=0){
+	public function creaPaiementFic($data, $type="livre", $taux_reduction=0, $ordreGen=0){
 	
-		$this->bTrace = false;
-		$this->temps_debut = microtime(true);
 		$this->trace(__METHOD__,$data);
 		
 		//initialisation des objets	
@@ -353,7 +351,7 @@ class Flux_Rapport extends Flux_Site{
 		
 				
 		//on enregistre le fichier
-		$nomFic = utf8_encode($this->dbImportfic->valideChaine($refRapport));
+		$nomFic = $ordreGen."_".$refRapport;
 		//copie le fichier dans le répertoire data
 		$newfile = ROOT_PATH."/data/editions/tmp/".$nomFic.".odt";
 		//copy($this->odf->tmpfile, $newfile);
@@ -389,18 +387,19 @@ class Flux_Rapport extends Flux_Site{
 	 */
 	public function convertOdtToPdf($odtPath, $pdfPath){
 
-		/*pour localhot 
+		//pour localhot 
 		$cmd = "export HOME=/tmp; ".LIBREOFFICE_PATH.' --headless ';
+		$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
 		$result = exec($cmd);
-		*/
-		//pour prod
+		//
+		/*pour prod
 		$cmd .= LIBREOFFICE_PATH.' -env:UserInstallation=file:///$HOME/.libreoffice-headless/ --headless ';
 		$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
 		$connection = ssh2_connect(SSH2_PATH);
 		ssh2_auth_password($connection, SSH2_USER, SSH2_MDP);		
 		$result = ssh2_exec($connection, $cmd);
-		//				
-		$this->bTrace = false;
+		//export HOME=/tmp; soffice --headless --convert-to pdf --outdir /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/editions /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/editions/tmp/*.odt
+		*/				
 		$this->trace($cmd);
 		$this->trace("result=".$result);
 		return $result;
@@ -555,6 +554,8 @@ class Flux_Rapport extends Flux_Site{
 	 *
 	 */
 	public function setAll(){
+		set_time_limit(3600);
+
 		$dbRoy = new Model_DbTable_Iste_royalty();
 		$dbRap = new Model_DbTable_Iste_rapport();
 		$dbDev = new Model_DbTable_Iste_devise();
@@ -566,12 +567,19 @@ class Flux_Rapport extends Flux_Site{
 		//récupère le taux actuel
 		$taux_reduction = floatval($dbDev->findByAnnee(date('Y'))["taxe_deduction"]);
 		//on récupère les paiements
-		$rs = $dbRoy->paiementAuteurFic("");
+		$rs = $dbRoy->paiementAuteurFic("");		
+		$i = 0;
 		foreach ($rs as $r) {
-			$this->creaPaiementFic($r,"livre",$taux_reduction);
-			$this->creaPaiementFic($r,"editoriaux",$taux_reduction);  
+			if($r['id_auteur']){
+				$this->creaPaiementFic($r,"livre",$taux_reduction,($i % 9));
+				$this->creaPaiementFic($r,"editoriaux",$taux_reduction,($i % 9));  
+				$i++;
+			}
 		}
-		$this->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/*.odt", ROOT_PATH."/data/editions");
+		//pour gérer la génération d'un grand nombre de pdf
+		for ($i=0; $i < 10; $i++) { 
+			$this->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/".$i."_*.odt", ROOT_PATH."/data/editions");
+		}
 	}
 
 }	

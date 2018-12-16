@@ -275,13 +275,16 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
 	public function valideChaine($chaineNonValide)
 	{
 	  $chaineNonValide = preg_replace('`\s+`', '_', trim($chaineNonValide));
-	  $chaineNonValide = str_replace("'", "_", $chaineNonValide);
-	  $chaineNonValide = preg_replace('`_+`', '_', trim($chaineNonValide));
+      $chaineNonValide = str_replace("'", "_", $chaineNonValide);
+      $chaineNonValide = str_replace("’", "_", $chaineNonValide);
+      $chaineNonValide = preg_replace('`_+`', '_', trim($chaineNonValide));
+      //$chaineNonValide = utf8_encode($chaineNonValide);
 	  $chaineValide=strtr($chaineNonValide,
-	"ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ",
-	                        "aaaaaaaaaaaaooooooooooooeeeeeeeecciiiiiiiiuuuuuuuuynn")
+	        "îçèéÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ",
+	        "iceeaaaaaaaaaaaaooooooooooooeeeeeeeecciiiiiiiiuuuuuuuuynn")
 	;
 	  return ($chaineValide);
-	}
+    }
+    
     
 }

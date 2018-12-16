@@ -650,13 +650,16 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         iste_importfic impF ON impF.id_importfic = impD.id_importfic 
             INNER JOIN
         iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat
-            -- AND ac.id_auteur IN (".$idsAuteur.")
             INNER JOIN
         iste_auteur a ON a.id_auteur = ac.id_auteur
     WHERE
         r.date_envoi IS NULL
     GROUP BY a.id_auteur
     ORDER BY a.nom, a.prenom";
+    /* AND ac.id_auteur IN (".$idsAuteur.")
+    on ne précise plus quels auteur
+    */
+
     //echo $sql;
         $stmt = $this->_db->query($sql);
         

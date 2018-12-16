@@ -107,6 +107,7 @@ function initDroit() {
 					{ field: 'password', type: 'password', html: { caption: "Mot de passe email :", page: 0, column: 2 }, required: true },
 					{ field: 'nom', type: 'text', html: { caption: "Nom de l'envoyeur :", page: 0, column: 2 }, required: true },
 					{ field: 'sujet', type: 'text', html: { caption: "Sujet de l'email :", page: 0, column: 2 }, required: true },
+					{ field: 'email_test', type: 'text', html: { caption: "Email de test :", page: 0, column: 2 }, required: false },
 					/*
 					{ field: 'periode1', type: 'date', options:{ end: $('input[name=periode2]'),format: 'dd-mm-yyyy'},  html: {   caption: 'Début période :', page: 0, column: 2 }, required: true },
 					{ field: 'periode2', type: 'date', options:{ start: $('input[name=periode1]'),format: 'dd-mm-yyyy'},  html: {  caption: 'Fin période :', page: 0, column: 2 }, required: true }
@@ -249,19 +250,6 @@ function initDroit() {
 		            selectColumn		: false,
 		            footer			: true,
 		        },
-		        multiSearch: true,
-		        searches: [
-				    { field: 'num', caption: 'ISBN', type: 'text' },
-				    { field: 'titre', caption: 'Titre', type: 'text' },
-				    { field: 'nom', caption: 'Nom auteur', type: 'text' },
-		            { field: 'id_boutique', caption: 'Boutique', type: 'combo', options: { items: arrListes['boutique']} },
-		            { field: 'date_vente', caption: 'Date de vente', type: 'date' },
-		            { field: 'montant_euro', caption: 'Montant &euro;', type: 'float'},
-		            { field: 'montant_livre', caption: 'Montant &pound;', type: 'float'},
-		            { field: 'montant_dollar', caption: 'Montant $', type: 'float'},
-		            { field: 'mt_r', caption: 'Mt. roy. &pound;', type: 'float'},
-		            { field: 'mt_r_due', caption: 'Mt. roy. due &pound;', type: 'float'},
-		        ],
 		        columns: [         
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'num', caption: 'ISBN', size: '100px', sortable: true, resizable: true},
@@ -301,32 +289,7 @@ function initDroit() {
 		        },	    
 		        onAdd: function(event) {
 			        openPopupAjoutVente();            
-			    },
-		        onSearch: function(event) {
-		        		var grid = this;
-		        		if(event.searchField=="multi"){
-		            		event.onComplete = function () {
-			            		$.get('<?php if(!$this->ajax) echo '../'; ?>cherche/vente',
-							{"searchData":event.searchData, "bLivre":1},
-			            		function(js){
-			            			finsession(js);
-			            			var ids = [];
-			            			js.rs.forEach(function(d){
-			            				rsVente.forEach(function(l, i){
-				            				if(l.recid==d)ids.push(i);
-			            				});
-				            		});
-		                        grid.last.searchIds = ids;
-		                        grid.total      = grid.last.searchIds.length; 
-		                        grid.buffered   = grid.total; 
-		                        grid.refresh();
-		                        w2alert(js.message);
-			           		},"json");
-		                }
-		            }else{
-			            	grid.localSearch();		            
-		            }
-		        },				    
+			    }			    
 		    },
 		    gridVenteAuteur: { 
 		        name: 'grid_<?php echo $idPage;?>_vente_auteur', 
@@ -334,28 +297,15 @@ function initDroit() {
 		        show: { 
 					header			: true,		
 		            toolbar			: true,
-					toolbarReload   	: true,
+					toolbarReload   	: false,
 					toolbarColumns  	: true,
-		            	toolbarSearch   	: true,
-		            	toolbarAdd      	: false,
-		            	toolbarDelete   	: false,
-		            	toolbarSave		: false,
+					toolbarSearch   	: true,
+					toolbarAdd      	: false,
+					toolbarDelete   	: false,
+					toolbarSave		: false,
 		            selectColumn		: false,
-		            	footer			: true,
+					footer			: true,
 		        },
-		        multiSearch: true,
-		        searches: [
-				    { field: 'titre', caption: 'Titre', type: 'text' },
-				    { field: 'nom', caption: 'Nom auteur', type: 'text' },
-		            { field: 'id_boutique', caption: 'Boutique', type: 'combo', options: { items: arrListes['boutique']} },
-		            { field: 'num', caption: 'ISBN', type: 'text' },
-		            { field: 'date_vente', caption: 'Date de vente', type: 'date' },
-		            { field: 'montant_euro', caption: 'Montant &euro;', type: 'float', render: 'money'},
-		            { field: 'montant_livre', caption: 'Montant &pound;', type: 'float', render: 'money'},
-		            { field: 'montant_dollar', caption: 'Montant $', type: 'float', render: 'money'},
-		            { field: 'mt_r', caption: 'Mt. roy. &pound;', type: 'float', render: 'money'},
-		            { field: 'mt_r_due', caption: 'Mt. roy. due &pound;', type: 'float', render: 'money'},
-		        ],
 		        columns: [         
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
 		            { field: 'auteur', caption: 'Auteur', size: '200px', sortable: true, resizable: true},
@@ -397,32 +347,7 @@ function initDroit() {
 		        },	    
 		        onAdd: function(event) {
 			        	openPopupAjoutVente();            
-			    },
-		        onSearch: function(event) {
-		        		var grid = this;
-		        		if(event.searchField=="multi"){
-		            		event.onComplete = function () {
-			            		$.get('<?php if(!$this->ajax) echo '../'; ?>cherche/vente',
-							{"searchData":event.searchData, "bLivre":1},
-			            		function(js){
-			            			finsession(js);
-			            			var ids = [];
-			            			js.rs.forEach(function(d){
-			            				rsVente.forEach(function(l, i){
-				            				if(l.recid==d)ids.push(i);
-			            				});
-				            		});
-		                        grid.last.searchIds = ids;
-		                        grid.total      = grid.last.searchIds.length; 
-		                        grid.buffered   = grid.total; 
-		                        grid.refresh();
-		                        w2alert(js.message);
-			           		},"json");
-		                }
-		            }else{
-			            	grid.localSearch();		            
-		            }
-		        },				    
+			    }
 		    },
 
 			gridFichierImport: { 
@@ -979,6 +904,7 @@ function initDroit() {
 		            items: [
 		                //{ id: 'voirRapport', type: 'button', caption: "Télécharger", icon: 'fa-file' },
 		                { id: 'impRapport', type: 'button', caption: "Envoyer", icon: 'fa-envelope' }
+		                ,{ id: 'zipRapport', type: 'button', caption: "Zipper", icon: 'fa-file-archive' }
 		                ,{ id: 'groupRapport', type: 'button', caption: "Grouper", icon: 'fa-object-group' }
 		                ,{ id: 'payerRapport', type: 'button', caption: "Payer", icon: 'fa-money' }
 		                ,{ id: 'encaisserRapport', type: 'button', caption: "Encaisser", icon: 'fa-pencil' }
@@ -1000,7 +926,8 @@ function initDroit() {
 									arraySel.push({
 										recid : item["recid"],
 										idAuteur: item["idAuteur"],
-										url: item["url"]
+										url: item["url"],
+										montant: item["montant_livre"]
 									});
 								})
 								$.get('<?php if(!$this->ajax) echo '../'; ?>import/envoimail',
@@ -1064,6 +991,20 @@ function initDroit() {
 								} else {
 									alert('Veuillez autoriser les popups sur cette page.');
 								}
+							}
+							else if (event.target=="zipRapport"){
+								var arraySel = [];
+								s.forEach(function(r){
+									var item = w2ui['grid_<?php echo $idPage;?>_ficRapport'].get(r);
+									arraySel.push(item["recid"]);
+								})
+								$.post("../export/zip",
+									{ids:arraySel},
+										function(js){
+											finsession(js);
+											w2alert(js.message);
+											window.open(js.lien,'_blank');
+									},"json");
 							}
 							else if(event.target =='payerRapport'){
 								// if(s){

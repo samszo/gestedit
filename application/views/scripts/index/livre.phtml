@@ -1241,9 +1241,9 @@ function initLivre() {
 			            		, html: { caption: 'type', attr: 'size="20"' } 
 			            		},
 		            { name: 'pc_papier_fr', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier FR', attr: 'size="10"' } },
-		            { name: 'pc_ebook_fr', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook FR', attr: 'size="10"' } },
+		            { name: 'pc_ebook_fr', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% ebook FR', attr: 'size="10"' } },
 		            { name: 'pc_papier_en', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% papier EN', attr: 'size="10"' } },
-		            { name: 'pc_ebook_en', type: 'percent', options: { precision: 1, min: 0, max: 100 }, html: { caption: '% ebook EN', attr: 'size="10"' } },
+		            { name: 'pc_ebook_en', type: 'percent', options: { precision: 2, min: 0, max: 100 }, html: { caption: '% ebook EN', attr: 'size="10"' } },
 		            { name: 'commentaire', type: 'textarea', html: { caption: 'Commentaire', attr: 'style="width: 100%; height: 80px; resize: none"' } },
 		        ],
 		        actions: {
@@ -1262,8 +1262,8 @@ function initLivre() {
 						data,
 							function(js){
 								finsession(js);
-								g.add(js.rs);
-								g.selectNone();
+								//g.add(js.rs);
+								//g.selectNone();
 								w2alert(js.message);
 						},"json");
 		            }

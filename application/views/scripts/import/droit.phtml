@@ -215,17 +215,25 @@ function importerData(){
 			function(html){
 				$('#progCalcData .progress-bar').css('width',100 + '%');		
 				calculerVente();
-       		});				
+			   })
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+;				
 }
 
 function calculerVente(){
 	$('#progCalcVente .progress-bar').css('width',10 + '%');		
 	$.get(urlP+'calculer/vente',
-			{idFic:ficId, type:'global'},
-			function(js){
-				$('#progCalcVente .progress-bar').css('width',100 + '%');		
-				calculerPrixVente();
-       		});				
+		{idFic:ficId, type:'global'},
+		function(js){
+			$('#progCalcVente .progress-bar').css('width',100 + '%');		
+			calculerPrixVente();
+			})
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+;				
 
 }
 
@@ -240,7 +248,9 @@ function calculerPrixVente(){
 			$('#progCalcPrixManquant .progress-bar').css('width',100 + '%');		
 			calculerRoyalties()
 		},
-		error: function() { }
+		error: function(e) {
+			w2alert(e.responseText);
+		 }
 	});		
 		
 
@@ -264,7 +274,11 @@ function calculerRoyalties(){
 				w2alert('Pas de rapport généré car pas de nouveaux royalties');				
 				if(parent)parent.finProcessImport(ficId);		
 			}
-	    },"json");           		           	
+		},"json")
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+;           		           	
 }
 
 function supprimerPaiements(s){
@@ -275,18 +289,25 @@ function supprimerPaiements(s){
 			$('#progSupPaiement .progress-bar').css('width',100 + '%');		
 			finsession(js);
 			calculerPaiements(s);
-		},"json");           		           	
+		},"json")
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+;           		           	
 }
 
 function calculerPaiements(s){
 	$('#progCalcPaiement .progress-bar').css('width',10 + '%');		
 	$.post('<?php if(!$this->ajax) echo '../'; ?>calculer/paiement',
-			{"type":"auteurFic","ids":s},
+			{"type":"auteurFic"},
 		function(js){
 			$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
 			finsession(js);
 			if(parent!=window)parent.finProcessImport(ficId);
-		},"json");           		           	
+		},"json")
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
 }
 
 </script>

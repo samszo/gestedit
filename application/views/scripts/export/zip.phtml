@@ -1,0 +1,9 @@
+<?php 
+if($this->zipname){
+    ///Then download the zipped file.
+    header('Content-Type: application/zip');
+    header('Content-disposition: attachment; filename='.$this->nomFicZip);
+    header('Content-Length: ' . filesize($this->zipname));
+    readfile($this->zipname);
+}else 	echo json_encode($this->data);
+

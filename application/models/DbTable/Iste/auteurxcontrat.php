@@ -248,7 +248,7 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray();
     }
 
-    	/**
+    /**
      * Recherche une entrée Iste_auteurxcontrat avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -264,7 +264,27 @@ class Model_DbTable_Iste_auteurxcontrat extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    	/**
+
+    /**
+     * Recherche une entrée Iste_auteurxcontrat avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $id_auteur
+     * @param int $id_livre
+     *
+     * @return array
+     */
+    public function findByIdAuteurIdLivre($id_auteur, $id_livre)
+    {
+        $query = $this->select()
+                    ->from( array("i" => "iste_auteurxcontrat") )                           
+                    ->where( "i.id_livre = ?", $id_livre )
+                    ->where( "i.id_auteur = ?", $id_auteur );
+
+        return $this->fetchAll($query)->toArray(); 
+    }
+
+    /**
      * Recherche une entrée Iste_auteurxcontrat avec la valeur spécifiée
      * et retourne cette entrée.
      *

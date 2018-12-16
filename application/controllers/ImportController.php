@@ -558,6 +558,86 @@ class ImportController extends Zend_Controller_Action
 
 
 
+	public function contratsauteurscorAction(){
+
+		$s = new Flux_Site();
+		$s->bTrace = $this->_getParam('trace',true);
+		$s->bTraceFlush = $s->bTrace;
+		$dbL = new Model_DbTable_Iste_livre();
+		$dbI = new Model_DbTable_Iste_isbn();
+		$dbA = new Model_DbTable_Iste_auteur();
+		$dbLA = new Model_DbTable_Iste_livrexauteur();
+		$dbCont = new Model_DbTable_Iste_contrat();
+		$dbAutCont = new Model_DbTable_Iste_auteurxcontrat();
+
+		$arrDroit = $s->csvToArray("../data/historiques/importDroit.csv");
+
+		$idContAut = $dbCont->ajouter(array("nom"=>"Contrat auteur","type"=>"auteur"));			
+		$idContDir = $dbCont->ajouter(array("nom"=>"Contrat directeur","type"=>"directeur"));
+		$idContRes = $dbCont->ajouter(array("nom"=>"Contrat de resp. série","type"=>"resp. série"));		
+		//conversion des rule en % de contrat
+		$s->trace("DEBUT ".__METHOD__);		
+		$nbC = count($arrDroit);
+		$comment = 'correction Excel 01/12/18';
+		$cols = array('idLivre'=>0,'idIsbn_EB_FR'=>3,'idIsbn_P_EN'=>5,'idAuteur'=>12,'pcPapier'=>17,'pcEbook'=>18);
+		for ($i=7; $i < $nbC; $i++) { 
+			$d = $arrDroit[$i];
+			$s->trace($i." : ".$d[$cols['idLivre']]." : ".$d[$cols['idIsbn_P_EN']]." : TRAITEMENT : ".$d[$cols['idAuteur']]);
+
+			//recherche les contrats de l'auteur pour le livre
+			$arrContrat = $dbAutCont->findByIdAuteurIdLivre($d[$cols['idAuteur']],$d[$cols['idLivre']]);
+			$update = false;
+			if(count($arrContrat)){
+				//parcourt les contrats à la recherche de celui à mettre à jour
+				foreach ($arrContrat as $c) {
+					if($c['id_isbn'] == $d[$cols['idIsbn_EB_FR']] && $c['id_contrat']==$idContAut){
+						//mis à jour du français
+						$dbAutCont->edit($c['id_auteurxcontrat']
+							, array('pc_papier'=>$d[$cols['pcPapier']],'pc_ebook'=>$d[$cols['pcEbook']],"type_isbn"=>"Papier FR", 'commentaire'=>$comment));
+						$s->trace($i." : ".$d[$cols['idLivre']]." : ".$d[$cols['idIsbn_EB_FR']]." : contrat français modifié pour : ".$d[$cols['idAuteur']]);
+						$update = true;
+					}
+					if($c['id_isbn'] == $d[$cols['idIsbn_P_EN']] && $c['id_contrat']==$idContAut){
+						//mis à jour de l'anglais
+						$dbAutCont->edit($c['id_auteurxcontrat']
+							, array('pc_papier'=>$d[$cols['pcPapier']],'pc_ebook'=>$d[$cols['pcEbook']],"type_isbn"=>"Hardback EN", 'commentaire'=>$comment));
+						$s->trace($i." : ".$d[$cols['idLivre']]." : ".$d[$cols['idIsbn_P_EN']]." : contrat français modifié pour : ".$d[$cols['idAuteur']]);
+						$update = true;
+					}
+				}
+			}
+			if(!$update){
+				//sans contrat 
+				if($d[$cols['idIsbn_EB_FR']]!="NULL" && $d[$cols['pcPapier']]!="NULL" && $d[$cols['pcEbook']]!="NULL" ){
+					//on crée le français
+					$data = array("id_auteur"=>$d[$cols['idAuteur']], "id_livre"=>$d[$cols['idLivre']]
+					, "id_isbn"=>$d[$cols['idIsbn_EB_FR']]
+					,'pc_papier'=>$d[$cols['pcPapier']],'pc_ebook'=>$d[$cols['pcEbook']]
+					, "id_contrat"=>$idContAut, "type_isbn"=>"Papier FR"
+					, 'commentaire'=>$comment);
+					$dbAutCont->ajouter($data, true, false,true);
+					$s->trace($i." : ".$d[$cols['idLivre']]." : ".$d[$cols['idIsbn_EB_FR']]." : contrat Papier FR ajouté pour : ".$d[$cols['idAuteur']]);
+				}
+				if($d[$cols['idIsbn_P_EN']]!="NULL" && $d[$cols['pcPapier']]!="NULL" && $d[$cols['pcEbook']]!="NULL" ){
+					//on crée l'anglais
+					$data = array("id_auteur"=>$d[$cols['idAuteur']], "id_livre"=>$d[$cols['idLivre']]
+					, "id_isbn"=>$d[$cols['idIsbn_P_EN']]
+					,'pc_papier'=>$d[$cols['pcPapier']],'pc_ebook'=>$d[$cols['pcEbook']]
+					, "id_contrat"=>$idContAut, "type_isbn"=>"Hardback EN"
+					, 'commentaire'=>$comment);
+					$dbAutCont->ajouter($data, true, false,true);
+					$s->trace($i." : ".$d[$cols['idLivre']]." : ".$d[$cols['idIsbn_P_EN']]." : contrat Hardback EN ajouté pour : ".$d[$cols['idAuteur']]);
+				}
+			}
+			if($d[$cols['idIsbn_EB_FR']]=="NULL" && $d[$cols['idIsbn_P_EN']]=="NULL"){
+				//création des contrats pour tout les isbn de l'auteur ???
+				$s->trace($i." : ".$d[$cols['idLivre']]." : ".$d[$cols['idIsbn_P_EN']]." : AUCUN ISBN : ".$d[$cols['idAuteur']]);
+			}
+		}
+		
+		$s->trace("FIN ".__METHOD__);		
+	}
+
 	public function contratsauteursAction(){
 
 		$s = new Flux_Site();
@@ -1724,7 +1804,7 @@ class ImportController extends Zend_Controller_Action
 		$dbr = new Model_DbTable_Iste_royalty();
 		$dbP = new Model_DbTable_Iste_parammail();
 
-		//récupérer les données de sélection {recid(rapport_id), idAuteur}
+		//récupérer les données de sélection {recid(rapport_id), idAuteur, montant}
 		$data = $this->_getParam("data");
 
 		//config mail
@@ -1740,27 +1820,32 @@ class ImportController extends Zend_Controller_Action
 		
 			//récupérer mail auteur 
 			$auteur = $dbAut->findById_auteur($ligne["idAuteur"]);
+			//vérifie la présence d'un mail de test
+			$mailTest =  $dbP->findByChamp_parammail("email_test");
+			if($mailTest)$mail = $mailTest;
+			else $mail = $auteur["mail_1"];
 			//si mail valide (simple check au cas où pas de mail)
-			if (strpos($auteur["mail_1"],"@") !== false){
+			if (strpos($mail,"@") !== false){
 				
 				//récupérer odt
 				$filePath = ROOT_PATH.substr($ligne["url"],strpos($ligne["url"],"/data"));
 				$fileName = substr($ligne["url"],strpos($ligne["url"],"editions/")+strlen("editions/"));
 				//conversion odt en pdf
 				
+				//plus besoin car fait à la création du rapport
 				//conversion qui marche (avec trace)
 				// $cmd= shell_exec("export HOME=/tmp && strace -f -o trace.txt soffice --headless -convert-to pdf --outdir ../data/editions ".$filePath);
 				//conversion qui marche (sans trace)
-				$cmd= shell_exec("export HOME=/tmp && soffice --headless -convert-to pdf --outdir ../data/editions ".$filePath);
+				//$cmd= shell_exec("export HOME=/tmp && soffice --headless -convert-to pdf --outdir ../data/editions ".$filePath);
 
-				if (file_exists(substr($filePath,0,(strlen($filePath)-3))."pdf")){
+				if (file_exists($filePath)){
 					
-					$mail = new Zend_Mail();
+					$mail = new Zend_Mail();//'UTF-8');
 					//construire le mail avec les informations nécessaires (texte, mail envoyeur)
 
 					$royalties = $dbr->findById_rapport($ligne["recid"]);
 					$textmail = "";
-					if ($royalties[0]["montant_euro"] > 100){
+					if (floatval($ligne["montant"]) > 100){
 						$textmail = $dbP->findByChamp_parammail("avec_redevance");
 					}
 					else{
@@ -1791,22 +1876,44 @@ class ImportController extends Zend_Controller_Action
 										// Zend_Mime::ENCODING_BASE64
 										// );
 					$mail->setFrom($dbP->findByChamp_parammail('email'), $dbP->findByChamp_parammail('nom'));
-					$mail->addTo($auteur["mail_1"], $auteur["nom"]." ".$auteur["prenom"]);
+					$mail->addTo($mail, $auteur["nom"]." ".$auteur["prenom"]);
 					$mail->setSubject('Royalties');
-					$filePath = substr($filePath,0,(strlen($filePath)-3))."pdf";
-					//attacher le pdf
+					/*attacher le pdf
 					$content = file_get_contents($filePath); // e.g. ("attachment/abc.pdf")
 					$attachment = new Zend_Mime_Part($content);
 					$attachment->type = 'application/pdf';
 					$attachment->disposition = Zend_Mime::DISPOSITION_ATTACHMENT;
 					$attachment->encoding = Zend_Mime::ENCODING_BASE64;
-					$attachment->filename = substr($fileName,0,(strlen($fileName)-3))."pdf"; // name of file
+					$attachment->filename = $fileName; // name of file
 	
 					$mail->addAttachment($attachment); 
-	
-	
-					$tr = new Zend_Mail_Transport_File(array("path" => ROOT_PATH."/tmp",'callback' => 'recipientFilename'));
-					$mail->send($tr);
+					*/
+
+					/*pour tester
+					$tr = new Zend_Mail_Transport_File(array("path" => ROOT_PATH."/tmp/mail",'callback' => 'recipientFilename'));
+					*/
+
+					$tr = new Zend_Mail_Transport_Smtp('smtp.univ-paris8.fr', array(
+						'auth'     => 'login',
+						'username' => "samuel.szoniecky@univ-paris8.fr",
+						'password' => "Para2014",
+						'port'     => 25
+					));
+
+					/*SMTP server configuration
+					$smtpHost = 'smtp.gmail.com';
+					$smtpConf = array(
+					'auth' => 'login',
+					'ssl' => 'ssl',
+					'port' => '465',
+					'username' => $dbP->findByChamp_parammail('email'),
+					'password' => $dbP->findByChamp_parammail('password')
+					);
+					$tr = new Zend_Mail_Transport_Smtp($smtpHost, $smtpConf);
+					*/
+
+					//Zend_Mail::setDefaultTransport($tr);
+					$mail->send();
 	
 					//si mail envoyé màj bdd
 					if ($mail){

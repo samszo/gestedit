@@ -81,7 +81,8 @@ class CalculerController extends Zend_Controller_Action
     		$this->initInstance();
     		$dbRoy = new Model_DbTable_Iste_royalty();
     		$dbRap = new Model_DbTable_Iste_rapport();
-    		$rapport = new Flux_Rapport();    		
+			$rapport = new Flux_Rapport($this->_getParam('idBase'),$this->_getParam('trace'));
+			$rapport->bTraceFlush = $this->_getParam('trace');    		
     		$result = array();
     		
     		$type = $this->_getParam('type');

@@ -203,7 +203,7 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
 	    else 
 	    		return false; 
     }
-    	/**
+    /**
      * Recherche une entrée Iste_isbn avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -223,7 +223,30 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    	/**
+    /**
+     * Recherche une entrée Iste_isbn avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int       $id_livre
+     * @param string    $type
+     *
+     * @return array
+     */
+    public function findById_livreType($id_livre, $type)
+    {
+        $query = $this->select()
+			->from( array("i" => "iste_isbn") )                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("iid" => "iste_isbn"),
+                'i.id_isbn = iid.id_isbn', array("recid"=>"id_isbn"))
+			->where( "i.id_livre = ?", $id_livre )
+			->where( "i.type = ?", $type )
+			->order("i.ordre");
+
+        return $this->fetchAll($query)->toArray(); 
+    }
+
+    /**
      * Recherche une entrée Iste_isbn avec la valeur spécifiée
      * et retourne cette entrée.
      *
