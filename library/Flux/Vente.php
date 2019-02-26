@@ -8,9 +8,9 @@
 */
 class Flux_Vente extends Flux_Site{
         
-    function __construct($idBase=false,$idTrace=false){    	
+    function __construct($idBase=false,$trace=false){    	
     	    	
-    		parent::__construct($idBase,$idTrace);
+			parent::__construct($idBase,$trace);
     		
     }
 
@@ -256,7 +256,6 @@ class Flux_Vente extends Flux_Site{
 	 *
 	 */
 	public function calculerVentesNew($idFic){
-	    $this->bTraceFlush = false;
 	    $this->trace("DEB ".__METHOD__);
 	    $dbData = new Model_DbTable_Iste_importdata();
 	    $dbVente = new Model_DbTable_Iste_vente();
@@ -268,22 +267,26 @@ class Flux_Vente extends Flux_Site{
 	    //traite les lignes de ventes
 	    foreach ($rs as $r) {
 	        if(!$r["commentaire"]){
+				if($r["numrow"] == 506)
+					$toto = 1;
 				//création des lignes pour le papier
-				if($r["col3"]){
-					$nbVente = $r["col3"] ? $r["col3"] : 1;
+				if(!is_null($r["col3"])){
+					$nbVente = $r["col3"] ? $r["col3"] : 0;					
 					$type = "papier";
 					$mt = $this->tofloat($r["col4"]);
-					$mtE = $mt*floatval($r["conversion_livre_euro"])/100;
+					//ajout du négatif
+					if(substr($r["col4"], 0, 1)=="-")$mt=$mt*-1;
+					$mtE = $mt*floatval($r["conversion_livre_euro"]);
 					$idBout = $idBoutISTE;
 					//enregistre la vente
 					$idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"]
 						, "date_vente"=>$r["periode_fin"], "id_boutique"=>$idBout, "type"=>$type
 						, "nombre"=>$nbVente, "montant_euro"=>$mtE, "montant_livre"=>$mt, "id_licence"=>-1, "id_prix"=>-1));
-					$this->trace("ajout vente : ".$idVente."=".$mt);
+					$this->trace("ajout vente papier : ".$r["numrow"]." : ".$idVente."=".$mt);
 				}
 				//création des lignes pour les ebook
-				if($r["col5"]){
-					$nbVente = 1;
+				if(!is_null($r["col5"])){
+					$nbVente = $r["col5"] ? 1 : 0;
 					$type = "ebook";
 					$mt = $this->tofloat($r["col5"]);
 					$mtE = $mt*floatval($r["conversion_livre_euro"])/100;
@@ -292,7 +295,7 @@ class Flux_Vente extends Flux_Site{
 					$idVente = $dbVente->ajouter(array("id_isbn"=>$r["id_isbn"], "id_importdata"=>$r["id_importdata"]
 						, "date_vente"=>$r["periode_fin"], "id_boutique"=>$idBout, "type"=>$type
 						, "nombre"=>$nbVente, "montant_euro"=>$mtE, "montant_livre"=>$mt, "id_licence"=>-1, "id_prix"=>-1));
-					$this->trace("ajout vente : ".$idVente."=".$mt);
+					$this->trace("ajout vente ebook : ".$r["numrow"]." : ".$idVente."=".$mt);
 				}
 			}
 	    }

@@ -193,7 +193,7 @@ class Flux_Rapport extends Flux_Site{
 			.".".$type.".".$data["idsFicImport"]
 			.".".$data["minDateVente"].".".$data["maxDateVente"];
 		*/
-		$refRapport = $data["autNom"]."_".substr($data["prenom"],0,2)."_".uniqid()."_".$date->format('Y-m-d');
+		$refRapport = $data["autNom"]."_".substr($data["prenom"],0,2)."_".$type."_".uniqid()."_".$date->format('Y-m-d');
 		$refRapport = $this->dbImportfic->valideChaine($refRapport);
 
 		
@@ -219,7 +219,7 @@ class Flux_Rapport extends Flux_Site{
 		$this->odf->setVars('roy_reference', $refRapport);
 		//les périodes sont différentes suivant les contrats on affiche à la fin
 		$periode = $data["minDateVente"]." -> ".$data["maxDateVente"];
-		$this->odf->setVars('roy_periode', $periode);
+		//$this->odf->setVars('roy_periode', $periode);
 		//$this->odf->setVars('livre_roy_pc', $data["pc_papier"]." %");
 				
 		//ajout des infos d'auteur
@@ -286,7 +286,7 @@ class Flux_Rapport extends Flux_Site{
 					$oTitre=$titre;	
 					$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]);
 					if($type=="livre"){
-						$roys->setVars('roy_role', $r["role"]);
+						$roys->setVars('roy_role', $r["typeContrat"]);
 						$roys->setVars('roy_isbn', "");
 					}else{
 						$roys->setVars('roy_role', $r["typeContrat"]);
@@ -294,21 +294,28 @@ class Flux_Rapport extends Flux_Site{
 					}
 				}
 				$isbn = "ISBN : ".$r["num"]." (".$r["typeISBN"].")";
-				if($r["typeVente"]=="ebook")$typeVente="Book digital   ".$isbn;
+				if($r["typeVente"]=="ebook")$typeVente="Book digital   ";//.$isbn;
 				if($r["typeVente"]=="papier")$typeVente="Book paper    ".$isbn;
 				if($r["typeVente"]=="Licence num")$typeVente="E-Licence    ".$isbn;
+				//si pas de vente 
+				if($r["rMtVente"]==0){
+					//on force le type de vente
+					//$typeVente="Book paper    ".$isbn;
+					//on met les quantité à zéro
+					$r["unit"]=0;
+				}
 				$roys->details->setVars('roy_type', $typeVente);
 				
 
-				if($typeVente=="Book digital")
+				if($typeVente=="Book digital   ")
 					$roys->details->setVars('roy_unit', " ");
 				else
 					$roys->details->setVars('roy_unit', $r["unit"]);
 
-				$roys->details->setVars('roy_rev', round($r["rMtVente"],2));
+				$roys->details->setVars('roy_rev', sprintf("%01.2f", $r["rMtVente"]));
 				$revTot += $r["rMtVente"];
-				$roys->details->setVars('roy_pc', $r["pc"]);
-				$roys->details->setVars('roy_livre', $r["rMtRoy"]);
+				$roys->details->setVars('roy_pc', sprintf("%01.2f", $r["pc"]));
+				$roys->details->setVars('roy_livre', sprintf("%01.2f", $r["rMtRoy"]));
 				$due += $r["rMtRoy"];
 				$taux_livre_euro += $r["taux_livre_euro"];
 				$nbRoy += $r["nbRoy"];
@@ -323,25 +330,27 @@ class Flux_Rapport extends Flux_Site{
 		}		
 		
 		//ajout les totaux
-		$this->odf->setVars('roy_rev_tot', $revTot);
-		$this->odf->setVars('roy_balance_due', $due);
+		$this->odf->setVars('roy_rev_tot', sprintf("%01.2f", $revTot));
+		$this->odf->setVars('roy_balance_due', sprintf("%01.2f", $due));
 
-		if($data['taxe_uk']=='oui'){
-			$this->odf->setVars('roy_tax_deduc_pc', $taux_reduction);
+		//if($data['taxe_uk']=='oui'){
+			$this->odf->setVars('roy_tax_deduc_pc', sprintf("%01.2f", $taux_reduction));
 			$deduc = $due*$taux_reduction;
-			$this->odf->setVars('roy_tax_deduc', $deduc);
+			$this->odf->setVars('roy_tax_deduc', sprintf("%01.2f", $deduc));
 			$due -= $deduc; 
+		/*
 		}else{
 			$this->odf->setVars('roy_tax_deduc_pc', 'no');
 			$this->odf->setVars('roy_tax_deduc', '0');
 		}
-		$this->odf->setVars('roy_net_due_livre', $due);
+		*/
+		$this->odf->setVars('roy_net_due_livre', sprintf("%01.2f", $due));
 		if($data['paiement_euro']=='oui'){
 			$moyenneTaux = round($taux_livre_euro/$nbRoy,2);
 			$this->odf->setVars('roy_devise_date', $periode);
-			$this->odf->setVars('roy_devise_pc', $moyenneTaux);
+			$this->odf->setVars('roy_devise_pc', sprintf("%01.2f", $moyenneTaux));
 			$montant = round($due*$moyenneTaux,2);
-			$this->odf->setVars('roy_net_due_euro', $montant);
+			$this->odf->setVars('roy_net_due_euro', sprintf("%01.2f", $montant));
 		}else{
 			$this->odf->setVars('roy_devise_date', 'no');
 			$this->odf->setVars('roy_devise_pc', 'no');
@@ -369,12 +378,15 @@ class Flux_Rapport extends Flux_Site{
 			,"id_importfic"=>$mod["id_importfic"], "periode_deb"=>$data["minDateVente"], "periode_fin"=>$data["maxDateVente"], 'montant'=>$due
 			, "data"=>json_encode($data),"type"=>$type, "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
 			
+		//supprime les anciens rapports
+		$this->supprimeObsoletes($data["idsRoyalty"]);
+		
 		//mise à jour de la date d'éditions
 		$this->dbRoyalty->edit(false,array("id_rapport"=>$idRapport,"date_edition"=>new Zend_Db_Expr('NOW()')),$data["idsRoyalty"]);
 
 		$this->trace("FIN");		
 		
-		return $idRapport;
+		return array($idRapport,$newfile);
 	}	
 
 	/**
@@ -387,19 +399,21 @@ class Flux_Rapport extends Flux_Site{
 	 */
 	public function convertOdtToPdf($odtPath, $pdfPath){
 
+		if(!$odtPath)return;
 		//pour localhot 
-		$cmd = "export HOME=/tmp; ".LIBREOFFICE_PATH.' --headless ';
-		$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
-		$result = exec($cmd);
-		//
-		/*pour prod
-		$cmd .= LIBREOFFICE_PATH.' -env:UserInstallation=file:///$HOME/.libreoffice-headless/ --headless ';
-		$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
-		$connection = ssh2_connect(SSH2_PATH);
-		ssh2_auth_password($connection, SSH2_USER, SSH2_MDP);		
-		$result = ssh2_exec($connection, $cmd);
-		//export HOME=/tmp; soffice --headless --convert-to pdf --outdir /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/editions /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/editions/tmp/*.odt
-		*/				
+		if(WEB_ROOT=="http://localhost/gestedit"){
+			$cmd = "export HOME=/tmp; ".LIBREOFFICE_PATH.' --headless ';
+			$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
+			$result = exec($cmd);	
+		}else{
+			//pour prod
+			$cmd .= LIBREOFFICE_PATH.' -env:UserInstallation=file:///$HOME/.libreoffice-headless/ --headless ';
+			$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
+			$connection = ssh2_connect(SSH2_PATH);
+			ssh2_auth_password($connection, SSH2_USER, SSH2_MDP);		
+			$result = ssh2_exec($connection, $cmd);
+			//export HOME=/tmp; soffice --headless --convert-to pdf --outdir /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/editions /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/editions/tmp/*.odt	
+		}
 		$this->trace($cmd);
 		$this->trace("result=".$result);
 		return $result;
@@ -537,7 +551,27 @@ class Flux_Rapport extends Flux_Site{
 		
 		return $oOdf;
 	}   
-	  
+		
+	/**
+	 * supprime les rapports des royalties obsoletes
+	 * 
+	 * @param int	$idsRoyalties
+	 *
+	 *
+	 */
+	function supprimeObsoletes($idsRoyalties){
+
+		$dbR = new Model_DbTable_Iste_rapport();
+		$rs = $dbR->findObsoleteByIdsRoyalties($idsRoyalties); 
+		foreach ($rs as $r) {
+			$dbR->remove($r['id_rapport']); 
+		} 
+	 
+		
+
+	}
+	
+	
 	
 	function delTree($dir) { 
 		$files = array_diff(scandir($dir), array('.','..')); 
@@ -547,13 +581,14 @@ class Flux_Rapport extends Flux_Site{
 		 return rmdir($dir); 
 	} 
 
-
 	/**
 	 * création de tous les rapports
+	 * 
+	 * @param int	$idAuteur
 	 *
 	 *
 	 */
-	public function setAll(){
+	public function setAll($idAuteur=false){
 		set_time_limit(3600);
 
 		$dbRoy = new Model_DbTable_Iste_royalty();
@@ -561,24 +596,29 @@ class Flux_Rapport extends Flux_Site{
 		$dbDev = new Model_DbTable_Iste_devise();
 
 		//on supprime le répertoire tmp
-		$this->delTree(ROOT_PATH."/data/editions/tmp");
+		if(!$idAuteur)$this->delTree(ROOT_PATH."/data/editions/tmp");
 		//on le recrée
-		mkdir(ROOT_PATH."/data/editions/tmp", 0775);
+		if(!$idAuteur)mkdir(ROOT_PATH."/data/editions/tmp", 0775);
 		//récupère le taux actuel
 		$taux_reduction = floatval($dbDev->findByAnnee(date('Y'))["taxe_deduction"]);
 		//on récupère les paiements
-		$rs = $dbRoy->paiementAuteurFic("");		
+		$rs = $dbRoy->paiementAuteurFic($idAuteur);		
 		$i = 0;
 		foreach ($rs as $r) {
-			if($r['id_auteur']){
-				$this->creaPaiementFic($r,"livre",$taux_reduction,($i % 9));
-				$this->creaPaiementFic($r,"editoriaux",$taux_reduction,($i % 9));  
+			$verifAuteur = $idAuteur ? $idAuteur : $r['id_auteur'];
+			if($r['id_auteur'] && $r['id_auteur'] == $verifAuteur){
+				$fic = $this->creaPaiementFic($r,"livre",$taux_reduction,($i % 9));
+				if($idAuteur)$this->convertOdtToPdf($fic[1], ROOT_PATH."/data/editions");
+				$fic = $this->creaPaiementFic($r,"editoriaux",$taux_reduction,($i % 9));  
+				if($idAuteur)$this->convertOdtToPdf($fic[1], ROOT_PATH."/data/editions");
 				$i++;
 			}
 		}
 		//pour gérer la génération d'un grand nombre de pdf
-		for ($i=0; $i < 10; $i++) { 
-			$this->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/".$i."_*.odt", ROOT_PATH."/data/editions");
+		if(!$idAuteur){
+			for ($i=0; $i < 10; $i++) { 
+				$this->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/".$i."_*.odt", ROOT_PATH."/data/editions");
+			}	
 		}
 	}
 

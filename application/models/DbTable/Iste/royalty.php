@@ -489,29 +489,24 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             */
 	    	//récupère les vente qui n'ont pas de royalty
 	    	$sql = "SELECT 
-                ac.id_auteurxcontrat
-                , ac.id_isbn, ac.pc_papier, ac.pc_ebook
-                , a.prenom, a.nom, c.type, IFNULL(a.taxe_uk,'oui') taxe_uk
-                ,i.num
-                , v.id_vente, v.date_vente, v.montant_livre, v.id_boutique, v.type typeVente
-                , i.id_editeur, i.type typeISBN
-                , impF.conversion_livre_euro
-                -- , d.base_contrat, d.id_devise, d.taux_livre_dollar, d.taux_livre_euro, d.date_taux, d.date_taux_fin, d.taxe_taux, d.taxe_deduction                
-                FROM iste_auteurxcontrat ac
-                INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
-                INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
-                INNER JOIN iste_livre l ON l.id_livre = ac.id_livre
-                INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
-                INNER JOIN iste_proposition p ON p.id_livre = l.id_livre
-                INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
-                INNER JOIN iste_importdata impD ON impD.id_importdata = v.id_importdata
-                INNER JOIN iste_importfic impF ON impF.id_importfic = impD.id_importfic
-                -- INNER JOIN iste_devise d ON d.base_contrat = IFNULL(p.base_contrat,'GB')
-                --            AND DATE_FORMAT(date_vente, '%Y') = DATE_FORMAT(date_taux, '%Y')
-                LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
-                WHERE pc_papier is not null AND pc_ebook is not null AND pc_papier != 0 AND pc_ebook != 0
-                    AND v.montant_livre > 0
-                    AND r.id_royalty is null";
+            ac.id_auteurxcontrat, ac.id_livre
+            , ac.id_isbn, ac.pc_papier, ac.pc_ebook
+            , a.prenom, a.nom, c.type, IFNULL(a.taxe_uk,'oui') taxe_uk
+            ,i.num
+            , v.id_vente, v.date_vente, v.montant_livre, v.id_boutique, v.type typeVente
+            , i.id_editeur, i.type typeISBN
+            , impF.conversion_livre_euro
+            FROM iste_vente v
+            INNER JOIN iste_isbn i ON v.id_isbn = i.id_isbn                
+            INNER JOIN iste_importdata impD ON impD.id_importdata = v.id_importdata
+            INNER JOIN iste_importfic impF ON impF.id_importfic = impD.id_importfic
+            INNER JOIN iste_auteurxcontrat ac ON ac.id_isbn = v.id_isbn
+            INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
+            INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
+            INNER JOIN iste_livre l ON l.id_livre = i.id_livre                 
+            LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente AND r.id_auteurxcontrat = ac.id_auteurxcontrat
+            WHERE pc_papier is not null AND pc_ebook is not null AND pc_papier != 0 AND pc_ebook != 0
+                AND r.id_royalty is null ";
 
             $stmt = $this->_db->query($sql);
             
@@ -526,7 +521,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 $mtL = floatval($r["montant_livre"])*floatval($pc)/100;
                 //ATTENTION le taux de conversion est passé en paramètre à l'import et le montant des ventes est calculé à ce moment
     			//$mtD = $mtL*floatval($r["taux_livre_dollar"]);
-    			$mtE = $mtL*floatval($r['conversion_livre_euro'])/100;;
+    			$mtE = $mtL*floatval($r['conversion_livre_euro']);
                 //ajoute les royalties pour l'auteur et la vente
                 //ATTENTION les taxes de déduction sont calculer lors de l'édition avec le taux de l'année en cours
                 $dt = array("pourcentage"=>$pc,"id_vente"=>$r["id_vente"]
@@ -625,8 +620,6 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         $sql = "SELECT 
         GROUP_CONCAT(DISTINCT r.id_royalty) idsRoyalty, r.id_auteurxcontrat,
         GROUP_CONCAT(DISTINCT impD.id_importfic SEPARATOR ',') idsFicImport,
-        SUM(v.nombre) vNb,
-        SUM(v.montant_livre) vMtLivre,
         MIN(impF.periode_debut) minDateVente,
         MAX(impF.periode_fin) maxDateVente,
         a.id_auteur,
@@ -653,17 +646,15 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             INNER JOIN
         iste_auteur a ON a.id_auteur = ac.id_auteur
     WHERE
-        r.date_envoi IS NULL
-    GROUP BY a.id_auteur
-    ORDER BY a.nom, a.prenom";
-    /* AND ac.id_auteur IN (".$idsAuteur.")
-    on ne précise plus quels auteur
-    */
+        r.date_envoi IS NULL ";
+    if($idsAuteur) $sql .= " AND ac.id_auteur IN (".$idsAuteur.") ";
+    $sql .= " GROUP BY a.id_auteur ORDER BY a.nom, a.prenom";
+
 
     //echo $sql;
-        $stmt = $this->_db->query($sql);
+    $stmt = $this->_db->query($sql);
         
-        return $stmt->fetchAll(); 
+    return $stmt->fetchAll(); 
         
 }    
 
@@ -707,27 +698,88 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      */
     function getDetailsLivre($idsRoy){
     		
-        //récupère les royalty pour les livres sélectionnés
+        //récupère les royalty pour les livres yant des ventes
         $sql = "SELECT 
-            COUNT(DISTINCT r.id_royalty) nbRoy
-            ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
-            ,SUM(r.montant_livre) rMtRoy
-            ,MIN(r.pourcentage) pc
-            , i.num num, i.type typeISBN
-            ,l.id_livre, l.titre_en, l.titre_fr
-            ,IFNULL(la.role,' ... ') role
-            ,c.type typeContrat, c.param, c.id_contrat
-            ,SUM(r.conversion_livre_euro) taux_livre_euro
-        FROM iste_royalty r 
-            INNER JOIN iste_vente v ON v.id_vente = r.id_vente
-            INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
-            INNER JOIN iste_livre l ON l.id_livre = i.id_livre
-            INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat AND ac.id_livre = l.id_livre
-            INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
-            LEFT JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.id_auteur = ac.id_auteur
-        WHERE r.id_royalty IN (".$idsRoy.")
-        GROUP BY l.id_livre, i.id_isbn, v.type
+        COUNT(DISTINCT r.id_royalty) nbRoy,
+        COUNT(DISTINCT r.id_royalty) idRD,
+        COUNT(DISTINCT v.id_vente) idVD,
+        COUNT(v.id_vente) idV,
+        MIN(v.date_vente) perDeb,
+        MAX(v.date_vente) perFin,
+        SUM(v.montant_livre) rMtVente,
+        SUM(v.nombre) unit,
+        v.type typeVente,
+        SUM(r.montant_livre) rMtRoy,
+        MIN(r.pourcentage) pc,
+        i.num num,
+        i.type typeISBN,
+        l.id_livre,
+        l.titre_en,
+        l.titre_fr,
+        c.type typeContrat,
+        c.param,
+        c.id_contrat,
+        SUM(r.conversion_livre_euro) taux_livre_euro
+    FROM
+        iste_royalty r
+            INNER JOIN
+        iste_vente v ON v.id_vente = r.id_vente
+            INNER JOIN
+        iste_isbn i ON i.id_isbn = v.id_isbn
+            INNER JOIN
+        iste_livre l ON l.id_livre = i.id_livre
+            INNER JOIN
+        iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat 
+            AND ac.id_isbn = i.id_isbn AND ac.id_contrat = 2
+            INNER JOIN
+        iste_contrat c ON c.id_contrat = ac.id_contrat
+    WHERE
+        r.id_royalty IN (".$idsRoy.")
+    GROUP BY l.id_livre , i.id_isbn , v.type
+    ORDER by l.id_livre, i.id_isbn, v.type DESC
         ";
+        //récupère les royalty pour les livres avec ou sans ventes
+        $sql = "SELECT 
+        COUNT(DISTINCT r.id_royalty) nbRoy,
+        COUNT(DISTINCT r.id_royalty) idRD,
+        COUNT(DISTINCT v.id_vente) idVD,
+        COUNT(v.id_vente) idV,
+        MIN(v.date_vente) perDeb,
+        MAX(v.date_vente) perFin,
+        SUM(v.montant_livre) rMtVente,
+        SUM(v.nombre) unit,
+        IFNULL(v.type, '') typeVente,
+        SUM(r.montant_livre) rMtRoy,
+        MIN(r.pourcentage) pc,
+        i.num num,
+        i.type typeISBN,
+        l.id_livre,
+        l.titre_en,
+        l.titre_fr,
+        c.type typeContrat,
+        c.param,
+        c.id_contrat,
+        SUM(r.conversion_livre_euro) taux_livre_euro
+    FROM
+        iste_isbn i
+            INNER JOIN
+        iste_livre l ON l.id_livre = i.id_livre
+            INNER JOIN
+        iste_auteurxcontrat ac ON ac.id_isbn = i.id_isbn
+            INNER JOIN
+        iste_contrat c ON c.id_contrat = ac.id_contrat
+            AND ac.id_contrat = 2
+            LEFT JOIN
+        iste_royalty r ON ac.id_auteurxcontrat = r.id_auteurxcontrat
+            LEFT JOIN
+        iste_vente v ON v.id_vente = r.id_vente
+    WHERE
+        i.type != 'E-Book FR'
+            AND i.type != 'E-Book EN'
+            AND r.id_royalty IN (".$idsRoy.")
+    GROUP BY l.id_livre , i.id_isbn , v.type
+    ORDER BY l.id_livre , i.id_isbn , v.type DESC
+        ";        
         //echo $sql;
         $stmt = $this->_db->query($sql);
         
@@ -780,14 +832,14 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      */
     function getDetailsEditoriaux($idsRoy){
     		
-        //récupère les royalty pour les livres sélectionnés
+        //récupère les royalty pour les livres ayant des ventes
         $sql = "SELECT
                 COUNT(DISTINCT r.id_royalty) nbRoy
                 ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
                 ,SUM(r.montant_livre) rMtRoy
                 ,MIN(r.pourcentage) pc
+                ,i.num, i.type typeISBN
                 ,l.id_livre, l.titre_en, l.titre_fr
-                ,la.role
                 ,c.type typeContrat, c.param, c.id_contrat
                 ,SUM(r.conversion_livre_euro) taux_livre_euro
             FROM iste_royalty r 
@@ -796,9 +848,31 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 INNER JOIN iste_livre l ON l.id_livre = i.id_livre
                 INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat 
                 INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat AND c.type != 'auteur'
-                INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre AND la.id_auteur = ac.id_auteur
             WHERE r.id_royalty IN (".$idsRoy.")
-            GROUP BY l.id_livre";
+            GROUP BY i.id_isbn, i.type, v.type
+            ORDER BY i.id_livre, i.id_isbn, i.type, v.type DESC";
+        //avec les sans vente
+        $sql = "SELECT
+                COUNT(DISTINCT r.id_royalty) nbRoy
+                ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit
+                , IFNULL(v.type, '') typeVente
+                ,SUM(r.montant_livre) rMtRoy
+                ,MIN(r.pourcentage) pc
+                ,i.num, i.type typeISBN
+                ,l.id_livre, l.titre_en, l.titre_fr
+                ,c.type typeContrat, c.param, c.id_contrat
+                ,SUM(r.conversion_livre_euro) taux_livre_euro
+            FROM iste_isbn i 
+                INNER JOIN iste_livre l ON l.id_livre = i.id_livre
+                INNER JOIN iste_auteurxcontrat ac ON ac.id_isbn = i.id_isbn 
+                INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat AND c.type != 'auteur'
+                LEFT JOIN iste_royalty r ON ac.id_auteurxcontrat = r.id_auteurxcontrat
+                LEFT JOIN iste_vente v ON v.id_vente = r.id_vente
+            WHERE i.type != 'E-Book FR' AND i.type != 'E-Book EN' AND r.id_royalty IN (".$idsRoy.")
+            GROUP BY i.id_isbn, i.type, v.type
+            ORDER BY i.id_livre, i.id_isbn, i.type, v.type DESC";
+
+
         //echo $sql;
         $stmt = $this->_db->query($sql);
         

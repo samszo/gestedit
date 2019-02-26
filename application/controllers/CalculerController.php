@@ -106,7 +106,7 @@ class CalculerController extends Zend_Controller_Action
     				//$result = $dbRap->findByModeleLivre($this->_getParam('idMod'),$this->_getParam('idLivre'));				
 					break;
 				case "auteurFic":
-					$rapport->setAll();
+					$rapport->setAll($this->_getParam('idAuteur',false));
 					break;
     		}
     				

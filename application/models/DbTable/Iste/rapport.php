@@ -269,42 +269,42 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
     public function findPaiementByFic($idFic)
     {
         $sql = "SELECT 
-                r.id_rapport recid,
-                r.url,
-                r.maj,
-                r.type,
-                ids.idsImpFic,
-                ids.idAuteur,
-                a.nom,
-                a.prenom,
-                a.id_auteur,
-                r.montant montant_livre,
-                MIN(date_paiement) date_paiement,
-                MIN(date_edition) date_edition,
-                MIN(date_encaissement) date_encaissement,
-                MIN(date_envoi) date_envoi,
-                CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
+            r.id_rapport recid,
+            r.url,
+            r.maj,
+            r.type,
+            ids.idsImpFic,
+            ids.idAuteur,
+            a.nom,
+            a.prenom,
+            a.id_auteur,
+            r.montant montant_livre,
+            MIN(date_paiement) date_paiement,
+            MIN(date_edition) date_edition,
+            MIN(date_encaissement) date_encaissement,
+            MIN(date_envoi) date_envoi,
+            CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
+        FROM
+            iste_rapport r
+                INNER JOIN
+            (SELECT 
+                id_rapport,
+                    SUBSTRING_INDEX(obj_id, '_', 1) idAuteur,
+                    SUBSTRING_INDEX(obj_id, '_', - 1) idsImpFic
             FROM
-                iste_rapport r
-                    INNER JOIN
-                (SELECT 
-                    id_rapport,
-                        SUBSTRING_INDEX(obj_id, '_', 1) idAuteur,
-                        SUBSTRING_INDEX(obj_id, '_', - 1) idsImpFic
-                FROM
-                    iste_rapport) ids ON ids.id_rapport = r.id_rapport
-                    INNER JOIN
-                iste_auteur a ON a.id_auteur = ids.idAuteur
-                    INNER JOIN
-                iste_royalty roy ON roy.id_rapport = r.id_rapport
-                    INNER JOIN
-                iste_vente v ON v.id_vente = roy.id_vente
-                    INNER JOIN
-                iste_importdata idfic ON idfic.id_importdata = v.id_importdata
-                    AND idfic.id_importfic IN (ids.idsImpFic)
-                    INNER JOIN
-                iste_importfic impFic ON impFic.id_importfic = ".$idFic."
-            GROUP BY r.id_rapport ";          
+                iste_rapport) ids ON ids.id_rapport = r.id_rapport
+                INNER JOIN
+            iste_auteur a ON a.id_auteur = ids.idAuteur
+                INNER JOIN
+            iste_importfic impFic ON impFic.id_importfic IN (ids.idsImpFic)
+                INNER JOIN
+            iste_importdata idfic ON idfic.id_importfic IN (ids.idsImpFic)
+                INNER JOIN
+            iste_vente v ON v.id_importdata = idfic.id_importdata
+                INNER JOIN
+            iste_royalty roy ON roy.id_vente = v.id_vente
+        WHERE ids.idsImpFic = ".$idFic."
+        GROUP BY r.id_rapport";          
             
 		$stmt = $this->_db->query($sql);
     	$rs = $stmt->fetchAll();
@@ -419,6 +419,32 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 		return $rs; 
     }              
 
+     /**
+     * Recherche les rapports obsoletes pour des royalties
+     *
+     * @param string	$idsRoyalties
+     *
+     * @return array
+     */
+    public function findObsoleteByIdsRoyalties($idsRoyalties)
+    {
+        $sql = "SELECT 
+                r.id_rapport, r.url, r.maj
+            FROM
+                iste_rapport r
+                    INNER JOIN
+                        iste_royalty roy ON roy.id_rapport = r.id_rapport
+            WHERE
+                roy.id_royalty IN (".$idsRoyalties.")
+                    AND roy.date_envoi IS NULL
+            GROUP BY r.id_rapport";  
+        //echo $sql;
+            
+		$stmt = $this->_db->query($sql);
+    	$rs = $stmt->fetchAll();
+    		        
+		return $rs; 
+    }       
 
     /**
      * Recherche une entrée Iste_rapport avec la clef primaire spécifiée

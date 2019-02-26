@@ -297,3 +297,13 @@ data/historiques/excelFR2018ok.csv
 data/historiques/importDroit.csv
 data/import_vente/excelFR2018cor.csv
 bdd/lyor_iste_admin05-12-2018.sql.zip
+bdd/correctionContratAuteurTypeISBN.csv
+bdd/correctionContratAuteurTypeISBN.ods
+bdd/correctionContratAuteurTypeISBN.sql
+bdd/iste_prod17-02-19.zip
+bdd/lyor_iste_admin01_02_19.sql.zip
+bdd/lyor_iste_admin04-02-19.sql
+bdd/lyor_iste_admin05-02-19.sql
+data/import_vente/Droitelseiver.csv
+data/import_vente/droits_2017.csv
+data/modeles/droitFR.odt

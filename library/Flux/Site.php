@@ -26,7 +26,8 @@ class Flux_Site{
     function __construct($idBase=false, $bTrace=false){    	
     	
     		if($bTrace){
-			$this->bTrace = true;		
+				$this->bTrace = true;		
+				$this->bTraceFlush = true;		
     		}
     	    	
     		$this->getDb($idBase);

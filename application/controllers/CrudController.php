@@ -362,7 +362,20 @@ class CrudController extends Zend_Controller_Action
 				$bdd = new Model_DbTable_Iste_auteur();
 				$rs["auteur"] = $bdd->getAllVente(true);
 			}
-	    	$this->view->rs = $rs;
+			if($this->_getParam('csv')){
+				header('Content-Description: File Transfer');
+				header('Content-Type: text/csv; charset=utf-8');
+				header("Content-Disposition: attachment; filename=" . $strName . "-export.csv");
+				header('Content-Transfer-Encoding: binary');
+				header('Expires: 0');
+				header('Cache-control: private, must-revalidate');
+				header("Pragma: public");	
+				foreach ($rs as $v) {
+					if(!$this->view->rs)$this->view->rs = $this->arrayToCsv(array_keys($v),",").PHP_EOL;
+					$this->view->rs .= $this->arrayToCsv($v,",").PHP_EOL;
+				}
+			}else
+		    	$this->view->rs = json_encode(array("rs"=>$rs),JSON_NUMERIC_CHECK);
     }    
     
     public function finduserAction()
@@ -479,7 +492,38 @@ class CrudController extends Zend_Controller_Action
 		$this->view->idObj = $this->_getParam('idObj');
 		$this->view->typeObj = $this->_getParam('typeObj');
     }     
-    
+	
+	
+
+	/**
+	 * Formats a line (passed as a fields  array) as CSV and returns the CSV as a string.
+	 * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
+	 * 
+     * 
+	 */
+	function arrayToCsv( array &$fields, $delimiter = ';', $enclosure = '"', $encloseAll = false, $nullToMysqlNull = false ) {
+		$delimiter_esc = preg_quote($delimiter, '/');
+		$enclosure_esc = preg_quote($enclosure, '/');
+		$output = array();
+		foreach ( $fields as $field ) {
+			if ($field === null && $nullToMysqlNull) {
+				$output[] = 'NULL';
+				continue;
+			}
+	
+			// Enclose fields containing $delimiter, $enclosure or whitespace
+			if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ) {
+				$output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
+			}
+			else {
+				$output[] = $field;
+			}
+	}
+	
+		return implode( $delimiter, $output );
+	}
+
+
 }
 
 

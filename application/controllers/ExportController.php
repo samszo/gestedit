@@ -179,7 +179,14 @@ class ExportController extends Zend_Controller_Action
 		$this->view->zipname = false;
 	}
 
-    
+	function odttopdfAction(){
+
+		$this->initInstance();
+		$rapport = new Flux_Rapport($this->_getParam('idBase'),$this->_getParam('trace'));
+		$rapport->convertOdtToPdf($this->_getParam('odt'), $this->_getParam('pdf'));
+	}
+
+	
 	function initInstance(){
     		$auth = Zend_Auth::getInstance();
 		if ($auth->hasIdentity()) {						

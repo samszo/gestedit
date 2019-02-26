@@ -269,7 +269,25 @@ function initDroit() {
 						return '<div>&pound;' + record.mt_l + '</div>';
 						}
 					},
-		        ],
+				],
+		        multiSearch: true,
+		        searches: [
+		            { field: 'recid', caption: 'ID', type: 'text', hidden:false},
+		            { field: 'num', caption: 'ISBN', type: 'text', hidden:false},
+		            { field: 'titre_fr', caption: 'Titre FR', type: 'text', hidden:false},
+		            { field: 'titre_en', caption: 'Titre EN', type: 'text', hidden:false},
+		            { field: 'typeVente', caption: 'Type vente', type: 'text', hidden:false},		            
+		            { field: 'type', caption: 'Type ISBN', type: 'text', hidden:false},		            
+		            { field: 'auteurs', caption: 'Auteurs', type: 'text', hidden:false},
+		            { field: 'mt_e_r', caption: 'Mt. roy. &pound;', type: 'text', hidden:false},
+		            { field: 'mt_rDue', caption: 'Mt. roy. due &pound;', type: 'text', hidden:false},
+		            { field: 'mt_rPaie', caption: 'Mt. roy. pay. &pound;', type: 'text', hidden:false},
+		            { field: 'boutiques', caption: 'Boutiques', type: 'text', hidden:false},
+		            { field: 'date_first', caption: 'Première vente', type: 'date', hidden:false},
+		            { field: 'date_last', caption: 'Dernière vente', type: 'date', hidden:false},
+		            { field: 'nb_vente', caption: 'Nb vente', type: 'text', hidden:false},
+		            { field: 'mt_l', caption: 'Mt. &pound;', type: 'text', hidden:false}
+		        ],				
 		        toolbar: {
 		            items: [
 		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
@@ -327,7 +345,31 @@ function initDroit() {
 		            { field: 'vCoormt_l', hidden:true, caption: 'Mt. coor. &pound;', size: '80px', sortable: true, resizable: true},
 		            { field: 'vDirnb_vente', hidden:true, caption: 'Nb vente dir.', size: '100px', render: 'int', sortable: true, resizable: true},
 		            { field: 'vDirmt_l', hidden:true, caption: 'Mt. dir. &pound;', size: '80px', sortable: true, resizable: true},
-		        ],
+				],
+		        multiSearch: true,
+		        searches: [
+					{ field: 'recid', caption: 'ID', type: 'text', hidden:false},
+					
+		            { field: 'auteur', caption: 'Auteur', type: 'text', hidden:false},
+		            { field: 'roles', hidden:true, caption: 'Roles', type: 'text', hidden:false},
+		            { field: 'mt_rTot', caption: 'Mt. roy. &pound;', type: 'text', hidden:false},
+		            { field: 'mt_rDue', caption: 'Mt. roy. due &pound;', type: 'text', hidden:false},
+		            { field: 'mt_rPaie', caption: 'Mt. roy. pay. &pound;', type: 'text', hidden:false},
+		            { field: 'boutiques', caption: 'Boutiques', type: 'text', hidden:false},
+					{ field: 'nbL', caption: 'Nb. livre', type: 'text', hidden:false},
+		            { field: 'livres', caption: 'Livres', type: 'text', hidden:false},
+					{ field: 'isbns', caption: 'ISBNs', type: 'text', hidden:false},
+					{ field: 'nbC', caption: 'Nb. contrat', type: 'text', hidden:false},
+					{ field: 'contrats', caption: 'Contrats', type: 'text', hidden:false},					
+		            { field: 'date_first', caption: 'Première vente', type: 'date', hidden:false},
+		            { field: 'date_last', caption: 'Dernière vente', type: 'date', hidden:false},
+		            { field: 'vAutnb_vente', hidden:true, caption: 'Nb vente aut.', type: 'text', hidden:false},
+		            { field: 'vAutmt_l', hidden:true, caption: 'Mt. aut. &pound;', type: 'text', hidden:false},
+		            { field: 'vCoornb_vente', hidden:true, caption: 'Nb vente coor.', type: 'text', hidden:false},
+		            { field: 'vCoormt_l', hidden:true, caption: 'Mt. coor. &pound;', type: 'text', hidden:false},
+		            { field: 'vDirnb_vente', hidden:true, caption: 'Nb vente dir.', type: 'text', hidden:false},
+					{ field: 'vDirmt_l', hidden:true, caption: 'Mt. dir. &pound;', type: 'text', hidden:false}
+				],
 		        toolbar: {
 		            items: [
 		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
@@ -417,7 +459,7 @@ function initDroit() {
 					toolbarSave		: false,
 					footer			: true,
 		            selectColumn		: false,
-                },
+				},
                 toolbar: {
                     items: [
                         { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
@@ -1363,6 +1405,14 @@ function voirData(id){
         		function(js){
 				//ajoute la définition des colonnes
 				config.gridImportVenteData.columns=js.col;
+				//ajoute le multisearch
+				config.gridImportVenteData.multiSearch = true;
+				config.gridImportVenteData.searches = [];
+				js.col.forEach(function(c){
+					//ajoute les colonnes de recherche
+					config.gridImportVenteData.searches.push({ field: c.field, caption: c.caption, type: 'text'});
+				});
+
 				//met en forme les lignes suivant les problèmes
 				var s = 'color:#3322b1;';
 				/*

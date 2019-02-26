@@ -194,7 +194,9 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
                 $dbData = new Model_DbTable_Iste_importdata();
                 $dbData->removeIdFic($id);
                 $this->delete('iste_importfic.id_importfic = ' . $id);
-                //reclacule les rapports
+                
+                //reclacule les rapports pour prendre en compte la supression des ventes et royalties
+                //utile quand plusieurs fichiers de vente sont chargés
                 $rapport = new Flux_Rapport();
                 $rapport->setAll();
 
@@ -278,10 +280,12 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
       $chaineNonValide = str_replace("'", "_", $chaineNonValide);
       $chaineNonValide = str_replace("’", "_", $chaineNonValide);
       $chaineNonValide = preg_replace('`_+`', '_', trim($chaineNonValide));
+      //problème avec certaine caractères
+      $chaineNonValide = preg_replace('/[[:^print:]]/', '', $chaineNonValide);
       //$chaineNonValide = utf8_encode($chaineNonValide);
 	  $chaineValide=strtr($chaineNonValide,
-	        "îçèéÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ",
-	        "iceeaaaaaaaaaaaaooooooooooooeeeeeeeecciiiiiiiiuuuuuuuuynn")
+	        "îçèéÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïïÙÚÛÜùúûüÿÑñ",
+	        "iceeaaaaaaaaaaaaooooooooooooeeeeeeeecciiiiiiiiiuuuuuuuuynn")
 	;
 	  return ($chaineValide);
     }

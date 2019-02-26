@@ -396,7 +396,8 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
         , GROUP_CONCAT(DISTINCT IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,'')) livres
         , GROUP_CONCAT(DISTINCT(i.num)) isbns
         , GROUP_CONCAT(DISTINCT(c.type)) contrats
-        , SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d, GROUP_CONCAT(DISTINCT(IFNULL(b.nom,''))) boutiques			
+        , count(distinct v.id_vente) nb_idventeD , count(v.id_vente) nb_idvente, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d        
+		, GROUP_CONCAT(DISTINCT(IFNULL(b.nom,''))) boutiques			
         , MAX(v.date_vente) date_last , MIN(v.date_vente) date_first			
         , SUM(rTot.montant_livre) mt_rTot
         , SUM(rDue.montant_livre) mt_rDue
@@ -406,12 +407,12 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
             INNER JOIN iste_auteurxcontrat ac ON ac.id_auteur = a.id_auteur
             INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
             INNER JOIN iste_livre l ON l.id_livre = ac.id_livre
-            INNER JOIN iste_isbn i ON i.id_livre = l.id_livre 
+            INNER JOIN iste_isbn i ON i.id_isbn = ac.id_isbn
             INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
             INNER JOIN iste_boutique b ON b.id_boutique = v.id_boutique
-            LEFT JOIN iste_royalty rTot ON rTot.id_vente = v.id_vente
-            LEFT JOIN iste_royalty rDue ON rDue.id_vente = v.id_vente AND rDue.date_paiement is null
-            LEFT JOIN iste_royalty rPaie ON rPaie.id_vente = v.id_vente AND rPaie.date_paiement is not null				
+            LEFT JOIN (SELECT id_vente, SUM(montant_livre) montant_livre FROM iste_royalty GROUP BY id_vente) rTot ON rTot.id_vente = v.id_vente
+            LEFT JOIN (SELECT id_vente, SUM(montant_livre) montant_livre FROM iste_royalty WHERE date_paiement is null GROUP BY id_vente) rDue ON rDue.id_vente = v.id_vente
+            LEFT JOIN (SELECT id_vente, SUM(montant_livre) montant_livre FROM iste_royalty WHERE date_paiement is  not null GROUP BY id_vente) rPaie ON rPaie.id_vente = v.id_vente
             LEFT JOIN iste_prix p ON p.id_prix = v.id_prix
         GROUP BY a.id_auteur";            
 	    	$db = $this->_db->query($sql);
