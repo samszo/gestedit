@@ -373,7 +373,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
                     iste_rapport) ids ON ids.id_rapport = r.id_rapport
                     INNER JOIN
                 iste_auteur a ON a.id_auteur = ids.idAuteur
-                    INNER JOIN
+                    LEFT JOIN
                 iste_royalty roy ON roy.id_rapport = r.id_rapport
             WHERE
                 a.id_auteur IN (".$idsAuteur.")

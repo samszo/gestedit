@@ -361,31 +361,25 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
      * @return array
      *
      */
-    public function getAllVenteISBN($resume=true)
+    public function getAllVenteISBN($resume=false)
     {
         $sql = "SELECT
 		i.id_isbn recid, l.titre_fr, l.titre_en
-		, ca.auteurs
 		, i.num, i.type, GROUP_CONCAT(DISTINCT v.type) typeVente
-		, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d, GROUP_CONCAT(DISTINCT(b.nom)) boutiques
+		, COUNT(v.id_vente) nbV, COUNT(DISTINCT v.id_vente) nbVD
+        , SUM(v.nombre)/COUNT(v.id_vente)*COUNT(DISTINCT v.id_vente) nb_vente 
+		, COUNT(ac.id_auteurxcontrat) nbC, COUNT(DISTINCT ac.id_auteurxcontrat) nbCD
+        , SUM(v.montant_livre)/COUNT(v.id_vente)*COUNT(DISTINCT v.id_vente) mt_l
 		, MAX(v.date_vente) date_last , MIN(v.date_vente) date_first
-		, sr.mt_e_r
-		, p.prix_livre, prix_euro, prix_dollar
-		FROM iste_livre l
-			INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
+        , GROUP_CONCAT(DISTINCT(CONCAT(a.prenom,' ',a.nom,' (',c.type,')'))) auteurs
+    	, SUM(r.montant_livre) mt_l_r
+		FROM iste_isbn i
+			INNER JOIN iste_livre l ON i.id_livre = l.id_livre
 			INNER JOIN iste_vente v ON v.id_isbn = i.id_isbn
-			INNER JOIN (SELECT GROUP_CONCAT(DISTINCT(CONCAT(a.prenom,' ',a.nom,' (',la.role,')'))) auteurs, la.id_livre
-			FROM iste_auteur a
-			INNER JOIN iste_livrexauteur la ON a.id_auteur = la.id_auteur
-			GROUP BY la.id_livre
-			) ca ON ca.id_livre = l.id_livre
-			INNER JOIN iste_boutique b ON b.id_boutique = v.id_boutique
-			INNER JOIN (SELECT SUM(r.montant_livre) mt_e_r, r.id_vente
-			FROM iste_royalty r
-			GROUP BY r.id_vente
-			) sr ON sr.id_vente = v.id_vente
-			-- LEFT JOIN iste_royalty r ON r.id_vente = v.id_vente
-			LEFT JOIN iste_prix p ON p.id_prix = v.id_prix
+            INNER JOIN iste_royalty r ON r.id_vente = v.id_vente
+            INNER JOIN iste_auteurxcontrat ac ON ac.id_auteurxcontrat = r.id_auteurxcontrat
+			INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
+            INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
 		GROUP BY i.id_isbn
 		ORDER BY l.titre_fr, l.titre_en";
         $db = $this->_db->query($sql);

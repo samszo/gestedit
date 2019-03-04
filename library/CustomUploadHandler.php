@@ -51,7 +51,7 @@ class CustomUploadHandler extends UploadHandler {
     protected function set_additional_file_properties($file) {
 		parent::set_additional_file_properties($file);
        	if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-	    	$rs = $this->db->findByUrl($file->url,array("periode_fin DESC"));
+	    	$rs = $this->db->findByUrl($file->url,array("i.id_importfic DESC"));
 			$file->id = $rs["id_importfic"];
 			$file->recid = $rs["id_importfic"];
 			//$file->name = $rs["nom"];
