@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>app_mailing</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+        <script type="text/javascript" src="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.css" />
+    </head>
+    <body>
+        <div id="tab-example">
+            <div id="tabs" style="width: 100%; height: 29px;"></div>
+                <div id="tab1" class="tab">
+                    <div id="layout" style="width: 100%; height: 600px;"></div>
+                </div>
+                <div id="tab2" class="tab">
+                        <div id="layout2" style="width: 100%; height: 600px;"></div>
+                </div>
+        </div>
+    
+    
+    <script type="text/javascript">
+
+var jsNomen = <?php echo $this->jsNomen; ?>;
+
+// Création des tabs
+var config = {
+    tabs: {
+        name: 'tabs',
+        active: 'tab1',
+        tabs: [
+            { id: 'tab1', caption: 'Prospects' },
+            { id: 'tab2', caption: 'Paramètres' },
+        ],
+        onClick: function (event) {
+            $('#tab-example .tab').hide();
+            $('#tab-example #' + event.target).show();
+        }
+    }
+}
+
+$(function () {
+    $('#tabs').w2tabs(config.tabs);
+    $('#tab1').show();
+
+
+// Création du layout 1er onglet (Prospects)
+    var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
+    $('#layout').w2layout({
+        name: 'layout',
+        panels: [
+            { type: 'left', size: '60%', resizable: true, style: pstyle, content: ''},
+            { type: 'main', resizable: true, style: pstyle, content: ''}
+            ]
+    })
+    
+    w2ui['layout'].content('left', 
+    $('#grid').w2grid({ 
+        name   : 'grid',
+        header : 'Grille Prospects',
+        show: { 
+            header : true,
+            toolbar: true,
+            footer: true,
+            toolbarAdd: true,
+            toolbarDelete: true,
+            toolbarSave: true,
+            toolbarEdit: true
+            },
+        searches: [                
+            { field: 'nom_prenom', caption: 'Nom_Prénom', type: 'text' },
+            { field: 'etab', caption: 'Etablissement', type: 'text' },
+            { field: 'email', caption: 'Email', type: 'text' }
+            ],
+      /*  buttons: [
+            {type: 'button', id: 'item2', text: 'upload', icon: 'fa-upload'}
+        ],*/
+        columns: [                
+            { field: 'nom_prenom', caption: 'Nom_Prénom', size: '40%' },
+            { field: 'email', caption: 'Email', size: '40%' },
+            { field: 'email2', caption: 'Email2', size: '120px' },
+            { field: 'etab', caption: 'Etablissement', size: '30%' },
+            { field: 'langue', caption: 'Langue', size: '30%' },
+            { field: 'clientIste', caption: 'Client Iste', size: '30%' },
+            { field: 'membreEditorial', caption: 'Membre editorial', size: '30%' },
+        ],
+        records: [
+            { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' }
+        ]
+    }))
+    
+    w2ui['layout'].content('main', 
+    $('#grid2').w2grid({ 
+        name   : 'grid2',
+        header : 'Historique des envois',
+        show  : {
+            header : true,
+            toolbar: true,
+        },
+        searches: [                
+            { field: 'date_envoi', caption: 'Date dernier mail', type: 'date' },
+            ],
+        columns: [                
+            { field: 'date_envoi', caption: 'Date dernier mail', size: '40%' },
+            { field: 'nombre_mail', caption: 'Nombre de mails envoyé', size: '20%' },
+            { field: 'date_creation', caption: 'Date de création prospect', size: '40%' },
+        ],
+        records: [
+            { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' }
+        ]
+    }))
+
+// Création du layout 2e onglet (Paramètres)
+    var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
+    $('#layout2').w2layout({
+        name: 'layout2',
+        panels: [
+            { type: 'left', size: '70%', resizable: true, style: pstyle, content: ''},
+            { type: 'main', resizable: true, style: pstyle, content: ''}
+            ]
+    })
+    
+    w2ui['layout2'].content('left', 
+    $('#grid3').w2grid({ 
+        name   : 'grid3',
+        header : 'Etablissement',
+        show: { 
+            header : true,
+            toolbar: true,
+            footer: true,
+            toolbarAdd: true,
+            toolbarDelete: true,
+            toolbarSave: true,
+            toolbarEdit: true,
+            },
+        searches: [                
+            { field: 'affiliation', caption: 'Affiliation 1', type: 'text' },
+            { field: 'affiliation2', caption: 'Affiliation 2', type: 'text' },
+            { field: 'responsable_labo', caption: 'Responsable Labo', type: 'text' }
+            ],
+        columns: [                
+            { field: 'url_labo', caption: 'URL du Labo', size: '40%' },
+            { field: 'adresse', caption: 'Adresse', size: '40%' },
+            { field: 'ville', caption: 'Ville', size: '120px' },
+            { field: 'cp', caption: 'Code Postal', size: '30%' },
+            { field: 'pays', caption: 'Pays', size: '30%' },
+            { field: 'responsable_labo', caption: 'Responsable du Labo', size: '30%' },
+            { field: 'affiliation', caption: 'Affiliation 1', size: '30%' },
+            { field: 'affiliation2', caption: 'Affiliation 2', size: '30%' },
+            { field: 'origine', caption: 'Origine Etablissement', size: '30%' },
+        ],
+        records: [
+            { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' }
+        ]
+        }))
+    
+
+    w2ui['layout2'].content('main', 
+    $('#grid4').w2grid({ 
+        name   : 'grid4',
+        header : 'Nomenclature',
+        show  : {
+            header : true,
+            toolbar: true,
+            footer: true,
+            toolbarAdd: true,
+            toolbarDelete: true,
+            toolbarSave: true,
+            toolbarEdit: true
+        },
+        searches: [                
+            { field: 'label_parent', caption: 'Catégorie Parent', type: 'text' },
+            { field: 'label', caption: 'label', type: 'text' }
+            ],
+        columns: [                
+            { field: 'code', caption: 'Code', size: '20%' },
+            { field: 'label', caption: 'Label', size: '40%' },
+        ],
+        records: jsNomen
+        }))
+});
+
+
+</script>
+    
+</body>
+</html>
