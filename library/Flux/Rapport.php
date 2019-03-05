@@ -333,17 +333,16 @@ class Flux_Rapport extends Flux_Site{
 		$this->odf->setVars('roy_rev_tot', sprintf("%01.2f", $revTot));
 		$this->odf->setVars('roy_balance_due', sprintf("%01.2f", $due));
 
-		//if($data['taxe_uk']=='oui'){
+		if($data['taxe_uk']=='oui'){
 			$this->odf->setVars('roy_tax_deduc_pc', sprintf("%01.2f", $taux_reduction));
 			$deduc = $due*$taux_reduction;
 			$this->odf->setVars('roy_tax_deduc', sprintf("%01.2f", $deduc));
 			$due -= $deduc; 
-		/*
 		}else{
 			$this->odf->setVars('roy_tax_deduc_pc', 'no');
 			$this->odf->setVars('roy_tax_deduc', '0');
 		}
-		*/
+		
 		$this->odf->setVars('roy_net_due_livre', sprintf("%01.2f", $due));
 		if($data['paiement_euro']=='oui'){
 			$moyenneTaux = round($taux_livre_euro/$nbRoy,2);
@@ -377,10 +376,7 @@ class Flux_Rapport extends Flux_Site{
 		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic.".pdf"
 			,"id_importfic"=>$mod["id_importfic"], "periode_deb"=>$data["minDateVente"], "periode_fin"=>$data["maxDateVente"], 'montant'=>$due
 			, "data"=>json_encode($data),"type"=>$type, "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
-			
-		//supprime les anciens rapports
-		$this->supprimeObsoletes($data["idsRoyalty"]);
-		
+					
 		//mise à jour de la date d'éditions
 		$this->dbRoyalty->edit(false,array("id_rapport"=>$idRapport,"date_edition"=>new Zend_Db_Expr('NOW()')),$data["idsRoyalty"]);
 
@@ -555,14 +551,14 @@ class Flux_Rapport extends Flux_Site{
 	/**
 	 * supprime les rapports des royalties obsoletes
 	 * 
-	 * @param int	$idsRoyalties
+	 * @param int	$idsAuteur
 	 *
 	 *
 	 */
-	function supprimeObsoletes($idsRoyalties){
+	function supprimeObsoletes($idsAuteur){
 
 		$dbR = new Model_DbTable_Iste_rapport();
-		$rs = $dbR->findObsoleteByIdsRoyalties($idsRoyalties); 
+		$rs = $dbR->findObsoleteByIdsAuteur($idsAuteur); 
 		foreach ($rs as $r) {
 			$dbR->remove($r['id_rapport']); 
 		} 
@@ -607,6 +603,9 @@ class Flux_Rapport extends Flux_Site{
 		foreach ($rs as $r) {
 			$verifAuteur = $idAuteur ? $idAuteur : $r['id_auteur'];
 			if($r['id_auteur'] && $r['id_auteur'] == $verifAuteur){
+				//supprime les anciens rapports
+				$this->supprimeObsoletes($r['id_auteur']);
+				//calcule les odt
 				$fic = $this->creaPaiementFic($r,"livre",$taux_reduction,($i % 9));
 				if($idAuteur)$this->convertOdtToPdf($fic[1], ROOT_PATH."/data/editions");
 				$fic = $this->creaPaiementFic($r,"editoriaux",$taux_reduction,($i % 9));  
