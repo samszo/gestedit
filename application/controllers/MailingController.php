@@ -44,7 +44,8 @@ class MailingController extends Zend_Controller_Action
                 break;
             case 'nomenclature':
                 $dbN = new Model_DbTable_Iste_nomenclature();
-                $rs = $dbP->ajouter(array('label'=>$this->_getParam('label'),'code'=>$this->_getParam('code')));
+                $arr = array('label'=>$this->_getParam('label'),'code'=>$this->_getParam('code'));
+                $rs = $dbN->ajouter($arr);
                 break;
             default:
                 # code...
@@ -57,7 +58,6 @@ class MailingController extends Zend_Controller_Action
 
     public function deleteAction()
     {
-        $this->initInstance();
             
         //récupère les paramètres
         $id = $this->_getParam('id');
@@ -86,7 +86,6 @@ class MailingController extends Zend_Controller_Action
     
     public function updateAction()
     {
-    		$this->initInstance();
     	
     		//récupère les paramètres
     		$params = $this->_request->getParams();
