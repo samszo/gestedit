@@ -183,7 +183,7 @@ $(function () {
 		            var changes = w2ui['grid_<?php echo $idPage;?>'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'nomenclature';		            
-						$.get('<?php if(!$this->ajax) echo '../'; ?>update.phtml',
+						$.get('<?php if(!$this->ajax) echo '../'; ?>application/views/scripts/mailing/update.phtml',
 								c,
 								function(js){
 									finsession(js);		
@@ -201,7 +201,7 @@ $(function () {
         onDelete: function(event) {            
                         var p = {id:itemSelect.recid, obj:'nomenclature'};
                         if(event.force){
-                            $.get('<?php if(!$this->ajax) echo '../'; ?>delete.phtml',
+                            $.get('<?php if(!$this->ajax) echo '../'; ?>application/views/scripts/mailing/delete.phtml',
                             p,
                             function(js){
                                 finsession(js);
