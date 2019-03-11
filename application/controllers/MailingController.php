@@ -12,7 +12,7 @@ class MailingController extends Zend_Controller_Action
         $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsNomen = $rs;
-
+/*
         // Affichage prospects dans index mailing
         $dbProsp = new Model_DbTable_Iste_prospect();
         $rs = json_encode($dbProsp->getAll());
@@ -28,7 +28,7 @@ class MailingController extends Zend_Controller_Action
         $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsEtab = $rs;
-
+*/
     }
 
     public function insertAction()

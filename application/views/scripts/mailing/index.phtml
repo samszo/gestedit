@@ -50,7 +50,8 @@ $(function () {
         name: 'layout',
         panels: [
             { type: 'left', size: '60%', resizable: true, style: pstyle, content: ''},
-            { type: 'main', resizable: true, style: pstyle, content: ''}
+            { type: 'main', resizable: true, style: pstyle, content: ''},
+            { type: 'right', size: 600, resizable: true, hidden: false, style: pstyle}
             ]
     })
     
@@ -72,9 +73,6 @@ $(function () {
             { field: 'etab', caption: 'Etablissement', type: 'text' },
             { field: 'email', caption: 'Email', type: 'text' }
             ],
-      /*  buttons: [
-            {type: 'button', id: 'item2', text: 'upload', icon: 'fa-upload'}
-        ],*/
         columns: [                
             { field: 'nom_prenom', caption: 'Nom_Prénom', size: '40%' },
             { field: 'email_prospect', caption: 'Email', size: '40%' },
@@ -84,8 +82,13 @@ $(function () {
             { field: 'clientIste_prospect', caption: 'Client Iste', size: '30%' },
             { field: 'membreEdito_prospect', caption: 'Membre editorial', size: '30%' },
         ],
-        records: jsProsp
+        toolbar: {
+		        items: [
+		            { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		        ],
+        records:[ { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' } ] //jsProsp
         
+        }
     }))
     
     w2ui['layout'].content('main', 
@@ -148,7 +151,7 @@ $(function () {
             { field: 'affiliation2_etab', caption: 'Affiliation 2', size: '30%' },
             { field: 'origine_etab', caption: 'Origine Etablissement', size: '30%' },
         ],
-        records: jsEtab
+        records:[ { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' } ] //jsEtab
         }))
     
 
