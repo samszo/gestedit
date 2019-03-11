@@ -257,7 +257,7 @@ $(function () {
 		                if (errors.length > 0) return;
 		                var data = this.record;
 		                data.obj = "nomenclature";
-			            $.get('<?php if(!$this->ajax) echo '../'; ?>application/views/mailing/update.phtml',
+			            $.get('<?php if(!$this->ajax) echo '../'; ?>application/views/scripts/mailing/update.phtml',
 						data,
 			            function(js){
 			            	finsession(js);
