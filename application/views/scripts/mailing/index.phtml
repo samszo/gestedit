@@ -86,10 +86,17 @@ $(function () {
         toolbar: {
 		        items: [
 		            { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
-		        ],
-        records:[ { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' } ] //jsProsp
-        
-        }
+                ],
+                onClick: function (event) {
+		                if (event.target == 'export') {
+				            var ids = w2ui.grid_<?php echo $idPage;?>.getSelection();
+				            exportByPost(ids, "auteur");
+		                		//open(urlP+'export?obj=auteur&ids='+ids,"_blank");
+                        }
+                    }
+        },
+        records:[ { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' } 
+        ] //jsProsp
     }))
     
     w2ui['layout'].content('main', 
@@ -168,11 +175,14 @@ $(function () {
             toolbarAdd: true,
             toolbarDelete: true,
             toolbarSave: true,
-            toolbarEdit: true
+            toolbarEdit: true,
+            selectColumn: true
         },
+        multiSearch: true,
         searches: [                
             { field: 'label_parent', caption: 'Catégorie Parent', type: 'text' },
-            { field: 'label', caption: 'label', type: 'text' }
+            { field: 'label', caption: 'label', type: 'text' },
+            { field: 'code', caption: 'code', type: 'text' }
             ],
         columns: [                
             { field: 'code', caption: 'Code', size: '20%' },
@@ -180,13 +190,13 @@ $(function () {
         ],
         records: jsNomen,
         onSave: function(event) {
-		            var changes = w2ui['grid_<?php echo $idPage;?>'].getChanges();
+		            var changes = w2ui['grid4'].getChanges();
 		            changes.forEach(function(c, i){
 			            c.obj = 'nomenclature';		            
-						$.get('<?php if(!$this->ajax) echo '../'; ?>application/views/scripts/mailing/update.phtml',
+						$.get('mailing/update',
 								c,
 								function(js){
-									finsession(js);		
+									//finsession(js);		
 									js.rs.text = js.rs.nom+" "+js.rs.prenom;
 									setListe(js.rs,'nomenclature');			            				            						        			
 									if(changes.length==i+1)w2alert(js.message);
@@ -201,22 +211,22 @@ $(function () {
         onDelete: function(event) {            
                         var p = {id:itemSelect.recid, obj:'nomenclature'};
                         if(event.force){
-                            $.get('<?php if(!$this->ajax) echo '../'; ?>application/views/scripts/mailing/delete.phtml',
+                            $.get('mailing/delete',
                             p,
                             function(js){
-                                finsession(js);
+                               // finsession(js);
                                 w2alert(js.message);
                             },"json");
                         }
 		},
         onSearch: function(event) {
 		        		var grid = this;
-		        		if(event.search){
+		        		if(event.searchField=="multi"){
 		            		event.onComplete = function () {
-			            		$.get('<?php if(!$this->ajax) echo '../'; ?>cherche/nomenclature',
+			            		$.get('cherche/nomenclature',
 							{"searchData":event.searchData},
 			            		function(js){
-			            			finsession(js);
+			            			//finsession(js);
 			            			var ids = [];
 			            			js.rs.forEach(function(d){
 			            				rsNomen.forEach(function(l, i){
@@ -248,7 +258,7 @@ $(function () {
 		        name: 'form_nomenclature',
 		        focus  : -1,
 		        fields: [
-                    { name: 'code', type: 'int', required: true, html: { caption: 'Code', attr: 'size="40" maxlength="40"' } },
+                    { name: 'code', type: 'text', required: true, html: { caption: 'Code', attr: 'size="40" maxlength="40"' } },
 		            { name: 'label', type: 'text', required: true, html: { caption: 'Label', attr: 'size="40"' } },
 		        ],
 		    actions: {
@@ -260,7 +270,7 @@ $(function () {
 			            $.get('mailing/insert',
 						data,
 			            function(js){
-			            	finsession(js);
+			            	//finsession(js);
 			            	w2alert(js.message);
 			           	},"json");
 		            }
