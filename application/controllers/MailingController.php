@@ -5,21 +5,21 @@ class MailingController extends Zend_Controller_Action
 
     public function indexAction()
     {
+        $s = new Flux_Site();
+        $s->bTrace = false;
+
         // Affichage nomenclature dans l'index mailing
         $dbNom = new Model_DbTable_Iste_nomenclature();
         $rs = json_encode($dbNom->getAll());
-        $s = new Flux_Site();
-        $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsNomen = $rs;
-/*
+
         // Affichage prospects dans index mailing
         $dbProsp = new Model_DbTable_Iste_prospect();
         $rs = json_encode($dbProsp->getAll());
-        $s = new Flux_Site();
-        $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsProsp = $rs;
+/*
 
         // Affichage établissement dans index mailing
         $dbEtab = new Model_DbTable_Iste_etab();
@@ -36,11 +36,13 @@ class MailingController extends Zend_Controller_Action
         switch ($this->_getParam('obj')) {
             case 'prospect':
                 $dbP = new Model_DbTable_Iste_prospect();
-                $dbP->ajouter(array('nom_prenom'=>$this->_getParam('nom_prenom'), 'email_prospect'=>$this->_getParam('email_prospect'), 'email2_prospect'=>$this->_getParam('email2_prospect'), 'etab_prospect'=>$this->_getParam('etab_prospect'), 'langue_prospect'=>$this->_getParam('langue_prospect'), 'clientIste_prospect'=>$this->_getParam('clientIste_prospect'), 'membreEdito_prospect'=>$this->_getParam('membreEdito_prospect')));
+                $arr = array('nom_prenom'=>$this->_getParam('nom_prenom'), 'email_prospect'=>$this->_getParam('email_prospect'), 'email2_prospect'=>$this->_getParam('email2_prospect'), 'etab_prospect'=>$this->_getParam('etab_prospect'), 'langue_prospect'=>$this->_getParam('langue_prospect'), 'clientIste_prospect'=>$this->_getParam('clientIste_prospect'), 'membreEdito_prospect'=>$this->_getParam('membreEdito_prospect'));
+                $rs = $dbP->ajouter($arr);
                 break;
             case 'etab':
                 $dbE = new Model_DbTable_Iste_etab();
-                $rs = $dbE->ajouter(array('url_labo_etab'=>$this->_getParam('url_labo_etab'), 'adresse_etab'=>$this->_getParam('adresse_etab'), 'ville_etab'=>$this->_getParam('ville_etab'), 'cp_etab'=>$this->_getParam('cp_etab'), 'pays_etab'=>$this->_getParam('pays_etab'), 'responsableLabo_etab'=>$this->_getParam('responsableLabo_etab'), 'affiliation1_etab'=>$this->_getParam('affiliation1_etab'), 'affiliation2_etab'=>$this->_getParam('affiliation2_etab'), 'origine_etab'=>$this->_getParam('origine_etab')));
+                $arr = array('url_labo_etab'=>$this->_getParam('url_labo_etab'), 'adresse_etab'=>$this->_getParam('adresse_etab'), 'ville_etab'=>$this->_getParam('ville_etab'), 'cp_etab'=>$this->_getParam('cp_etab'), 'pays_etab'=>$this->_getParam('pays_etab'), 'responsableLabo_etab'=>$this->_getParam('responsableLabo_etab'), 'affiliation1_etab'=>$this->_getParam('affiliation1_etab'), 'affiliation2_etab'=>$this->_getParam('affiliation2_etab'), 'origine_etab'=>$this->_getParam('origine_etab'));
+                $rs = $dbE->ajouter($arr);
                 break;
             case 'nomenclature':
                 $dbN = new Model_DbTable_Iste_nomenclature();
@@ -75,7 +77,13 @@ class MailingController extends Zend_Controller_Action
             case 'nomenclature':
                  foreach ($id as $ids){
                     $r = $oBdd->remove($ids);
-                };						
+                };
+            break;
+            case 'prospect':
+            foreach ($id as $ids){
+                $r = $oBdd->remove($ids);
+            };
+            break;						
             default:
                 $r = $oBdd->remove($id);
             break;
