@@ -168,25 +168,28 @@ $(function () {
     $('#grid4').w2grid({ 
         name   : 'grid4',
         header : 'Nomenclature',
-        show  : {
-            header : true,
-            toolbar: true,
-            footer: true,
-            toolbarAdd: true,
-            toolbarDelete: true,
-            toolbarSave: true,
-            toolbarEdit: true,
-            selectColumn: true
-        },
+        show: { 
+					header			: true,		
+		            toolbar			: true,
+					toolbarReload   : true,
+					toolbarColumns  : true,
+		            	toolbarSearch   : true,
+		            	toolbarAdd      : true,
+		            	toolbarDelete   : true,
+		            	toolbarSave		: true,
+		            	selectColumn	: true,		            	
+		            	footer			: true,
+		        },
         multiSearch: true,
         searches: [                
             { field: 'label_parent', caption: 'Catégorie Parent', type: 'text' },
             { field: 'label', caption: 'label', type: 'text' },
             { field: 'code', caption: 'code', type: 'text' }
             ],
-        columns: [                
+        columns: [
+            { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },                
             { field: 'code', caption: 'Code', size: '20%' },
-            { field: 'label', caption: 'Label', size: '40%' },
+            { field: 'label', caption: 'Label', size: '40%' }
         ],
         records: jsNomen,
         onSave: function(event) {
@@ -208,8 +211,9 @@ $(function () {
 		            w2ui['layout2'].hide('main', true);
 		            w2ui['layout2'].toggle('right', true);
 			    },
-        onDelete: function(event) {            
-                        var p = {id:itemSelect.recid, obj:'nomenclature'};
+        onDelete: function(event) {
+                        var itemsSelect = w2ui.grid4.getSelection();           
+                        var p = {id:itemsSelect, obj:'nomenclature'};
                         if(event.force){
                             $.get('mailing/delete',
                             p,
@@ -250,8 +254,7 @@ $(function () {
                             grid.refresh();
                         }			            	
 		            }
-		        },
-            
+                },       
     }))
     w2ui['layout2'].content('right', 
     $('#form1').w2form({ 
@@ -264,7 +267,7 @@ $(function () {
 		    actions: {
 		            Save: function () {
 		                var errors = this.validate();
-		                if (errors.length > 0) return;
+                        if (errors.length > 0) return;
 		                var data = this.record;
 		                data.obj = "nomenclature";
 			            $.get('mailing/insert',

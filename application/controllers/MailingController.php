@@ -71,7 +71,11 @@ class MailingController extends Zend_Controller_Action
             break;			
             case 'prospectxnomenclature':
                 $r = $oBdd->remove($this->_getParam("id_nomenclature"),$this->_getParam("id_prospect"));
-            break;						
+            break;
+            case 'nomenclature':
+                 foreach ($id as $ids){
+                    $r = $oBdd->remove($ids);
+                };						
             default:
                 $r = $oBdd->remove($id);
             break;
