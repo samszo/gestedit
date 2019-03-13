@@ -6,6 +6,7 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
         <script type="text/javascript" src="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.js"></script>
         <link rel="stylesheet" type="text/css" href="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.css" />
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     </head>
     <body>
         <div id="tab-example">
@@ -24,6 +25,7 @@
 
 var jsNomen = <?php echo $this->jsNomen; ?>;
 var jsProsp =  <?php echo $this->jsProsp; ?>;
+var jsEtab =  <?php echo $this->jsEtab; ?>;
 // Création des tabs
 var config = {
     tabs: {
@@ -72,20 +74,25 @@ $(function () {
             },
         searches: [                
             { field: 'nom_prenom', caption: 'Nom_Prénom', type: 'text' },
-            { field: 'email', caption: 'Email', type: 'text' }
+            { field: 'email', caption: 'Email', type: 'text' },
+            { field: 'url_labo_etab', caption: 'URL Labo', type: 'text' },
+            { field: 'clientIste_prospect', caption: 'Client Iste', type:'text' },
+            { field: 'membreEdito_prospect', caption: 'Membre editorial', type:'text' }  
             ],
         columns: [
             { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },                
             { field: 'nom_prenom', caption: 'Nom_Prénom', size: '40%' },
             { field: 'email_prospect', caption: 'Email', size: '40%' },
             { field: 'email2_prospect', caption: 'Email2', size: '120px' },
+            { field: 'url_labo_etab', caption: 'URL Labo', size: '40%' },
             { field: 'langue_prospect', caption: 'Langue', size: '30%' },
             { field: 'clientIste_prospect', caption: 'Client Iste', size: '30%' },
             { field: 'membreEdito_prospect', caption: 'Membre editorial', size: '30%' }
         ],
         toolbar: {
 		        items: [
-		            { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+                    { id: 'export', type: 'button', caption: 'Exporter', icon: 'fas fa-file-export' },
+                    { id: 'import', type: 'button', caption: 'Importer', icon: 'fas fa-file-import' }
                 ],
                 onClick: function (event) {
 		                if (event.target == 'export') {
@@ -137,8 +144,8 @@ $(function () {
 			            			//finsession(js);
 			            			var ids = [];
 			            			js.rs.forEach(function(d){
-			            				rsNomen.forEach(function(l, i){
-				            				if(l.id_nomenclature==d)ids.push(i);
+			            				jsProsp.forEach(function(l, i){
+				            				if(l.id_prospect==d)ids.push(i);
 			            				});
 				            		});
 		                        grid.last.searchIds = ids;
@@ -167,13 +174,14 @@ $(function () {
 		        fields: [
                     { name: 'nom_prenom', type: 'text', required: true, html: { caption: 'Nom_Prénom', attr: 'size="80" maxlength="80"' } },
                     { name: 'langue_prospect', type: 'text', required: false, html: { caption: 'Langue', attr: 'size="20"' } },
+                    { name: 'url_labo_etab', type: 'text', required: false, html: { caption: 'URL Labo', attr: 'size="20"' } },
                     { name: 'email_prospect', type: 'text', required: true, html: { caption: 'Email', attr: 'size="70"' } },
                     { name: 'email2_prospect', type: 'text', required: false, html: { caption: 'Email 2', attr: 'size="70"' } },
                     { name: 'clientIste_prospect', type: 'text', required: false, html: { caption: 'Client Iste oui/non', attr: 'size="03"' } },
                     { name: 'membreEdito_prospect', type: 'text', required: false, html: { caption: 'membre Edito oui/non', attr: 'size="03"' } }
 		        ],
 		    actions: {
-		            Save: function () {
+                Save: function () {
 		                var errors = this.validate();
                         if (errors.length > 0) return;
 		                var data = this.record;
@@ -215,6 +223,7 @@ $(function () {
     $('#layout2').w2layout({
         name: 'layout2',
         panels: [
+            { type: 'top',  size: 600, resizable: true, hidden: true, style: pstyle, content: '' },
             { type: 'left', size: '70%', resizable: true, hidden: false, style: pstyle, content: ''},
             { type: 'main', resizable: true, hidden: false, style: pstyle, content: ''},
             { type: 'right', size: 600, resizable: true, hidden: true, style: pstyle}
@@ -251,7 +260,101 @@ $(function () {
             { field: 'affiliation2_etab', caption: 'Affiliation 2', size: '30%' },
             { field: 'origine_etab', caption: 'Origine Etablissement', size: '30%' },
         ],
-        records:[ { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' } ] //jsEtab
+        records: jsEtab,
+        onSave: function(event) {
+		            var changes = w2ui['grid3'].getChanges();
+		            changes.forEach(function(c, i){
+			            c.obj = 'etab';		            
+						$.get('mailing/update',
+								c,
+								function(js){
+									//finsession(js);		
+									js.rs.text = js.rs.nom+" "+js.rs.prenom;
+									setListe(js.rs,'etab');			            				            						        			
+									if(changes.length==i+1)w2alert(js.message);
+								},"json");                        
+		            });
+		        },
+        onAdd: function(event) {
+                    w2ui['layout2'].toggle('top', true);            
+		            w2ui['layout2'].hide('left', true);
+		            w2ui['layout2'].hide('main', true);
+		            w2ui['layout2'].hide('right', true);
+			    },
+        onDelete: function(event) {
+                        var itemsSelect = w2ui.grid3.getSelection();           
+                        var p = {id:itemsSelect, obj:'etab'};
+                        if(event.force){
+                            $.get('mailing/delete',
+                            p,
+                            function(js){
+                               // finsession(js);
+                                w2alert(js.message);
+                            },"json");
+                        }
+		},
+        onSearch: function(event) {
+		        		var grid = this;
+		        		if(event.searchField=="multi"){
+		            		event.onComplete = function () {
+			            		$.get('cherche/etab',
+							{"searchData":event.searchData},
+			            		function(js){
+			            			//finsession(js);
+			            			var ids = [];
+			            			js.rs.forEach(function(d){
+			            				jsEtab.forEach(function(l, i){
+				            				if(l.id_etab==d)ids.push(i);
+			            				});
+				            		});
+		                        grid.last.searchIds = ids;
+		                        grid.total      = grid.last.searchIds.length; 
+		                        grid.buffered   = grid.total; 
+		                        grid.refresh();
+		                        w2alert(js.message);
+			           		},"json");
+		                }
+                        }else
+                        {
+                            grid.localSearch();		            
+                            event.onComplete = function () {
+                            grid.last.searchIds = grid.last.searchIds;
+                            grid.total      = grid.last.searchIds.length; 
+                            grid.buffered   = grid.total; 
+                            grid.refresh();
+                        }			            	
+		            }
+                },       
+    })),
+    w2ui['layout2'].content('top', 
+    $('#form3').w2form({ 
+		        name: 'form_etab',
+		        focus  : -1,
+		        fields: [
+                    { name: 'url_labo_etab', type: 'text', required: true, html: { caption: 'URL Labo', attr: 'size="80" maxlength="80"' } },
+                    { name: 'adresse_etab', type: 'text', required: false, html: { caption: 'Adresse', attr: 'size="20"' } },
+                    { name: 'ville_etab', type: 'text', required: false, html: { caption: 'Ville', attr: 'size="20"' } },
+                    { name: 'cp_etab', type: 'text', required: true, html: { caption: 'Code Postal', attr: 'size="10"' } },
+                    { name: 'pays_etab', type: 'text', required: false, html: { caption: 'Pays', attr: 'size="70"' } },
+                    { name: 'responsableLabo_etab', type: 'text', required: false, html: { caption: 'Responsable du Labo', attr: 'size="45"' } },
+                    { name: 'affiliation1_etab', type: 'text', required: true, html: { caption: 'Affiliation 1', attr: 'size="45"' } },
+                    { name: 'affiliation2_etab', type: 'text', required: false, html: { caption: 'Affiliation 2', attr: 'size="45"' } },
+                    { name: 'origine_etab', type: 'text', required: false, html: { caption: 'Origine', attr: 'size="45"' } }
+		        ],
+		    actions: {
+		            Save: function () {
+		                var errors = this.validate();
+                        if (errors.length > 0) return;
+		                var data = this.record;
+		                data.obj = "etab";
+			            $.get('mailing/insert',
+						data,
+			            function(js){
+			            	//finsession(js);
+			            	w2alert(js.message);
+			           	},"json");
+		            }
+		        }
         }))
     
 
@@ -297,7 +400,8 @@ $(function () {
 								},"json");                        
 		            });
 		        },
-        onAdd: function(event) {            
+        onAdd: function(event) {
+                    w2ui['layout2'].hide('top', true)            
 		            w2ui['layout2'].hide('left', true);
 		            w2ui['layout2'].hide('main', true);
 		            w2ui['layout2'].toggle('right', true);
@@ -324,7 +428,7 @@ $(function () {
 			            			//finsession(js);
 			            			var ids = [];
 			            			js.rs.forEach(function(d){
-			            				rsNomen.forEach(function(l, i){
+			            				jsNomen.forEach(function(l, i){
 				            				if(l.id_nomenclature==d)ids.push(i);
 			            				});
 				            		});

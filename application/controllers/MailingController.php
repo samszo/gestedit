@@ -19,7 +19,7 @@ class MailingController extends Zend_Controller_Action
         $rs = json_encode($dbProsp->getAll());
         $s->trace($rs);
         $this->view->jsProsp = $rs;
-/*
+
 
         // Affichage établissement dans index mailing
         $dbEtab = new Model_DbTable_Iste_etab();
@@ -28,7 +28,6 @@ class MailingController extends Zend_Controller_Action
         $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsEtab = $rs;
-*/
     }
 
     public function insertAction()
@@ -36,7 +35,7 @@ class MailingController extends Zend_Controller_Action
         switch ($this->_getParam('obj')) {
             case 'prospect':
                 $dbP = new Model_DbTable_Iste_prospect();
-                $arr = array('nom_prenom'=>$this->_getParam('nom_prenom'), 'email_prospect'=>$this->_getParam('email_prospect'), 'email2_prospect'=>$this->_getParam('email2_prospect'), 'etab_prospect'=>$this->_getParam('etab_prospect'), 'langue_prospect'=>$this->_getParam('langue_prospect'), 'clientIste_prospect'=>$this->_getParam('clientIste_prospect'), 'membreEdito_prospect'=>$this->_getParam('membreEdito_prospect'));
+                $arr = array('nom_prenom'=>$this->_getParam('nom_prenom'), 'email_prospect'=>$this->_getParam('email_prospect'), 'email2_prospect'=>$this->_getParam('email2_prospect'), 'url_labo_etab'=>$this->_getParam('url_labo_etab'), 'langue_prospect'=>$this->_getParam('langue_prospect'), 'clientIste_prospect'=>$this->_getParam('clientIste_prospect'), 'membreEdito_prospect'=>$this->_getParam('membreEdito_prospect'));
                 $rs = $dbP->ajouter($arr);
                 break;
             case 'etab':
@@ -80,6 +79,11 @@ class MailingController extends Zend_Controller_Action
                 };
             break;
             case 'prospect':
+            foreach ($id as $ids){
+                $r = $oBdd->remove($ids);
+            };
+            break;
+            case 'etab':
             foreach ($id as $ids){
                 $r = $oBdd->remove($ids);
             };
