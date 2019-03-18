@@ -12,10 +12,10 @@
         <div id="tab-example">
             <div id="tabs" style="width: 100%; height: 29px;"></div>
                 <div id="tab1" class="tab">
-                    <div id="layout" style="width: 100%; height: 600px;"></div>
+                    <div id="layout" style="width: 100%; height: 800px;"></div>
                 </div>
                 <div id="tab2" class="tab">
-                        <div id="layout2" style="width: 100%; height: 600px;"></div>
+                        <div id="layout2" style="width: 100%; height: 800px;"></div>
                 </div>
         </div>
 
@@ -110,7 +110,8 @@ $(function () {
             { field: 'email', caption: 'Email', type: 'text' },
             { field: 'url_labo_etab', caption: 'URL Labo', type: 'text' },
             { field: 'clientIste_prospect', caption: 'Client Iste', type:'combo', options: { items: ['oui','non'] }},
-            { field: 'membreEdito_prospect', caption: 'Membre editorial', type:'combo', options: { items: ['oui','non'] }}  
+            { field: 'membreEdito_prospect', caption: 'Membre editorial', type:'combo', options: { items: ['oui','non'] }},
+            { field: 'unsub', caption: 'Unsubscribe', type:'combo', options: { items: ['oui','non'] }}  
             ],
         columns: [
             { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },                
@@ -120,7 +121,8 @@ $(function () {
             { field: 'url_labo_etab', caption: 'URL Labo', size: '40%', editable: { type: 'text' } },
             { field: 'langue_prospect', caption: 'Langue', size: '30%', editable: { type: 'text' } },
             { field: 'clientIste_prospect', caption: 'Client Iste', size: '30%', editable: { type: 'text' } },
-            { field: 'membreEdito_prospect', caption: 'Membre editorial', size: '30%', editable: { type: 'text' } }
+            { field: 'membreEdito_prospect', caption: 'Membre editorial', size: '30%', editable: { type: 'text' } },
+            { field: 'unsub', caption: 'Unsubscribe', size: '30%', editable: { type: 'text' } }
         ],
         toolbar: {
 		        items: [
@@ -279,6 +281,7 @@ $(function () {
         searches: [                
             { field: 'affiliation1_etab', caption: 'Affiliation 1', type: 'text' },
             { field: 'affiliation2_etab', caption: 'Affiliation 2', type: 'text' },
+            { field: 'affiliation3_etab', caption: 'Affiliation 3', type: 'text' },
             { field: 'responsableLabo_etab', caption: 'Responsable Labo', type: 'text' }
             ],
         columns: [                
@@ -290,6 +293,7 @@ $(function () {
             { field: 'responsableLabo_etab', caption: 'Responsable du Labo', size: '30%', editable: { type: 'text' } },
             { field: 'affiliation1_etab', caption: 'Affiliation 1', size: '30%', editable: { type: 'text' } },
             { field: 'affiliation2_etab', caption: 'Affiliation 2', size: '30%', editable: { type: 'text' } },
+            { field: 'affiliation3_etab', caption: 'Affiliation 3', size: '30%', editable: { type: 'text' } },
             { field: 'origine_etab', caption: 'Origine Etablissement', size: '30%', editable: { type: 'text' } },
         ],
         records: jsEtab,
