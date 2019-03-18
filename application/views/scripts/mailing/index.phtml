@@ -18,14 +18,48 @@
                         <div id="layout2" style="width: 100%; height: 600px;"></div>
                 </div>
         </div>
-    
-<?php $idPage = "mailing"; ?>
 
 <script type="text/javascript">
 
 var jsNomen = <?php echo $this->jsNomen; ?>;
 var jsProsp =  <?php echo $this->jsProsp; ?>;
 var jsEtab =  <?php echo $this->jsEtab; ?>;
+var urlP = "../";
+
+function exportByPost(ids, obj){
+	var form = document.getElementById("exportPostForm");
+	if(form){
+		form.ids.value = ids;
+		form.obj.value = obj;
+	}else{
+	    var form = document.createElement("form");
+	    form.setAttribute("id", "exportPostForm");
+	    form.setAttribute("method", "post");
+	    form.setAttribute("action", "export");
+	
+	    form.setAttribute("target", "view");
+	
+	    var hiddenField = document.createElement("input"); 
+	    hiddenField.setAttribute("type", "hidden");
+	    hiddenField.setAttribute("name", "ids");
+	    hiddenField.setAttribute("value", ids);
+	    form.appendChild(hiddenField);
+	    hiddenField = document.createElement("input"); 
+	    hiddenField.setAttribute("type", "hidden");
+	    hiddenField.setAttribute("name", "obj");
+	    hiddenField.setAttribute("value", obj);
+	    form.appendChild(hiddenField);
+	    document.body.appendChild(form);
+	}
+    window.open('', 'view');
+    form.submit();				            
+	
+}
+
+var arrListes = [];
+
+arrListes['prospect'] = jsProsp;
+console.log(arrListes['prospect']);
 // Création des tabs
 var config = {
     tabs: {
@@ -75,8 +109,8 @@ $(function () {
             { field: 'nom_prenom', caption: 'Nom_Prénom', type: 'text' },
             { field: 'email', caption: 'Email', type: 'text' },
             { field: 'url_labo_etab', caption: 'URL Labo', type: 'text' },
-            { field: 'clientIste_prospect', caption: 'Client Iste', type:'text' },
-            { field: 'membreEdito_prospect', caption: 'Membre editorial', type:'text' }  
+            { field: 'clientIste_prospect', caption: 'Client Iste', type:'combo', options: { items: ['oui','non'] }},
+            { field: 'membreEdito_prospect', caption: 'Membre editorial', type:'combo', options: { items: ['oui','non'] }}  
             ],
         columns: [
             { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },                
@@ -97,7 +131,7 @@ $(function () {
 		                if (event.target == 'export') {
 				            var ids = w2ui.grid.getSelection();
 				            exportByPost(ids, "prospect");
-		                		//open(urlP+'export?obj=auteur&ids='+ids,"_blank");
+		                    open(urlP+'export?obj=email_prospect&ids='+ids,"_blank");
                         }
                     }
                 },
