@@ -56,10 +56,8 @@ function exportByPost(ids, obj){
 	
 }
 
-var arrListes = [];
+//var arrListes = [];
 
-arrListes['prospect'] = jsProsp;
-console.log(arrListes['prospect']);
 // Création des tabs
 var config = {
     tabs: {
@@ -244,9 +242,10 @@ $(function () {
             { field: 'date_envoi', caption: 'Date dernier mail', type: 'date' },
             ],
         columns: [                
-            { field: 'date_envoi', caption: 'Date dernier mail', size: '40%' },
-            { field: 'nombre_mail', caption: 'Nombre de mails envoyé', size: '20%' },
-            { field: 'date_creation', caption: 'Date de création prospect', size: '40%' },
+            { field: 'date_envoi', caption: 'Date dernier mail', type: 'date', size: '20%' },
+            { field: 'nombre_mail', caption: 'Nombre de mails envoyé', type: 'text', size: '20%' },
+            { field: 'date_creation', caption: 'Date de création prospect', type: 'date', size: '20%' },
+            { field: 'date_unsub', caption: 'Date de désinscription', type: 'date', size: '20%' }
         ],
         records: [
             { recid: 1, fname: 'John', lname: 'Doe', email: 'jdoe@gmail.com', sdate: '4/3/2012' }
@@ -296,6 +295,16 @@ $(function () {
             { field: 'affiliation3_etab', caption: 'Affiliation 3', size: '30%', editable: { type: 'text' } },
             { field: 'origine_etab', caption: 'Origine Etablissement', size: '30%', editable: { type: 'text' } },
         ],
+        toolbar: {
+		        items: [
+                    { id: 'import', type: 'button', caption: 'Importer', icon: 'fas fa-file-import' }
+                ],
+                onClick: function (event) {
+		                if (event.target == 'import') {
+				            var ids = w2ui.grid.getSelection();
+                        }
+                    }
+                },
         records: jsEtab,
         onSave: function(event) {
 		            var changes = w2ui['grid3'].getChanges();
