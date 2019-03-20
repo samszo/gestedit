@@ -1,0 +1,322 @@
+<?php 
+if($this->ajax)$urlP = "../"; else $urlP = "../"  ;
+if($this->inc)$urlP = "";
+if(!$this->ajax){
+	echo '
+<!DOCTYPE HTML>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>ISTE - importation des fichiers prospects</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="'.$urlP.'css/gestedit.css" />
+		<link rel="stylesheet" href="'.$urlP.'css/w2ui-1.5.rc1.min.css" />	
+		<link rel="stylesheet" type="text/css" href="../fonts/font-awesome/font-awesome.css" />
+		<script type="text/javascript">
+			var uti = '.$this->uti.';
+			var fctInit;			
+		</script>		
+		<script type="text/javascript" src="'.$urlP.'js/jquery.min.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/w2ui-1.5.rc1.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/global.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/data.js"></script>
+		<script type="text/javascript" src="'.$urlP.'js/log.js"></script>		
+		<script type="text/javascript">
+			function init() {
+				initFileUploadDroit();
+				fctInit = initImportDroit;			
+				initAll(); 
+	  			if(uti.id_uti!=0)
+					utiIsConnect();
+	  			else
+		    	  	diagLogin.showModal();				
+			}
+		</script>
+	</head>
+	<body onload="init()" >
+		<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
+		<div id="utiConnect" style="visibility:hidden;"></div>
+		<dialog id="diagLogin" close> 
+			<label for="iptLogin">Login : </label>
+	        <input type="text" name="iptLogin" id="iptLogin" required="required">
+	        <label for="iptlogin">Mot de passe : </label>
+	        <input type="password" name="iptMdp" id="iptMdp" required="required">
+		    <div class="boutons">
+				<button onclick="diagLogin.close()">Fermer</button> 
+				<button onclick="connecte()">Connexion</button> 
+			</div> 
+		</dialog> ';
+}
+?>
+	<!-- Generic page styles -->
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/jqfu.css">
+	<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/bootstrap.min.css">
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/blueimp-gallery.min.css">
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/jquery.fileupload.css">
+	<link rel="stylesheet" href="<?php echo $urlP;?>css/jquery.fileupload-ui.css">
+
+
+	<script type="text/javascript">
+<?php 
+if($this->ajax)
+	echo 'var urlP = "../";';
+else
+	echo 'var urlP = "../";';	
+if($this->inc)
+	echo 'urlP = "";';
+?>
+	</script>	
+
+<div class="container">
+    <h1>Ajouter un fichier prospects</h1>
+    <div class="w2ui-field">
+        <label>Période :</label>
+        <div> <input type="dateDeb"> - <input type="dateFin"> </div>
+	</div>
+    <!-- The fileinput-button span is used to style the file input field as button -->
+    <span class="btn btn-success fileinput-button">
+        <i class="glyphicon glyphicon-plus"></i>
+        <span>Selectionnez un fichier...</span>
+        <!-- The file input field used as target for the file upload widget -->
+        <input id="fileupload" type="file" name="files[]" multiple>
+    </span>
+    <br>
+    <br>
+    <!-- The global progress bar -->
+    <div id="progress" class="progress">
+        <div class="progress-bar progress-bar-success"></div>
+    </div>
+    <!-- The container for the uploaded files -->
+    <div id="files" class="files"></div>
+	<br>
+	
+	<div id="progCalcData" class="progress">
+		<div class="progress-bar progress-bar-success" >Importe les données</div>
+	</div>
+	<div id="progCalcVente" class="progress">
+		<div class="progress-bar progress-bar-success" >Calcule les ventes</div>
+	</div>
+	
+	<div id="progCalcPrixManquant" class="progress">
+		<div class="progress-bar progress-bar-success" >Ajoute les prix manquants</div>
+	</div>
+	<div id="progCalcRoyalyies" class="progress">
+		<div class="progress-bar progress-bar-success" >Calcule les royalties</div>
+	</div>	
+	<div id="progSupPaiement" class="progress">
+		<div class="progress-bar progress-bar-success" >Supprime les paiements obsoletes</div>
+	</div>
+	<div id="progCalcPaiement" class="progress">
+		<div class="progress-bar progress-bar-success" >Calcule les paiements</div>
+	</div>
+</div>
+
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="<?php echo $urlP;?>js/jquery.ui.widget.js"></script>
+<!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+<script src="<?php echo $urlP;?>js/bootstrap.min.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="<?php echo $urlP;?>js/jqfu/jquery.fileupload.js"></script>
+
+
+<script type="text/javascript">
+var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
+var idFicImport, ficId;
+fuVerif = true;
+function initImportDroit() {
+	//initialise les champs pour définir la période
+	$('input[type=dateDeb]').w2field('date', { format: 'yyyy-m-d', end: $('input[type=dateFin]'), required: true });
+	$('input[type=dateFin]').w2field('date', { format: 'yyyy-m-d', start: $('input[type=dateDeb]'), required: true})
+		.on('change',function(e){
+			var dates = {
+	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
+	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
+		    	    		};
+			//vérifie la présence du taux de réduction
+			$.ajax({
+					data: dates,
+					url: urlP+'import/verifdevise',
+					success: function (result) {
+						if (result.length < 1){
+							w2alert("Il manque des taux de réduction pour la période définie.<br/>Merci de les renseigner dans l'onglet paramètres.");
+							return false;
+						}
+					},
+					dataType:'json',
+					async: false
+				});
+		});	
+	//initialise le champ pour le taux de conversion
+	$('#livreToEuro').w2field('percent', { precision: 2, min: 0, max: 100 });
+}
+
+function initFileUploadDroit(){
+
+	    // Change this to the location of your server-side upload handler:
+	    var url = urlP+'import/upload/';
+	    $('#fileupload').fileupload({
+	        url: url,
+	        dataType: 'json',	        
+	        done: function (e, data) {
+	            $.each(data.result.files, function (index, file) {
+					$('<p/>').text(file.name).appendTo('#files');
+					ficId = file.id;
+					if(file.error)w2alert(file.error);
+					importerData();
+	            });
+	        },
+	        progressall: function (e, data) {
+	            var progress = parseInt(data.loaded / data.total * 100, 10);
+	            $('#progress .progress-bar').css(
+	                'width',
+	                progress + '%'
+	            );
+	        }
+	    })
+	    .on('fileuploadsubmit', function (e, data) {
+	    		data.formData = {
+	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
+	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
+	    	    		,'type':'vente','obj':'import','dir':1
+						,'conversion':$('#livreToEuro').w2field().get().replace('%','')
+		    	    		};
+	    		if(!data.formData.dateDeb ){
+	    		    w2alert('Veuillez sélectionner une date de début');
+	    		    return false;
+	    		}
+	    		if(!data.formData.dateFin ){
+	    		    w2alert('Veuillez sélectionner une date de fin');
+	    		    return false;
+	    		}
+	    		if(!data.formData.conversion ){
+	    		    w2alert('Veuillez sélectionner un taux de conversion livre -> euro');
+	    		    return false;
+	    		}
+                var fileType = data.files[0].name.split('.').pop(), allowdtypes = 'csv,CSV';
+                if (allowdtypes.indexOf(fileType) < 0) {
+                	w2alert("Le type de fichier n'est pas bon");
+                    return false;
+                }
+	    		
+	    })
+	    .prop('disabled', !$.support.fileInput)
+	    .parent().addClass($.support.fileInput ? undefined : 'disabled');
+}
+
+function importerData(){
+	$('#progCalcData .progress-bar').css('width',10 + '%');	
+	$.get(urlP+'import/setdataficvente',
+			{idFic:ficId, type:'global'},
+			function(html){
+				$('#progCalcData .progress-bar').css('width',100 + '%');		
+				calculerVente();
+			   })
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+;				
+}
+
+function calculerVente(){
+	$('#progCalcVente .progress-bar').css('width',10 + '%');		
+	$.get(urlP+'calculer/vente',
+		{idFic:ficId, type:'global'},
+		function(js){
+			$('#progCalcVente .progress-bar').css('width',100 + '%');		
+			calculerPrixVente();
+			})
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+;				
+
+}
+
+function calculerPrixVente(){
+	$('#progCalcPrixManquant .progress-bar').css('width',10 + '%');		
+	$.ajax({
+		method: 'GET',
+		url: '<?php if(!$this->ajax) echo '../'; ?>calculer/prixvente',
+		dataType: 'json',
+		success: function(js) {
+			finsession(js);
+			$('#progCalcPrixManquant .progress-bar').css('width',100 + '%');		
+			calculerRoyalties()
+		},
+		error: function(e) {
+			w2alert(e.responseText);
+		 }
+	});		
+		
+
+}
+
+function calculerRoyalties(){
+	$('#progCalcRoyalyies .progress-bar').css('width',10 + '%');		
+	$.get('<?php if(!$this->ajax) echo '../'; ?>calculer/royalties',
+			{},
+	    function(js){
+			finsession(js);
+			$('#progCalcRoyalyies .progress-bar').css('width',100 + '%');		
+			var s = [];
+			js.rs.forEach(function(d) {
+				if(d.recid.substr(0,1)!='S')s.push(d.recid);
+			});
+			if(s.length)
+				supprimerPaiements(s);
+			else{
+				$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
+				w2alert('Pas de rapport généré car pas de nouveaux royalties');				
+				if(parent)parent.finProcessImport(ficId);		
+			}
+		},"json")
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+;           		           	
+}
+
+function supprimerPaiements(s){
+	$('#progSupPaiement .progress-bar').css('width',10 + '%');		
+	$.post('<?php if(!$this->ajax) echo '../'; ?>calculer/paiementobsolete',
+			{"type":"auteurFic","ids":s},
+		function(js){
+			$('#progSupPaiement .progress-bar').css('width',100 + '%');		
+			finsession(js);
+			calculerPaiements(s);
+		},"json")
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+;           		           	
+}
+
+function calculerPaiements(s){
+	$('#progCalcPaiement .progress-bar').css('width',10 + '%');		
+	$.post('<?php if(!$this->ajax) echo '../'; ?>calculer/paiement',
+			{"type":"auteurFic"},
+		function(js){
+			$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
+			finsession(js);
+			if(parent!=window)parent.finProcessImport(ficId);
+		},"json")
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           	
+}
+
+</script>
+<?php 
+if(!$this->ajax){
+	echo '</body>
+</html>';
+}else{
+	echo '<script type="text/javascript">
+			$(function () {
+				initFileUploadDroit();
+				initImportDroit(); 
+			});                       		
+		</script>		
+		';	
+}

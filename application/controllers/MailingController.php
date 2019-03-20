@@ -135,4 +135,23 @@ class MailingController extends Zend_Controller_Action
 		$dbHM = new Model_DbTable_Iste_histomodif();
 		$dbHM->ajouter(array("id_uti"=>$this->ssUti->uti["id_uti"],"action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id,"data"=>json_encode($params)));   		
     }
+
+    public function importAction()
+    {
+        $this->initInstance();
+    }
+
+    function initInstance(){
+            $auth = Zend_Auth::getInstance();
+        if ($auth->hasIdentity()) {						
+            // l'identité existe ; on la récupère
+            $this->view->identite = $auth->getIdentity();
+            $ssUti = new Zend_Session_Namespace('uti');
+            $this->view->uti = json_encode($ssUti->uti);
+        }else{			
+            //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
+            $this->_redirect('/auth/finsession');		    
+        }
+    }
 }
+
