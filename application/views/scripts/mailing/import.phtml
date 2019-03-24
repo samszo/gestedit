@@ -74,10 +74,7 @@ if($this->inc)
         <label>Période :</label>
         <div> <input type="dateDeb"> - <input type="dateFin"> </div>
 	</div>
-	<div class="w2ui-field">
-		<label style="width: 230px;">Taux de conversion Livre -> Euro : </label>
-		<div><input id="livreToEuro" value="0"></div>
-	</div>
+
     <!-- The fileinput-button span is used to style the file input field as button -->
     <span class="btn btn-success fileinput-button">
         <i class="glyphicon glyphicon-plus"></i>
@@ -98,23 +95,7 @@ if($this->inc)
 	<div id="progCalcData" class="progress">
 		<div class="progress-bar progress-bar-success" >Importe les données</div>
 	</div>
-	<div id="progCalcVente" class="progress">
-		<div class="progress-bar progress-bar-success" >Calcule les ventes</div>
-	</div>
-	
-	<div id="progCalcPrixManquant" class="progress">
-		<div class="progress-bar progress-bar-success" >Ajoute les prix manquants</div>
-	</div>
-	<div id="progCalcRoyalyies" class="progress">
-		<div class="progress-bar progress-bar-success" >Calcule les royalties</div>
-	</div>	
-	<div id="progSupPaiement" class="progress">
-		<div class="progress-bar progress-bar-success" >Supprime les paiements obsoletes</div>
-	</div>
-	<div id="progCalcPaiement" class="progress">
-		<div class="progress-bar progress-bar-success" >Calcule les paiements</div>
-	</div>
-</div>
+
 
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
 <script src="<?php echo $urlP;?>js/jquery.ui.widget.js"></script>
@@ -137,19 +118,6 @@ function initImportDroit() {
 	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
 	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
 		    	    		};
-			//vérifie la présence du taux de réduction
-			$.ajax({
-					data: dates,
-					url: urlP+'import/verifdevise',
-					success: function (result) {
-						if (result.length < 1){
-							w2alert("Il manque des taux de réduction pour la période définie.<br/>Merci de les renseigner dans l'onglet paramètres.");
-							return false;
-						}
-					},
-					dataType:'json',
-					async: false
-				});
 		});	
 	//initialise le champ pour le taux de conversion
 	$('#livreToEuro').w2field('percent', { precision: 2, min: 0, max: 100 });
@@ -183,7 +151,7 @@ function initFileUploadDroit(){
 	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
 	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
 	    	    		,'type':'vente','obj':'import','dir':1
-						,'conversion':$('#livreToEuro').w2field().get().replace('%','')
+
 		    	    		};
 	    		if(!data.formData.dateDeb ){
 	    		    w2alert('Veuillez sélectionner une date de début');
@@ -193,10 +161,7 @@ function initFileUploadDroit(){
 	    		    w2alert('Veuillez sélectionner une date de fin');
 	    		    return false;
 	    		}
-	    		if(!data.formData.conversion ){
-	    		    w2alert('Veuillez sélectionner un taux de conversion livre -> euro');
-	    		    return false;
-	    		}
+
                 var fileType = data.files[0].name.split('.').pop(), allowdtypes = 'csv,CSV';
                 if (allowdtypes.indexOf(fileType) < 0) {
                 	w2alert("Le type de fichier n'est pas bon");
@@ -222,93 +187,6 @@ function importerData(){
 ;				
 }
 
-function calculerVente(){
-	$('#progCalcVente .progress-bar').css('width',10 + '%');		
-	$.get(urlP+'calculer/vente',
-		{idFic:ficId, type:'global'},
-		function(js){
-			$('#progCalcVente .progress-bar').css('width',100 + '%');		
-			calculerPrixVente();
-			})
-		.fail(function(e) {
-			w2alert(e.responseText);				
-		});           		           	
-;				
-
-}
-
-function calculerPrixVente(){
-	$('#progCalcPrixManquant .progress-bar').css('width',10 + '%');		
-	$.ajax({
-		method: 'GET',
-		url: '<?php if(!$this->ajax) echo '../'; ?>calculer/prixvente',
-		dataType: 'json',
-		success: function(js) {
-			finsession(js);
-			$('#progCalcPrixManquant .progress-bar').css('width',100 + '%');		
-			calculerRoyalties()
-		},
-		error: function(e) {
-			w2alert(e.responseText);
-		 }
-	});		
-		
-
-}
-
-function calculerRoyalties(){
-	$('#progCalcRoyalyies .progress-bar').css('width',10 + '%');		
-	$.get('<?php if(!$this->ajax) echo '../'; ?>calculer/royalties',
-			{},
-	    function(js){
-			finsession(js);
-			$('#progCalcRoyalyies .progress-bar').css('width',100 + '%');		
-			var s = [];
-			js.rs.forEach(function(d) {
-				if(d.recid.substr(0,1)!='S')s.push(d.recid);
-			});
-			if(s.length)
-				supprimerPaiements(s);
-			else{
-				$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
-				w2alert('Pas de rapport généré car pas de nouveaux royalties');				
-				if(parent)parent.finProcessImport(ficId);		
-			}
-		},"json")
-		.fail(function(e) {
-			w2alert(e.responseText);				
-		});           		           	
-;           		           	
-}
-
-function supprimerPaiements(s){
-	$('#progSupPaiement .progress-bar').css('width',10 + '%');		
-	$.post('<?php if(!$this->ajax) echo '../'; ?>calculer/paiementobsolete',
-			{"type":"auteurFic","ids":s},
-		function(js){
-			$('#progSupPaiement .progress-bar').css('width',100 + '%');		
-			finsession(js);
-			calculerPaiements(s);
-		},"json")
-		.fail(function(e) {
-			w2alert(e.responseText);				
-		});           		           	
-;           		           	
-}
-
-function calculerPaiements(s){
-	$('#progCalcPaiement .progress-bar').css('width',10 + '%');		
-	$.post('<?php if(!$this->ajax) echo '../'; ?>calculer/paiement',
-			{"type":"auteurFic"},
-		function(js){
-			$('#progCalcPaiement .progress-bar').css('width',100 + '%');		
-			finsession(js);
-			if(parent!=window)parent.finProcessImport(ficId);
-		},"json")
-		.fail(function(e) {
-			w2alert(e.responseText);				
-		});           		           	
-}
 
 </script>
 <?php 
