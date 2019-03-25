@@ -119,8 +119,6 @@ function initImportDroit() {
 	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
 		    	    		};
 		});	
-	//initialise le champ pour le taux de conversion
-	$('#livreToEuro').w2field('percent', { precision: 2, min: 0, max: 100 });
 }
 
 function initFileUploadDroit(){
@@ -150,7 +148,7 @@ function initFileUploadDroit(){
 	    		data.formData = {
 	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
 	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
-	    	    		,'type':'vente','obj':'import','dir':1
+	    	    		,'type':'prospect','obj':'import','dir':1
 
 		    	    		};
 	    		if(!data.formData.dateDeb ){
