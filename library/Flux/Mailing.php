@@ -26,15 +26,14 @@ class Flux_Mailing extends Flux_Site{
     */
     public function importer($path, $idFic=false){
 		$this->trace("DEB ".__METHOD__);
-		$this->data = new csvToArray();
-		
+
 		if($idFic){
 			$rsFic = $this->dbFic->findById_importfic($idFic);
 			$path = str_replace(WEB_ROOT, ROOT_PATH, $rsFic["url"]);
 			$this->trace("//url du fichier = ".$path);
 		}		
 		
-		$this->data->read($path);
+		$this->data= $this->csvToArray($path);
 		
 		$ref = str_replace("\0", "", $this->data->sheets[0]['cells'][1][1]);
 
