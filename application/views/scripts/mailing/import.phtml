@@ -23,8 +23,7 @@ if(!$this->ajax){
 		<script type="text/javascript" src="'.$urlP.'js/log.js"></script>		
 		<script type="text/javascript">
 			function init() {
-				initFileUploadDroit();
-				fctInit = initImportDroit;			
+				initFileUploadDroit();		
 				initAll(); 
 	  			if(uti.id_uti!=0)
 					utiIsConnect();
@@ -34,7 +33,7 @@ if(!$this->ajax){
 		</script>
 	</head>
 	<body onload="init()" >
-		<p id="promptCompat">Votre navigateur ne pend pas en charge les balises <code><dialog></code></p> 
+		<p id="promptCompat">Votre navigateur ne prend pas en charge les balises <code><dialog></code></p> 
 		<div id="utiConnect" style="visibility:hidden;"></div>
 		<dialog id="diagLogin" close> 
 			<label for="iptLogin">Login : </label>
@@ -70,10 +69,6 @@ if($this->inc)
 
 <div class="container">
     <h1>Ajouter un fichier prospects</h1>
-    <div class="w2ui-field">
-        <label>Période :</label>
-        <div> <input type="dateDeb"> - <input type="dateFin"> </div>
-	</div>
 
     <!-- The fileinput-button span is used to style the file input field as button -->
     <span class="btn btn-success fileinput-button">
@@ -109,22 +104,11 @@ if($this->inc)
 var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
 var idFicImport, ficId;
 fuVerif = true;
-function initImportDroit() {
-	//initialise les champs pour définir la période
-	$('input[type=dateDeb]').w2field('date', { format: 'yyyy-m-d', end: $('input[type=dateFin]'), required: true });
-	$('input[type=dateFin]').w2field('date', { format: 'yyyy-m-d', start: $('input[type=dateDeb]'), required: true})
-		.on('change',function(e){
-			var dates = {
-	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
-	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
-		    	    		};
-		});	
-}
 
 function initFileUploadDroit(){
 
 	    // Change this to the location of your server-side upload handler:
-	    var url ='import/upload/';
+	    var url ='../import/upload';
 	    $('#fileupload').fileupload({
 	        url: url,
 	        dataType: 'json',	        
@@ -146,19 +130,9 @@ function initFileUploadDroit(){
 	    })
 	    .on('fileuploadsubmit', function (e, data) {
 	    		data.formData = {
-	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
-	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
-	    	    		,'type':'prospect','obj':'import','dir':1
+	    	    		'type':'mailing','obj':'import','dir':1
 
 		    	    		};
-	    		if(!data.formData.dateDeb ){
-	    		    w2alert('Veuillez sélectionner une date de début');
-	    		    return false;
-	    		}
-	    		if(!data.formData.dateFin ){
-	    		    w2alert('Veuillez sélectionner une date de fin');
-	    		    return false;
-	    		}
 
                 var fileType = data.files[0].name.split('.').pop(), allowdtypes = 'csv,CSV';
                 if (allowdtypes.indexOf(fileType) < 0) {
@@ -173,11 +147,10 @@ function initFileUploadDroit(){
 
 function importerData(){
 	$('#progCalcData .progress-bar').css('width',10 + '%');	
-	$.get(urlP+'import/setdataficvente',
+	$.get(urlP+'import/setdataficmailing',
 			{idFic:ficId, type:'global'},
 			function(html){
 				$('#progCalcData .progress-bar').css('width',100 + '%');		
-				calculerVente();
 			   })
 		.fail(function(e) {
 			w2alert(e.responseText);				
@@ -195,7 +168,6 @@ if(!$this->ajax){
 	echo '<script type="text/javascript">
 			$(function () {
 				initFileUploadDroit();
-				initImportDroit(); 
 			});                       		
 		</script>		
 		';	
