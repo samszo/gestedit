@@ -36,7 +36,7 @@ class Flux_Mailing extends Flux_Site{
 		$this->data= $this->csvToArray($path,0,",");
 		
 		//TODO:ajouter les autres colonnes
-		$descColo = array("col1","col2","col3","col4","col5","col6");	
+		$descColo = array("col1","col2","col3","col4","col5","col6","col7","col8","col9", "col10", "col11","col12", "col13", "col14", "col15");	
 		
 		$nbCol = count($descColo);
 		$nbRow = count($this->data);
@@ -65,5 +65,15 @@ class Flux_Mailing extends Flux_Site{
 	    }
 	    
 	    $this->trace("FIN ".__METHOD__);
+	}
+	/* insertion des données dans les différentes tables:
+	- Utilisation de la fonction d'insertion comme dans le controller mailing ?
+	- sql = INSERT INTO prospect (colonne1, colonne2 ...) SELECT FROM importdata (col1, col2...) ; ?
+	*/
+	public function inserer()
+	{
+	$sql = 'INSERT INTO iste_prospect (url_labo_etab, nom_prenom, langue_prospect, email_prospect, code_nomen1, code_nomen2, code_nomen3) 
+			SELECT col1, col2, col8, col15, col9, col10, col11 FROM iste_importdata';
+	$db->query($sql);
 	}
 }
