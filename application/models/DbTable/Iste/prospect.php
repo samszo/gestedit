@@ -64,9 +64,14 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
      *
      * @return void
      */
-    public function edit($id, $data)
+    public function edit($id, $data, $url=null)
     {        
-    	$this->update($data, 'iste_prospect.id_prospect = ' . $id);
+        //$this->update($data, 'iste_prospect.id_prospect = ' . $id);
+        if(!isset($data["maj"])) $data["maj"] = new Zend_Db_Expr('NOW()');
+        	if($url)
+    	        $this->update($data, 'flux_mailing.url = "'. $url.'"');
+        	else        
+    	        $this->update($data, 'flux_mailing.id_prospect = ' . $id);
     }
 
     /**

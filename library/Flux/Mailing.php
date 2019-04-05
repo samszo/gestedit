@@ -66,14 +66,26 @@ class Flux_Mailing extends Flux_Site{
 	    
 	    $this->trace("FIN ".__METHOD__);
 	}
-	/* insertion des données dans les différentes tables:
-	- Utilisation de la fonction d'insertion comme dans le controller mailing ?
-	- sql = INSERT INTO prospect (colonne1, colonne2 ...) SELECT FROM importdata (col1, col2...) ; ?
-	*/
-	public function inserer()
-	{
-	$sql = 'INSERT INTO iste_prospect (url_labo_etab, nom_prenom, langue_prospect, email_prospect, code_nomen1, code_nomen2, code_nomen3) 
-			SELECT col1, col2, col8, col15, col9, col10, col11 FROM iste_importdata';
-	$db->query($sql);
+
+	// insertion des données dans les différentes tables:
+	public function inserer($r)
+	{	
+		// Insertion de données dans prospect
+		switch ($r['numsheet']) {
+		case 1:
+			$dbProspect = new Model_DbTable_Iste_prospect();
+			$data = array('url_labo_etab'=>'col1', 'nom_prenom'=>'col2', 'langue_prospect'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
+			$idP =  $dbProspect->ajouter(array('email_prospect'=>'col15'));
+			$dbProspect->edit($idP, $data);
+			break;
+
+		//Insertion de données dans etab
+		case 2:
+			$dbEtab = new Model_DbTable_Iste_etab();
+			$data = array('affiliation1_etab'=>'col3', 'affiliation2_etab'=>'col4', 'affiliation3_etab'=>'col5');
+			$idE =  $dbEtab->ajouter(array('url_labo_etab'=>'col1'));
+			$dbEtab->edit($idE, $data);
+			break;
+		}
 	}
 }
