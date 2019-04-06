@@ -40,7 +40,7 @@ class MailingController extends Zend_Controller_Action
                 break;
             case 'etab':
                 $dbE = new Model_DbTable_Iste_etab();
-                $arr = array('url_labo_etab'=>$this->_getParam('url_labo_etab'),'adresse_etab'=>$this->_getParam('adresse_etab'),'ville_etab'=>$this->_getParam('ville_etab'),'cp_etab'=>$this->_getParam('cp_etab'),'pays_etab'=>$this->_getParam('pays_etab'),'responsableLabo_etab'=>$this->_getParam('responsableLabo_etab'),'affiliation1_etab'=>$this->_getParam('affiliation1_etab'),'affiliation2_etab'=>$this->_getParam('affiliation2_etab'),'affiliation3_etab'=>$this->_getParam('affiliation3_etab'),'origine_etab'=>$this->_getParam('origine_etab'));
+                $arr = array('url_labo_etab'=>$this->_getParam('url_labo_etab'),'adresse_etab'=>$this->_getParam('adresse_etab'),'ville_etab'=>$this->_getParam('ville_etab'),'cp_etab'=>$this->_getParam('cp_etab'),'pays_etab'=>$this->_getParam('pays_etab'),'responsableLabo_etab'=>$this->_getParam('responsableLabo_etab'),'affiliation1_etab'=>$this->_getParam('affiliation1_etab'),'origine_etab'=>$this->_getParam('origine_etab'));
                 $rs = $dbE->ajouter($arr);
                 break;
             case 'nomenclature':
