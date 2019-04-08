@@ -71,21 +71,12 @@ class Flux_Mailing extends Flux_Site{
 	public function inserer($r)
 	{	
 		// Insertion de données dans prospect
-		switch ($r['numsheet']) {
-		case 1:
+		if ($r['numsheet']) {
+
 			$dbProspect = new Model_DbTable_Iste_prospect();
-			$data = array('url_labo_etab'=>'col1', 'nom_prenom'=>'col2', 'langue_prospect'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
+			$data = array('nom_prenom'=>'col2', 'langue_prospect'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11', 'affiliation1_prospect'=>'col3', 'affiliation2_prospect'=>'col4', 'affiliation3_prospect'=>'col5');
 			$idP =  $dbProspect->ajouter(array('email_prospect'=>'col15'));
 			$dbProspect->edit($idP, $data);
-			break;
-
-		//Insertion de données dans etab
-		case 2:
-			$dbEtab = new Model_DbTable_Iste_etab();
-			$data = array('affiliation1_etab'=>'col3', 'affiliation2_etab'=>'col4', 'affiliation3_etab'=>'col5');
-			$idE =  $dbEtab->ajouter(array('url_labo_etab'=>'col1'));
-			$dbEtab->edit($idE, $data);
-			break;
 		}
 	}
 }
