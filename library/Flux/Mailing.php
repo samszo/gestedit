@@ -68,15 +68,23 @@ class Flux_Mailing extends Flux_Site{
 	}
 
 	// insertion des données dans les différentes tables:
-	public function inserer($r)
-	{	
+	public function insertData(){	
+		$this->trace("DEB ".__METHOD__);
+		
 		// Insertion de données dans prospect
-		if ($r['numsheet']) {
-
+		switch ($this->_getParam('obj')) {
+		case 'prospect':
 			$dbProspect = new Model_DbTable_Iste_prospect();
-			$data = array('nom_prenom'=>'col2', 'langue_prospect'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11', 'affiliation1_prospect'=>'col3', 'affiliation2_prospect'=>'col4', 'affiliation3_prospect'=>'col5');
+			$data = array('nom_prenom'=>'col2', 'affiliation1_prospect'=>'col3', 'affiliation2_prospect'=>'col4', 'affiliation3_prospect'=>'col5', 'langue_prospect'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
 			$idP =  $dbProspect->ajouter(array('email_prospect'=>'col15'));
 			$dbProspect->edit($idP, $data);
+		break;
+		case 'etab':
+		break;
+		default:
+		break;
 		}
+
+		$this->trace("FIN ".__METHOD__);
 	}
 }

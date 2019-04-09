@@ -36,17 +36,17 @@ class MailingController extends Zend_Controller_Action
             case 'prospect':
                 $dbP = new Model_DbTable_Iste_prospect();
                 $arr = array('nom_prenom'=>$this->_getParam('nom_prenom'),'email_prospect'=>$this->_getParam('email_prospect'),'email2_prospect'=>$this->_getParam('email2_prospect'), 'affiliation1_prospect'=>$this->_getParam('affiliation1_prospect'),'affiliation2_prospect'=>$this->_getParam('affiliation2_prospect'),'affiliation3_prospect'=>$this->_getParam('affiliation3_prospect'),'code_nomen1'=>$this->_getParam('code_nomen1'),'code_nomen2'=>$this->_getParam('code_nomen2'),'code_nomen3'=>$this->_getParam('code_nomen3'), 'langue_prospect'=>$this->_getParam('langue_prospect'),'clientIste_prospect'=>$this->_getParam('clientIste_prospect'),'membreEdito_prospect'=>$this->_getParam('membreEdito_prospect'),'unsub'=>$this->_getParam('unsub'));
-                $rs = $dbP->ajouter($arr);
+                $rs = $dbP->ajouter($arr, true, true);
                 break;
             case 'etab':
                 $dbE = new Model_DbTable_Iste_etab();
                 $arr = array('url_labo_etab'=>$this->_getParam('url_labo_etab'),'adresse_etab'=>$this->_getParam('adresse_etab'),'ville_etab'=>$this->_getParam('ville_etab'),'cp_etab'=>$this->_getParam('cp_etab'),'pays_etab'=>$this->_getParam('pays_etab'),'responsableLabo_etab'=>$this->_getParam('responsableLabo_etab'),'affiliation1_etab'=>$this->_getParam('affiliation1_etab'),'origine_etab'=>$this->_getParam('origine_etab'));
-                $rs = $dbE->ajouter($arr);
+                $rs = $dbE->ajouter($arr, true, true);
                 break;
             case 'nomenclature':
                 $dbN = new Model_DbTable_Iste_nomenclature();
                 $arr = array('label'=>$this->_getParam('label'),'code'=>$this->_getParam('code'), 'id_parent'=>$this->_getParam('id_parent'), 'label_parent'=>$this->_getParam('label_parent'));
-                $rs = $dbN->ajouter($arr);
+                $rs = $dbN->ajouter($arr, true, true);
                 break;
             default:
                 # code...

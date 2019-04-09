@@ -45,13 +45,16 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {    	
 	    	$id=false;
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
-	    	}
+            }
+            if($rs)
+               return $this->getById($id);
+            else
 	    	return $id;
     } 
            
@@ -108,6 +111,21 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
         }
 
         return $this->fetchAll($query)->toArray();
+    }
+
+    public function getById($id)
+    {
+   	
+    	$query = $this->select()
+                    ->from( array("n" => "iste_etab") )
+                    ->joinInner(array("nid" => "iste_etab"),
+                    'n.id_etab = nid.id_etab', array("recid"=>"n.id_etab"))
+                    ->where('n.id_etab',$id);
+                    
+        
+        $rs = $this->fetchAll($query)->toArray();
+        if(count($rs))return end($rs);
+        else return false;
     }
 
 }        

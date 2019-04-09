@@ -42,17 +42,21 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
      *
      * @param array $data
      * @param boolean $existe
+     * @param boolean $rs
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true)
+    public function ajouter($data, $existe=true, $rs=false)
     {    	
 	    	$id=false;
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
-	    	}
-	    	return $id;
+            }
+            if($rs)
+               return $this->getById($id);
+            else
+    	    	return $id;
     } 
            
     /**
@@ -115,6 +119,27 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
         }
 
         return $this->fetchAll($query)->toArray();
+    }
+        /**
+     * Récupère une entrées Iste_prospect avec certains critères
+     * de tri, intervalles
+     *  @param int       $id
+     * 
+     * @return array
+     */
+    public function getById($id)
+    {
+   	
+    	$query = $this->select()
+                    ->from( array("n" => "iste_prospect") )
+                    ->joinInner(array("nid" => "iste_prospect"),
+                    'n.id_prospect = nid.id_prospect', array("recid"=>"n.id_prospect"))
+                    ->where('n.id_prospect',$id);
+                    
+        
+        $rs = $this->fetchAll($query)->toArray();
+        if(count($rs))return end($rs);
+        else return false;
     }
 
 }        

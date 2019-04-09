@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>app_mailing</title>
+    <title>Gestion des prospects ISTE</title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script type="text/javascript" src="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.js"></script>
     <link rel="stylesheet" type="text/css" href="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.css" />
@@ -26,13 +26,13 @@
     </div>
 
     <script type="text/javascript">
-    // Variable avec les données de la base à afficher
+        // Variable avec les données de la base à afficher
         var jsNomen = <?php echo $this->jsNomen; ?>;
         var jsProsp = <?php echo $this->jsProsp; ?>;
         var jsEtab = <?php echo $this->jsEtab; ?>;
 
         var urlP = "../";
-    // Fonction pour exporter un fichier
+        // Fonction pour exporter un fichier
         function exportByPost(ids, obj) {
             var form = document.getElementById("exportPostForm");
             if (form) {
@@ -118,412 +118,456 @@
             })
             // Création de la grille prospects
             w2ui['layout'].content('left',
-                    $('#grid').w2grid({
-                        name: 'grid',
-                        header: 'Prospects',
-                        show: {
-                            header: true,
-                            toolbar: true,
-                            footer: true,
-                            selectColumn: true,
-                            toolbarAdd: true,
-                            toolbarDelete: true,
-                            toolbarSave: true
+                $('#grid').w2grid({
+                    name: 'grid',
+                    header: 'Prospects',
+                    show: {
+                        header: true,
+                        toolbar: true,
+                        footer: true,
+                        selectColumn: true,
+                        toolbarAdd: true,
+                        toolbarDelete: true,
+                        toolbarSave: true
+                    },
+                    multiSearch: true,
+                    searches: [{
+                            field: 'nom_prenom',
+                            caption: 'Nom_Prénom',
+                            type: 'text'
                         },
-                        multiSearch: true,
-                        searches: [{
-                                field: 'nom_prenom',
-                                caption: 'Nom_Prénom',
+                        {
+                            field: 'email',
+                            caption: 'Email',
+                            type: 'text'
+                        },
+                        {
+                            field: 'url_labo_etab',
+                            caption: 'URL Labo',
+                            type: 'text'
+                        },
+                        {
+                            field: 'clientIste_prospect',
+                            caption: 'Client Iste',
+                            type: 'combo',
+                            options: {
+                                items: ['0', '1']
+                            }
+                        },
+                        {
+                            field: 'membreEdito_prospect',
+                            caption: 'Membre editorial',
+                            type: 'combo',
+                            options: {
+                                items: ['0', '1']
+                            }
+                        },
+                        {
+                            field: 'unsub',
+                            caption: 'Unsubscribe',
+                            type: 'combo',
+                            options: {
+                                items: ['0', '1']
+                            }
+                        }
+                    ],
+                    columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'nom_prenom',
+                            caption: 'Nom Prénom',
+                            size: '40%',
+                            editable: {
                                 type: 'text'
-                            },
-                            {
-                                field: 'email',
-                                caption: 'Email',
+                            }
+                        },
+                        {
+                            field: 'email_prospect',
+                            caption: 'Email',
+                            size: '40%',
+                            editable: {
+                                type: 'email'
+                            }
+                        },
+                        {
+                            field: 'email2_prospect',
+                            caption: 'Email2',
+                            size: '120px',
+                            editable: {
+                                type: 'email'
+                            }
+                        },
+                        {
+                            field: 'affiliation1_prospect',
+                            caption: 'Affiliation 1',
+                            size: '120px',
+                            editable: {
                                 type: 'text'
-                            },
-                            {
-                                field: 'url_labo_etab',
-                                caption: 'URL Labo',
+                            }
+                        },
+                        {
+                            field: 'affiliation2_prospect',
+                            caption: 'Affiliation 2',
+                            size: '120px',
+                            editable: {
                                 type: 'text'
+                            }
+                        },
+                        {
+                            field: 'affiliation3_prospect',
+                            caption: 'Affiliation 3',
+                            size: '120px',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'code_nomen1',
+                            caption: 'Code 1',
+                            size: '60px',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'code_nomen2',
+                            caption: 'Code 2',
+                            size: '60px',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'code_nomen3',
+                            caption: 'Code 3',
+                            size: '60px',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'langue_prospect',
+                            caption: 'Langue',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'clientIste_prospect',
+                            caption: 'Client Iste',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+
+                        },
+                        {
+                            field: 'membreEdito_prospect',
+                            caption: 'Membre editorial',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'unsub',
+                            caption: 'Unsubscribe',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        }
+                    ],
+                    toolbar: {
+                        items: [{
+                                id: 'export',
+                                type: 'button',
+                                text: 'Exporter',
+                                icon: 'fas fa-file-export'
                             },
                             {
-                                field: 'clientIste_prospect',
-                                caption: 'Client Iste',
-                                type: 'combo',
-                                options: {
-                                    items: ['0', '1']
-                                }
-                            },
-                            {
-                                field: 'membreEdito_prospect',
-                                caption: 'Membre editorial',
-                                type: 'combo',
-                                options: {
-                                    items: ['0', '1']
-                                }
-                            },
-                            {
-                                field: 'unsub',
-                                caption: 'Unsubscribe',
-                                type: 'combo',
-                                options: {
-                                    items: ['0', '1']
-                                }
+                                id: 'import',
+                                type: 'button',
+                                text: 'Importer',
+                                icon: 'fas fa-file-import'
                             }
                         ],
-                        columns: [{
-                                field: 'recid',
-                                caption: 'ID',
-                                size: '50px',
-                                sortable: true,
-                                resizable: true
-                            },
-                            {
-                                field: 'nom_prenom',
-                                caption: 'Nom Prénom',
-                                size: '40%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'email_prospect',
-                                caption: 'Email',
-                                size: '40%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'email2_prospect',
-                                caption: 'Email2',
-                                size: '120px',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'affiliation1_prospect',
-                                caption: 'Affiliation 1',
-                                size: '120px',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'affiliation2_prospect',
-                                caption: 'Affiliation 2',
-                                size: '120px',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'affiliation3_prospect',
-                                caption: 'Affiliation 3',
-                                size: '120px',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'code_nomen1',
-                                caption: 'Code Nomenclature 1',
-                                size: '120px',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'code_nomen2',
-                                caption: 'Code Nomenclature 2',
-                                size: '120px',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'code_nomen3',
-                                caption: 'Code Nomenclature 3',
-                                size: '120px',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'langue_prospect',
-                                caption: 'Langue',
-                                size: '30%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'clientIste_prospect',
-                                caption: 'Client Iste',
-                                size: '30%',
-                                editable: {
-                                    type: 'text'
-                                }
-                                
-                            },
-                            {
-                                field: 'membreEdito_prospect',
-                                caption: 'Membre editorial',
-                                size: '30%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'unsub',
-                                caption: 'Unsubscribe',
-                                size: '30%',
-                                editable: {
-                                    type: 'text'
-                                }
+                        onClick: function (event) {
+                            if (event.target == 'export') {
+                                var ids = w2ui.grid.getSelection();
+                                exportByPost(ids, "prospect");
+                                open(urlP + 'export?obj=email_prospect&ids=' + ids, "_blank");
                             }
-                        ],
-                        toolbar: {
-                            items: [{
-                                    id: 'export',
-                                    type: 'button',
-                                    text: 'Exporter',
-                                    icon: 'fas fa-file-export'
-                                },
-                                {
-                                    id: 'import',
-                                    type: 'button',
-                                    text: 'Importer',
-                                    icon: 'fas fa-file-import'
-                                }
-                            ],
-                            onClick: function (event) {
-                                if (event.target == 'export') {
-                                    var ids = w2ui.grid.getSelection();
-                                    exportByPost(ids, "prospect");
-                                    open(urlP + 'export?obj=email_prospect&ids=' + ids, "_blank");
-                                }
-                                if (event.target == 'import') {
-		                	        openPopupImportData();
-		                        }
+                            if (event.target == 'import') {
+                                openPopupImportData();
                             }
-                        },
-                        records: jsProsp,
-                        onSave: function (event) {
-                            var changes = w2ui['grid'].getChanges();
-                            changes.forEach(function (c, i) {
-                                c.obj = 'prospect';
-                                $.get('mailing/update',
-                                    c,
+                        }
+                    },
+                    records: jsProsp,
+                    onSave: function (event) {
+                        var changes = w2ui['grid'].getChanges();
+                        changes.forEach(function (c, i) {
+                            c.obj = 'prospect';
+                            $.get('mailing/update',
+                                c,
+                                function (js) {
+                                    //finsession(js);		
+                                    js.rs.text = js.rs.nom + " " + js.rs.prenom;
+                                    setListe(js.rs, 'prospect');
+                                    if (changes.length == i + 1) w2alert(js.message);
+                                }, "json");
+                        });
+                    },
+                    onAdd: function (event) {
+                        /*   w2ui['layout'].hide('left', true);
+                           w2ui['layout'].hide('main', true);
+                           w2ui['layout'].toggle('right', true); */
+                        openPopupP();
+                    },
+                    onDelete: function (event) {
+                        var itemsSelect = w2ui.grid.getSelection();
+                        var p = {
+                            id: itemsSelect,
+                            obj: 'prospect'
+                        };
+                        if (event.force) {
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+                    },
+                    onSearch: function (event) {
+                        var grid = this;
+                        if (event.searchField == "multi") {
+                            event.onComplete = function () {
+                                $.get('cherche/mailing', {
+                                        "searchData": event.searchData
+                                    },
                                     function (js) {
-                                        //finsession(js);		
-                                        js.rs.text = js.rs.nom + " " + js.rs.prenom;
-                                        setListe(js.rs, 'prospect');
-                                        if (changes.length == i + 1) w2alert(js.message);
-                                    }, "json");
-                            });
-                        },
-                        onAdd: function (event) {
-                         /*   w2ui['layout'].hide('left', true);
-                            w2ui['layout'].hide('main', true);
-                            w2ui['layout'].toggle('right', true); */
-                            openPopupP();
-                        },
-                        onDelete: function (event) {
-                            var itemsSelect = w2ui.grid.getSelection();
-                            var p = {
-                                id: itemsSelect,
-                                obj: 'prospect'
-                            };
-                            if (event.force) {
-                                $.get('mailing/delete',
-                                    p,
-                                    function (js) {
-                                        // finsession(js);
+                                        //finsession(js);
+                                        var ids = [];
+                                        js.rs.forEach(function (d) {
+                                            jsProsp.forEach(function (l, i) {
+                                                if (l.id_prospect == d) ids
+                                                    .push(i);
+                                            });
+                                        });
+                                        grid.last.searchIds = ids;
+                                        grid.total = grid.last.searchIds.length;
+                                        grid.buffered = grid.total;
+                                        grid.refresh();
                                         w2alert(js.message);
                                     }, "json");
                             }
-                        },
-                        onSearch: function (event) {
-                            var grid = this;
-                            if (event.searchField == "multi") {
-                                event.onComplete = function () {
-                                    $.get('cherche/mailing', {
-                                            "searchData": event.searchData
-                                        },
-                                        function (js) {
-                                            //finsession(js);
-                                            var ids = [];
-                                            js.rs.forEach(function (d) {
-                                                jsProsp.forEach(function (l, i) {
-                                                    if (l.id_prospect == d) ids
-                                                        .push(i);
-                                                });
-                                            });
-                                            grid.last.searchIds = ids;
-                                            grid.total = grid.last.searchIds.length;
-                                            grid.buffered = grid.total;
-                                            grid.refresh();
-                                            w2alert(js.message);
-                                        }, "json");
-                                }
-                            } else {
-                                grid.localSearch();
-                                event.onComplete = function () {
-                                    grid.last.searchIds = grid.last.searchIds;
-                                    grid.total = grid.last.searchIds.length;
-                                    grid.buffered = grid.total;
-                                    grid.refresh();
-                                }
-                            }
-                        },
-                    }))
-                // Création formulaire ajout de prospect
-                    function openPopupP () {
-                    if (!w2ui.foo) {
-                        $().w2form({
-                            name: 'foo',
-                            style: 'border: 0px; background-color: transparent;',
-                            formHTML: 
-                                '<div class="w2ui-page page-0">'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Nom Prénom:</label>'+
-                                '        <div>'+
-                                '           <input name="nom_prenom" type="text" maxlength="100" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Langue:</label>'+
-                                '        <div>'+
-                                '           <input name="langue_prospect" type="text" maxlength="100" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Email:</label>'+
-                                '        <div>'+
-                                '           <input name="email_prospect" type="text" maxlength="100" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Email 2:</label>'+
-                                '        <div>'+
-                                '            <input name="email2_prospect" type="text" maxlength="150" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Affiliation 1:</label>'+
-                                '        <div>'+
-                                '            <input name="affiliation1_prospect" type="text" maxlength="150" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Affiliation 2:</label>'+
-                                '        <div>'+
-                                '            <input name="affiliation2_prospect" type="text" maxlength="150" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Affiliation 3:</label>'+
-                                '        <div>'+
-                                '            <input name="affiliation3_prospect" type="text" maxlength="150" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Code Nomenclature 1:</label>'+
-                                '        <div>'+
-                                '            <input name="code_nomen1" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Code Nomenclature 2:</label>'+
-                                '        <div>'+
-                                '            <input name="code_nomen2" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Code Nomenclature 3:</label>'+
-                                '        <div>'+
-                                '            <input name="code_nomen3" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Client ISTE:</label>'+
-                                '        <div>'+
-                                '            <input name="clientIste_prospect" type="checkbox" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Membre Edito:</label>'+
-                                '        <div>'+
-                                '            <input name="membreEdito_prospect" type="checkbox" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Unsubscribe:</label>'+
-                                '        <div>'+
-                                '            <input name="unsub" type="checkbox" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '</div>'+
-                                '<div class="w2ui-buttons">'+
-                                '    <button class="w2ui-btn" name="reset">Reset</button>'+
-                                '    <button class="w2ui-btn" name="save">Save</button>'+
-                                '</div>',
-                            fields: [
-                                { field: 'nom_prenom', type: 'text', required: true },
-                                { field: 'langue_prospect', type: 'text' },
-                                { field: 'email_prospect', type: 'text', required: true },
-                                { field: 'email2_prospect', type: 'text' },
-                                { field: 'affiliation1_prospect', type: 'text', required: true },
-                                { field: 'affiliation2_prospect', type: 'text' },
-                                { field: 'affiliation3_prospect', type: 'text' },
-                                { field: 'code_nomen1', type: 'text' },
-                                { field: 'code_nomen2', type: 'text' },
-                                { field: 'code_nomen3', type: 'text' },
-                                { field: 'clientIste_prospect', type: 'checkbox' },
-                                { field: 'membreEdito_prospect', type: 'checkbox' },
-                                { field: 'unsub', type: 'checkbox' }
-                            ],
-                            actions: {
-                                "save": function () {
-                                            var errors = this.validate();
-                                            if (errors.length > 0) return;
-                                            var data = this.record;
-                                            data.obj = "prospect";
-                                            $.get('mailing/insert',
-                                                data,
-                                                function (js) {
-                                                    //finsession(js);
-                                                    w2alert(js.message);
-                                                }, "json");
-                                        },
-                                "reset": function () { this.clear(); }
-                            }
-                        });
-                    }
-                    $().w2popup('open', {
-                        title   : 'Formulaire Prospects',
-                        body    : '<div id="form" style="width: 100%; height: 100%;"></div>',
-                        style   : 'padding: 15px 0px 0px 0px',
-                        width   : 500,
-                        height  : 600, 
-                        showMax : true,
-                        onToggle: function (event) {
-                            $(w2ui.foo.box).hide();
+                        } else {
+                            grid.localSearch();
                             event.onComplete = function () {
-                                $(w2ui.foo.box).show();
-                                w2ui.foo.resize();
+                                grid.last.searchIds = grid.last.searchIds;
+                                grid.total = grid.last.searchIds.length;
+                                grid.buffered = grid.total;
+                                grid.refresh();
                             }
-                        },
-                        onOpen: function (event) {
-                            event.onComplete = function () {
-                                // specifying an onOpen handler instead is equivalent to specifying an onBeforeOpen handler, which would make this code execute too early and hence not deliver.
-                                $('#w2ui-popup #form').w2render('foo');
+                        }
+                    },
+                }))
+            // Création formulaire ajout de prospect
+            function openPopupP() {
+                if (!w2ui.foo) {
+                    $().w2form({
+                        name: 'foo',
+                        style: 'border: 0px; background-color: transparent;',
+                        formHTML: '<div class="w2ui-page page-0">' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Nom Prénom:</label>' +
+                            '        <div>' +
+                            '           <input name="nom_prenom" type="text" maxlength="100" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Langue:</label>' +
+                            '        <div>' +
+                            '           <input name="langue_prospect" type="text" maxlength="100" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Email:</label>' +
+                            '        <div>' +
+                            '           <input name="email_prospect" type="text" maxlength="100" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Email 2:</label>' +
+                            '        <div>' +
+                            '            <input name="email2_prospect" type="text" maxlength="150" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Affiliation 1:</label>' +
+                            '        <div>' +
+                            '            <input name="affiliation1_prospect" type="text" maxlength="150" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Affiliation 2:</label>' +
+                            '        <div>' +
+                            '            <input name="affiliation2_prospect" type="text" maxlength="150" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Affiliation 3:</label>' +
+                            '        <div>' +
+                            '            <input name="affiliation3_prospect" type="text" maxlength="150" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Code Nmclt 1:</label>' +
+                            '        <div>' +
+                            '            <input name="code_nomen1" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Code Nmclt 2:</label>' +
+                            '        <div>' +
+                            '            <input name="code_nomen2" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Code Nmclt 3:</label>' +
+                            '        <div>' +
+                            '            <input name="code_nomen3" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Client ISTE:</label>' +
+                            '        <div>' +
+                            '            <input name="clientIste_prospect" type="checkbox" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Membre Edito:</label>' +
+                            '        <div>' +
+                            '            <input name="membreEdito_prospect" type="checkbox" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Unsubscribe:</label>' +
+                            '        <div>' +
+                            '            <input name="unsub" type="checkbox" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '</div>' +
+                            '<div class="w2ui-buttons">' +
+                            '    <button class="w2ui-btn" name="reset">Reset</button>' +
+                            '    <button class="w2ui-btn" name="save">Save</button>' +
+                            '</div>',
+                        fields: [{
+                                field: 'nom_prenom',
+                                type: 'text',
+                                required: true
+                            },
+                            {
+                                field: 'langue_prospect',
+                                type: 'text'
+                            },
+                            {
+                                field: 'email_prospect',
+                                type: 'email',
+                                required: true
+                            },
+                            {
+                                field: 'email2_prospect',
+                                type: 'email'
+                            },
+                            {
+                                field: 'affiliation1_prospect',
+                                type: 'text',
+                                required: true
+                            },
+                            {
+                                field: 'affiliation2_prospect',
+                                type: 'text'
+                            },
+                            {
+                                field: 'affiliation3_prospect',
+                                type: 'text'
+                            },
+                            {
+                                field: 'code_nomen1',
+                                type: 'text',
+                                required: true
+                            },
+                            {
+                                field: 'code_nomen2',
+                                type: 'text'
+                            },
+                            {
+                                field: 'code_nomen3',
+                                type: 'text'
+                            },
+                            {
+                                field: 'clientIste_prospect',
+                                type: 'checkbox'
+                            },
+                            {
+                                field: 'membreEdito_prospect',
+                                type: 'checkbox'
+                            },
+                            {
+                                field: 'unsub',
+                                type: 'checkbox'
+                            }
+                        ],
+                        actions: {
+                            "save": function () {
+                                var errors = this.validate();
+                                if (errors.length > 0) return;
+                                var data = this.record;
+                                data.obj = "prospect";
+                                $.get('mailing/insert',
+                                    data,
+                                    function (js) {
+                                        //finsession(js);
+                                        w2ui['grid'].add(js.rs);
+                                    }, "json");
+                                w2popup.close();
+                            },
+                            "reset": function () {
+                                this.clear();
                             }
                         }
                     });
                 }
+                $().w2popup('open', {
+                    title: 'Formulaire Prospects',
+                    body: '<div id="form" style="width: 100%; height: 100%;"></div>',
+                    style: 'padding: 15px 0px 0px 0px',
+                    width: 500,
+                    height: 600,
+                    showMax: true,
+                    onToggle: function (event) {
+                        $(w2ui.foo.box).hide();
+                        event.onComplete = function () {
+                            $(w2ui.foo.box).show();
+                            w2ui.foo.resize();
+                        }
+                    },
+                    onOpen: function (event) {
+                        event.onComplete = function () {
+                            // specifying an onOpen handler instead is equivalent to specifying an onBeforeOpen handler, which would make this code execute too early and hence not deliver.
+                            $('#w2ui-popup #form').w2render('foo');
+                        }
+                    }
+                });
+            }
             // Création grille historique des envois mails prospects
             w2ui['layout'].content('main',
                 $('#grid2').w2grid({
@@ -540,6 +584,13 @@
                         type: 'date'
                     }, ],
                     columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
                             field: 'date_envoi',
                             caption: 'Date dernier mail',
                             type: 'date',
@@ -610,301 +661,334 @@
             })
             // Création de la grille Etablissements
             w2ui['layout2'].content('left',
-                    $('#grid3').w2grid({
-                        name: 'grid3',
-                        header: 'Etablissements',
-                        show: {
-                            header: true,
-                            toolbar: true,
-                            footer: true,
-                            selectColumn: true,
-                            toolbarAdd: true,
-                            toolbarDelete: true,
-                            toolbarSave: true
+                $('#grid3').w2grid({
+                    name: 'grid3',
+                    header: 'Etablissements',
+                    show: {
+                        header: true,
+                        toolbar: true,
+                        footer: true,
+                        selectColumn: true,
+                        toolbarAdd: true,
+                        toolbarDelete: true,
+                        toolbarSave: true
+                    },
+                    multiSearch: true,
+                    searches: [{
+                            field: 'affiliation1_etab',
+                            caption: 'Affiliation 1',
+                            type: 'text'
                         },
-                        multiSearch: true,
-                        searches: [{
-                                field: 'affiliation1_etab',
-                                caption: 'Affiliation 1',
-                                type: 'text'
-                            },
-                            {
-                                field: 'affiliation2_etab',
-                                caption: 'Affiliation 2',
-                                type: 'text'
-                            },
-                            {
-                                field: 'affiliation3_etab',
-                                caption: 'Affiliation 3',
-                                type: 'text'
-                            },
-                            {
-                                field: 'responsableLabo_etab',
-                                caption: 'Responsable Labo',
+                        {
+                            field: 'affiliation2_etab',
+                            caption: 'Affiliation 2',
+                            type: 'text'
+                        },
+                        {
+                            field: 'affiliation3_etab',
+                            caption: 'Affiliation 3',
+                            type: 'text'
+                        },
+                        {
+                            field: 'responsableLabo_etab',
+                            caption: 'Responsable Labo',
+                            type: 'text'
+                        }
+                    ],
+                    columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'affiliation1_etab',
+                            caption: 'Affiliation',
+                            size: '30%',
+                            editable: {
                                 type: 'text'
                             }
-                        ],
-                        columns: [{
-                                field: 'affiliation1_etab',
-                                caption: 'Affiliation',
-                                size: '30%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'url_labo_etab',
-                                caption: 'URL du Labo',
-                                size: '40%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'adresse_etab',
-                                caption: 'Adresse',
-                                size: '40%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'ville_etab',
-                                caption: 'Ville',
-                                size: '120px',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'cp_etab',
-                                caption: 'Code Postal',
-                                size: '30%',
-                                editable: {
-                                    type: 'int'
-                                }
-                            },
-                            {
-                                field: 'pays_etab',
-                                caption: 'Pays',
-                                size: '30%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'responsableLabo_etab',
-                                caption: 'Responsable du Labo',
-                                size: '30%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                            {
-                                field: 'origine_etab',
-                                caption: 'Origine Etablissement',
-                                size: '30%',
-                                editable: {
-                                    type: 'text'
-                                }
-                            },
-                        ],
-                        /*toolbar: {
-                            items: [{
-                                id: 'import',
-                                type: 'button',
-                                caption: 'Importer',
-                                icon: 'fas fa-file-import'
-                            }],
-                            onClick: function (event) {
-                                if (event.target == 'import') {
-                                    openPopupImportData();
-                                }
+                        },
+                        {
+                            field: 'url_labo_etab',
+                            caption: 'URL du Labo',
+                            size: '40%',
+                            editable: {
+                                type: 'text'
                             }
-                        },*/
-                        records: jsEtab,
-                        onSave: function (event) {
-                            var changes = w2ui['grid3'].getChanges();
-                            changes.forEach(function (c, i) {
-                                c.obj = 'etab';
-                                $.get('mailing/update',
-                                    c,
-                                    function (js) {
-                                        //finsession(js);		
-                                        js.rs.text = js.rs.nom + " " + js.rs.prenom;
-                                        setListe(js.rs, 'etab');
-                                        if (changes.length == i + 1) w2alert(js.message);
-                                    }, "json");
-                            });
                         },
-                        onAdd: function (event) {
-                           /* w2ui['layout2'].toggle('top', true);
-                            w2ui['layout2'].hide('left', true);
-                            w2ui['layout2'].toggle('main', true);
-                            w2ui['layout2'].hide('right', true);*/
-                            openPopupE();
+                        {
+                            field: 'adresse_etab',
+                            caption: 'Adresse',
+                            size: '40%',
+                            editable: {
+                                type: 'text'
+                            }
                         },
-                        onDelete: function (event) {
-                            var itemsSelect = w2ui.grid3.getSelection();
-                            var p = {
-                                id: itemsSelect,
-                                obj: 'etab'
-                            };
-                            if (event.force) {
-                                $.get('mailing/delete',
-                                    p,
+                        {
+                            field: 'ville_etab',
+                            caption: 'Ville',
+                            size: '120px',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'cp_etab',
+                            caption: 'Code Postal',
+                            size: '30%',
+                            editable: {
+                                type: 'int'
+                            }
+                        },
+                        {
+                            field: 'pays_etab',
+                            caption: 'Pays',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'responsableLabo_etab',
+                            caption: 'Responsable du Labo',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'origine_etab',
+                            caption: 'Origine Etablissement',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                    ],
+                    /*toolbar: {
+                        items: [{
+                            id: 'import',
+                            type: 'button',
+                            caption: 'Importer',
+                            icon: 'fas fa-file-import'
+                        }],
+                        onClick: function (event) {
+                            if (event.target == 'import') {
+                                openPopupImportData();
+                            }
+                        }
+                    },*/
+                    records: jsEtab,
+                    onSave: function (event) {
+                        var changes = w2ui['grid3'].getChanges();
+                        changes.forEach(function (c, i) {
+                            c.obj = 'etab';
+                            $.get('mailing/update',
+                                c,
+                                function (js) {
+                                    //finsession(js);		
+                                    js.rs.text = js.rs.nom + " " + js.rs.prenom;
+                                    setListe(js.rs, 'etab');
+                                    if (changes.length == i + 1) w2alert(js.message);
+                                }, "json");
+                        });
+                    },
+                    onAdd: function (event) {
+                        /* w2ui['layout2'].toggle('top', true);
+                         w2ui['layout2'].hide('left', true);
+                         w2ui['layout2'].toggle('main', true);
+                         w2ui['layout2'].hide('right', true);*/
+                        openPopupE();
+                    },
+                    onDelete: function (event) {
+                        var itemsSelect = w2ui.grid3.getSelection();
+                        var p = {
+                            id: itemsSelect,
+                            obj: 'etab'
+                        };
+                        if (event.force) {
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+                    },
+                    onSearch: function (event) {
+                        var grid = this;
+                        if (event.searchField == "multi") {
+                            event.onComplete = function () {
+                                $.get('cherche/mailing', {
+                                        "searchData": event.searchData
+                                    },
                                     function (js) {
-                                        // finsession(js);
+                                        //finsession(js);
+                                        var ids = [];
+                                        js.rs.forEach(function (d) {
+                                            jsEtab.forEach(function (l, i) {
+                                                if (l.id_etab == d) ids
+                                                    .push(i);
+                                            });
+                                        });
+                                        grid.last.searchIds = ids;
+                                        grid.total = grid.last.searchIds.length;
+                                        grid.buffered = grid.total;
+                                        grid.refresh();
                                         w2alert(js.message);
                                     }, "json");
                             }
-                        },
-                        onSearch: function (event) {
-                            var grid = this;
-                            if (event.searchField == "multi") {
-                                event.onComplete = function () {
-                                    $.get('cherche/mailing', {
-                                            "searchData": event.searchData
-                                        },
-                                        function (js) {
-                                            //finsession(js);
-                                            var ids = [];
-                                            js.rs.forEach(function (d) {
-                                                jsEtab.forEach(function (l, i) {
-                                                    if (l.id_etab == d) ids
-                                                        .push(i);
-                                                });
-                                            });
-                                            grid.last.searchIds = ids;
-                                            grid.total = grid.last.searchIds.length;
-                                            grid.buffered = grid.total;
-                                            grid.refresh();
-                                            w2alert(js.message);
-                                        }, "json");
-                                }
-                            } else {
-                                grid.localSearch();
-                                event.onComplete = function () {
-                                    grid.last.searchIds = grid.last.searchIds;
-                                    grid.total = grid.last.searchIds.length;
-                                    grid.buffered = grid.total;
-                                    grid.refresh();
-                                }
-                            }
-                        },
-                    }))
-                // Création du formulaire d'ajout d'établissement
-                    function openPopupE () {
-                    if (!w2ui.foo2) {
-                        $().w2form({
-                            name: 'foo2',
-                            style: 'border: 0px; background-color: transparent;',
-                            formHTML: 
-                                '<div class="w2ui-page page-0">'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Affiliation:</label>'+
-                                '        <div>'+
-                                '           <input name="affiliation1_etab" type="text" maxlength="100" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>URL Labo:</label>'+
-                                '        <div>'+
-                                '            <input name="url_labo_etab" type="text" maxlength="150" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Adresse:</label>'+
-                                '        <div>'+
-                                '            <input name="adresse_etab" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Ville:</label>'+
-                                '        <div>'+
-                                '            <input name="ville_etab" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Code Postal:</label>'+
-                                '        <div>'+
-                                '            <input name="cp_etab" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Pays:</label>'+
-                                '        <div>'+
-                                '            <input name="pays_etab" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Responsable Labo:</label>'+
-                                '        <div>'+
-                                '            <input name="responsableLabo_etab" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Origine:</label>'+
-                                '        <div>'+
-                                '            <input name="origine_etab" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '</div>'+
-                                '<div class="w2ui-buttons">'+
-                                '    <button class="w2ui-btn" name="reset">Reset</button>'+
-                                '    <button class="w2ui-btn" name="save">Save</button>'+
-                                '</div>',
-                            fields: [
-                                { field: 'affiliation1_etab', type: 'text', required: true },
-                                { field: 'url_labo_etab', type: 'text' },
-                                { field: 'adresse_etab', type: 'text' },
-                                { field: 'ville_etab', type: 'text' },
-                                { field: 'cp_etab', type: 'text' },
-                                { field: 'pays_etab', type: 'text' },
-                                { field: 'responsableLabo_etab', type: 'text' },
-                                { field: 'origine_etab', type: 'text' }
-                            ],
-                            actions: {
-                                "save": function () {
-                                            var errors = this.validate();
-                                            if (errors.length > 0) return;
-                                            var data = this.record;
-                                            data.obj = "etab";
-                                            $.get('mailing/insert',
-                                                data,
-                                                function (js) {
-                                                    //finsession(js);
-                                                    w2alert(js.message);
-                                                }, "json");
-                                        },
-                                "reset": function () { this.clear(); }
-                            }
-                        });
-                    }
-                    $().w2popup('open', {
-                        title   : 'Formulaire Affiliation',
-                        body    : '<div id="form" style="width: 100%; height: 100%;"></div>',
-                        style   : 'padding: 15px 0px 0px 0px',
-                        width   : 500,
-                        height  : 600, 
-                        showMax : true,
-                        onToggle: function (event) {
-                            $(w2ui.foo.box).hide();
+                        } else {
+                            grid.localSearch();
                             event.onComplete = function () {
-                                $(w2ui.foo.box).show();
-                                w2ui.foo.resize();
+                                grid.last.searchIds = grid.last.searchIds;
+                                grid.total = grid.last.searchIds.length;
+                                grid.buffered = grid.total;
+                                grid.refresh();
                             }
-                        },
-                        onOpen: function (event) {
-                            event.onComplete = function () {
-                                // specifying an onOpen handler instead is equivalent to specifying an onBeforeOpen handler, which would make this code execute too early and hence not deliver.
-                                $('#w2ui-popup #form').w2render('foo2');
+                        }
+                    },
+                }))
+            // Création du formulaire d'ajout d'établissement
+            function openPopupE() {
+                if (!w2ui.foo2) {
+                    $().w2form({
+                        name: 'foo2',
+                        style: 'border: 0px; background-color: transparent;',
+                        formHTML: '<div class="w2ui-page page-0">' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Affiliation:</label>' +
+                            '        <div>' +
+                            '           <input name="affiliation1_etab" type="text" maxlength="100" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>URL Labo:</label>' +
+                            '        <div>' +
+                            '            <input name="url_labo_etab" type="text" maxlength="150" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Adresse:</label>' +
+                            '        <div>' +
+                            '            <input name="adresse_etab" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Ville:</label>' +
+                            '        <div>' +
+                            '            <input name="ville_etab" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Code Postal:</label>' +
+                            '        <div>' +
+                            '            <input name="cp_etab" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Pays:</label>' +
+                            '        <div>' +
+                            '            <input name="pays_etab" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Responsable Labo:</label>' +
+                            '        <div>' +
+                            '            <input name="responsableLabo_etab" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Origine:</label>' +
+                            '        <div>' +
+                            '            <input name="origine_etab" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '</div>' +
+                            '<div class="w2ui-buttons">' +
+                            '    <button class="w2ui-btn" name="reset">Reset</button>' +
+                            '    <button class="w2ui-btn" name="save">Save</button>' +
+                            '</div>',
+                        fields: [{
+                                field: 'affiliation1_etab',
+                                type: 'text',
+                                required: true
+                            },
+                            {
+                                field: 'url_labo_etab',
+                                type: 'text'
+                            },
+                            {
+                                field: 'adresse_etab',
+                                type: 'text'
+                            },
+                            {
+                                field: 'ville_etab',
+                                type: 'text'
+                            },
+                            {
+                                field: 'cp_etab',
+                                type: 'text'
+                            },
+                            {
+                                field: 'pays_etab',
+                                type: 'text'
+                            },
+                            {
+                                field: 'responsableLabo_etab',
+                                type: 'text'
+                            },
+                            {
+                                field: 'origine_etab',
+                                type: 'text'
+                            }
+                        ],
+                        actions: {
+                            "save": function () {
+                                var errors = this.validate();
+                                if (errors.length > 0) return;
+                                var data = this.record;
+                                data.obj = "etab";
+                                $.get('mailing/insert',
+                                    data,
+                                    function (js) {
+                                        //finsession(js);
+                                        w2ui['grid3'].add(js.rs);
+                                    }, "json");
+                                w2popup.close();
+                            },
+                            "reset": function () {
+                                this.clear();
                             }
                         }
                     });
                 }
-                // Création de la grille historique des envois / établissement
-                    w2ui['layout2'].content('main',
+                $().w2popup('open', {
+                    title: 'Formulaire Affiliation',
+                    body: '<div id="form" style="width: 100%; height: 100%;"></div>',
+                    style: 'padding: 15px 0px 0px 0px',
+                    width: 500,
+                    height: 600,
+                    showMax: true,
+                    onToggle: function (event) {
+                        $(w2ui.foo.box).hide();
+                        event.onComplete = function () {
+                            $(w2ui.foo.box).show();
+                            w2ui.foo.resize();
+                        }
+                    },
+                    onOpen: function (event) {
+                        event.onComplete = function () {
+                            // specifying an onOpen handler instead is equivalent to specifying an onBeforeOpen handler, which would make this code execute too early and hence not deliver.
+                            $('#w2ui-popup #form').w2render('foo2');
+                        }
+                    }
+                });
+            }
+            // Création de la grille historique des envois / établissement
+            w2ui['layout2'].content('main',
                 $('#grid5').w2grid({
                     name: 'grid5',
                     header: 'Historique des envois',
@@ -919,6 +1003,13 @@
                         type: 'date'
                     }, ],
                     columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
                             field: 'date_envoi',
                             caption: 'Date dernier mail',
                             type: 'date',
@@ -945,9 +1036,9 @@
                         sdate: '4/3/2012'
                     }]
                 }))
-        
-             // Création du layout 3e onglet (Nomenclatures)
-             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
+
+            // Création du layout 3e onglet (Nomenclatures)
+            var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
             $('#layout3').w2layout({
                 name: 'layout3',
                 panels: [{
@@ -1077,10 +1168,10 @@
                         });
                     },
                     onAdd: function (event) {
-                       /* w2ui['layout3'].hide('top', true)
-                        w2ui['layout3'].hide('left', true);
-                        w2ui['layout3'].hide('main', true);
-                        w2ui['layout3'].toggle('right', true); */
+                        /* w2ui['layout3'].hide('top', true)
+                         w2ui['layout3'].hide('left', true);
+                         w2ui['layout3'].hide('main', true);
+                         w2ui['layout3'].toggle('right', true); */
                         openPopupN();
                     },
                     onDelete: function (event) {
@@ -1133,89 +1224,106 @@
                     },
                 }))
             // Création du formulaire d'ajout de nomenclature
-                function openPopupN () {
-                    if (!w2ui.foo3) {
-                        $().w2form({
-                            name: 'foo3',
-                            style: 'border: 0px; background-color: transparent;',
-                            formHTML: 
-                                '<div class="w2ui-page page-0">'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Code:</label>'+
-                                '        <div>'+
-                                '           <input name="code" type="text" maxlength="100" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Label:</label>'+
-                                '        <div>'+
-                                '            <input name="label" type="text" maxlength="100" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>ID Parent:</label>'+
-                                '        <div>'+
-                                '            <input name="id_parent" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '    <div class="w2ui-field">'+
-                                '        <label>Catégorie Parent:</label>'+
-                                '        <div>'+
-                                '            <input name="label_parent" type="text" style="width: 250px"/>'+
-                                '        </div>'+
-                                '    </div>'+
-                                '</div>'+
-                                '<div class="w2ui-buttons">'+
-                                '    <button class="w2ui-btn" name="reset">Reset</button>'+
-                                '    <button class="w2ui-btn" name="save">Save</button>'+
-                                '</div>',
-                            fields: [
-                                { field: 'code', type: 'text', required: true },
-                                { field: 'label', type: 'text', required: true },
-                                { field: 'id_parent', type: 'text' },
-                                { field: 'label_parent', type: 'text' }
-                            ],
-                            actions: {
-                                "save": function () {
-                                            var errors = this.validate();
-                                            if (errors.length > 0) return;
-                                            var data = this.record;
-                                            data.obj = "nomenclature";
-                                            $.get('mailing/insert',
-                                                data,
-                                                function (js) {
-                                                    //finsession(js);
-                                                    w2alert(js.message);
-                                                }, "json");
-                                        },
-                                "reset": function () { this.clear(); }
+            function openPopupN() {
+                if (!w2ui.foo3) {
+                    $().w2form({
+                        name: 'foo3',
+                        style: 'border: 0px; background-color: transparent;',
+                        formHTML: '<div class="w2ui-page page-0">' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Code:</label>' +
+                            '        <div>' +
+                            '           <input name="code" type="text" maxlength="100" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Label:</label>' +
+                            '        <div>' +
+                            '            <input name="label" type="text" maxlength="100" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>ID Parent:</label>' +
+                            '        <div>' +
+                            '            <input name="id_parent" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Catégorie Parent:</label>' +
+                            '        <div>' +
+                            '            <input name="label_parent" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '</div>' +
+                            '<div class="w2ui-buttons">' +
+                            '    <button class="w2ui-btn" name="reset">Reset</button>' +
+                            '    <button class="w2ui-btn" name="save">Save</button>' +
+                            '</div>',
+                        fields: [{
+                                field: 'code',
+                                type: 'text',
+                                required: true
+                            },
+                            {
+                                field: 'label',
+                                type: 'text',
+                                required: true
+                            },
+                            {
+                                field: 'id_parent',
+                                type: 'text',
+                                required: true
+                            },
+                            {
+                                field: 'label_parent',
+                                type: 'text',
+                                required: true
                             }
-                        });
-                    }
-                    $().w2popup('open', {
-                        title   : 'Formulaire Nomenclature',
-                        body    : '<div id="form" style="width: 100%; height: 100%;"></div>',
-                        style   : 'padding: 15px 0px 0px 0px',
-                        width   : 500,
-                        height  : 300, 
-                        showMax : true,
-                        onToggle: function (event) {
-                            $(w2ui.foo.box).hide();
-                            event.onComplete = function () {
-                                $(w2ui.foo.box).show();
-                                w2ui.foo.resize();
-                            }
-                        },
-                        onOpen: function (event) {
-                            event.onComplete = function () {
-                                // specifying an onOpen handler instead is equivalent to specifying an onBeforeOpen handler, which would make this code execute too early and hence not deliver.
-                                $('#w2ui-popup #form').w2render('foo3');
+                        ],
+                        actions: {
+                            "save": function () {
+                                var errors = this.validate();
+                                if (errors.length > 0) return;
+                                var data = this.record;
+                                data.obj = "nomenclature";
+                                $.get('mailing/insert',
+                                    data,
+                                    function (js) {
+                                        //finsession(js);
+                                        w2ui['grid4'].add(js.rs);
+                                    }, "json");
+                                w2popup.close();
+                            },
+                            "reset": function () {
+                                this.clear();
                             }
                         }
                     });
                 }
-                // Création de la grille historique des envois / nomenclature
-                w2ui['layout3'].content('main',
+                $().w2popup('open', {
+                    title: 'Formulaire Nomenclature',
+                    body: '<div id="form" style="width: 100%; height: 100%;"></div>',
+                    style: 'padding: 15px 0px 0px 0px',
+                    width: 500,
+                    height: 300,
+                    showMax: true,
+                    onToggle: function (event) {
+                        $(w2ui.foo.box).hide();
+                        event.onComplete = function () {
+                            $(w2ui.foo.box).show();
+                            w2ui.foo.resize();
+                        }
+                    },
+                    onOpen: function (event) {
+                        event.onComplete = function () {
+                            // specifying an onOpen handler instead is equivalent to specifying an onBeforeOpen handler, which would make this code execute too early and hence not deliver.
+                            $('#w2ui-popup #form').w2render('foo3');
+                        }
+                    }
+                });
+            }
+            // Création de la grille historique des envois / nomenclature
+            w2ui['layout3'].content('main',
                 $('#grid6').w2grid({
                     name: 'grid6',
                     header: 'Historique des envois',
@@ -1230,6 +1338,13 @@
                         type: 'date'
                     }, ],
                     columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
                             field: 'date_envoi',
                             caption: 'Date dernier mail',
                             type: 'date',
@@ -1252,20 +1367,20 @@
                 }))
         });
 
-        // Fonction pour importer les fichiers
-        function openPopupImportData () {
+        // Fonction pour ouvrir la popup : importer les fichiers
+        function openPopupImportData() {
             w2popup.open({
                 title: 'Importation des fichiers prospects',
                 body: '<iframe height="100%" width="100%" scrolling="no" src="mailing/import"></iframe>',
-                width     : 1080,
-                height    : 740,
-                overflow  : 'hidden',
-                color     : '#333',
-                speed     : '0.3',
-                opacity   : '0.8',
-                modal     : true,
-                showClose : true,
-                showMax   : false,
+                width: 1080,
+                height: 740,
+                overflow: 'hidden',
+                color: '#333',
+                speed: '0.3',
+                opacity: '0.8',
+                modal: true,
+                showClose: true,
+                showMax: false,
             });
         }
     </script>
