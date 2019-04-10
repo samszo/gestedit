@@ -30,6 +30,33 @@
         var jsNomen = <?php echo $this->jsNomen; ?>;
         var jsProsp = <?php echo $this->jsProsp; ?>;
         var jsEtab = <?php echo $this->jsEtab; ?>;
+        var srchNom = [], srchIdP = [], srchCod = [], srchCat = [], triIdP = [], triCat = [];
+        var e;
+        var data = jsNomen;
+
+        // Tri des données pour les recherches dans les grids
+        function tri(e, f){
+            for (i= 0; i < e.length; i++){
+                if(e[i] != e[i+1]){
+                    f.push(e[i]);
+                }
+            }   
+        };
+        data.forEach(function(d){
+            srchNom.push(d.label);
+            srchCod.push(d.code);
+            srchCod.sort();
+            triIdP.push(d.id_parent);
+            triIdP.sort();
+            triCat.push(d.label_parent);
+            triCat.sort();
+        });
+        new function(){
+            tri(triIdP, srchIdP);
+            tri(triCat, srchCat);
+        };
+
+        
 
         var urlP = "../";
         // Fonction pour exporter un fichier
@@ -137,26 +164,74 @@
                             type: 'text'
                         },
                         {
-                            field: 'email',
+                            field: 'email_prospect',
                             caption: 'Email',
                             type: 'text'
                         },
                         {
-                            field: 'url_labo_etab',
-                            caption: 'URL Labo',
+                            field: 'email2_prospect',
+                            caption: 'Email',
                             type: 'text'
                         },
                         {
-                            field: 'clientIste_prospect',
-                            caption: 'Client Iste',
+                            field: 'affiliation1_prospect',
+                            caption: 'Affiliation 1',
+                            type: 'enum',
+                            options: {
+                                items:[]
+                            }
+                        },
+                        {
+                            field: 'affiliation2_prospect',
+                            caption: 'Affiliation 2',
+                            type: 'enum',
+                            options: {
+                                items:[]
+                            }
+                        },
+                        {
+                            field: 'affiliation3_prospect',
+                            caption: 'Affiliation 3',
+                            type: 'enum',
+                            options: {
+                                items:[]
+                            }
+                        },
+                        {
+                            field: 'code_nomen1',
+                            caption: 'Code Nmclt 1',
+                            type: 'enum',
+                            options: {
+                                items:[]
+                            }
+                        },
+                        {
+                            field: 'code_nomen2',
+                            caption: 'Code Nmclt 2',
+                            type: 'enum',
+                            options: {
+                                items:[]
+                            }
+                        },
+                        {
+                            field: 'code_nomen3',
+                            caption: 'Code Nmclt 3',
+                            type: 'enum',
+                            options: {
+                                items:['141','142']
+                            }
+                        },
+                        {
+                            field: 'membreEdito_prospect',
+                            caption: 'Membre editorial',
                             type: 'combo',
                             options: {
                                 items: ['0', '1']
                             }
                         },
                         {
-                            field: 'membreEdito_prospect',
-                            caption: 'Membre editorial',
+                            field: 'clientIste_prospect',
+                            caption: 'Client ISTE',
                             type: 'combo',
                             options: {
                                 items: ['0', '1']
@@ -676,24 +751,22 @@
                     multiSearch: true,
                     searches: [{
                             field: 'affiliation1_etab',
-                            caption: 'Affiliation 1',
+                            caption: 'Affiliation',
+                            type: 'combo',
+                            options: {
+                                items: []
+                            }
+                        },
+                        {
+                            field: 'cp_etab',
+                            caption: 'Code Postal',
                             type: 'text'
                         },
                         {
-                            field: 'affiliation2_etab',
-                            caption: 'Affiliation 2',
+                            field: 'pays_etab',
+                            caption: 'Pays',
                             type: 'text'
                         },
-                        {
-                            field: 'affiliation3_etab',
-                            caption: 'Affiliation 3',
-                            type: 'text'
-                        },
-                        {
-                            field: 'responsableLabo_etab',
-                            caption: 'Responsable Labo',
-                            type: 'text'
-                        }
                     ],
                     columns: [{
                             field: 'recid',
@@ -1094,22 +1167,34 @@
                     searches: [{
                             field: 'label_parent',
                             caption: 'Catégorie Parent',
-                            type: 'text'
+                            type: 'enum',
+                            options: {
+                                items: srchCat
+                            }
+                        },
+                        {
+                            field: 'id_parent',
+                            caption: 'id Parent',
+                            type: 'enum',
+                            options: {
+                                items: srchIdP
+                            }
                         },
                         {
                             field: 'label',
                             caption: 'label',
-                            type: 'text'
+                            type: 'enum',
+                            options: {
+                                items: srchNom
+                            }
                         },
                         {
                             field: 'code',
                             caption: 'code',
-                            type: 'text'
-                        },
-                        {
-                            field: 'id_parent',
-                            caption: 'id Par',
-                            type: 'text'
+                            type: 'enum',
+                            options: {
+                                items: srchCod
+                            }
                         }
                     ],
                     columns: [{
