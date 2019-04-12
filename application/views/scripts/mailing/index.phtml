@@ -57,8 +57,6 @@
             tri(triCat, srchCat);
         };
 
-        
-
         var urlP = "../";
         // Fonction pour exporter un fichier
         function exportByPost(ids, obj) {
@@ -307,7 +305,8 @@
                             caption: 'Code 1',
                             size: '60px',
                             editable: {
-                                type: 'text'
+                                type: 'combo',
+                                items: srchCod
                             }
                         },
                         {
@@ -315,7 +314,8 @@
                             caption: 'Code 2',
                             size: '60px',
                             editable: {
-                                type: 'text'
+                                type: 'combo',
+                                items: srchCod
                             }
                         },
                         {
@@ -323,7 +323,8 @@
                             caption: 'Code 3',
                             size: '60px',
                             editable: {
-                                type: 'text'
+                                type: 'combo',
+                                items: srchCod
                             }
                         },
                         {
@@ -753,7 +754,7 @@
                     searches: [{
                             field: 'affiliation1_etab',
                             caption: 'Affiliation',
-                            type: 'combo',
+                            type: 'enum',
                             options: {
                                 items: []
                             }
