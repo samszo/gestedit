@@ -32,7 +32,6 @@
         var jsEtab = <?php echo $this->jsEtab; ?>;
         // Variables pour la recherche Nomenclature
         var srchNom = [], srchIdP = [], srchCod = [], srchCat = [], triIdP = [], triCat = [];
-        var e;
         var data = jsNomen;
 
         // Tri des données pour les recherches dans les grids
@@ -163,17 +162,17 @@
                             type: 'text'
                         },
                         {
-                            field: 'email_prospect',
+                            field: 'email',
                             caption: 'Email',
                             type: 'text'
                         },
                         {
-                            field: 'email2_prospect',
+                            field: 'email2',
                             caption: 'Email 2',
                             type: 'text'
                         },
                         {
-                            field: 'affiliation1_prospect',
+                            field: 'affiliation1',
                             caption: 'Affiliation 1',
                             type: 'enum',
                             options: {
@@ -181,7 +180,7 @@
                             }
                         },
                         {
-                            field: 'affiliation2_prospect',
+                            field: 'affiliation2',
                             caption: 'Affiliation 2',
                             type: 'enum',
                             options: {
@@ -189,7 +188,7 @@
                             }
                         },
                         {
-                            field: 'affiliation3_prospect',
+                            field: 'affiliation3',
                             caption: 'Affiliation 3',
                             type: 'enum',
                             options: {
@@ -221,7 +220,7 @@
                             }
                         },
                         {
-                            field: 'membreEdito_prospect',
+                            field: 'membreEdito',
                             caption: 'Membre editorial',
                             type: 'combo',
                             options: {
@@ -229,7 +228,7 @@
                             }
                         },
                         {
-                            field: 'clientIste_prospect',
+                            field: 'clientIste',
                             caption: 'Client ISTE',
                             type: 'combo',
                             options: {
@@ -261,7 +260,7 @@
                             }
                         },
                         {
-                            field: 'email_prospect',
+                            field: 'email',
                             caption: 'Email',
                             size: '40%',
                             editable: {
@@ -269,7 +268,7 @@
                             }
                         },
                         {
-                            field: 'email2_prospect',
+                            field: 'email2',
                             caption: 'Email2',
                             size: '120px',
                             editable: {
@@ -277,7 +276,7 @@
                             }
                         },
                         {
-                            field: 'affiliation1_prospect',
+                            field: 'affiliation1',
                             caption: 'Affiliation 1',
                             size: '120px',
                             editable: {
@@ -285,7 +284,7 @@
                             }
                         },
                         {
-                            field: 'affiliation2_prospect',
+                            field: 'affiliation2',
                             caption: 'Affiliation 2',
                             size: '120px',
                             editable: {
@@ -293,7 +292,7 @@
                             }
                         },
                         {
-                            field: 'affiliation3_prospect',
+                            field: 'affiliation3',
                             caption: 'Affiliation 3',
                             size: '120px',
                             editable: {
@@ -328,7 +327,7 @@
                             }
                         },
                         {
-                            field: 'langue_prospect',
+                            field: 'langue',
                             caption: 'Langue',
                             size: '30%',
                             editable: {
@@ -336,7 +335,7 @@
                             }
                         },
                         {
-                            field: 'clientIste_prospect',
+                            field: 'clientIste',
                             caption: 'Client Iste',
                             size: '30%',
                             editable: {
@@ -345,7 +344,7 @@
 
                         },
                         {
-                            field: 'membreEdito_prospect',
+                            field: 'membreEdito',
                             caption: 'Membre editorial',
                             size: '30%',
                             editable: {
@@ -359,6 +358,12 @@
                             editable: {
                                 type: 'text'
                             }
+                        },
+                        {
+                            field: 'maj',
+                            caption: 'Date MAJ',
+                            size: '30%',
+                            type: 'date'
                         }
                     ],
                     toolbar: {
@@ -472,37 +477,37 @@
                             '    <div class="w2ui-field">' +
                             '        <label>Langue:</label>' +
                             '        <div>' +
-                            '           <input name="langue_prospect" type="text" maxlength="100" style="width: 250px"/>' +
+                            '           <input name="langue" type="text" maxlength="100" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Email:</label>' +
                             '        <div>' +
-                            '           <input name="email_prospect" type="text" maxlength="100" style="width: 250px"/>' +
+                            '           <input name="email" type="text" maxlength="100" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Email 2:</label>' +
                             '        <div>' +
-                            '            <input name="email2_prospect" type="text" maxlength="150" style="width: 250px"/>' +
+                            '            <input name="email2" type="text" maxlength="150" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Affiliation 1:</label>' +
                             '        <div>' +
-                            '            <input name="affiliation1_prospect" type="text" maxlength="150" style="width: 250px"/>' +
+                            '            <input name="affiliation1" type="text" maxlength="150" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Affiliation 2:</label>' +
                             '        <div>' +
-                            '            <input name="affiliation2_prospect" type="text" maxlength="150" style="width: 250px"/>' +
+                            '            <input name="affiliation2" type="text" maxlength="150" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Affiliation 3:</label>' +
                             '        <div>' +
-                            '            <input name="affiliation3_prospect" type="text" maxlength="150" style="width: 250px"/>' +
+                            '            <input name="affiliation3" type="text" maxlength="150" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
@@ -526,13 +531,13 @@
                             '    <div class="w2ui-field">' +
                             '        <label>Client ISTE:</label>' +
                             '        <div>' +
-                            '            <input name="clientIste_prospect" type="checkbox" style="width: 250px"/>' +
+                            '            <input name="clientIste" type="checkbox" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Membre Edito:</label>' +
                             '        <div>' +
-                            '            <input name="membreEdito_prospect" type="checkbox" style="width: 250px"/>' +
+                            '            <input name="membreEdito" type="checkbox" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
@@ -552,29 +557,29 @@
                                 required: true
                             },
                             {
-                                field: 'langue_prospect',
+                                field: 'langue',
                                 type: 'text'
                             },
                             {
-                                field: 'email_prospect',
+                                field: 'email',
                                 type: 'email',
                                 required: true
                             },
                             {
-                                field: 'email2_prospect',
+                                field: 'email2',
                                 type: 'email'
                             },
                             {
-                                field: 'affiliation1_prospect',
+                                field: 'affiliation1',
                                 type: 'text',
                                 required: true
                             },
                             {
-                                field: 'affiliation2_prospect',
+                                field: 'affiliation2',
                                 type: 'text'
                             },
                             {
-                                field: 'affiliation3_prospect',
+                                field: 'affiliation3',
                                 type: 'text'
                             },
                             {
@@ -591,11 +596,11 @@
                                 type: 'text'
                             },
                             {
-                                field: 'clientIste_prospect',
+                                field: 'clientIste',
                                 type: 'checkbox'
                             },
                             {
-                                field: 'membreEdito_prospect',
+                                field: 'membreEdito',
                                 type: 'checkbox'
                             },
                             {
@@ -752,7 +757,7 @@
                     },
                     multiSearch: true,
                     searches: [{
-                            field: 'affiliation1_etab',
+                            field: 'affiliation1',
                             caption: 'Affiliation',
                             type: 'enum',
                             options: {
@@ -760,12 +765,12 @@
                             }
                         },
                         {
-                            field: 'cp_etab',
+                            field: 'cp',
                             caption: 'Code Postal',
                             type: 'text'
                         },
                         {
-                            field: 'pays_etab',
+                            field: 'pays',
                             caption: 'Pays',
                             type: 'text'
                         },
@@ -778,7 +783,7 @@
                             resizable: true
                         },
                         {
-                            field: 'affiliation1_etab',
+                            field: 'affiliation1',
                             caption: 'Affiliation',
                             size: '30%',
                             editable: {
@@ -786,7 +791,7 @@
                             }
                         },
                         {
-                            field: 'url_labo_etab',
+                            field: 'url_labo',
                             caption: 'URL du Labo',
                             size: '40%',
                             editable: {
@@ -794,7 +799,7 @@
                             }
                         },
                         {
-                            field: 'adresse_etab',
+                            field: 'adresse',
                             caption: 'Adresse',
                             size: '40%',
                             editable: {
@@ -802,7 +807,7 @@
                             }
                         },
                         {
-                            field: 'ville_etab',
+                            field: 'ville',
                             caption: 'Ville',
                             size: '120px',
                             editable: {
@@ -810,7 +815,7 @@
                             }
                         },
                         {
-                            field: 'cp_etab',
+                            field: 'cp',
                             caption: 'Code Postal',
                             size: '30%',
                             editable: {
@@ -818,7 +823,7 @@
                             }
                         },
                         {
-                            field: 'pays_etab',
+                            field: 'pays',
                             caption: 'Pays',
                             size: '30%',
                             editable: {
@@ -826,7 +831,7 @@
                             }
                         },
                         {
-                            field: 'responsableLabo_etab',
+                            field: 'responsableLabo',
                             caption: 'Responsable du Labo',
                             size: '30%',
                             editable: {
@@ -834,7 +839,7 @@
                             }
                         },
                         {
-                            field: 'origine_etab',
+                            field: 'origine',
                             caption: 'Origine Etablissement',
                             size: '30%',
                             editable: {
@@ -936,49 +941,49 @@
                             '    <div class="w2ui-field">' +
                             '        <label>Affiliation:</label>' +
                             '        <div>' +
-                            '           <input name="affiliation1_etab" type="text" maxlength="100" style="width: 250px"/>' +
+                            '           <input name="affiliation1" type="text" maxlength="100" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>URL Labo:</label>' +
                             '        <div>' +
-                            '            <input name="url_labo_etab" type="text" maxlength="150" style="width: 250px"/>' +
+                            '            <input name="url_labo" type="text" maxlength="150" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Adresse:</label>' +
                             '        <div>' +
-                            '            <input name="adresse_etab" type="text" style="width: 250px"/>' +
+                            '            <input name="adresse" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Ville:</label>' +
                             '        <div>' +
-                            '            <input name="ville_etab" type="text" style="width: 250px"/>' +
+                            '            <input name="ville" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Code Postal:</label>' +
                             '        <div>' +
-                            '            <input name="cp_etab" type="text" style="width: 250px"/>' +
+                            '            <input name="cp" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Pays:</label>' +
                             '        <div>' +
-                            '            <input name="pays_etab" type="text" style="width: 250px"/>' +
+                            '            <input name="pays" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Responsable Labo:</label>' +
                             '        <div>' +
-                            '            <input name="responsableLabo_etab" type="text" style="width: 250px"/>' +
+                            '            <input name="responsableLabo" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
                             '        <label>Origine:</label>' +
                             '        <div>' +
-                            '            <input name="origine_etab" type="text" style="width: 250px"/>' +
+                            '            <input name="origine" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '</div>' +
@@ -987,36 +992,36 @@
                             '    <button class="w2ui-btn" name="save">Save</button>' +
                             '</div>',
                         fields: [{
-                                field: 'affiliation1_etab',
+                                field: 'affiliation1',
                                 type: 'text',
                                 required: true
                             },
                             {
-                                field: 'url_labo_etab',
+                                field: 'url_labo',
                                 type: 'text'
                             },
                             {
-                                field: 'adresse_etab',
+                                field: 'adresse',
                                 type: 'text'
                             },
                             {
-                                field: 'ville_etab',
+                                field: 'ville',
                                 type: 'text'
                             },
                             {
-                                field: 'cp_etab',
+                                field: 'cp',
                                 type: 'text'
                             },
                             {
-                                field: 'pays_etab',
+                                field: 'pays',
                                 type: 'text'
                             },
                             {
-                                field: 'responsableLabo_etab',
+                                field: 'responsableLabo',
                                 type: 'text'
                             },
                             {
-                                field: 'origine_etab',
+                                field: 'origine',
                                 type: 'text'
                             }
                         ],

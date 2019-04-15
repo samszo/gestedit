@@ -35,12 +35,12 @@ class MailingController extends Zend_Controller_Action
         switch ($this->_getParam('obj')) {
             case 'prospect':
                 $dbP = new Model_DbTable_Iste_prospect();
-                $arr = array('nom_prenom'=>$this->_getParam('nom_prenom'),'email_prospect'=>$this->_getParam('email_prospect'),'email2_prospect'=>$this->_getParam('email2_prospect'), 'affiliation1_prospect'=>$this->_getParam('affiliation1_prospect'),'affiliation2_prospect'=>$this->_getParam('affiliation2_prospect'),'affiliation3_prospect'=>$this->_getParam('affiliation3_prospect'),'code_nomen1'=>$this->_getParam('code_nomen1'),'code_nomen2'=>$this->_getParam('code_nomen2'),'code_nomen3'=>$this->_getParam('code_nomen3'), 'langue_prospect'=>$this->_getParam('langue_prospect'),'clientIste_prospect'=>$this->_getParam('clientIste_prospect'),'membreEdito_prospect'=>$this->_getParam('membreEdito_prospect'),'unsub'=>$this->_getParam('unsub'));
+                $arr = array('nom_prenom'=>$this->_getParam('nom_prenom'),'email'=>$this->_getParam('email'),'email2'=>$this->_getParam('email2'), 'affiliation1'=>$this->_getParam('affiliation1'),'affiliation2'=>$this->_getParam('affiliation2'),'affiliation3'=>$this->_getParam('affiliation3'),'code_nomen1'=>$this->_getParam('code_nomen1'),'code_nomen2'=>$this->_getParam('code_nomen2'),'code_nomen3'=>$this->_getParam('code_nomen3'), 'langue'=>$this->_getParam('langue'),'clientIste'=>$this->_getParam('clientIste'),'membreEdito'=>$this->_getParam('membreEdito'),'unsub'=>$this->_getParam('unsub'));
                 $rs = $dbP->ajouter($arr, true, true);
                 break;
             case 'etab':
                 $dbE = new Model_DbTable_Iste_etab();
-                $arr = array('url_labo_etab'=>$this->_getParam('url_labo_etab'),'adresse_etab'=>$this->_getParam('adresse_etab'),'ville_etab'=>$this->_getParam('ville_etab'),'cp_etab'=>$this->_getParam('cp_etab'),'pays_etab'=>$this->_getParam('pays_etab'),'responsableLabo_etab'=>$this->_getParam('responsableLabo_etab'),'affiliation1_etab'=>$this->_getParam('affiliation1_etab'),'origine_etab'=>$this->_getParam('origine_etab'));
+                $arr = array('url_labo'=>$this->_getParam('url_labo'),'adresse'=>$this->_getParam('adresse'),'ville'=>$this->_getParam('ville'),'cp'=>$this->_getParam('cp'),'pays'=>$this->_getParam('pays'),'responsableLabo'=>$this->_getParam('responsableLabo'),'affiliation1'=>$this->_getParam('affiliation1'),'origine'=>$this->_getParam('origine'));
                 $rs = $dbE->ajouter($arr, true, true);
                 break;
             case 'nomenclature':
@@ -135,13 +135,16 @@ class MailingController extends Zend_Controller_Action
 		$dbHM = new Model_DbTable_Iste_histomodif();
 		$dbHM->ajouter(array("id_uti"=>$this->ssUti->uti["id_uti"],"action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id,"data"=>json_encode($params)));   		
     }
+    public function importAction()
+    {
+        $this->initInstance();
+    }
 
     public function insertdataAction()
     {
         $this->initInstance();
         $m = new Flux_Mailing();
         $m->insertdata($this->_getParam('idFic'));
-
     }
 
     function initInstance(){
