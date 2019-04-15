@@ -16,6 +16,10 @@ class Flux_Mailing extends Flux_Site{
 			$this->dbLivre = new Model_DbTable_Iste_livre();
 			$this->dbIsbn = new Model_DbTable_Iste_isbn();
 			$this->dbProspect = new Model_DbTable_Iste_prospect();
+			$this->dbEtab = new Model_DbTable_Iste_etab();
+			$this->dbNomen = new Model_DbTable_Iste_nomenclature();
+			$this->dbPxE = new Model_DbTable_Iste_prospectxetab();
+			$this->dbPxN = new Model_DbTable_Iste_prospectxnomenclature();
 
 		}
 	
@@ -73,7 +77,7 @@ class Flux_Mailing extends Flux_Site{
 	 * @param integer	$idFic
 	 * */ 
 
-	public function insertdata($idFic){	
+	public function insertData($idFic){	
 		$this->trace("DEB ".__METHOD__);
 		
 		$arr = $this->dbData->findByIdFic($idFic);
@@ -82,19 +86,19 @@ class Flux_Mailing extends Flux_Site{
 		foreach ($arr as $d) {
 			$data = array('nom_prenom'=>'col2', 'affiliation1'=>'col3', 'affiliation2'=>'col4', 'affiliation3'=>'col5', 'langue'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
 			$idP = $this->dbProspect->ajouter($data);
-/*
+	/*
 			//etab
-			$idE = ..
+			$idE = $this->dbEtab->ajouter(array());
 			//etabxprospect
-			ajouter $idP $idE
+			ajouter $idP $idE, $idPxE = $this->dbPxE->ajouter(array());
 			//nomenclature
-			$idN = 
+			$idN = $this->dbNomen->ajouter(array());
 			//prospectxnomencalture
-			ajouter $idP $idN
-*/
+			ajouter $idP $idN, $idPxN = $this->dbPxN->ajouter(array());
+	*/
 		}
 
-/*
+	/*
 		// Insertion de données dans prospect
 		switch ($this->_getParam('obj')) {
 		case 'prospect':
@@ -108,7 +112,7 @@ class Flux_Mailing extends Flux_Site{
 		default:
 		break;
 		}
-*/		
+	*/		
 		$this->trace("FIN ".__METHOD__);
 	}
 }

@@ -144,7 +144,7 @@ class MailingController extends Zend_Controller_Action
     {
         $this->initInstance();
         $m = new Flux_Mailing();
-        $m->insertdata($this->_getParam('idFic'));
+        $m->insertData($this->_getParam('idFic'));
     }
 
     function initInstance(){
