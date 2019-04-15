@@ -758,7 +758,23 @@
                     multiSearch: true,
                     searches: [{
                             field: 'affiliation1',
-                            caption: 'Affiliation',
+                            caption: 'Affiliation 1',
+                            type: 'enum',
+                            options: {
+                                items: []
+                            }
+                        },
+                        {
+                            field: 'affiliation2',
+                            caption: 'Affiliation 2',
+                            type: 'enum',
+                            options: {
+                                items: []
+                            }
+                        },
+                        {
+                            field: 'affiliation3',
+                            caption: 'Affiliation 3',
                             type: 'enum',
                             options: {
                                 items: []
@@ -784,7 +800,23 @@
                         },
                         {
                             field: 'affiliation1',
-                            caption: 'Affiliation',
+                            caption: 'Affiliation 1',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'affiliation2',
+                            caption: 'Affiliation 2',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'affiliation3',
+                            caption: 'Affiliation 3',
                             size: '30%',
                             editable: {
                                 type: 'text'
@@ -939,9 +971,21 @@
                         style: 'border: 0px; background-color: transparent;',
                         formHTML: '<div class="w2ui-page page-0">' +
                             '    <div class="w2ui-field">' +
-                            '        <label>Affiliation:</label>' +
+                            '        <label>Affiliation 1 :</label>' +
                             '        <div>' +
                             '           <input name="affiliation1" type="text" maxlength="100" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Affiliation 2 :</label>' +
+                            '        <div>' +
+                            '           <input name="affiliation2" type="text" maxlength="100" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Affiliation 3 :</label>' +
+                            '        <div>' +
+                            '           <input name="affiliation3" type="text" maxlength="100" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
@@ -995,6 +1039,14 @@
                                 field: 'affiliation1',
                                 type: 'text',
                                 required: true
+                            },
+                            {
+                                field: 'affiliation2',
+                                type: 'text'
+                            },
+                            {
+                                field: 'affiliation3',
+                                type: 'text'
                             },
                             {
                                 field: 'url_labo',

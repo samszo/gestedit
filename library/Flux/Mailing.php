@@ -82,14 +82,14 @@ class Flux_Mailing extends Flux_Site{
 		
 		$arr = $this->dbData->findByIdFic($idFic);
 
-
+		// Boucle sur les données de importdata par $idFic
 		foreach ($arr as $d) {
+			//prospect
 			$data = array('nom_prenom'=>'col2', 'affiliation1'=>'col3', 'affiliation2'=>'col4', 'affiliation3'=>'col5', 'langue'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
 			$idP = $this->dbProspect->ajouter($data);
-	/*
 			//etab
-			$idE = $this->dbEtab->ajouter(array());
-			//etabxprospect
+			$idE = $this->dbEtab->ajouter(array('url_labo'=>'col1', 'ville'=>'col7', 'affiliation1'=>'col3', 'affiliation2'=>'col4', 'affiliation3'=>'col5', 'origine'=>'col14'));
+	/*		//etabxprospect
 			ajouter $idP $idE, $idPxE = $this->dbPxE->ajouter(array());
 			//nomenclature
 			$idN = $this->dbNomen->ajouter(array());
@@ -99,19 +99,10 @@ class Flux_Mailing extends Flux_Site{
 		}
 
 	/*
-		// Insertion de données dans prospect
-		switch ($this->_getParam('obj')) {
-		case 'prospect':
 			$dbProspect = new Model_DbTable_Iste_prospect();
 			$data = array('nom_prenom'=>'col2', 'affiliation1_prospect'=>'col3', 'affiliation2_prospect'=>'col4', 'affiliation3_prospect'=>'col5', 'langue_prospect'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
 			$idP =  $dbProspect->ajouter(array('email_prospect'=>'col15'));
 			$dbProspect->edit($idP, $data);
-		break;
-		case 'etab':
-		break;
-		default:
-		break;
-		}
 	*/		
 		$this->trace("FIN ".__METHOD__);
 	}
