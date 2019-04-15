@@ -84,26 +84,20 @@ class Flux_Mailing extends Flux_Site{
 
 		// Boucle sur les données de importdata par $idFic
 		foreach ($arr as $d) {
-			//prospect
-			$data = array('nom_prenom'=>'col2', 'affiliation1'=>'col3', 'affiliation2'=>'col4', 'affiliation3'=>'col5', 'langue'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
+			//prospect : voir dbTable/Iste/prospect.php L33 pour éviter la création de doublons
+			$data = array('nom_prenom'=>'col2', 'origine'=>'col14', 'email'=>'col15');
 			$idP = $this->dbProspect->ajouter($data);
 			//etab
-			$idE = $this->dbEtab->ajouter(array('url_labo'=>'col1', 'ville'=>'col7', 'affiliation1'=>'col3', 'affiliation2'=>'col4', 'affiliation3'=>'col5', 'origine'=>'col14'));
-	/*		//etabxprospect
-			ajouter $idP $idE, $idPxE = $this->dbPxE->ajouter(array());
+			$idE = $this->dbEtab->ajouter(array('url_labo'=>'col1', 'ville_cp'=>'col7', 'pays'=>'col8', 'affiliation1'=>'col3', 'affiliation2'=>'col4', 'affiliation3'=>'col5'));
+			//etabxprospect
+		/*	$idPxE = $this->dbPxE->ajouter(array($idP, $idE));
 			//nomenclature
 			$idN = $this->dbNomen->ajouter(array());
-			//prospectxnomencalture
-			ajouter $idP $idN, $idPxN = $this->dbPxN->ajouter(array());
-	*/
-		}
-
-	/*
-			$dbProspect = new Model_DbTable_Iste_prospect();
-			$data = array('nom_prenom'=>'col2', 'affiliation1_prospect'=>'col3', 'affiliation2_prospect'=>'col4', 'affiliation3_prospect'=>'col5', 'langue_prospect'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
-			$idP =  $dbProspect->ajouter(array('email_prospect'=>'col15'));
-			$dbProspect->edit($idP, $data);
-	*/		
+			//prospectxnomenlature
+			$idPxN = $this->dbPxN->ajouter(array($idP));
+		*/
+	
+		}	
 		$this->trace("FIN ".__METHOD__);
 	}
 }

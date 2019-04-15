@@ -172,54 +172,6 @@
                             type: 'text'
                         },
                         {
-                            field: 'affiliation1',
-                            caption: 'Affiliation 1',
-                            type: 'enum',
-                            options: {
-                                items:[]
-                            }
-                        },
-                        {
-                            field: 'affiliation2',
-                            caption: 'Affiliation 2',
-                            type: 'enum',
-                            options: {
-                                items:[]
-                            }
-                        },
-                        {
-                            field: 'affiliation3',
-                            caption: 'Affiliation 3',
-                            type: 'enum',
-                            options: {
-                                items:[]
-                            }
-                        },
-                        {
-                            field: 'code_nomen1',
-                            caption: 'Code Nmclt 1',
-                            type: 'enum',
-                            options: {
-                                items: srchCod
-                            }
-                        },
-                        {
-                            field: 'code_nomen2',
-                            caption: 'Code Nmclt 2',
-                            type: 'enum',
-                            options: {
-                                items: srchCod
-                            }
-                        },
-                        {
-                            field: 'code_nomen3',
-                            caption: 'Code Nmclt 3',
-                            type: 'enum',
-                            options: {
-                                items: srchCod
-                            }
-                        },
-                        {
                             field: 'membreEdito',
                             caption: 'Membre editorial',
                             type: 'combo',
@@ -262,7 +214,7 @@
                         {
                             field: 'email',
                             caption: 'Email',
-                            size: '40%',
+                            size: '20%',
                             editable: {
                                 type: 'email'
                             }
@@ -270,66 +222,15 @@
                         {
                             field: 'email2',
                             caption: 'Email2',
-                            size: '120px',
+                            size: '20%',
                             editable: {
                                 type: 'email'
                             }
                         },
                         {
-                            field: 'affiliation1',
-                            caption: 'Affiliation 1',
-                            size: '120px',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'affiliation2',
-                            caption: 'Affiliation 2',
-                            size: '120px',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'affiliation3',
-                            caption: 'Affiliation 3',
-                            size: '120px',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'code_nomen1',
-                            caption: 'Code 1',
-                            size: '60px',
-                            editable: {
-                                type: 'combo',
-                                items: srchCod
-                            }
-                        },
-                        {
-                            field: 'code_nomen2',
-                            caption: 'Code 2',
-                            size: '60px',
-                            editable: {
-                                type: 'combo',
-                                items: srchCod
-                            }
-                        },
-                        {
-                            field: 'code_nomen3',
-                            caption: 'Code 3',
-                            size: '60px',
-                            editable: {
-                                type: 'combo',
-                                items: srchCod
-                            }
-                        },
-                        {
-                            field: 'langue',
-                            caption: 'Langue',
-                            size: '30%',
+                            field: 'origine',
+                            caption: 'Origine',
+                            size: '20%',
                             editable: {
                                 type: 'text'
                             }
@@ -475,12 +376,6 @@
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
-                            '        <label>Langue:</label>' +
-                            '        <div>' +
-                            '           <input name="langue" type="text" maxlength="100" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
                             '        <label>Email:</label>' +
                             '        <div>' +
                             '           <input name="email" type="text" maxlength="100" style="width: 250px"/>' +
@@ -493,39 +388,9 @@
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
-                            '        <label>Affiliation 1:</label>' +
+                            '        <label>Origine :</label>' +
                             '        <div>' +
-                            '            <input name="affiliation1" type="text" maxlength="150" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Affiliation 2:</label>' +
-                            '        <div>' +
-                            '            <input name="affiliation2" type="text" maxlength="150" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Affiliation 3:</label>' +
-                            '        <div>' +
-                            '            <input name="affiliation3" type="text" maxlength="150" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Code Nmclt 1:</label>' +
-                            '        <div>' +
-                            '            <input name="code_nomen1" type="text" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Code Nmclt 2:</label>' +
-                            '        <div>' +
-                            '            <input name="code_nomen2" type="text" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Code Nmclt 3:</label>' +
-                            '        <div>' +
-                            '            <input name="code_nomen3" type="text" style="width: 250px"/>' +
+                            '            <input name="origine" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
@@ -557,10 +422,6 @@
                                 required: true
                             },
                             {
-                                field: 'langue',
-                                type: 'text'
-                            },
-                            {
                                 field: 'email',
                                 type: 'email',
                                 required: true
@@ -570,29 +431,7 @@
                                 type: 'email'
                             },
                             {
-                                field: 'affiliation1',
-                                type: 'text',
-                                required: true
-                            },
-                            {
-                                field: 'affiliation2',
-                                type: 'text'
-                            },
-                            {
-                                field: 'affiliation3',
-                                type: 'text'
-                            },
-                            {
-                                field: 'code_nomen1',
-                                type: 'text',
-                                required: true
-                            },
-                            {
-                                field: 'code_nomen2',
-                                type: 'text'
-                            },
-                            {
-                                field: 'code_nomen3',
+                                field: 'origine',
                                 type: 'text'
                             },
                             {
@@ -781,13 +620,8 @@
                             }
                         },
                         {
-                            field: 'cp',
-                            caption: 'Code Postal',
-                            type: 'text'
-                        },
-                        {
-                            field: 'pays',
-                            caption: 'Pays',
+                            field: 'ville_cp',
+                            caption: 'Ville + CP',
                             type: 'text'
                         },
                     ],
@@ -833,25 +667,17 @@
                         {
                             field: 'adresse',
                             caption: 'Adresse',
-                            size: '40%',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'ville',
-                            caption: 'Ville',
                             size: '120px',
                             editable: {
                                 type: 'text'
                             }
                         },
                         {
-                            field: 'cp',
-                            caption: 'Code Postal',
-                            size: '30%',
+                            field: 'ville_cp',
+                            caption: 'Ville + CP',
+                            size: '120px',
                             editable: {
-                                type: 'int'
+                                type: 'text'
                             }
                         },
                         {
@@ -865,14 +691,6 @@
                         {
                             field: 'responsableLabo',
                             caption: 'Responsable du Labo',
-                            size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'origine',
-                            caption: 'Origine Etablissement',
                             size: '30%',
                             editable: {
                                 type: 'text'
@@ -1001,15 +819,9 @@
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
-                            '        <label>Ville:</label>' +
+                            '        <label>Ville + CP:</label>' +
                             '        <div>' +
-                            '            <input name="ville" type="text" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Code Postal:</label>' +
-                            '        <div>' +
-                            '            <input name="cp" type="text" style="width: 250px"/>' +
+                            '            <input name="ville_cp" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
@@ -1022,12 +834,6 @@
                             '        <label>Responsable Labo:</label>' +
                             '        <div>' +
                             '            <input name="responsableLabo" type="text" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Origine:</label>' +
-                            '        <div>' +
-                            '            <input name="origine" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '</div>' +
@@ -1057,11 +863,7 @@
                                 type: 'text'
                             },
                             {
-                                field: 'ville',
-                                type: 'text'
-                            },
-                            {
-                                field: 'cp',
+                                field: 'ville_cp',
                                 type: 'text'
                             },
                             {
@@ -1070,10 +872,6 @@
                             },
                             {
                                 field: 'responsableLabo',
-                                type: 'text'
-                            },
-                            {
-                                field: 'origine',
                                 type: 'text'
                             }
                         ],

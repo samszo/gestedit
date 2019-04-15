@@ -35,12 +35,12 @@ class MailingController extends Zend_Controller_Action
         switch ($this->_getParam('obj')) {
             case 'prospect':
                 $dbP = new Model_DbTable_Iste_prospect();
-                $arr = array('nom_prenom'=>$this->_getParam('nom_prenom'),'email'=>$this->_getParam('email'),'email2'=>$this->_getParam('email2'), 'affiliation1'=>$this->_getParam('affiliation1'),'affiliation2'=>$this->_getParam('affiliation2'),'affiliation3'=>$this->_getParam('affiliation3'),'code_nomen1'=>$this->_getParam('code_nomen1'),'code_nomen2'=>$this->_getParam('code_nomen2'),'code_nomen3'=>$this->_getParam('code_nomen3'), 'langue'=>$this->_getParam('langue'),'clientIste'=>$this->_getParam('clientIste'),'membreEdito'=>$this->_getParam('membreEdito'),'unsub'=>$this->_getParam('unsub'));
+                $arr = array('nom_prenom'=>$this->_getParam('nom_prenom'),'email'=>$this->_getParam('email'),'email2'=>$this->_getParam('email2'),'clientIste'=>$this->_getParam('clientIste'),'membreEdito'=>$this->_getParam('membreEdito'),'unsub'=>$this->_getParam('unsub'),'origine'=>$this->_getParam('origine'));
                 $rs = $dbP->ajouter($arr, true, true);
                 break;
             case 'etab':
                 $dbE = new Model_DbTable_Iste_etab();
-                $arr = array('url_labo'=>$this->_getParam('url_labo'),'adresse'=>$this->_getParam('adresse'),'ville'=>$this->_getParam('ville'),'cp'=>$this->_getParam('cp'),'pays'=>$this->_getParam('pays'),'responsableLabo'=>$this->_getParam('responsableLabo'),'affiliation1'=>$this->_getParam('affiliation1'),'affiliation2'=>$this->_getParam('affiliation2'),'affiliation3'=>$this->_getParam('affiliation3'),'origine'=>$this->_getParam('origine'));
+                $arr = array('url_labo'=>$this->_getParam('url_labo'),'adresse'=>$this->_getParam('adresse'),'ville_cp'=>$this->_getParam('ville_cp'),'pays'=>$this->_getParam('pays'),'responsableLabo'=>$this->_getParam('responsableLabo'),'affiliation1'=>$this->_getParam('affiliation1'),'affiliation2'=>$this->_getParam('affiliation2'),'affiliation3'=>$this->_getParam('affiliation3'));
                 $rs = $dbE->ajouter($arr, true, true);
                 break;
             case 'nomenclature':
