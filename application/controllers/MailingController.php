@@ -136,9 +136,12 @@ class MailingController extends Zend_Controller_Action
 		$dbHM->ajouter(array("id_uti"=>$this->ssUti->uti["id_uti"],"action"=>__METHOD__,"obj"=>$this->_getParam('obj'),"id_obj"=>$id,"data"=>json_encode($params)));   		
     }
 
-    public function importAction()
+    public function insertdataAction()
     {
         $this->initInstance();
+        $m = new Flux_Mailing();
+        $m->insertdata($this->_getParam('idFic'));
+
     }
 
     function initInstance(){

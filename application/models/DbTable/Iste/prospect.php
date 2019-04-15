@@ -30,7 +30,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
 		$select = $this->select();
 		$select->from($this, array('id_prospect'));
 		foreach($data as $k=>$v){
-			$select->where($k.' = ?', $v);
+			if($k=="email_prospect")$select->where($k.' = ?', $v);
 		}
 	    $rows = $this->fetchAll($select);        
 	    if($rows->count()>0)$id=$rows[0]->id_prospect; else $id=false;
@@ -52,6 +52,8 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
 	    	 	$id = $this->insert($data);
+            }else{
+                $this->edit($id,$data);
             }
             if($rs)
                return $this->getById($id);

@@ -15,6 +15,8 @@ class Flux_Mailing extends Flux_Site{
 			$this->dbData = new Model_DbTable_Iste_importdata();
 			$this->dbLivre = new Model_DbTable_Iste_livre();
 			$this->dbIsbn = new Model_DbTable_Iste_isbn();
+			$this->dbProspect = new Model_DbTable_Iste_prospect();
+
 		}
 	
 	
@@ -67,10 +69,31 @@ class Flux_Mailing extends Flux_Site{
 	    $this->trace("FIN ".__METHOD__);
 	}
 
-	// insertion des données dans les différentes tables:
-	public function insertData(){	
+	/** insertion des données dans les différentes tables:
+	 * @param integer	$idFic
+	 * */ 
+
+	public function insertData($idFic){	
 		$this->trace("DEB ".__METHOD__);
 		
+		$arr = $this->dbData->findByIdFic($idFic);
+
+
+		foreach ($arr as $d) {
+			$data = array('nom_prenom'=>'col2', 'affiliation1_prospect'=>'col3', 'affiliation2_prospect'=>'col4', 'affiliation3_prospect'=>'col5', 'langue_prospect'=>'col8', 'code_nomen1'=>'col9', 'code_nomen2'=>'col10', 'code_nomen3'=>'col11');
+			$idP = $this->dbProspect->ajouter($data);
+			//etab
+			$idE = ..
+			//etab_prospect
+			ajouter $idP $idE
+			//nomenclature
+			$idN = 
+			//prosp nomencalture
+			ajouter $idP $idN
+
+		}
+
+		/*
 		// Insertion de données dans prospect
 		switch ($this->_getParam('obj')) {
 		case 'prospect':
@@ -84,7 +107,7 @@ class Flux_Mailing extends Flux_Site{
 		default:
 		break;
 		}
-
+		*/
 		$this->trace("FIN ".__METHOD__);
 	}
 }
