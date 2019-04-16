@@ -34,7 +34,13 @@
         var urlP = "../";
         // Variables pour la recherche Nomenclature
         var srchNom = [], srchIdP = [], srchCod = [], srchCat = [], triIdP = [], triCat = [];
-        var data = jsNomen;
+        var dataN = jsNomen;
+        // Variables pour la recherche Prospect
+        var srchProsp = [], srchEmail = [], srchEmail2 = [];
+        var dataP = jsProsp;
+        // Variables pour la recherche Etablissement
+        var srchAff1 = [], srchAff2 = [], srchAff3 = [], srchLoc = [];
+        var dataE = jsEtab;
 
         /*
          * Tri des données pour les recherches dans les grids
@@ -46,7 +52,22 @@
                 }
             }   
         };
-        data.forEach(function(d){
+        /*
+        * Essai création fonction générique pour créer les tableaux de valeur/recherche
+        * Problème avec le 'n' : les en-tête de colonne ne passent pas en paramètre ?
+        *
+        *   new function(){
+        *       srch(dataP, srchProsp, nom_prenom);
+        *   };
+        */
+        function srch(l, m, n){
+            l.forEach(function(d){
+                m.push(d.n);
+                m.sort();
+            });
+        }
+        // Tri nomenclature
+        dataN.forEach(function(d){
             srchNom.push(d.label);
             srchCod.push(d.code);
             srchCod.sort();
@@ -59,6 +80,26 @@
             tri(triIdP, srchIdP);
             tri(triCat, srchCat);
         };
+        // Tri prospect
+        dataP.forEach(function(d){
+            srchProsp.push(d.nom_prenom);
+            srchProsp.sort();
+            srchEmail.push(d.email);
+            srchEmail.sort();
+            srchEmail2.push(d.email2);
+            srchEmail2.sort();
+        });
+        // Tri Etablissement
+        dataE.forEach(function(d){
+            srchAff1.push(d.affiliation1);
+            srchAff1.sort();
+            srchAff2.push(d.affiliation2);
+            srchAff2.sort();
+            srchAff3.push(d.affiliation3);
+            srchAff3.sort();
+            srchLoc.push(d.ville_cp);
+            srchLoc.sort();
+        });
 
         // Fonction pour exporter un fichier
         function exportByPost(ids, obj) {
@@ -162,22 +203,31 @@
                     searches: [{
                             field: 'nom_prenom',
                             caption: 'Nom_Prénom',
-                            type: 'text'
+                            type: 'enum',
+                            options: {
+                                items: srchProsp
+                            }
                         },
                         {
                             field: 'email',
                             caption: 'Email',
-                            type: 'text'
+                            type: 'enum',
+                            options: {
+                                items: srchEmail
+                            }
                         },
                         {
                             field: 'email2',
                             caption: 'Email 2',
-                            type: 'text'
+                            type: 'enum',
+                            options: {
+                                items: srchEmail2
+                            }
                         },
                         {
                             field: 'membreEdito',
                             caption: 'Membre editorial',
-                            type: 'combo',
+                            type: 'enum',
                             options: {
                                 items: ['0', '1']
                             }
@@ -185,15 +235,15 @@
                         {
                             field: 'clientIste',
                             caption: 'Client ISTE',
-                            type: 'combo',
+                            type: 'enum',
                             options: {
-                                items: ['0', '1']
+                                items: ['0','1']
                             }
                         },
                         {
                             field: 'unsub',
                             caption: 'Unsubscribe',
-                            type: 'combo',
+                            type: 'enum',
                             options: {
                                 items: ['0', '1']
                             }
@@ -603,7 +653,7 @@
                             caption: 'Affiliation 1',
                             type: 'enum',
                             options: {
-                                items: []
+                                items: srchAff1
                             }
                         },
                         {
@@ -611,7 +661,7 @@
                             caption: 'Affiliation 2',
                             type: 'enum',
                             options: {
-                                items: []
+                                items: srchAff2
                             }
                         },
                         {
@@ -619,13 +669,16 @@
                             caption: 'Affiliation 3',
                             type: 'enum',
                             options: {
-                                items: []
+                                items: srchAff3
                             }
                         },
                         {
                             field: 'ville_cp',
                             caption: 'Ville + CP',
-                            type: 'text'
+                            type: 'enum',
+                            options: {
+                                items: srchLoc
+                            }
                         },
                     ],
                     columns: [{
