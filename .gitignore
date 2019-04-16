@@ -312,3 +312,6 @@ config/.htaccess
 data/import_vente/Wiley201718.csv
 data/import_vente/Droitelseiver (1).csv
 data/import_mailing/extrait_prospect.csv
+data/import_mailing/extrait_prospect (1).csv
+data/import_mailing/extrait_prospect (2).csv
+data/import_mailing/extrait_prospect (3).csv

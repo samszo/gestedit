@@ -112,7 +112,7 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
-
+    //TODO:ajouter la description
     public function getById($id)
     {
    	
@@ -122,6 +122,25 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
                     'n.id_nomenclature = nid.id_nomenclature', array("recid"=>"n.id_nomenclature"))
                     ->where('n.id_nomenclature',$id);
                     
+        
+        $rs = $this->fetchAll($query)->toArray();
+        if(count($rs))return end($rs);
+        else return false;
+    }
+
+    /**
+     * Récupère toutes les entrées Iste_nomenclature avec certains critères
+     * de tri, intervalles
+     *  @param string   $code
+     * 
+     * @return array
+     */
+    public function getByCode($code)
+    {
+   	
+    	$query = $this->select()
+                    ->from( array("n" => "iste_nomenclature") )
+                    ->where('n.code',$code);                    
         
         $rs = $this->fetchAll($query)->toArray();
         if(count($rs))return end($rs);

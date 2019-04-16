@@ -84,19 +84,32 @@ class Flux_Mailing extends Flux_Site{
 
 		// Boucle sur les données de importdata par $idFic
 		foreach ($arr as $d) {
-			//prospect : voir dbTable/Iste/prospect.php L33 pour éviter la création de doublons
-			$data = array('nom_prenom'=>'col2', 'origine'=>'col14', 'email'=>'col15');
-			$idP = $this->dbProspect->ajouter($data);
-			//etab
-			$idE = $this->dbEtab->ajouter(array('url_labo'=>'col1', 'ville_cp'=>'col7', 'pays'=>'col8', 'affiliation1'=>'col3', 'affiliation2'=>'col4', 'affiliation3'=>'col5'));
-			//etabxprospect
-		/*	$idPxE = $this->dbPxE->ajouter(array($idP, $idE));
-			//nomenclature
-			$idN = $this->dbNomen->ajouter(array());
-			//prospectxnomenlature
-			$idPxN = $this->dbPxN->ajouter(array($idP));
-		*/
-	
+			//vérifie si la ligne est en erreur
+			if(substr($d['commentaire'],0,7)!='erreur:'){
+				//prospect : voir dbTable/Iste/prospect.php L33 pour éviter la création de doublons
+				$data = array('nom_prenom'=>$d['col2'], 'origine'=>$d['col14'], 'email'=>$d['col15']);
+				$idP = $this->dbProspect->ajouter($data);
+				//etab
+				$idE = $this->dbEtab->ajouter(array('url_labo'=>$d['col1'], 'ville_cp'=>$d['col7'], 'pays'=>$d['col8']
+					, 'affiliation1'=>$d['col3'], 'affiliation2'=>$d['col4'], 'affiliation3'=>$d['col5']));
+				//etabxprospect
+				$idPxE = $this->dbPxE->ajouter(array("id_prospect"=>$idP, "id_etab"=>$idE));
+				//nomenclature
+				//TODO:vérifier à l'import que tous les codes sont bien présents sinon mettre un commentaire = erreur:...
+				for ($i=1; $i <= 3; $i++) { 
+					//récupère le code
+					$code = $d['col'.(8+$i)];
+					//vérifie que le code est renseigné
+					if($code){
+						//récupère l'identifiant de nomenclature
+						$rsN = $this->dbNomen->getByCode($code);
+						if($rsN){
+							//ajoute la relation entre le prospect et la nomenclature
+							$this->dbPxN->ajouter(array("id_prospect"=>$idP,"id_nomenclature"=>$rsN['id_nomenclature']));
+						}
+					}
+				}
+			}	
 		}	
 		$this->trace("FIN ".__METHOD__);
 	}

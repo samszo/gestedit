@@ -131,9 +131,7 @@ function initFileUploadDroit(){
 	    .on('fileuploadsubmit', function (e, data) {
 	    		data.formData = {
 	    	    		'type':'mailing','obj':'import','dir':1
-
 		    	    		};
-
                 var fileType = data.files[0].name.split('.').pop(), allowdtypes = 'csv,CSV';
                 if (allowdtypes.indexOf(fileType) < 0) {
                 	w2alert("Le type de fichier n'est pas bon");
@@ -150,12 +148,24 @@ function importerData(){
 	$.get(urlP+'import/setdataficmailing',
 			{idFic:ficId, type:'global'},
 			function(html){
+				$('#progCalcData .progress-bar').css('width',50 + '%');	
+				insertData();	
+			   })
+		.fail(function(e) {
+			w2alert(e.responseText);				
+		});           		           					
+}
+
+function insertData(){
+	$('#progCalcData .progress-bar').css('width',60 + '%');	
+	$.get(urlP+'mailing/insertdata',
+			{idFic:ficId},
+			function(js){
 				$('#progCalcData .progress-bar').css('width',100 + '%');		
 			   })
 		.fail(function(e) {
 			w2alert(e.responseText);				
-		});           		           	
-;				
+		},'json');           		           					
 }
 
 
