@@ -39,7 +39,7 @@
         var srchProsp = [], srchEmail = [], srchEmail2 = [];
         var dataP = jsProsp;
         // Variables pour la recherche Etablissement
-        var srchAff1 = [], srchAff2 = [], srchAff3 = [], srchLoc = [];
+        var srchAff1 = [], srchAff2 = [], srchAff3 = [], srchLoc = [], triAff1 = [], triAff2 = [], triAff3 = [], triLoc = []; 
         var dataE = jsEtab;
 
         /*
@@ -91,15 +91,21 @@
         });
         // Tri Etablissement
         dataE.forEach(function(d){
-            srchAff1.push(d.affiliation1);
-            srchAff1.sort();
-            srchAff2.push(d.affiliation2);
-            srchAff2.sort();
-            srchAff3.push(d.affiliation3);
-            srchAff3.sort();
-            srchLoc.push(d.ville_cp);
-            srchLoc.sort();
+            triAff1.push(d.affiliation1);
+            triAff1.sort();
+            triAff2.push(d.affiliation2);
+            triAff2.sort();
+            triAff3.push(d.affiliation3);
+            triAff3.sort();
+            triLoc.push(d.ville_cp);
+            triLoc.sort();
         });
+        new function(){
+            tri(triAff1, srchAff1);
+            tri(triAff2, srchAff2);
+            tri(triAff3, srchAff3);
+            tri(triLoc, srchLoc);
+        };
 
         // Fonction pour exporter un fichier
         function exportByPost(ids, obj) {
