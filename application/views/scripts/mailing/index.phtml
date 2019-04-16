@@ -30,11 +30,15 @@
         var jsNomen = <?php echo $this->jsNomen; ?>;
         var jsProsp = <?php echo $this->jsProsp; ?>;
         var jsEtab = <?php echo $this->jsEtab; ?>;
+        // Variable pour exporter les fichiers
+        var urlP = "../";
         // Variables pour la recherche Nomenclature
         var srchNom = [], srchIdP = [], srchCod = [], srchCat = [], triIdP = [], triCat = [];
         var data = jsNomen;
 
-        // Tri des données pour les recherches dans les grids
+        /*
+         * Tri des données pour les recherches dans les grids
+         */ 
         function tri(e, f){
             for (i= 0; i < e.length; i++){
                 if(e[i] != e[i+1]){
@@ -56,7 +60,6 @@
             tri(triCat, srchCat);
         };
 
-        var urlP = "../";
         // Fonction pour exporter un fichier
         function exportByPost(ids, obj) {
             var form = document.getElementById("exportPostForm");
@@ -689,7 +692,7 @@
                             }
                         },
                         {
-                            field: 'responsableLabo',
+                            field: 'responsable',
                             caption: 'Responsable du Labo',
                             size: '30%',
                             editable: {
@@ -833,7 +836,7 @@
                             '    <div class="w2ui-field">' +
                             '        <label>Responsable Labo:</label>' +
                             '        <div>' +
-                            '            <input name="responsableLabo" type="text" style="width: 250px"/>' +
+                            '            <input name="responsable" type="text" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
                             '</div>' +
@@ -871,7 +874,7 @@
                                 type: 'text'
                             },
                             {
-                                field: 'responsableLabo',
+                                field: 'responsable',
                                 type: 'text'
                             }
                         ],

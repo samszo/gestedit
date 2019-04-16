@@ -112,7 +112,15 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
-    //TODO:ajouter la description
+     
+    /** 
+     * TODO:ajouter la description
+     * Récupère toutes les entrées Iste_nomenclature avec certains critères
+     * de tri, intervalles
+     * @param integer $id
+     * 
+     * @return array
+     */
     public function getById($id)
     {
    	

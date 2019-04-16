@@ -95,7 +95,8 @@ class Flux_Mailing extends Flux_Site{
 				//etabxprospect
 				$idPxE = $this->dbPxE->ajouter(array("id_prospect"=>$idP, "id_etab"=>$idE));
 				//nomenclature
-				//TODO:vérifier à l'import que tous les codes sont bien présents sinon mettre un commentaire = erreur:...
+				//TODO:vérifier à l'import que tous les codes sont bien présents sinon mettre un commentaire
+				// = erreur : Il n'y a que les id_nomenclature = 160 qui sont renseignées dans la table prospectxnomenclature
 				for ($i=1; $i <= 3; $i++) { 
 					//récupère le code
 					$code = $d['col'.(8+$i)];
