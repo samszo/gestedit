@@ -12,32 +12,24 @@
 </head>
 
 <body>
-<style>
-.tab {
-    width: 100%;
-    height: 800px;
-    border: 1px solid silver;
-    border-top: 0px;
-    display: none;
-    padding: 10px;
-    overflow: auto;
-}
-</style>
+    <style>
+        .tab {
+            width: 100%;
+            height: 800px;
+            border: 1px solid silver;
+            border-top: 0px;
+            display: none;
+            padding: 10px;
+            overflow: auto;
+        }
+    </style>
 
     <div id="tab-example">
         <div id="tabs" style="width: 100%; height: 29px;"></div>
-        <div id="tab1" class="tab">
-            <div id="layout" style="width: 100%; height: 100%"></div>
-        </div>
-        <div id="tab2" class="tab">
-            <div id="layout2" style="width: 100%; height: 100%"></div>
-        </div>
-        <div id="tab3" class="tab">
-            <div id="layout3" style="width: 100%; height: 100%"></div>
-        </div>
-        <div id="tab4" class="tab">
-            <div id="layout4" style="width: 100%; height: 100%"></div>
-        </div>
+        <div id="tab1" class="tab"></div>
+        <div id="tab2" class="tab"></div>
+        <div id="tab3" class="tab"></div>
+        <div id="tab4" class="tab"></div>
     </div>
 
     <script type="text/javascript">
@@ -48,24 +40,35 @@
         var jsImp = <?php echo $this->jsImp; ?>;
         // Variable pour exporter les fichiers
         var urlP = "../";
-        
+
         // Création des listes de recherches pour chaque onglet
-        var filters = {'aff1':[],'aff2':[],'aff3':[], 'Nom':[], 'NomP':[],'Cod':[], 'Prosp':[], 'Email':[], 'Email2':[] }, doublons = [];
-        jsEtab.forEach(function(d){
-            if(d.affiliation1)doublons[d.affiliation1]='aff1';
-            if(d.affiliation2)doublons[d.affiliation2]='aff2';
-            if(d.affiliation3)doublons[d.affiliation3]='aff3';
+        var filters = {
+                'aff1': [],
+                'aff2': [],
+                'aff3': [],
+                'Nom': [],
+                'NomP': [],
+                'Cod': [],
+                'Prosp': [],
+                'Email': [],
+                'Email2': []
+            },
+            doublons = [];
+        jsEtab.forEach(function (d) {
+            if (d.affiliation1) doublons[d.affiliation1] = 'aff1';
+            if (d.affiliation2) doublons[d.affiliation2] = 'aff2';
+            if (d.affiliation3) doublons[d.affiliation3] = 'aff3';
         })
-        jsNomen.forEach(function(d){
-            if(d.label)doublons[d.label]='Nom';
-            if(d.label_parent)doublons[d.label_parent]='NomP';
-            if(d.code)doublons[d.code]='Cod';
+        jsNomen.forEach(function (d) {
+            if (d.label) doublons[d.label] = 'Nom';
+            if (d.label_parent) doublons[d.label_parent] = 'NomP';
+            if (d.code) doublons[d.code] = 'Cod';
         })
-        jsProsp.forEach(function(d){
-            if(d.nom_prenom)doublons[d.nom_prenom]="Prosp";
-            if(d.email)doublons[d.email]="Email";
-            if(d.email2)doublons[d.email2]="Email2";
-        })        
+        jsProsp.forEach(function (d) {
+            if (d.nom_prenom) doublons[d.nom_prenom] = "Prosp";
+            if (d.email) doublons[d.email] = "Email";
+            if (d.email2) doublons[d.email2] = "Email2";
+        })
         for (var k in doublons) {
             filters[doublons[k]].push(k);
         }
@@ -118,7 +121,7 @@
                     {
                         id: 'tab4',
                         caption: 'Imports'
-                    },
+                    }
                 ],
                 onClick: function (event) {
                     $('#tab-example .tab').hide();
@@ -129,12 +132,10 @@
         $(function () {
             $('#tabs').w2tabs(config.tabs);
             $('#tab1').show();
-            $('#tab2').show();
-            $('#tab3').show();
-            $('#tab4').show();
+
             // Création du layout 1er onglet (Prospects)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
-            $('#layout').w2layout({
+            $('#tab1').w2layout({
                 name: 'layout',
                 panels: [{
                         type: 'left',
@@ -212,7 +213,7 @@
                             caption: 'Client ISTE',
                             type: 'enum',
                             options: {
-                                items: ['0','1']
+                                items: ['0', '1']
                             }
                         },
                         {
@@ -297,12 +298,11 @@
                     ],
                     toolbar: {
                         items: [{
-                                id: 'export',
-                                type: 'button',
-                                text: 'Exporter',
-                                icon: 'fas fa-file-export'
-                            }
-                        ],
+                            id: 'export',
+                            type: 'button',
+                            text: 'Exporter',
+                            icon: 'fas fa-file-export'
+                        }],
                         onClick: function (event) {
                             if (event.target == 'export') {
                                 var ids = w2ui.grid.getSelection();
@@ -565,7 +565,7 @@
                 }))
             // Création du layout 2e onglet (Etablissements)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
-            $('#layout2').w2layout({
+            $('#tab2').w2layout({
                 name: 'layout2',
                 panels: [{
                         type: 'top',
@@ -983,7 +983,7 @@
 
             // Création du layout 3e onglet (Nomenclatures)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
-            $('#layout3').w2layout({
+            $('#tab3').w2layout({
                 name: 'layout3',
                 panels: [{
                         type: 'top',
@@ -1313,20 +1313,19 @@
                         sdate: '4/3/2012'
                     }]
                 }))
-           
-        // Création du layout 4e onglet (Import)
-        var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
-            $('#layout4').w2layout({
+
+            // Création du layout 4e onglet (Import)
+            var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
+            $('#tab4').w2layout({
                 name: 'layout4',
                 panels: [{
-                        type: 'left',
-                        size: '100%',
-                        resizable: true,
-                        hidden: false,
-                        style: pstyle,
-                        content: ''
-                    },
-                ]
+                    type: 'left',
+                    size: '100%',
+                    resizable: true,
+                    hidden: false,
+                    style: pstyle,
+                    content: ''
+                }, ]
             })
             // Création de la grille import
             w2ui['layout4'].content('left',
@@ -1341,11 +1340,10 @@
                     },
                     multiSearch: true,
                     searches: [{
-                            field: 'id_importfic',
-                            caption: 'ID Import',
-                            type: 'text'
-                        },
-                    ],
+                        field: 'id_importfic',
+                        caption: 'ID Import',
+                        type: 'text'
+                    }, ],
                     columns: [{
                             field: 'recid',
                             caption: 'ID',
@@ -1467,14 +1465,12 @@
                         }
                     ],
                     toolbar: {
-                        items: [
-                            {
-                                id: 'import',
-                                type: 'button',
-                                text: 'Importer',
-                                icon: 'fas fa-file-import'
-                            }
-                        ],
+                        items: [{
+                            id: 'import',
+                            type: 'button',
+                            text: 'Importer',
+                            icon: 'fas fa-file-import'
+                        }],
                         onClick: function (event) {
                             if (event.target == 'import') {
                                 openPopupImportData();
@@ -1494,7 +1490,8 @@
                                         var ids = [];
                                         js.rs.forEach(function (d) {
                                             jsImp.forEach(function (l, i) {
-                                                if (l.id_importdata == d) ids
+                                                if (l.id_importdata == d)
+                                                    ids
                                                     .push(i);
                                             });
                                         });
@@ -1534,6 +1531,19 @@
                 showMax: false,
             });
         }
+
+        // Fonction de modification de couleur du background import
+        function voirCouleur() {
+            jsImp.forEach(function(d){
+                if (d.commentaire != "") {
+                    d.w2ui.style = 'background-color: red';
+                } 
+                else 
+                {
+                    d.w2ui.style = 'background-color: green';
+                }
+            })   
+        };
     </script>
 
 </body>

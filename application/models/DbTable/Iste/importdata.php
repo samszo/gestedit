@@ -145,7 +145,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
      * 
      * @return array
      */
-    public function getData($order=null, $limit=0, $from=0)
+    public function getAllData($order=null, $limit=0, $from=0)
     {
    	
     	$query = $this->select()
