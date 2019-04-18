@@ -28,6 +28,14 @@ class MailingController extends Zend_Controller_Action
         $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsEtab = $rs;
+
+        // Affichage historique import dans index mailing
+        $dbImp = new Model_DbTable_Iste_importdata();
+        $rs = json_encode($dbImp->getAll());
+        $s = new Flux_Site();
+        $s->bTrace = false;
+        $s->trace($rs);
+        $this->view->jsImp = $rs;
     }
 
     public function insertAction()

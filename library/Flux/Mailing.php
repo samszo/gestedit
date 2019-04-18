@@ -115,6 +115,14 @@ class Flux_Mailing extends Flux_Site{
 		$this->trace("FIN ".__METHOD__);
 	}
 
+	/**
+     * Recherche des entrées avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int       $idFic
+     *
+     * @return array
+     */
 	function getIdsNomenByCode($d,$csv=false){
 		$result = array();
 		for ($i=1; $i <= 3; $i++) { 

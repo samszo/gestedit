@@ -12,16 +12,31 @@
 </head>
 
 <body>
+<style>
+.tab {
+    width: 100%;
+    height: 800px;
+    border: 1px solid silver;
+    border-top: 0px;
+    display: none;
+    padding: 10px;
+    overflow: auto;
+}
+</style>
+
     <div id="tab-example">
         <div id="tabs" style="width: 100%; height: 29px;"></div>
         <div id="tab1" class="tab">
-            <div id="layout" style="width: 100%; height: 800px;"></div>
+            <div id="layout" style="width: 100%; height: 100%"></div>
         </div>
         <div id="tab2" class="tab">
-            <div id="layout2" style="width: 100%; height: 800px;"></div>
+            <div id="layout2" style="width: 100%; height: 100%"></div>
         </div>
         <div id="tab3" class="tab">
-            <div id="layout3" style="width: 100%; height: 800px;"></div>
+            <div id="layout3" style="width: 100%; height: 100%"></div>
+        </div>
+        <div id="tab4" class="tab">
+            <div id="layout4" style="width: 100%; height: 100%"></div>
         </div>
     </div>
 
@@ -30,6 +45,7 @@
         var jsNomen = <?php echo $this->jsNomen; ?>;
         var jsProsp = <?php echo $this->jsProsp; ?>;
         var jsEtab = <?php echo $this->jsEtab; ?>;
+        var jsImp = <?php echo $this->jsImp; ?>;
         // Variable pour exporter les fichiers
         var urlP = "../";
         // Variables pour la recherche Nomenclature
@@ -165,6 +181,10 @@
                         id: 'tab3',
                         caption: 'Nomenclatures'
                     },
+                    {
+                        id: 'tab4',
+                        caption: 'Imports'
+                    },
                 ],
                 onClick: function (event) {
                     $('#tab-example .tab').hide();
@@ -175,14 +195,16 @@
         $(function () {
             $('#tabs').w2tabs(config.tabs);
             $('#tab1').show();
-
+            $('#tab2').show();
+            $('#tab3').show();
+            $('#tab4').show();
             // Création du layout 1er onglet (Prospects)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
             $('#layout').w2layout({
                 name: 'layout',
                 panels: [{
                         type: 'left',
-                        size: '80%',
+                        size: '60%',
                         resizable: true,
                         hidden: false,
                         style: pstyle,
@@ -197,7 +219,7 @@
                     },
                     {
                         type: 'right',
-                        size: '20%',
+                        size: '30%',
                         resizable: true,
                         hidden: true,
                         style: pstyle
@@ -1381,6 +1403,209 @@
                         email: 'jdoe@gmail.com',
                         sdate: '4/3/2012'
                     }]
+                }))
+           
+        // Création du layout 4e onglet (Import)
+        var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
+            $('#layout4').w2layout({
+                name: 'layout4',
+                panels: [{
+                        type: 'left',
+                        size: '100%',
+                        resizable: true,
+                        hidden: false,
+                        style: pstyle,
+                        content: ''
+                    },
+                ]
+            })
+            // Création de la grille import
+            w2ui['layout4'].content('left',
+                $('#grid7').w2grid({
+                    name: 'grid7',
+                    header: 'Historique des imports',
+                    show: {
+                        header: true,
+                        toolbar: true,
+                        footer: true,
+                        selectColumn: true
+                    },
+                    multiSearch: true,
+                    searches: [{
+                            field: 'id_importfic',
+                            caption: 'ID Import',
+                            type: 'text'
+                        },
+                    ],
+                    columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'id_importfic',
+                            caption: 'ID Import',
+                            size: '10%',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'col1',
+                            caption: 'URL Labo',
+                            size: '40%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'col2',
+                            caption: 'Nom Prénom',
+                            size: '20%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'col3',
+                            caption: 'Affiliation 1',
+                            size: '20%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'col4',
+                            caption: 'Affiliation 2',
+                            size: '20%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'col5',
+                            caption: 'Affiliation 3',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+
+                        },
+                        {
+                            field: 'col6',
+                            caption: 'Affiliation 4',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'col7',
+                            caption: 'Ville CP',
+                            size: '30%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'col8',
+                            caption: 'Pays',
+                            size: '30%',
+                            type: 'text'
+                        },
+                        {
+                            field: 'col9',
+                            caption: 'Code 1',
+                            size: '30%',
+                            type: 'text'
+                        },
+                        {
+                            field: 'col10',
+                            caption: 'Code 2',
+                            size: '30%',
+                            type: 'text'
+                        },
+                        {
+                            field: 'col11',
+                            caption: 'Code 3',
+                            size: '30%',
+                            type: 'text'
+                        },
+                        {
+                            field: 'creation',
+                            caption: 'Date Import',
+                            size: '30%',
+                            type: 'text'
+                        },
+                        {
+                            field: 'col14',
+                            caption: 'Origine',
+                            size: '30%',
+                            type: 'text'
+                        },
+                        {
+                            field: 'col15',
+                            caption: 'Email',
+                            size: '30%',
+                            type: 'text'
+                        },
+                        {
+                            field: 'commentaire',
+                            caption: 'Commentaire',
+                            size: '30%',
+                            type: 'text'
+                        }
+                    ],
+                    toolbar: {
+                        items: [
+                            {
+                                id: 'import',
+                                type: 'button',
+                                text: 'Importer',
+                                icon: 'fas fa-file-import'
+                            }
+                        ],
+                        onClick: function (event) {
+                            if (event.target == 'import') {
+                                openPopupImportData();
+                            }
+                        }
+                    },
+                    records: jsImp,
+                    onSearch: function (event) {
+                        var grid = this;
+                        if (event.searchField == "multi") {
+                            event.onComplete = function () {
+                                $.get('cherche/mailing', {
+                                        "searchData": event.searchData
+                                    },
+                                    function (js) {
+                                        //finsession(js);
+                                        var ids = [];
+                                        js.rs.forEach(function (d) {
+                                            jsImp.forEach(function (l, i) {
+                                                if (l.id_importdata == d) ids
+                                                    .push(i);
+                                            });
+                                        });
+                                        grid.last.searchIds = ids;
+                                        grid.total = grid.last.searchIds.length;
+                                        grid.buffered = grid.total;
+                                        grid.refresh();
+                                        w2alert(js.message);
+                                    }, "json");
+                            }
+                        } else {
+                            grid.localSearch();
+                            event.onComplete = function () {
+                                grid.last.searchIds = grid.last.searchIds;
+                                grid.total = grid.last.searchIds.length;
+                                grid.buffered = grid.total;
+                                grid.refresh();
+                            }
+                        }
+                    },
                 }))
         });
 
