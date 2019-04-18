@@ -171,7 +171,7 @@ class IndexController extends Zend_Controller_Action
     		$this->initInstance();
     		$oName = "Model_DbTable_Iste_".$this->_getParam('obj');
     		$oBdd = new $oName();
-		$this->view->rs = $oBdd->getListe();		
+				$this->view->rs = $oBdd->getListe();		
     }    
 
     public function testAction()

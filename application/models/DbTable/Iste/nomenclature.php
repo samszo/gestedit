@@ -148,7 +148,7 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
    	
     	$query = $this->select()
                     ->from( array("n" => "iste_nomenclature") )
-                    ->where('n.code',$code);                    
+                    ->where('n.code = ?',$code);                    
         
         $rs = $this->fetchAll($query)->toArray();
         if(count($rs))return end($rs);

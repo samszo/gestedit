@@ -64,6 +64,16 @@ class Flux_Mailing extends Flux_Site{
 			- ajouter des commentaires suivant les erreurs
 			- récupérer les identifiants
 			*/
+			$idsNomen = $this->getIdsNomenByCode($c,true);
+			foreach ($idsNomen as $idN) {
+				if(substr($idN,0,7)=='erreur:'){
+					if($r['commentaire']=="")$r['commentaire']="{'erreurs':[]}";
+					$arrE = explode(':',$idN);
+					$e = "la nomenclature ".$arrE[2]." de la colonne Code".$arrE[1]." n'as pas été trouvée";
+					$r['commentaire']=str_replace("]}","'".$e."',]}",$r['commentaire']);
+				}
+			}
+
 			
 			//enregistre la ligne dans la table des datas
 			$idD = $this->dbData->ajouter($r);
@@ -85,7 +95,7 @@ class Flux_Mailing extends Flux_Site{
 		// Boucle sur les données de importdata par $idFic
 		foreach ($arr as $d) {
 			//vérifie si la ligne est en erreur
-			if(substr($d['commentaire'],0,7)!='erreur:'){
+			if(substr($d['commentaire'],0,9)!="{'erreurs"){
 				//prospect : voir dbTable/Iste/prospect.php L33 pour éviter la création de doublons
 				$data = array('nom_prenom'=>$d['col2'], 'origine'=>$d['col14'], 'email'=>$d['col15']);
 				$idP = $this->dbProspect->ajouter($data);
@@ -95,23 +105,33 @@ class Flux_Mailing extends Flux_Site{
 				//etabxprospect
 				$idPxE = $this->dbPxE->ajouter(array("id_prospect"=>$idP, "id_etab"=>$idE));
 				//nomenclature
-				//TODO:vérifier à l'import que tous les codes sont bien présents sinon mettre un commentaire
-				// = erreur : Il n'y a que les id_nomenclature = 160 qui sont renseignées dans la table prospectxnomenclature
-				for ($i=1; $i <= 3; $i++) { 
-					//récupère le code
-					$code = $d['col'.(8+$i)];
-					//vérifie que le code est renseigné
-					if($code){
-						//récupère l'identifiant de nomenclature
-						$rsN = $this->dbNomen->getByCode($code);
-						if($rsN){
-							//ajoute la relation entre le prospect et la nomenclature
-							$this->dbPxN->ajouter(array("id_prospect"=>$idP,"id_nomenclature"=>$rsN['id_nomenclature']));
-						}
-					}
+				$idsNomen = $this->getIdsNomenByCode($d);
+				foreach ($idsNomen as $idN) {
+					//ajoute la relation entre le prospect et la nomenclature
+					$this->dbPxN->ajouter(array("id_prospect"=>$idP,"id_nomenclature"=>$idN));
 				}
 			}	
 		}	
 		$this->trace("FIN ".__METHOD__);
+	}
+
+	function getIdsNomenByCode($d,$csv=false){
+		$result = array();
+		for ($i=1; $i <= 3; $i++) { 
+			//récupère le code
+			if($csv)$code = $d[(7+$i)];
+			else $code = $d['col'.(8+$i)];
+			//vérifie que le code est renseigné
+			if($code){
+				//récupère l'identifiant de nomenclature
+				$rsN = $this->dbNomen->getByCode($code);
+				if($rsN){
+					$result[]=$rsN['id_nomenclature'];
+				}else{
+					$result[]='erreur:'.$i.':'.$code;
+				}
+			}
+		}
+		return $result;		
 	}
 }

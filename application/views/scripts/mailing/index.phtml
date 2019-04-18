@@ -42,6 +42,19 @@
         var srchAff1 = [], srchAff2 = [], srchAff3 = [], srchLoc = [], triAff1 = [], triAff2 = [], triAff3 = [], triLoc = []; 
         var dataE = jsEtab;
 
+
+
+        var filters = {'aff1':[],'aff2':[],'aff3':[]}, doublons = [];
+        jsEtab.forEach(function(d){
+            if(d.affiliation1)doublons[d.affiliation1]='aff1';
+            if(d.affiliation2)doublons[d.affiliation2]='aff2';
+            if(d.affiliation3)doublons[d.affiliation3]='aff3';
+        })        
+        for (var k in doublons) {
+            filters[doublons[k]].push(k);
+        }
+        console.log(filters);
+
         /*
          * Tri des données pour les recherches dans les grids
          */ 
