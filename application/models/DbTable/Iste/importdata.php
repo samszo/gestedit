@@ -138,6 +138,34 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray();
     }
 
+    /**
+     * Récupère toutes les entrées Iste_importdata avec certains critères
+     * de tri, intervalles
+     *  @param string $order
+     * 
+     * @return array
+     */
+    public function getData($order=null, $limit=0, $from=0)
+    {
+   	
+    	$query = $this->select()
+                    ->from( array("n" => "iste_importdata") )
+                    ->joinInner(array("nid" => "iste_importdata"),
+                    'n.id_importdata = nid.id_importdata', array("recid"=>"n.id_importdata"));
+                    
+        if($order != null)
+        {
+            $query->order($order);
+        }
+
+        if($limit != 0)
+        {
+            $query->limit($limit, $from);
+        }
+
+        return $this->fetchAll($query)->toArray();
+    }
+
 	/**
      * Recherche des entrées avec la valeur spécifiée
      * et retourne cette entrée.
