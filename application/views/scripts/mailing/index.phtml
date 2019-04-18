@@ -48,93 +48,27 @@
         var jsImp = <?php echo $this->jsImp; ?>;
         // Variable pour exporter les fichiers
         var urlP = "../";
-        // Variables pour la recherche Nomenclature
-        var srchNom = [], srchIdP = [], srchCod = [], srchCat = [], triIdP = [], triCat = [];
-        var dataN = jsNomen;
-        // Variables pour la recherche Prospect
-        var srchProsp = [], srchEmail = [], srchEmail2 = [];
-        var dataP = jsProsp;
-        // Variables pour la recherche Etablissement
-        var srchAff1 = [], srchAff2 = [], srchAff3 = [], srchLoc = [], triAff1 = [], triAff2 = [], triAff3 = [], triLoc = []; 
-        var dataE = jsEtab;
-
-
-
-        var filters = {'aff1':[],'aff2':[],'aff3':[]}, doublons = [];
+        
+        // Création des listes de recherches pour chaque onglet
+        var filters = {'aff1':[],'aff2':[],'aff3':[], 'Nom':[], 'NomP':[],'Cod':[], 'Prosp':[], 'Email':[], 'Email2':[] }, doublons = [];
         jsEtab.forEach(function(d){
             if(d.affiliation1)doublons[d.affiliation1]='aff1';
             if(d.affiliation2)doublons[d.affiliation2]='aff2';
             if(d.affiliation3)doublons[d.affiliation3]='aff3';
+        })
+        jsNomen.forEach(function(d){
+            if(d.label)doublons[d.label]='Nom';
+            if(d.label_parent)doublons[d.label_parent]='NomP';
+            if(d.code)doublons[d.code]='Cod';
+        })
+        jsProsp.forEach(function(d){
+            if(d.nom_prenom)doublons[d.nom_prenom]="Prosp";
+            if(d.email)doublons[d.email]="Email";
+            if(d.email2)doublons[d.email2]="Email2";
         })        
         for (var k in doublons) {
             filters[doublons[k]].push(k);
         }
-        console.log(filters);
-
-        /*
-         * Tri des données pour les recherches dans les grids
-         */ 
-        function tri(e, f){
-            for (i= 0; i < e.length; i++){
-                if(e[i] != e[i+1]){
-                    f.push(e[i]);
-                }
-            }   
-        };
-        /*
-        * Essai création fonction générique pour créer les tableaux de valeur/recherche
-        * Problème avec le 'n' : les en-tête de colonne ne passent pas en paramètre ?
-        *
-        *   new function(){
-        *       srch(dataP, srchProsp, nom_prenom);
-        *   };
-        */
-        function srch(l, m, n){
-            l.forEach(function(d){
-                m.push(d.n);
-                m.sort();
-            });
-        }
-        // Tri nomenclature
-        dataN.forEach(function(d){
-            srchNom.push(d.label);
-            srchCod.push(d.code);
-            srchCod.sort();
-            triIdP.push(d.id_parent);
-            triIdP.sort();
-            triCat.push(d.label_parent);
-            triCat.sort();
-        });
-        new function(){
-            tri(triIdP, srchIdP);
-            tri(triCat, srchCat);
-        };
-        // Tri prospect
-        dataP.forEach(function(d){
-            srchProsp.push(d.nom_prenom);
-            srchProsp.sort();
-            srchEmail.push(d.email);
-            srchEmail.sort();
-            srchEmail2.push(d.email2);
-            srchEmail2.sort();
-        });
-        // Tri Etablissement
-        dataE.forEach(function(d){
-            triAff1.push(d.affiliation1);
-            triAff1.sort();
-            triAff2.push(d.affiliation2);
-            triAff2.sort();
-            triAff3.push(d.affiliation3);
-            triAff3.sort();
-            triLoc.push(d.ville_cp);
-            triLoc.sort();
-        });
-        new function(){
-            tri(triAff1, srchAff1);
-            tri(triAff2, srchAff2);
-            tri(triAff3, srchAff3);
-            tri(triLoc, srchLoc);
-        };
 
         // Fonction pour exporter un fichier
         function exportByPost(ids, obj) {
@@ -246,7 +180,7 @@
                             caption: 'Nom_Prénom',
                             type: 'enum',
                             options: {
-                                items: srchProsp
+                                items: filters['Prosp']
                             }
                         },
                         {
@@ -254,7 +188,7 @@
                             caption: 'Email',
                             type: 'enum',
                             options: {
-                                items: srchEmail
+                                items: filters['Email']
                             }
                         },
                         {
@@ -262,7 +196,7 @@
                             caption: 'Email 2',
                             type: 'enum',
                             options: {
-                                items: srchEmail2
+                                items: filters['Email2']
                             }
                         },
                         {
@@ -367,12 +301,6 @@
                                 type: 'button',
                                 text: 'Exporter',
                                 icon: 'fas fa-file-export'
-                            },
-                            {
-                                id: 'import',
-                                type: 'button',
-                                text: 'Importer',
-                                icon: 'fas fa-file-import'
                             }
                         ],
                         onClick: function (event) {
@@ -380,9 +308,6 @@
                                 var ids = w2ui.grid.getSelection();
                                 exportByPost(ids, "prospect");
                                 open(urlP + 'export?obj=email_prospect&ids=' + ids, "_blank");
-                            }
-                            if (event.target == 'import') {
-                                openPopupImportData();
                             }
                         }
                     },
@@ -694,7 +619,7 @@
                             caption: 'Affiliation 1',
                             type: 'enum',
                             options: {
-                                items: srchAff1
+                                items: filters['aff1']
                             }
                         },
                         {
@@ -702,7 +627,7 @@
                             caption: 'Affiliation 2',
                             type: 'enum',
                             options: {
-                                items: srchAff2
+                                items: filters['aff2']
                             }
                         },
                         {
@@ -710,17 +635,9 @@
                             caption: 'Affiliation 3',
                             type: 'enum',
                             options: {
-                                items: srchAff3
+                                items: filters['aff3']
                             }
-                        },
-                        {
-                            field: 'ville_cp',
-                            caption: 'Ville + CP',
-                            type: 'enum',
-                            options: {
-                                items: srchLoc
-                            }
-                        },
+                        }
                     ],
                     columns: [{
                             field: 'recid',
@@ -1123,15 +1040,7 @@
                             caption: 'Catégorie Parent',
                             type: 'enum',
                             options: {
-                                items: srchCat
-                            }
-                        },
-                        {
-                            field: 'id_parent',
-                            caption: 'id Parent',
-                            type: 'enum',
-                            options: {
-                                items: srchIdP
+                                items: filters['NomP']
                             }
                         },
                         {
@@ -1139,7 +1048,7 @@
                             caption: 'label',
                             type: 'enum',
                             options: {
-                                items: srchNom
+                                items: filters['Nom']
                             }
                         },
                         {
@@ -1147,7 +1056,7 @@
                             caption: 'code',
                             type: 'enum',
                             options: {
-                                items: srchCod
+                                items: filters['Cod']
                             }
                         }
                     ],
