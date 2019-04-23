@@ -15,7 +15,7 @@
     <style>
         .tab {
             width: 100%;
-            height: 800px;
+            height: 100%;
             border: 1px solid silver;
             border-top: 0px;
             display: none;
@@ -24,7 +24,7 @@
         }
     </style>
 
-    <div id="tab-example">
+    <div id="tab-example" style="width: 100%; height: 600px;" >
         <div id="tabs" style="width: 100%; height: 29px;"></div>
         <div id="tab1" class="tab"></div>
         <div id="tab2" class="tab"></div>
@@ -33,6 +33,9 @@
     </div>
 
     <script type="text/javascript">
+        //redimensionnement du tab principal
+        document.getElementById('tab-example').setAttribute('style','width: 100%; height: '+(window.innerHeight-30)+'px;');
+
         // Variable avec les données de la base à afficher
         var jsNomen = <?php echo $this->jsNomen; ?>;
         var jsProsp = <?php echo $this->jsProsp; ?>;
@@ -147,6 +150,7 @@
                     },
                     {
                         type: 'main',
+                        size: '70%',
                         resizable: true,
                         hidden: false,
                         style: pstyle,
@@ -161,6 +165,7 @@
                     },
                     {
                         type: 'bottom',
+                        size: '30%',
                         resizable: true,
                         hidden: false,
                         style: pstyle
