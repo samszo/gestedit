@@ -97,10 +97,10 @@ class Flux_Mailing extends Flux_Site{
 			//vérifie si la ligne est en erreur
 			if(substr($d['commentaire'],0,9)!="{'erreurs"){
 				//prospect : voir dbTable/Iste/prospect.php L33 pour éviter la création de doublons
-				$data = array('nom_prenom'=>$d['col2'], 'origine'=>$d['col14'], 'email'=>$d['col15']);
+				$data = array('nom_prenom'=>$d['col2'], 'origine'=>$d['col14'], 'email'=>$d['col15'], 'unsub'=>$d['col16']);
 				$idP = $this->dbProspect->ajouter($data);
 				//etab
-				$idE = $this->dbEtab->ajouter(array('url_labo'=>$d['col1'], 'ville_cp'=>$d['col7'], 'pays'=>$d['col8']
+				$idE = $this->dbEtab->ajouter(array('url_labo'=>$d['col1'],'adresse'=>$d['col6'], 'ville_cp'=>$d['col7'], 'pays'=>$d['col8']
 					, 'affiliation1'=>$d['col3'], 'affiliation2'=>$d['col4'], 'affiliation3'=>$d['col5']));
 				//etabxprospect
 				$idPxE = $this->dbPxE->ajouter(array("id_prospect"=>$idP, "id_etab"=>$idE));

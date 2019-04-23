@@ -41,6 +41,7 @@
         var jsProsp = <?php echo $this->jsProsp; ?>;
         var jsEtab = <?php echo $this->jsEtab; ?>;
         var jsImp = <?php echo $this->jsImp; ?>;
+        var config;
         // Variable pour exporter les fichiers
         var urlP = "../";
 
@@ -105,7 +106,7 @@
         }
 
         // Création des tabs
-        var config = {
+        config = {
             tabs: {
                 name: 'tabs',
                 active: 'tab1',
@@ -129,6 +130,16 @@
                 onClick: function (event) {
                     $('#tab-example .tab').hide();
                     $('#tab-example #' + event.target).show();
+                    
+                    if(event.target=="tab1"){
+                        w2ui['layout'].refresh();
+                    }else if(event.target=="tab2"){
+                        w2ui['layout2'].refresh();
+                    }else if(event.target=="tab3"){
+                        w2ui['layout3'].refresh();				
+                    }else if(event.target=="tab4"){
+                        w2ui['layout4'].refresh();			
+                    }
                 }
             }
         }
@@ -174,7 +185,7 @@
             })
             // Création de la grille prospects
             w2ui['layout'].content('left',
-                $('#grid').w2grid({
+                $().w2grid({
                     name: 'grid',
                     header: 'Prospects',
                     show: {
@@ -338,15 +349,25 @@
                         });
                     },
                     onClick: function (event) {
+                        if (record && record.recid == event.recid) return;
                         var record = this.get(event.recid);
+                        // Grille secondaire Prospect -> Affiliations
                         w2ui['grid10'].clear();
                         w2ui['grid10'].add([
-                            //ajouter les informations via les tables intermediaires
+                            //ajouter les informations via les tables intermediaires 
                         ]);
-                        w2ui['grid11'].clear();
-                        w2ui['grid11'].add([
-                            //ajouter les informations via les tables intermediaires
-                        ]);
+
+                        // Grille secondaire Prospect -> Nomenclatures
+                        w2ui['grid11'].clear();  
+                        //ajouter les informations via les tables intermediaires
+                        $.get('mailing/prospectnom',
+						{id_prospect:record.recid},
+			            function(js){
+		            		//finsession(js);
+                            w2ui['grid11'].add(js.rs);
+                            console.log(js.rs);								
+			           	},"json");
+                            
                     },
                     onAdd: function (event) {
                         openPopupP();
@@ -529,7 +550,7 @@
             }
             // Création grille historique des envois mails prospects
             w2ui['layout'].content('main',
-                $('#grid2').w2grid({
+                $().w2grid({
                     name: 'grid2',
                     header: 'Historique des envois',
                     show: {
@@ -586,7 +607,7 @@
             // Création du layout esclave (Prospects)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
             w2ui['layout'].content('bottom',
-            $('#layout5').w2layout({
+            $().w2layout({
                 name: 'layout5',
                 panels: [{
                         type: 'left',
@@ -607,7 +628,7 @@
             }))
             // Création de la grille esclaves affiliation
             w2ui['layout5'].content('left',
-                $('#grid10').w2grid({
+                $().w2grid({
                     name: 'grid10',
                     header: 'Affiliations du prospect',
                     show: {
@@ -674,7 +695,7 @@
                 }))
             // Création de la grille esclaves nomenclature
             w2ui['layout5'].content('main',
-                $('#grid11').w2grid({
+                $().w2grid({
                     name: 'grid11',
                     header: 'Nomenclatures du prospect',
                     show: {
@@ -737,6 +758,7 @@
                     },
                     {
                         type: 'main',
+                        size: '70%',
                         resizable: true,
                         hidden: false,
                         style: pstyle,
@@ -744,6 +766,7 @@
                     },
                     {
                         type: 'bottom',
+                        size: '30%',
                         resizable: true,
                         hidden: false,
                         style: pstyle
@@ -752,7 +775,7 @@
             })
             // Création de la grille Etablissements
             w2ui['layout2'].content('left',
-                $('#grid3').w2grid({
+                $().w2grid({
                     name: 'grid3',
                     header: 'Etablissements',
                     show: {
@@ -1095,7 +1118,7 @@
             }
             // Création de la grille historique des envois / établissement
             w2ui['layout2'].content('main',
-                $('#grid5').w2grid({
+                $().w2grid({
                     name: 'grid5',
                     header: 'Historique des envois',
                     show: {
@@ -1145,7 +1168,7 @@
                 // Création du layout esclave (Affiliations)
                 var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
                 w2ui['layout2'].content('bottom',
-                $('#layout6').w2layout({
+                $().w2layout({
                     name: 'layout6',
                     panels: [{
                         type: 'left',
@@ -1166,7 +1189,7 @@
             }))
             // Création de la grille esclaves affiliation
             w2ui['layout6'].content('left',
-                $('#grid12').w2grid({
+                $().w2grid({
                     name: 'grid12',
                     header: 'Prospects liés aux affiliations',
                     show: {
@@ -1248,7 +1271,7 @@
                 }))
             // Création de la grille esclaves nomenclature
             w2ui['layout6'].content('main',
-                $('#grid13').w2grid({
+                $().w2grid({
                     name: 'grid13',
                     header: 'Nomenclatures liés aux affiliations',
                     show: {
@@ -1319,6 +1342,7 @@
                     },
                     {
                         type: 'main',
+                        size: '70%',
                         resizable: true,
                         hidden: false,
                         style: pstyle,
@@ -1326,6 +1350,7 @@
                     },
                     {
                         type: 'bottom',
+                        size: '30%',
                         resizable: true,
                         hidden: false,
                         style: pstyle
@@ -1334,7 +1359,7 @@
             })
             // Création de la grille nomenclature
             w2ui['layout3'].content('left',
-                $('#grid4').w2grid({
+                $().w2grid({
                     name: 'grid4',
                     header: 'Nomenclatures',
                     show: {
@@ -1594,7 +1619,7 @@
             }
             // Création de la grille historique des envois / nomenclature
             w2ui['layout3'].content('main',
-                $('#grid6').w2grid({
+                $().w2grid({
                     name: 'grid6',
                     header: 'Historique des envois',
                     show: {
@@ -1638,7 +1663,7 @@
             // Création du layout esclave (Affiliations)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
                 w2ui['layout3'].content('bottom',
-                $('#layout7').w2layout({
+                $().w2layout({
                     name: 'layout7',
                     panels: [{
                         type: 'left',
@@ -1659,7 +1684,7 @@
             }))
             // Création de la grille esclaves affiliation
             w2ui['layout7'].content('left',
-                $('#grid14').w2grid({
+                $().w2grid({
                     name: 'grid14',
                     header: 'Prospects liés aux nomenclatures',
                     show: {
@@ -1741,7 +1766,7 @@
                 }))
             // Création de la grille esclaves nomenclature
             w2ui['layout7'].content('main',
-                $('#grid15').w2grid({
+                $().w2grid({
                     name: 'grid15',
                     header: 'Affiliations liées aux nomenclatures',
                     show: {
@@ -1838,7 +1863,7 @@
             })
             // Création de la grille import
             w2ui['layout4'].content('left',
-                $('#grid7').w2grid({
+                $().w2grid({
                     name: 'grid7',
                     header: 'Historique des imports',
                     show: {
@@ -1900,7 +1925,7 @@
                         },
                         {
                             field: 'col6',
-                            caption: 'Affiliation 4',
+                            caption: 'Adresse',
                             size: '30%',
                             type: 'text'
                         },
@@ -1949,6 +1974,12 @@
                         {
                             field: 'col15',
                             caption: 'Email',
+                            size: '30%',
+                            type: 'text'
+                        },
+                        {
+                            field: 'col16',
+                            caption: 'Unsubscribe',
                             size: '30%',
                             type: 'text'
                         },

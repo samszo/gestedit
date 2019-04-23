@@ -122,7 +122,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
-        /**
+    /**
      * Récupère une entrées Iste_prospect avec certains critères
      * de tri, intervalles
      *  @param int       $id
@@ -142,6 +142,28 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
         $rs = $this->fetchAll($query)->toArray();
         if(count($rs))return end($rs);
         else return false;
+    }
+
+    /**
+     * Récupère une entrées Iste_prospect avec certains critères
+     * de tri, intervalles
+     *  @param int       
+     * 
+     * @return array
+     */
+    public function getNomenclatureByIdProspect($id_prospect){
+        $sql = 'SELECT 
+                    p.id_prospect, nom_prenom, pn.id_nomenclature, n.label
+                FROM
+                    iste_prospect p
+                        INNER JOIN
+                    iste_prospectxnomenclature pn ON pn.id_prospect = p.id_prospect
+                        INNER JOIN
+                    iste_nomenclature n ON n.id_nomenclature = pn.id_nomenclature
+                WHERE p.id_prospect = '+$id_prospect;
+        return $this->fetchAll($sql);
+        
+    
     }
 
 }        

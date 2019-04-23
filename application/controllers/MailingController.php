@@ -19,8 +19,7 @@ class MailingController extends Zend_Controller_Action
         $rs = json_encode($dbProsp->getAll());
         $s->trace($rs);
         $this->view->jsProsp = $rs;
-
-
+        
         // Affichage établissement dans index mailing
         $dbEtab = new Model_DbTable_Iste_etab();
         $rs = json_encode($dbEtab->getAll());
@@ -167,5 +166,15 @@ class MailingController extends Zend_Controller_Action
             $this->_redirect('/auth/finsession');		    
         }
     }
+
+    public function prospectnomAction(){
+        // Affichage grille secondaire prospect -> nomenclature
+        $dbPN = new Model_DbTable_Iste_prospect();
+        if ('id_prospect'!= null){
+        $rs = $dbPN->getNomenclatureByIdProspect($this->_getParam('id_prospect'));
+        $this->view->rs = $rs;
+        }
+    }
+
 }
 
