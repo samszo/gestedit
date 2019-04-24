@@ -152,7 +152,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
      * @return array
      */
     public function getNomenclatureByIdProspect($id_prospect){
-
+/*
         $sql = $this->select()
         ->from( array('p' => 'iste_prospect') )
         ->joinInner(array('pn' => 'iste_prospectnomenclature'),
@@ -160,7 +160,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
         ->joinInner(array('n' => 'iste_nomenclature'),
         'n.id_nomenclature = pn.id_nomenclature')
         ->where('p.id_prospect', $id_prospect);
-/*
+*/
         $sql = 'SELECT 
                     p.id_prospect, nom_prenom, pn.id_nomenclature, n.label
                 FROM
@@ -169,8 +169,10 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
                     iste_prospectxnomenclature pn ON pn.id_prospect = p.id_prospect
                         INNER JOIN
                     iste_nomenclature n ON n.id_nomenclature = pn.id_nomenclature
-                WHERE p.id_prospect = '+$id_prospect; */
-        return $this->fetchAll($sql);
+                WHERE p.id_prospect = '.$id_prospect; 
+        	    $db = $this->_db->query($sql);
+                $rs = $db->fetchAll();
+        return $rs;
         
     
     }
