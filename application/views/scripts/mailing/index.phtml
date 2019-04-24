@@ -633,8 +633,11 @@
                     header: 'Affiliations du prospect',
                     show: {
                         header: true,
-                        toolbar: false,
+                        toolbar: true,
                         footer: true,
+                        selectColumn: true,
+                        toolbarAdd: true,
+                        toolbarDelete: true
                     },
                     columns: [{
                             field: 'recid',
@@ -660,38 +663,26 @@
                             caption: 'Affiliation 3',
                             size: '30%',
                             type: 'text'
-                        },
-                        {
-                            field: 'url_labo',
-                            caption: 'URL du Labo',
-                            size: '40%',
-                            type: 'text'
-                        },
-                        {
-                            field: 'adresse',
-                            caption: 'Adresse',
-                            size: '120px',
-                            type: 'text'
-                        },
-                        {
-                            field: 'ville_cp',
-                            caption: 'Ville + CP',
-                            size: '120px',
-                            type: 'text'
-                        },
-                        {
-                            field: 'pays',
-                            caption: 'Pays',
-                            size: '30%',
-                            type: 'text'
-                        },
-                        {
-                            field: 'responsable',
-                            caption: 'Responsable du Labo',
-                            size: '30%',
-                            type: 'text'
-                        },
+                        }
                     ],
+                    onAdd: function (event) {
+                       // openPopupP();
+                    },
+                    onDelete: function (event) {
+                        var itemsSelect = w2ui.grid.getSelection();
+                        var p = {
+                            id: itemsSelect,
+                            obj: 'prospect'
+                        };
+                        if (event.force) {
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+                    },
                 }))
             // Création de la grille esclaves nomenclature
             w2ui['layout5'].content('main',
@@ -700,8 +691,11 @@
                     header: 'Nomenclatures du prospect',
                     show: {
                         header: true,
-                        toolbar: false,
+                        toolbar: true,
                         footer: true,
+                        selectColumn: true,
+                        toolbarAdd: true,
+                        toolbarDelete: true
                     },
                     columns: [{
                             field: 'recid',
@@ -735,6 +729,24 @@
                             type: 'text'
                         }
                     ],
+                    onAdd: function (event) {
+                       // openPopupP();
+                    },
+                    onDelete: function (event) {
+                        var itemsSelect = w2ui.grid.getSelection();
+                        var p = {
+                            id: itemsSelect,
+                            obj: 'prospect'
+                        };
+                        if (event.force) {
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+                    },
                 }))
             // Création du layout 2e onglet (Etablissements)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
@@ -925,10 +937,6 @@
                         });
                     },
                     onAdd: function (event) {
-                        /* w2ui['layout2'].toggle('top', true);
-                         w2ui['layout2'].hide('left', true);
-                         w2ui['layout2'].toggle('main', true);
-                         w2ui['layout2'].hide('right', true);*/
                         openPopupE();
                     },
                     onDelete: function (event) {
@@ -1194,8 +1202,11 @@
                     header: 'Prospects liés aux affiliations',
                     show: {
                         header: true,
-                        toolbar: false,
+                        toolbar: true,
                         footer: true,
+                        toolbarAdd: true,
+                        selectColumn: true,
+                        toolbarDelete: true
                     },
                     columns: [{
                             field: 'recid',
@@ -1208,58 +1219,19 @@
                             field: 'nom_prenom',
                             caption: 'Nom Prénom',
                             size: '40%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'email',
                             caption: 'Email',
                             size: '20%',
-                            editable: {
-                                type: 'email'
-                            }
-                        },
-                        {
-                            field: 'email2',
-                            caption: 'Email2',
-                            size: '20%',
-                            editable: {
-                                type: 'email'
-                            }
-                        },
-                        {
-                            field: 'origine',
-                            caption: 'Origine',
-                            size: '20%',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'clientIste',
-                            caption: 'Client Iste',
-                            size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
-
-                        },
-                        {
-                            field: 'membreEdito',
-                            caption: 'Membre editorial',
-                            size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'unsub',
                             caption: 'Unsubscribe',
                             size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'maj',
@@ -1268,6 +1240,24 @@
                             type: 'date'
                         }
                     ],
+                    onAdd: function (event) {
+                        //openPopupP();
+                    },
+                    onDelete: function (event) {
+                        var itemsSelect = w2ui.grid.getSelection();
+                        var p = {
+                            id: itemsSelect,
+                            obj: 'prospect'
+                        };
+                        if (event.force) {
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+                    },
                 }))
             // Création de la grille esclaves nomenclature
             w2ui['layout6'].content('main',
@@ -1276,8 +1266,11 @@
                     header: 'Nomenclatures liés aux affiliations',
                     show: {
                         header: true,
-                        toolbar: false,
+                        toolbar: true,
                         footer: true,
+                        selectColumn: true,
+                        toolbarAdd: true,
+                        toolbarDelete: true
                     },
                     columns: [{
                             field: 'recid',
@@ -1290,35 +1283,45 @@
                             field: 'code',
                             caption: 'Code',
                             size: '20%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'label',
                             caption: 'Label',
                             size: '40%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'id_parent',
                             caption: 'ID Parent',
                             size: '10%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'label_parent',
                             caption: 'Catégorie Parent',
                             size: '40%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         }
                     ],
+                    onAdd: function (event) {
+                        //openPopupP();
+                    },
+                    onDelete: function (event) {
+                        var itemsSelect = w2ui.grid.getSelection();
+                        var p = {
+                            id: itemsSelect,
+                            obj: 'prospect'
+                        };
+                        if (event.force) {
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+                    },
                 }))
             // Création du layout 3e onglet (Nomenclatures)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
@@ -1689,8 +1692,11 @@
                     header: 'Prospects liés aux nomenclatures',
                     show: {
                         header: true,
-                        toolbar: false,
+                        toolbar: true,
                         footer: true,
+                        selectColumn: true,
+                        toolbarAdd: true,
+                        toolbarDelete: true
                     },
                     columns: [{
                             field: 'recid',
@@ -1703,58 +1709,19 @@
                             field: 'nom_prenom',
                             caption: 'Nom Prénom',
                             size: '40%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'email',
                             caption: 'Email',
                             size: '20%',
-                            editable: {
-                                type: 'email'
-                            }
-                        },
-                        {
-                            field: 'email2',
-                            caption: 'Email2',
-                            size: '20%',
-                            editable: {
-                                type: 'email'
-                            }
-                        },
-                        {
-                            field: 'origine',
-                            caption: 'Origine',
-                            size: '20%',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'clientIste',
-                            caption: 'Client Iste',
-                            size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
-
-                        },
-                        {
-                            field: 'membreEdito',
-                            caption: 'Membre editorial',
-                            size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'unsub',
                             caption: 'Unsubscribe',
                             size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'maj',
@@ -1763,6 +1730,24 @@
                             type: 'date'
                         }
                     ],
+                    onAdd: function (event) {
+                        //openPopupP();
+                    },
+                    onDelete: function (event) {
+                        var itemsSelect = w2ui.grid.getSelection();
+                        var p = {
+                            id: itemsSelect,
+                            obj: 'prospect'
+                        };
+                        if (event.force) {
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+                    },
                 }))
             // Création de la grille esclaves nomenclature
             w2ui['layout7'].content('main',
@@ -1771,8 +1756,11 @@
                     header: 'Affiliations liées aux nomenclatures',
                     show: {
                         header: true,
-                        toolbar: false,
+                        toolbar: true,
                         footer: true,
+                        toolbarAdd: true,
+                        toolbarDelete: true,
+                        selectColumn: true
                     },
                     columns: [{
                             field: 'recid',
@@ -1785,67 +1773,40 @@
                             field: 'affiliation1',
                             caption: 'Affiliation 1',
                             size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'affiliation2',
                             caption: 'Affiliation 2',
                             size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
                         },
                         {
                             field: 'affiliation3',
                             caption: 'Affiliation 3',
                             size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'url_labo',
-                            caption: 'URL du Labo',
-                            size: '40%',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'adresse',
-                            caption: 'Adresse',
-                            size: '120px',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'ville_cp',
-                            caption: 'Ville + CP',
-                            size: '120px',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'pays',
-                            caption: 'Pays',
-                            size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'responsable',
-                            caption: 'Responsable du Labo',
-                            size: '30%',
-                            editable: {
-                                type: 'text'
-                            }
+                            type: 'text'
+                            
                         },
                     ],
+                    onAdd: function (event) {
+                        //openPopupP();
+                    },
+                    onDelete: function (event) {
+                        var itemsSelect = w2ui.grid.getSelection();
+                        var p = {
+                            id: itemsSelect,
+                            obj: 'prospect'
+                        };
+                        if (event.force) {
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+                    },
                 }))
 
             // Création du layout 4e onglet (Import)

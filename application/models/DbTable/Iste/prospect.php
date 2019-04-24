@@ -147,7 +147,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
     /**
      * Récupère une entrées Iste_prospect avec certains critères
      * de tri, intervalles
-     *  @param int       
+     *  @param int    $id_prospect   
      * 
      * @return array
      */
