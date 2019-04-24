@@ -152,17 +152,8 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
      * @return array
      */
     public function getNomenclatureByIdProspect($id_prospect){
-/*
-        $sql = $this->select()
-        ->from( array('p' => 'iste_prospect') )
-        ->joinInner(array('pn' => 'iste_prospectnomenclature'),
-        'pn.id_prospect = p.id_prospect')
-        ->joinInner(array('n' => 'iste_nomenclature'),
-        'n.id_nomenclature = pn.id_nomenclature')
-        ->where('p.id_prospect', $id_prospect);
-*/
         $sql = 'SELECT 
-                    p.id_prospect, nom_prenom, pn.id_nomenclature, n.label
+                    p.id_prospect recid, pn.id_nomenclature, n.label, n.code
                 FROM
                     iste_prospect p
                         INNER JOIN
@@ -173,8 +164,28 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
         	    $db = $this->_db->query($sql);
                 $rs = $db->fetchAll();
         return $rs;
-        
-    
+    }
+
+        /**
+     * Récupère une entrées Iste_prospect avec certains critères
+     * de tri, intervalles
+     *  @param int    $id_prospect   
+     * 
+     * @return array
+     */
+    public function getAffiliationByIdProspect($id_prospect){
+        $sql = 'SELECT 
+                    p.id_prospect recid, pe.id_etab, e.affiliation1, e.affiliation2, e.affiliation3
+                FROM
+                    iste_prospect p
+                        INNER JOIN
+                    iste_prospectxetab pe ON pe.id_prospect = p.id_prospect
+                        INNER JOIN
+                    iste_etab e ON e.id_etab = pe.id_etab
+                WHERE p.id_prospect = '.$id_prospect; 
+        	    $db = $this->_db->query($sql);
+                $rs = $db->fetchAll();
+        return $rs;
     }
 
 }        

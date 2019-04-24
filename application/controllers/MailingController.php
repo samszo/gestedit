@@ -166,12 +166,60 @@ class MailingController extends Zend_Controller_Action
             $this->_redirect('/auth/finsession');		    
         }
     }
-
+    // Gestion des grid 'details'
+    // Grid details Prospect
     public function prospectnomAction(){
         // Affichage grille secondaire prospect -> nomenclature
-        $dbPN = new Model_DbTable_Iste_prospect();
+        $db = new Model_DbTable_Iste_prospect();
         if ('id_prospect'!= null){
-        $rs = $dbPN->getNomenclatureByIdProspect($this->_getParam('id_prospect'));
+        $rs = $db->getNomenclatureByIdProspect($this->_getParam('id_prospect'));
+        $this->view->rs = $rs;
+        }
+    }
+
+    public function prospectaffAction(){
+        // Affichage grille secondaire prospect -> affiliations
+        $db = new Model_DbTable_Iste_prospect();
+        if ('id_prospect'!= null){
+        $rs = $db->getAffiliationByIdProspect($this->_getParam('id_prospect'));
+        $this->view->rs = $rs;
+        }
+    }
+
+    // Grid details etab
+    public function affprospectAction(){
+        // Affichage grille secondaire etab -> prospect
+        $db = new Model_DbTable_Iste_etab();
+        if ('id_etab'!= null){
+        $rs = $db->getProspectByIdEtab($this->_getParam('id_etab'));
+        $this->view->rs = $rs;
+        }
+    }
+
+    public function affnomenAction(){
+        // Affichage grille secondaire etab -> nomenclature
+        $db = new Model_DbTable_Iste_etab();
+        if ('id_etab'!= null){
+        $rs = $db->getNomenByIdEtab($this->_getParam('id_etab'));
+        $this->view->rs = $rs;
+        }
+    }
+
+    // Grid details nomenclature
+    public function nomenprospectAction(){
+        // Affichage grille secondaire nomenclature -> prospect
+        $db = new Model_DbTable_Iste_nomenclature();
+        if ('id_nomenclature'!= null){
+        $rs = $db->getProspectByIdNomen($this->_getParam('id_nomenclature'));
+        $this->view->rs = $rs;
+        }
+    }
+
+    public function nomenaffAction(){
+        // Affichage grille secondaire nomenclature -> etab
+        $db = new Model_DbTable_Iste_nomenclature();
+        if ('id_nomenclature'!= null){
+        $rs = $db->getEtabByIdNomen($this->_getParam('id_nomenclature'));
         $this->view->rs = $rs;
         }
     }

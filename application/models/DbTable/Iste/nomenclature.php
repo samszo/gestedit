@@ -155,5 +155,59 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
         else return false;
     }
 
+        /**
+     * Récupère une entrées Iste_nomenclature avec certains critères
+     * de tri, intervalles
+     *  @param int    $id_nomenclature   
+     * 
+     * @return array
+     */
+    public function getProspectByIdNomen($id_nomenclature){
+        $sql = 'SELECT 
+                    n.id_nomenclature recid, pn.id_prospect, p.nom_prenom, p.email, p.unsub
+                FROM
+                    iste_nomenclature n
+                        INNER JOIN
+                    iste_prospectxnomenclature pn ON pn.id_nomenclature = n.id_nomenclature
+                        INNER JOIN
+                    iste_prospect p ON p.id_prospect = pn.id_prospect
+                WHERE n.id_nomenclature = '.$id_nomenclature; 
+        	    $db = $this->_db->query($sql);
+                $rs = $db->fetchAll();
+        return $rs;
+    }
+
+            /**
+     * Récupère une entrées Iste_nomenclature avec certains critères
+     * de tri, intervalles
+     *  @param int    $id_nomenclature  
+     * 
+     * @return array
+     */
+    public function getEtabByIdNomen($id_nomenclature){
+        $sql = 'SELECT DISTINCT
+                n.id_nomenclature recid,
+                pe.id_etab,
+                e.affiliation1,
+                e.affiliation2,
+                e.affiliation3
+            FROM
+                iste_prospect p
+                    INNER JOIN
+                iste_prospectxnomenclature pn ON pn.id_prospect = p.id_prospect
+                    INNER JOIN
+                iste_nomenclature n ON n.id_nomenclature = pn.id_nomenclature
+                    INNER JOIN
+                iste_prospectxetab pe ON pe.id_prospect = p.id_prospect
+                    INNER JOIN
+                iste_etab e ON e.id_etab = pe.id_etab
+            WHERE
+                n.id_nomenclature =' .$id_nomenclature.'
+            ORDER BY n.label';
+    
+            $db = $this->_db->query($sql);
+            $rs = $db->fetchAll();
+            return $rs;
+        }
 }        
 

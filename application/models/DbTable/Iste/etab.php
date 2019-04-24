@@ -128,5 +128,58 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
         else return false;
     }
 
+        /**
+     * Récupère une entrées Iste_etab avec certains critères
+     * de tri, intervalles
+     *  @param int    $id_etab   
+     * 
+     * @return array
+     */
+    public function getProspectByIdEtab($id_etab){
+        $sql = 'SELECT 
+                    e.id_etab recid, ep.id_prospect, p.nom_prenom, p.email, p.unsub
+                FROM
+                    iste_etab e
+                        INNER JOIN
+                    iste_prospectxetab ep ON ep.id_etab = e.id_etab
+                        INNER JOIN
+                    iste_prospect p ON p.id_prospect = ep.id_prospect
+                WHERE e.id_etab = '.$id_etab; 
+        	    $db = $this->_db->query($sql);
+                $rs = $db->fetchAll();
+        return $rs;
+    }
+
+        /**
+     * Récupère une entrées Iste_etab avec certains critères
+     * de tri, intervalles
+     *  @param int    $id_etab   
+     * 
+     * @return array
+     */
+    public function getNomenByIdEtab($id_etab){
+    $sql = 'SELECT DISTINCT
+            e.id_etab recid,
+            pn.id_nomenclature,
+            n.code,
+            n.label
+        FROM
+            iste_prospect p
+                INNER JOIN
+            iste_prospectxnomenclature pn ON pn.id_prospect = p.id_prospect
+                INNER JOIN
+            iste_nomenclature n ON n.id_nomenclature = pn.id_nomenclature
+                INNER JOIN
+            iste_prospectxetab pe ON pe.id_prospect = p.id_prospect
+                INNER JOIN
+            iste_etab e ON e.id_etab = pe.id_etab
+        WHERE
+            e.id_etab =' .$id_etab.'
+        ORDER BY n.label';
+
+        $db = $this->_db->query($sql);
+        $rs = $db->fetchAll();
+        return $rs;
+    }
 }        
 
