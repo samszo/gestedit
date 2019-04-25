@@ -153,7 +153,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
      */
     public function getNomenclatureByIdProspect($id_prospect){
         $sql = 'SELECT 
-                    p.id_prospect recid, pn.id_nomenclature, n.label, n.code
+                    p.id_prospect, pn.id_nomenclature recid, n.label, n.code
                 FROM
                     iste_prospect p
                         INNER JOIN
@@ -175,7 +175,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
      */
     public function getAffiliationByIdProspect($id_prospect){
         $sql = 'SELECT 
-                    p.id_prospect recid, pe.id_etab, e.affiliation1, e.affiliation2, e.affiliation3
+                    p.id_prospect, pe.id_etab recid, e.affiliation1, e.affiliation2, e.affiliation3
                 FROM
                     iste_prospect p
                         INNER JOIN

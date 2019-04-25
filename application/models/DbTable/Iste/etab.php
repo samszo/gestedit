@@ -137,7 +137,7 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
      */
     public function getProspectByIdEtab($id_etab){
         $sql = 'SELECT 
-                    e.id_etab recid, ep.id_prospect, p.nom_prenom, p.email, p.unsub
+                    e.id_etab, ep.id_prospect recid, p.nom_prenom, p.email, p.unsub
                 FROM
                     iste_etab e
                         INNER JOIN
@@ -159,8 +159,8 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
      */
     public function getNomenByIdEtab($id_etab){
     $sql = 'SELECT DISTINCT
-            e.id_etab recid,
-            pn.id_nomenclature,
+            e.id_etab,
+            pn.id_nomenclature recid,
             n.code,
             n.label
         FROM
