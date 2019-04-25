@@ -184,7 +184,7 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
      */
     public function getImportdataByIdImportfic($id_importfic){
         $sql = 'SELECT 
-                   i.id_importfic recid, d.col1, d.col2, d.col3, d.col4, d.col5, d.col6, d.col7, d.col8, d.col9, d.col10, d.col11, d.creation, d.col14, d.col15, d.col16, d.commentaire
+                   d.id_importdata recid, d.col1, d.col2, d.col3, d.col4, d.col5, d.col6, d.col7, d.col8, d.col9, d.col10, d.col11, d.creation, d.col14, d.col15, d.col16, d.commentaire
                 FROM
                     iste_importfic i
                         INNER JOIN
