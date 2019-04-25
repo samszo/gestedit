@@ -169,10 +169,30 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
         $query = $this->select()
         ->from( array("i" => "iste_importfic") )
         ->joinInner(array("nid" => "iste_importfic"),
-        'i.id_importfic = nid.id_importfic', array("id"=>"i.id_importfic"));
+        'i.id_importfic = nid.id_importfic', array("recid"=>"i.id_importfic"));
         
 
         return $this->fetchAll($query)->toArray();
+    }
+
+     /**
+     * Récupère une entrées Iste_importfic avec certains critères
+     * de tri, intervalles
+     *  @param int    $id_importfic   
+     * 
+     * @return array
+     */
+    public function getImportdataByIdImportfic($id_importfic){
+        $sql = 'SELECT 
+                   i.id_importfic recid, d.col1, d.col2, d.col3, d.col4, d.col5, d.col6, d.col7, d.col8, d.col9, d.col10, d.col11, d.creation, d.col14, d.col15, d.col16, d.commentaire
+                FROM
+                    iste_importfic i
+                        INNER JOIN
+                    iste_importdata d ON d.id_importfic = i.id_importfic
+                WHERE i.id_importfic = '.$id_importfic; 
+        	    $db = $this->_db->query($sql);
+                $rs = $db->fetchAll();
+        return $rs;
     }
     
     /**

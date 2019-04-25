@@ -56,9 +56,7 @@
                 'Cod': [],
                 'Prosp': [],
                 'Email': [],
-                'Email2': [],
-                'recid': [],
-                'text': []
+                'Email2': []
             },
             doublons = [];
         jsEtab.forEach(function (d) {
@@ -75,10 +73,6 @@
             if (d.nom_prenom) doublons[d.nom_prenom] = "Prosp";
             if (d.email) doublons[d.email] = "Email";
             if (d.email2) doublons[d.email2] = "Email2";
-        })
-        jsImpfic.forEach(function(d){
-            if (d.id_importfic) doublons[d.id_importfic] = 'recid';
-            if (d.nom) doublons[d.nom] ='text';
         })
         for (var k in doublons) {
             filters[doublons[k]].push(k);
@@ -1886,24 +1880,62 @@
             })
             // Création du sidebar , Choix fichier import
             w2ui['layout4'].content('left',
-                $().w2sidebar({
-                    name: 'sidebar',
-                    nodes: [
-                        { id: 'level-1', text: 'Level 1', img: 'icon-folder', expanded: true, group: true,
-                        nodes: filters['recid','text']
+                $().w2grid({
+                    name: 'grid20',
+                    header: 'Historique des imports',
+                    show: {
+                        header: true,
+                        toolbar: false,
+                        footer: true,
+                        selectColumn: true
+                    },
+                    multiSearch: true,
+                    searches: [{
+                        field: 'id_importfic',
+                        caption: 'ID Import',
+                        type: 'text'
+                    }, ],
+                    columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '10%',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'nom',
+                            caption: 'Nom du Fichier',
+                            size: '50%',
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'reception',
+                            caption: 'Date Import',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true
                         }
-                    ]
+                    ],
+                    records: jsImpfic,
+                    onClick: function (event) {
+                        if (record && record.recid == event.recid) return;
+                        var record = this.get(event.recid);
+                        // Grille secondaire Prospect -> Affiliations
+                        w2ui['grid7'].clear();
+                        $.get('mailing/datafic',
+						{id_importfic:record.recid},
+			            function(js){
+                            //finsession(js);
+                            w2ui['grid7'].add(js.rs);
+                        },"json");
+                    }
                 }))
-                w2ui.sidebar.on('*', function (event) {
-                    $('#event').html('<span style="color: #999">Event</span>: ' + event.type + '    <span style="color: #999">Target</span>: ' + event.target);
-                  //  console.log('Last Event: ' + event.type + ' Target: ' + event.target);
-                  //  console.log(event);
-                })
             // Création de la grille import
             w2ui['layout4'].content('main',
                 $().w2grid({
                     name: 'grid7',
-                    header: 'Historique des imports',
+                    header: 'Détails imports',
                     show: {
                         header: true,
                         toolbar: true,
@@ -1920,13 +1952,6 @@
                             field: 'recid',
                             caption: 'ID',
                             size: '50px',
-                            sortable: true,
-                            resizable: true
-                        },
-                        {
-                            field: 'id_importfic',
-                            caption: 'ID Import',
-                            size: '10%',
                             sortable: true,
                             resizable: true
                         },
@@ -2041,7 +2066,6 @@
                             }
                         }
                     },
-                    records: jsImp,
                     onSearch: function (event) {
                         var grid = this;
                         if (event.searchField == "multi") {

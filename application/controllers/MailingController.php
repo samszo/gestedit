@@ -232,5 +232,15 @@ class MailingController extends Zend_Controller_Action
         }
     }
 
+    // Grid details import
+    public function dataficAction(){
+        // Affichage grille secondaire etab -> prospect
+        $db = new Model_DbTable_Iste_importfic();
+        if ('id_importfic'!= null){
+        $rs = $db->getImportdataByIdImportfic($this->_getParam('id_importfic'));
+        $this->view->rs = $rs;
+        }
+    }
+
 }
 
