@@ -1945,6 +1945,7 @@
 			            function(js){
                             //finsession(js);
                             w2ui['grid7'].add(js.rs);
+                            voirCouleur(js.rs);
                         },"json");
                     }
                 }))
@@ -2083,18 +2084,18 @@
                 showMax: false,
             });
         };
-        // Fonction de modification de couleur du background import
-        function voirCouleur() {
-            jsImp.forEach(function(d){
-                if (d.commentaire != "") {
-                    d.w2ui = {'style':'background-color: red'};
+        //Fonction de modification de couleur du background import
+        function voirCouleur(e) {
+            e.forEach(function(d){
+                if (d.commentaire !== null) {
+                    d.w2ui ='{style:background-color:#FF011B}';
                 } 
                 else 
                 {
-                    d.w2ui = {'style':'background-color: green'};
+                    d.w2ui ='{style:background-color:#C2F5B4}';
                 }
             })   
-        };
+        }; 
     </script>
 
 </body>
