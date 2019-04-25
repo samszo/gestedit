@@ -79,6 +79,16 @@
         }
 
         // Fonction pour exporter un fichier
+        function exportSave(ids, obj) {
+            $.post('mailing/export',
+                {'ids':ids,'obj':obj},
+                function (js) {
+                    if (changes.length == i + 1) w2alert(js.message);
+                }, "json");
+
+        }
+
+        // Fonction pour exporter un fichier
         function exportByPost(ids, obj) {
             var form = document.getElementById("exportPostForm");
             if (form) {
@@ -330,7 +340,7 @@
                             if (event.target == 'export') {
                                 var ids = w2ui.grid.getSelection();
                                 exportByPost(ids, "prospect");
-                                open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
+                                //open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
                             }
                         }
                     },
@@ -1226,9 +1236,9 @@
                         }],
                         onClick: function (event) {
                             if (event.target == 'export') {
-                                var ids = w2ui.grid.getSelection();
+                                var ids = w2ui.grid12.getSelection();
                                 exportByPost(ids, "prospect");
-                                open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
+                                //open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
                             }
                         }
                     },
@@ -1733,9 +1743,9 @@
                         }],
                         onClick: function (event) {
                             if (event.target == 'export') {
-                                var ids = w2ui.grid.getSelection();
+                                var ids = w2ui.grid14.getSelection();
                                 exportByPost(ids, "prospect");
-                                open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
+                                //open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
                             }
                         }
                     },
