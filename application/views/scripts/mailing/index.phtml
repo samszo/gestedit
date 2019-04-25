@@ -41,6 +41,7 @@
         var jsProsp = <?php echo $this->jsProsp; ?>;
         var jsEtab = <?php echo $this->jsEtab; ?>;
         var jsImp = <?php echo $this->jsImp; ?>;
+        var jsImpfic = <?php echo $this->jsImpfic; ?>;
         var config;
         // Variable pour exporter les fichiers
         var urlP = "../";
@@ -55,7 +56,9 @@
                 'Cod': [],
                 'Prosp': [],
                 'Email': [],
-                'Email2': []
+                'Email2': [],
+                'recid': [],
+                'text': []
             },
             doublons = [];
         jsEtab.forEach(function (d) {
@@ -72,6 +75,10 @@
             if (d.nom_prenom) doublons[d.nom_prenom] = "Prosp";
             if (d.email) doublons[d.email] = "Email";
             if (d.email2) doublons[d.email2] = "Email2";
+        })
+        jsImpfic.forEach(function(d){
+            if (d.id_importfic) doublons[d.id_importfic] = 'recid';
+            if (d.nom) doublons[d.nom] ='text';
         })
         for (var k in doublons) {
             filters[doublons[k]].push(k);
@@ -1861,15 +1868,39 @@
                 name: 'layout4',
                 panels: [{
                     type: 'left',
-                    size: '100%',
+                    size: '20%',
                     resizable: true,
                     hidden: false,
                     style: pstyle,
                     content: ''
-                }, ]
+                },
+                {
+                    type: 'main',
+                    size: '80%',
+                    resizable: true,
+                    hidden: false,
+                    style: pstyle,
+                    content: ''
+                }
+                ]
             })
-            // Création de la grille import
+            // Création du sidebar , Choix fichier import
             w2ui['layout4'].content('left',
+                $().w2sidebar({
+                    name: 'sidebar',
+                    nodes: [
+                        { id: 'level-1', text: 'Level 1', img: 'icon-folder', expanded: true, group: true,
+                        nodes: filters['recid','text']
+                        }
+                    ]
+                }))
+                w2ui.sidebar.on('*', function (event) {
+                    $('#event').html('<span style="color: #999">Event</span>: ' + event.type + '    <span style="color: #999">Target</span>: ' + event.target);
+                  //  console.log('Last Event: ' + event.type + ' Target: ' + event.target);
+                  //  console.log(event);
+                })
+            // Création de la grille import
+            w2ui['layout4'].content('main',
                 $().w2grid({
                     name: 'grid7',
                     header: 'Historique des imports',

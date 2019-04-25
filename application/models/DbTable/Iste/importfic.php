@@ -154,7 +154,26 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
 		$rs = $this->fetchAll($query)->toArray();
         if(count($rs))return $rs[0];
         else return false; 
-    }           
+    }
+    
+        	/**
+     * Recherche une entrée avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     *
+     *
+     * @return array
+     */
+    public function getById_importfic()
+    {
+        $query = $this->select()
+        ->from( array("i" => "iste_importfic") )
+        ->joinInner(array("nid" => "iste_importfic"),
+        'i.id_importfic = nid.id_importfic', array("id"=>"i.id_importfic"));
+        
+
+        return $this->fetchAll($query)->toArray();
+    }
     
     /**
      * Recherche une entrée Iste_importfic avec la clef primaire spécifiée
