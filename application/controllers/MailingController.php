@@ -27,7 +27,7 @@ class MailingController extends Zend_Controller_Action
         $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsEtab = $rs;
-
+/*
         // Affichage historique import dans index mailing
         $dbImp = new Model_DbTable_Iste_importdata();
         $rs = json_encode($dbImp->getAllData());
@@ -35,7 +35,7 @@ class MailingController extends Zend_Controller_Action
         $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsImp = $rs;
-
+*/
         // Affichage historique import dans sidebar
         $dbImpfic = new Model_DbTable_Iste_importfic();
         $rs = json_encode($dbImpfic->getById_importfic());
@@ -86,7 +86,7 @@ class MailingController extends Zend_Controller_Action
                 $r = $oBdd->remove($this->_getParam("id_etab"),$this->_getParam("id_prospect"));
             break;			
             case 'prospectxnomenclature':
-                $r = $oBdd->remove($this->_getParam("id_nomenclature"),$this->_getParam("id_prospect"));
+                $r = $oBdd->remove($this->_getParam("id_prospect"),$this->_getParam("id_nomenclature"));
             break;
             case 'nomenclature':
                  foreach ($id as $ids){

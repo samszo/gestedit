@@ -145,6 +145,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
      * 
      * @return array
      */
+    /*
     public function getAllData($order=null, $limit=0, $from=0)
     {
    	
@@ -165,7 +166,7 @@ class Model_DbTable_Iste_importdata extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
-
+    */
 	/**
      * Recherche des entrées avec la valeur spécifiée
      * et retourne cette entrée.

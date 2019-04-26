@@ -84,9 +84,9 @@ class Model_DbTable_Iste_prospectxnomenclature extends Zend_Db_Table_Abstract
      *
      * @return void
      */
-    public function remove($id)
+    public function remove($idProspect, $idNomen)
     {
-    		$this->delete('iste_prospectxnomenclature.id_prospect = ' . $id);
+            $this->delete('iste_prospectxnomenclature.id_prospect = '.$idProspect.' AND iste_prospectxnomenclature.id_nomenclature = '.$idNomen);
     }
     
     /**

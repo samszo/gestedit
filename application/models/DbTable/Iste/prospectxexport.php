@@ -1,17 +1,17 @@
 <?php
 /**
- * Ce fichier contient la classe Iste_prospectxetab.
+ * Ce fichier contient la classe Iste_prospectxexport.
  *
  * @copyright  2019 Roch Delannay
  * @license    "New" BSD License
 */
-class Model_DbTable_Iste_prospectxetab extends Zend_Db_Table_Abstract
+class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
 {
     
     /**
      * Nom de la table.
      */
-    protected $_name = 'iste_prospectxetab';
+    protected $_name = 'iste_prospectxexport';
     
     /**
      * Clef primaire de la table.
@@ -19,7 +19,7 @@ class Model_DbTable_Iste_prospectxetab extends Zend_Db_Table_Abstract
     protected $_primary = 'id_prospect';
     
     /**
-     * Vérifie si une entrée Iste_prospectxetab existe.
+     * Vérifie si une entrée Iste_prospectxexport existe.
      *
      * @param array $data
      *
@@ -38,7 +38,7 @@ class Model_DbTable_Iste_prospectxetab extends Zend_Db_Table_Abstract
     } 
         
     /**
-     * Ajoute une entrée Iste_prospectxetab.
+     * Ajoute une entrée Iste_prospectxexport.
      *
      * @param array $data
      * @param boolean $existe
@@ -62,7 +62,7 @@ class Model_DbTable_Iste_prospectxetab extends Zend_Db_Table_Abstract
     } 
            
     /**
-     * Recherche une entrée Iste_prospectxetab avec la clef primaire spécifiée
+     * Recherche une entrée Iste_prospectxexport avec la clef primaire spécifiée
      * et modifie cette entrée avec les nouvelles données.
      *
      * @param integer $id
@@ -73,31 +73,31 @@ class Model_DbTable_Iste_prospectxetab extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
    	
-    	$this->update($data, 'iste_prospectxetab.id_prospect = ' . $id);
+    	$this->update($data, 'iste_prospectxexport.id_prospect = ' . $id);
     }
     
     /**
-     * Recherche une entrée Iste_prospectxetab avec la clef primaire spécifiée
+     * Recherche une entrée Iste_prospectxexport avec la clef primaire spécifiée
      * et supprime cette entrée.
      *
      * @param integer $id
      *
      * @return void
      */
-    public function remove($idProspect, $idEtab)
+    public function remove($id)
     {
-            $this->delete('iste_prospectxetab.id_prospect = '.$idProspect.' AND iste_prospectxetab.id_etab = '.$idEtab);
+    		$this->delete('iste_prospectxexport.id_prospect = ' . $id);
     }
     
     /**
-     * Récupère toutes les entrées Iste_prospectxetab avec certains critères
+     * Récupère toutes les entrées Iste_prospectxexport avec certains critères
      * de tri, intervalles
      */
     public function getAll($order=null, $limit=0, $from=0)
     {
    	
     	$query = $this->select()
-                    ->from( array("iste_prospectxetab" => "iste_prospectxetab") );
+                    ->from( array("iste_prospectxexport" => "iste_prospectxexport") );
                     
         if($order != null)
         {

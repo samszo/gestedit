@@ -82,7 +82,8 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
      */
     public function remove($id)
     {
-    	$this->delete('iste_etab.id_etab = ' . $id);
+        $this->delete('iste_etab.id_etab = ' . $id);
+        $this->delete('iste_prospectxetab.id_etab = ' . $id);
     }
 
         /**
