@@ -83,7 +83,13 @@ class MailingController extends Zend_Controller_Action
         //traitement des supressions
         switch ($this->_getParam('obj')) {						
             case 'prospectxetab':
-                $r = $oBdd->remove($this->_getParam("id_etab"),$this->_getParam("id_prospect"));
+            $arrP = $this->_getParam('idsProspect');
+            $arrE = $this->_getParam("idsEtab");
+            foreach ($arrP as $p) {
+                foreach ($arrE as $e) {
+                    $r[] = array($p,$e,$oBdd->remove($p,$e));
+                }
+            }
             break;			
             case 'prospectxnomenclature':
                 $arrP = $this->_getParam("idsProspect");

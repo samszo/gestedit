@@ -358,7 +358,7 @@
                                 }, "json");
                         });
                     },
-                    onClick: function (event) {
+                    onSelect: function (event) {
                         //if (record && record.recid == event.recid) return;
                         event.onComplete = function () {
                             var record = this.get(event.recid);
@@ -366,7 +366,7 @@
                             // Grille secondaire Prospect -> Affiliations
                             w2ui['grid10'].clear();
                             $.get('mailing/prospectaff',
-                                {id_prospect:record.recid},
+                                {id_prospect:record.recid, 'ids':ids},
                                 function(js){
                                     //finsession(js);
                                     w2ui['grid10'].add(js.rs);
@@ -659,6 +659,7 @@
                             hidden: true,
                             resizable: true
                         },
+                        /*
                         {
                             field: 'id_prospect',
                             caption: 'ID Prospect',
@@ -667,6 +668,7 @@
                             hidden: true,
                             resizable: true
                         },
+                        */
                         {
                             field: 'affiliation1',
                             caption: 'Affiliation 1',
@@ -692,12 +694,12 @@
                     onDelete: function (event) {
                         var itemsSelect = w2ui.grid.getSelection();
                         var p = {
-                            'id_prospect': itemsSelect,
+                            'idsProspect': itemsSelect,
                             obj: 'prospectxetab'
                         };
                         if (event.force) {
                             var s = w2ui[event.target].getSelection();
-						    p.id_etab = s[0];
+						    p.idsEtab = s;
                             $.get('mailing/delete',
                                 p,
                                 function (js) {
@@ -935,25 +937,28 @@
                         }
                     },*/
                     records: jsEtab,
-                    onClick: function (event) {
-                        if (record && record.recid == event.recid) return;
-                        var record = this.get(event.recid);
-                        // Grille secondaire Affiliation -> Prospects
-                        w2ui['grid12'].clear();
-                        $.get('mailing/affprospect',
-						{id_etab:record.recid},
-			            function(js){
-                            //finsession(js);
-                            w2ui['grid12'].add(js.rs);
-                        },"json");
-                        // Grille secondaire Affiliation -> Nomenclatures
-                        w2ui['grid13'].clear();
-                        $.get('mailing/affnomen',
-						{id_etab:record.recid},
-			            function(js){
-                            //finsession(js);
-                            w2ui['grid13'].add(js.rs);
-                        },"json");
+                    onSelect: function (event) {
+                      //  if (record && record.recid == event.recid) return;
+                        event.onComplete = function (){
+                            var record = this.get(event.recid);
+                            var ids = w2ui.grid3.getSelection();
+                            // Grille secondaire Affiliation -> Prospects
+                            w2ui['grid12'].clear();
+                            $.get('mailing/affprospect',
+                            {id_etab:record.recid, 'ids':ids},
+                            function(js){
+                                //finsession(js);
+                                w2ui['grid12'].add(js.rs);
+                            },"json");
+                            // Grille secondaire Affiliation -> Nomenclatures
+                            w2ui['grid13'].clear();
+                            $.get('mailing/affnomen',
+                            {id_etab:record.recid, 'ids':ids},
+                            function(js){
+                                //finsession(js);
+                                w2ui['grid13'].add(js.rs);
+                            },"json");
+                        }
                     },
                     onSave: function (event) {
                         var changes = w2ui['grid3'].getChanges();
@@ -1287,12 +1292,14 @@
                         //openPopupP();
                     },
                     onDelete: function (event) {
-                        var itemsSelect = w2ui.grid.getSelection();
+                        var itemsSelect = w2ui.grid3.getSelection();
                         var p = {
-                            id: itemsSelect,
+                            'idsEtab': itemsSelect,
                             obj: 'prospectxetab'
                         };
                         if (event.force) {
+                            var s = w2ui[event.target].getSelection();
+                            p.idsProspect = s;
                             $.get('mailing/delete',
                                 p,
                                 function (js) {
@@ -1309,11 +1316,11 @@
                     header: 'Nomenclatures liés aux affiliations',
                     show: {
                         header: true,
-                        toolbar: true,
+                        toolbar: false,
                         footer: true,
                         selectColumn: true,
-                        toolbarAdd: true,
-                        toolbarDelete: true
+                        toolbarAdd: false,
+                        toolbarDelete: false
                     },
                     columns: [{
                             field: 'recid',
@@ -1336,6 +1343,7 @@
                             type: 'text'
                         }
                     ],
+                    /*
                     onAdd: function (event) {
                         //openPopupP();
                     },
@@ -1354,6 +1362,7 @@
                                 }, "json");
                         }
                     },
+                    */
                 }))
             // Création du layout 3e onglet (Nomenclatures)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
@@ -1476,24 +1485,27 @@
                         }
                     ],
                     records: jsNomen,
-                    onClick: function (event) {
-                        if (record && record.recid == event.recid) return;
-                        var record = this.get(event.recid);
-                        // Grille secondaire Nomenclature -> Prospects
-                        w2ui['grid14'].clear();
-                        $.get('mailing/nomenprospect',
-						{id_nomenclature:record.recid},
-			            function(js){
-                            //finsession(js);
-                            w2ui['grid14'].add(js.rs);
-                        },"json");
-                        w2ui['grid15'].clear();
-                        $.get('mailing/nomenaff',
-						{id_nomenclature:record.recid},
-			            function(js){
-                            //finsession(js);
-                            w2ui['grid15'].add(js.rs);
-                        },"json");
+                    onSelect: function (event) {
+                      //  if (record && record.recid == event.recid) return;
+                        event.onComplete = function (){
+                            var record = this.get(event.recid);
+                            var ids = w2ui.grid4.getSelection();
+                            // Grille secondaire Nomenclature -> Prospects
+                            w2ui['grid14'].clear();
+                            $.get('mailing/nomenprospect',
+                            {id_nomenclature:record.recid, 'ids': ids},
+                            function(js){
+                                //finsession(js);
+                                w2ui['grid14'].add(js.rs);
+                            },"json");
+                            w2ui['grid15'].clear();
+                            $.get('mailing/nomenaff',
+                            {id_nomenclature:record.recid, 'ids': ids},
+                            function(js){
+                                //finsession(js);
+                                w2ui['grid15'].add(js.rs);
+                            },"json");
+                        }
                     },
                     onSave: function (event) {
                         var changes = w2ui['grid4'].getChanges();
@@ -1784,12 +1796,14 @@
                         //openPopupP();
                     },
                     onDelete: function (event) {
-                        var itemsSelect = w2ui.grid.getSelection();
+                        var itemsSelect = w2ui.grid4.getSelection();
                         var p = {
-                            id: itemsSelect,
+                            idsNomenclature: itemsSelect,
                             obj: 'prospectxnomenclature'
                         };
                         if (event.force) {
+                            var s = w2ui[event.target].getSelection();
+                            p.idsProspect = s;
                             $.get('mailing/delete',
                                 p,
                                 function (js) {
@@ -1798,6 +1812,7 @@
                                 }, "json");
                         }
                     },
+                    
                 }))
             // Création de la grille esclaves nomenclature
             w2ui['layout7'].content('main',
@@ -1806,10 +1821,10 @@
                     header: 'Affiliations liées aux nomenclatures',
                     show: {
                         header: true,
-                        toolbar: true,
+                        toolbar: false,
                         footer: true,
-                        toolbarAdd: true,
-                        toolbarDelete: true,
+                        toolbarAdd: false,
+                        toolbarDelete: false,
                         selectColumn: true
                     },
                     columns: [{
@@ -1840,6 +1855,7 @@
                             
                         },
                     ],
+                    /*
                     onAdd: function (event) {
                         //openPopupP();
                     },
@@ -1858,6 +1874,7 @@
                                 }, "json");
                         }
                     },
+                    */
                 }))
 
             // Création du layout 4e onglet (Import)
@@ -1929,7 +1946,7 @@
                             }
                         }
                     },
-                    onClick: function (event) {
+                    onSelect: function (event) {
                         if (record && record.recid == event.recid) return;
                         var record = this.get(event.recid);
                         // Grille secondaire Prospect -> Affiliations
