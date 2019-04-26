@@ -359,24 +359,27 @@
                         });
                     },
                     onClick: function (event) {
-                        if (record && record.recid == event.recid) return;
-                        var record = this.get(event.recid);
-                        // Grille secondaire Prospect -> Affiliations
-                        w2ui['grid10'].clear();
-                        $.get('mailing/prospectaff',
-						{id_prospect:record.recid},
-			            function(js){
-                            //finsession(js);
-                            w2ui['grid10'].add(js.rs);
-                        },"json");
-                        // Grille secondaire Prospect -> Nomenclatures
-                        w2ui['grid11'].clear();  
-                        $.get('mailing/prospectnom',
-						{id_prospect:record.recid},
-			            function(js){
-		            		//finsession(js);
-                            w2ui['grid11'].add(js.rs);		
-			           	},"json");      
+                        //if (record && record.recid == event.recid) return;
+                        event.onComplete = function () {
+                            var record = this.get(event.recid);
+                            var ids = w2ui.grid.getSelection();
+                            // Grille secondaire Prospect -> Affiliations
+                            w2ui['grid10'].clear();
+                            $.get('mailing/prospectaff',
+                                {id_prospect:record.recid},
+                                function(js){
+                                    //finsession(js);
+                                    w2ui['grid10'].add(js.rs);
+                                },"json");
+                            // Grille secondaire Prospect -> Nomenclatures
+                            w2ui['grid11'].clear();  
+                            $.get('mailing/prospectnom',
+                                {id_prospect:record.recid, 'ids':ids},
+                                function(js){
+                                    //finsession(js);
+                                    w2ui['grid11'].add(js.rs);		
+                                },"json");      
+                        }
                     },
                     onAdd: function (event) {
                         openPopupP();
@@ -725,6 +728,7 @@
                             sortable: true,
                             resizable: true
                         },
+                        /*
                         {
                             field: 'id_prospect',
                             caption: 'ID Prospect',
@@ -733,6 +737,7 @@
                             sortable: true,
                             resizable: true
                         },
+                        */
                         {
                             field: 'label',
                             caption: 'Label',
@@ -752,12 +757,12 @@
                     onDelete: function (event) {
                         var itemsSelect = w2ui.grid.getSelection();
                         var p = {
-                            'id_prospect': itemsSelect,
+                            'idsProspect': itemsSelect,
                             obj: 'prospectxnomenclature'
                         };
                         if (event.force) {
                             var s = w2ui[event.target].getSelection();
-						    p.id_nomenclature = s[0];
+						    p.idsNomenclature = s;
                             $.get('mailing/delete',
                                 p,
                                 function (js) {

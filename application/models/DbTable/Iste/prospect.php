@@ -150,22 +150,27 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
     /**
      * Récupère une entrées Iste_prospect avec certains critères
      * de tri, intervalles
-     *  @param int    $id_prospect   
+     *  @param int          $id_prospect   
+     *  @param string       $ids   
      * 
      * @return array
      */
-    public function getNomenclatureByIdProspect($id_prospect){
+    public function getNomenclatureByIdProspect($id_prospect, $ids=""){
         $sql = 'SELECT 
-                    p.id_prospect, pn.id_nomenclature recid, n.label, n.code
+                    DISTINCT pn.id_nomenclature recid, n.label, n.code
                 FROM
                     iste_prospect p
                         INNER JOIN
                     iste_prospectxnomenclature pn ON pn.id_prospect = p.id_prospect
                         INNER JOIN
-                    iste_nomenclature n ON n.id_nomenclature = pn.id_nomenclature
-                WHERE p.id_prospect = '.$id_prospect; 
-        	    $db = $this->_db->query($sql);
-                $rs = $db->fetchAll();
+                    iste_nomenclature n ON n.id_nomenclature = pn.id_nomenclature';
+        if($ids){
+            $sql .= ' WHERE p.id_prospect IN ('.$ids.')'; 
+        }else{
+            $sql .= ' WHERE p.id_prospect = '.$id_prospect; 
+        }
+        $db = $this->_db->query($sql);
+        $rs = $db->fetchAll();
         return $rs;
     }
 

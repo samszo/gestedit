@@ -86,7 +86,13 @@ class MailingController extends Zend_Controller_Action
                 $r = $oBdd->remove($this->_getParam("id_etab"),$this->_getParam("id_prospect"));
             break;			
             case 'prospectxnomenclature':
-                $r = $oBdd->remove($this->_getParam("id_prospect"),$this->_getParam("id_nomenclature"));
+                $arrP = $this->_getParam("idsProspect");
+                $arrN = $this->_getParam("idsNomenclature");
+                foreach ($arrP as $p) {
+                    foreach ($arrN as $n) {
+                        $r[] = array($p,$n,$oBdd->remove($p,$n));
+                    }
+                }
             break;
             case 'nomenclature':
                  foreach ($id as $ids){
@@ -179,9 +185,14 @@ class MailingController extends Zend_Controller_Action
     public function prospectnomAction(){
         // Affichage grille secondaire prospect -> nomenclature
         $db = new Model_DbTable_Iste_prospect();
-        if ('id_prospect'!= null){
-        $rs = $db->getNomenclatureByIdProspect($this->_getParam('id_prospect'));
-        $this->view->rs = $rs;
+        if ($this->_getParam('ids')){
+            $ids = $this->_getParam('ids');
+            $ids = implode(',',$ids);
+            $rs = $db->getNomenclatureByIdProspect($this->_getParam('id_prospect'),$ids);
+            $this->view->rs = $rs;
+        }else{
+            $rs = $db->getNomenclatureByIdProspect($this->_getParam('id_prospect'));
+            $this->view->rs = $rs;
         }
     }
 
