@@ -63,11 +63,30 @@ class MailingController extends Zend_Controller_Action
                 $arr = array('label'=>$this->_getParam('label'),'code'=>$this->_getParam('code'), 'id_parent'=>$this->_getParam('id_parent'), 'label_parent'=>$this->_getParam('label_parent'));
                 $rs = $dbN->ajouter($arr, true, true);
                 break;
+            case 'prospectxetab':
+                $dbPE = new Model_DbTable_Iste_prospectxetab();
+                $arrP = $this->_getParam('idsProspect');
+                $arrE = $this->_getParam("idsEtab");
+                foreach ($arrP as $p) {
+                    foreach ($arrE as $e) {
+                        $rs[] = array($p,$e,$dbPE->ajouter($p,$e));
+                    }
+                }
+                break;
+            case 'prospectxnomenclature':
+            $dbPN = new Model_DbTable_Iste_prospectxnomenclature();
+            $arrP = $this->_getParam("idsProspect");
+                $arrN = $this->_getParam("idsNomenclature");
+                foreach ($arrP as $p) {
+                    foreach ($arrN as $n) {
+                        $rs[] = array($p,$n,$dbPN->ajouter($p,$n));
+                    }
+                }
+                break;
             default:
                 # code...
                 break;
         }
-
         $this->view->rs = $rs;
     }
 
