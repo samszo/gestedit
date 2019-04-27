@@ -1888,17 +1888,12 @@
                                 field: 'id_prospect',
                                 type: 'enum',
                                 options: {
-                                    items:  function(){
-                                                if(w2ui.field['email'] != null)
-                                                {
-                                                    jsProsp.forEach(function(d){
-                                                        if(d.email == w2ui['foo4'].get('email'))
-                                                            {
-                                                                return d.id-prospect;
-                                                            }
-                                                    })
-                                                }
-                                            }
+                                    items:  jsProsp.forEach(function(d){
+                                                if(d.email == w2ui['foo4'].get('email'))
+                                                    {
+                                                        return d.id-prospect;
+                                                    }
+                                            })
                                 },
                                 required: true
                             }
