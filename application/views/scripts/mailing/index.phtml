@@ -107,7 +107,10 @@
         function exportByPost(ids, obj) {
 
             //filtre les ids qui sont unsub
-            let idsP = ids.filter(function(d){return d.unsub!="1";});
+            let idsP = ids.filter(function(d){
+                let r = w2ui['grid'].get(d);
+                return r.unsub!="1";
+            });
 
             //enregistrement de l'export
             $.post('mailing/insert',
