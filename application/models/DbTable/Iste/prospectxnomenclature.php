@@ -56,7 +56,7 @@ class Model_DbTable_Iste_prospectxnomenclature extends Zend_Db_Table_Abstract
 	    		$id = $this->insert($data);
 	    	}
 	    	if($rs)
-			return $this->findById_processus($id);
+			return $this->findById_prospect($id);
 	    	else
 		    	return $id;
     } 
@@ -110,5 +110,22 @@ class Model_DbTable_Iste_prospectxnomenclature extends Zend_Db_Table_Abstract
         }
 
         return $this->fetchAll($query)->toArray();
-    }  
+    }
+    
+       	/**
+     * Recherche une entrée Iste_prospectxnomenclature avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $id_prospect
+     *
+     * @return array
+     */
+    public function findById_prospect($id_prospect)
+    {
+        $query = $this->select()
+                    ->from( array("i" => "iste_prospectxnomenclature") )                           
+                    ->where( "i.id_prospect = ?", $id_prospect );
+
+        return $this->fetchAll($query)->toArray(); 
+    }
 }

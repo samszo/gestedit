@@ -75,13 +75,14 @@ class MailingController extends Zend_Controller_Action
                 break;
             case 'prospectxnomenclature':
             $dbPN = new Model_DbTable_Iste_prospectxnomenclature();
-            $arrN = $this->_getParam("idsNomenclature");
-            $arrP = $this->_getParam("idsProspect");
-                foreach ($arrP as $p) {
+            $arrN = array('id_nomenclature'=>$this->_getParam("id_nomenclature"), 'id_prospect'=>$this->_getParam("id_prospect"));
+          //  $arrP = array('id_prospect'=>$this->_getParam("id_prospect"));
+            $rs = $dbPN->ajouter($arrN, true, true);
+             /*   foreach ($arrP as $p) {
                     foreach ($arrN as $n) {
                         $rs[] = array($p,$n,$dbPN->ajouter($p,$n));
                     }
-                }
+                } */
                 break;
             default:
                 # code...

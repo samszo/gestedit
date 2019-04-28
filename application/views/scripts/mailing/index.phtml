@@ -1912,7 +1912,7 @@
                                 if (errors.length > 0) return;
                                 var data = this.record;
                                 jsProsp.forEach(function(d){
-                                    if(d.email == data.email){
+                                    if(d.email == data.email[0].text){
                                         data.id_prospect = d.id_prospect ;
                                     }
                                 });
