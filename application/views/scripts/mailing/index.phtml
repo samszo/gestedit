@@ -89,9 +89,22 @@
 
         // Fonction pour exporter un fichier
         function exportByPost(ids, obj) {
+
+            //filtre les ids qui sont unsub
+            let idsP = ids.filter(function(d){return d.unsub!=1;});
+
+            //enregistrement de l'export
+            $.post('mailing/insert',
+                {'ids':idsP,'obj':'prospectxexport'},
+                function (js) {
+                    w2alert(js.message);
+                }, "json");
+
+
+            //construction du formulaire d'export
             var form = document.getElementById("exportPostForm");
             if (form) {
-                form.ids.value = ids;
+                form.ids.value = idsP;
                 form.obj.value = obj;
             } else {
                 var form = document.createElement("form");
@@ -102,7 +115,7 @@
                 var hiddenField = document.createElement("input");
                 hiddenField.setAttribute("type", "hidden");
                 hiddenField.setAttribute("name", "ids");
-                hiddenField.setAttribute("value", ids);
+                hiddenField.setAttribute("value", idsP);
                 form.appendChild(hiddenField);
                 hiddenField = document.createElement("input");
                 hiddenField.setAttribute("type", "hidden");
@@ -338,12 +351,7 @@
                         onClick: function (event) {
                             if (event.target == 'export') {
                                 var ids = w2ui.grid.getSelection();
-                                ids.forEach(function(d){
-                                    if(d.unsub!=1){
-                                        exportByPost(ids, "prospect");
-                                    }
-                                })
-                                
+                                exportByPost(ids, "prospect");
                                 //open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
                             }
                         }

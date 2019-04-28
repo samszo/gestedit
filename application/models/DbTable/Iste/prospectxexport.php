@@ -46,7 +46,7 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
      *  
      * @return integer
      */
-    public function ajouter($data, $existe=true, $rs=false)
+    public function ajouter($data, $existe=false, $rs=false)
     {
 	    	
 	    	$id=false;
@@ -56,7 +56,7 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
 	    		$id = $this->insert($data);
 	    	}
 	    	if($rs)
-			return $this->findById_processus($id);
+    			return $this->findById_processus($id);
 	    	else
 		    	return $id;
     } 
