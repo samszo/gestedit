@@ -119,6 +119,8 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
     {
         $query = $this->select()
             ->from( array("i" => "iste_importfic") )                           
+            ->joinInner(array("nid" => "iste_importfic"),
+            'i.id_importfic = nid.id_importfic', array("recid"=>"i.id_importfic"))
             ->where( "i.type = ?", $type);
 		$rs = $this->fetchAll($query)->toArray();
         if(count($rs))return $rs[0];
@@ -156,7 +158,7 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
         else return false; 
     }
     
-        	/**
+    /**
      * Recherche une entrée avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -174,7 +176,7 @@ class Model_DbTable_Iste_importfic extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
-
+    
      /**
      * Récupère une entrées Iste_importfic avec certains critères
      * de tri, intervalles

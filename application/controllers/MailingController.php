@@ -38,7 +38,7 @@ class MailingController extends Zend_Controller_Action
 */
         // Affichage historique import dans sidebar
         $dbImpfic = new Model_DbTable_Iste_importfic();
-        $rs = json_encode($dbImpfic->getById_importfic());
+        $rs = json_encode($dbImpfic->findByType('Mailing'));
         $s = new Flux_Site();
         $s->bTrace = false;
         $s->trace($rs);
