@@ -107,7 +107,7 @@
         function exportByPost(ids, obj) {
 
             //filtre les ids qui sont unsub
-            let idsP = ids.filter(function(d){return d.unsub!=1;});
+            let idsP = ids.filter(function(d){return d.unsub!="1";});
 
             //enregistrement de l'export
             $.post('mailing/insert',
