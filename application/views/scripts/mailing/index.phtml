@@ -6,6 +6,9 @@
     <title>Gestion des prospects ISTE</title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script type="text/javascript" src="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.js"></script>
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
         integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
@@ -68,7 +71,9 @@
             if (d.label_parent) doublons[d.label_parent] = 'NomP';
             if (d.code) doublons[d.code] = 'Cod';
         })
+        var maxExport = 0;
         jsProsp.forEach(function (d) {
+            if(maxExport<d.nbExport)maxExport=d.nbExport;
             if (d.nom_prenom) doublons[d.nom_prenom] = "Prosp";
             if (d.email) doublons[d.email] = "Email";
             if (d.email2) doublons[d.email2] = "Email2";
@@ -76,6 +81,17 @@
         for (var k in doublons) {
             filters[doublons[k]].push(k);
         }
+
+        //échelle des couleurs cf. https://github.com/d3/d3-scale-chromatic
+        var colors = d3.interpolateRdYlGn;        
+        var rangeExport = d3.scaleLinear()
+            .domain([maxExport, 0])
+            .range([0, 1]);
+        //applique le style
+        jsProsp.forEach(function (d) {
+            d.w2ui={ "style": "background-color: "+colors(rangeExport(d.nbExport)) };
+        });
+
 
         // Fonction pour exporter un fichier
         function exportSave(ids, obj) {
@@ -97,6 +113,11 @@
             $.post('mailing/insert',
                 {'ids':idsP,'obj':'prospectxexport'},
                 function (js) {
+                    //mise à jour du grid
+                    js.rs.forEach(function(d){
+                        d.w2ui={ "style": "background-color: "+colors(rangeExport(d.nbExport)) };
+                        w2ui['grid'].set(d.recid, d);
+                    });
                     w2alert(js.message);
                 }, "json");
 
@@ -176,7 +197,7 @@
                 name: 'layout',
                 panels: [{
                         type: 'left',
-                        size: '60%',
+                        size: '100%',
                         resizable: true,
                         hidden: false,
                         style: pstyle,
@@ -184,7 +205,7 @@
                     },
                     {
                         type: 'main',
-                        size: '70%',
+                        size: '0%',
                         resizable: true,
                         hidden: false,
                         style: pstyle,
@@ -280,6 +301,7 @@
                         {
                             field: 'nom_prenom',
                             caption: 'Nom Prénom',
+                            sortable: true,
                             size: '40%',
                             editable: {
                                 type: 'text'
@@ -288,6 +310,7 @@
                         {
                             field: 'email',
                             caption: 'Email',
+                            sortable: true,
                             size: '20%',
                             editable: {
                                 type: 'email'
@@ -295,6 +318,7 @@
                         },
                         {
                             field: 'email2',
+                            sortable: true,
                             caption: 'Email2',
                             size: '20%',
                             editable: {
@@ -305,6 +329,7 @@
                             field: 'origine',
                             caption: 'Origine',
                             size: '20%',
+                            sortable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -313,6 +338,7 @@
                             field: 'clientIste',
                             caption: 'Client Iste',
                             size: '30%',
+                            sortable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -322,6 +348,7 @@
                             field: 'membreEdito',
                             caption: 'Membre editorial',
                             size: '30%',
+                            sortable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -329,14 +356,30 @@
                         {
                             field: 'unsub',
                             caption: 'Unsubscribe',
+                            sortable: true,
                             size: '30%',
                             editable: {
                                 type: 'text'
                             }
                         },
                         {
+                            field: 'lastExport',
+                            caption: 'Dernier export',
+                            sortable: true,
+                            size: '30%',
+                            type: 'date'
+                        },
+                        {
+                            field: 'nbExport',
+                            sortable: true,
+                            caption: 'Nb. export',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
                             field: 'maj',
-                            caption: 'Date MAJ',
+                            caption: 'maj.',
+                            sortable: true,
                             size: '30%',
                             type: 'date'
                         }
@@ -573,7 +616,7 @@
                     }
                 });
             }
-            // Création grille historique des envois mails prospects
+            /* Création grille historique des envois mails prospects
             w2ui['layout'].content('main',
                 $().w2grid({
                     name: 'grid2',
@@ -628,7 +671,7 @@
                         sdate: '4/3/2012'
                     }]
                 }))
-
+            */
             // Création du layout esclave (Prospects)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
             w2ui['layout'].content('bottom',

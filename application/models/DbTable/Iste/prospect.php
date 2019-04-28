@@ -98,7 +98,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
         $this->delete('iste_prospectxexport.id_prospect = ' . $id);
     }
 
-        /**
+    /**
      * Récupère toutes les entrées Iste_prospect avec certains critères
      * de tri, intervalles
      *  @param string $order
@@ -125,6 +125,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
+
     /**
      * Récupère une entrées Iste_prospect avec certains critères
      * de tri, intervalles
@@ -145,6 +146,34 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
         $rs = $this->fetchAll($query)->toArray();
         if(count($rs))return end($rs);
         else return false;
+    }
+
+    /**
+     * Récupère une entrées Iste_prospect avec certains critères
+     * de tri, intervalles
+     * 
+     * @param string $ids
+     * 
+     * @return array
+     */
+    public function getAllHistorique($ids="")
+    {
+   	
+    	$sql = 'SELECT 
+                p.*, 
+                p.id_prospect recid,
+                MAX(pe.maj) lastExport, COUNT(DISTINCT id_export) nbExport
+            FROM
+                iste_prospect p
+                    LEFT JOIN
+                iste_prospectxexport pe ON pe.id_prospect = p.id_prospect ';
+        if($ids)$sql .= ' WHERE p.id_prospect IN ('.$ids.')';
+
+        $sql .= ' GROUP BY p.id_prospect';
+                    
+        $db = $this->_db->query($sql);
+        $rs = $db->fetchAll();
+        return $rs;
     }
 
     /**

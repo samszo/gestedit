@@ -16,7 +16,7 @@ class MailingController extends Zend_Controller_Action
 
         // Affichage prospects dans index mailing
         $dbProsp = new Model_DbTable_Iste_prospect();
-        $rs = json_encode($dbProsp->getAll());
+        $rs = json_encode($dbProsp->getAllHistorique());        
         $s->trace($rs);
         $this->view->jsProsp = $rs;
         
@@ -36,6 +36,7 @@ class MailingController extends Zend_Controller_Action
         $s->trace($rs);
         $this->view->jsImp = $rs;
 */
+
         // Affichage historique import dans sidebar
         $dbImpfic = new Model_DbTable_Iste_importfic();
         $rs = json_encode($dbImpfic->findByType('Mailing'));
@@ -86,10 +87,12 @@ class MailingController extends Zend_Controller_Action
                     break;
             case 'prospectxexport':
                 $dbPE = new Model_DbTable_Iste_prospectxexport();
+                $dbP = new Model_DbTable_Iste_prospect();
                 $ids = $this->_getParam('ids');
                 foreach ($ids as $id) {
-                    $rs[] = $dbPE->ajouter(array('id_prospect'=>$id));
+                    $dbPE->ajouter(array('id_prospect'=>$id));
                 }
+                $rs = $dbP->getAllHistorique(implode(',',$ids));
                 $this->view->message = "l'export est bien enregistré";
                 break;    
             default:

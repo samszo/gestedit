@@ -75,16 +75,16 @@ class ImportController extends Zend_Controller_Action
 		public function setdataficmailingAction()
     {
     	$this->initInstance();
-		switch ($this->_getParam('type',"")) {		
-			case "global":
-				$v = new Flux_Mailing(false,true);
-				//$v->importer(null,$this->_getParam('idFic'));
-				$v->importer($this->_getParam('idFic'));
-				break;			
-			default:
-				echo "pas de processus d'importation pour ce type de fichier";
-				break;			
-		}
+			switch ($this->_getParam('type',"")) {		
+				case "global":
+					$v = new Flux_Mailing(false,true);
+					//$v->importer(null,$this->_getParam('idFic'));
+					$v->importer($this->_getParam('idFic'));
+					break;			
+				default:
+					echo "pas de processus d'importation pour ce type de fichier";
+					break;			
+			}
 		}
     	
     public function verifdeviseAction()
