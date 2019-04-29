@@ -22,7 +22,7 @@ class MailingController extends Zend_Controller_Action
         
         // Affichage établissement dans index mailing
         $dbEtab = new Model_DbTable_Iste_etab();
-        $rs = json_encode($dbEtab->getAll());
+        $rs = json_encode($dbEtab->getAllHistorique());
         $s = new Flux_Site();
         $s->bTrace = false;
         $s->trace($rs);
@@ -248,7 +248,8 @@ class MailingController extends Zend_Controller_Action
         // Affichage grille secondaire etab -> prospect
         $db = new Model_DbTable_Iste_etab();
         if ('id_etab'!= null){
-        $rs = $db->getProspectByIdEtab($this->_getParam('id_etab'));
+        $rs['pros'] = $db->getProspectByIdEtab($this->_getParam('id_etab'));
+        $rs['histo'] = $db->getProspectByIdEtab($this->_getParam('id_etab'));
         $this->view->rs = $rs;
         }
     }

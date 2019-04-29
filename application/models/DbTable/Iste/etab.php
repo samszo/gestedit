@@ -114,6 +114,41 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray();
     }
 
+      /**
+     * Récupère une entrées Iste_prospect avec certains critères
+     * de tri, intervalles
+     * 
+     * @param string $ids
+     * 
+     * @return array
+     */
+    public function getAllHistorique($ids="")
+    {
+   	
+    	$sql = 'SELECT 
+                et.*,
+                et.id_etab recid,
+                COUNT(DISTINCT p.id_prospect) nbProspect,
+                MAX(pet.maj) lastExport,
+                COUNT(DISTINCT id_export) nbExport
+            FROM
+                iste_etab et
+                    LEFT JOIN
+                iste_prospectxetab  pet ON pet.id_etab = et.id_etab
+                    LEFT JOIN
+                iste_prospect p ON p.id_prospect = pet.id_prospect
+                    LEFT JOIN
+                iste_prospectxexport pe ON pe.id_prospect = p.id_prospect
+                    ';
+        if($ids)$sql .= ' WHERE et.id_etab IN ('.$ids.')';
+
+        $sql .= ' GROUP BY et.id_etab';
+                    
+        $db = $this->_db->query($sql);
+        $rs = $db->fetchAll();
+        return $rs;
+    }    
+
     public function getById($id)
     {
    	

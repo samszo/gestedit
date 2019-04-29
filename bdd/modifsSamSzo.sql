@@ -24,3 +24,5 @@ ALTER TABLE `iste_prospectxexport` ADD PRIMARY KEY( `id_export`);
 
 ALTER TABLE `iste_prospectxexport` CHANGE `maj` `maj` DATETIME(6) NULL DEFAULT NULL;
 
+ALTER TABLE `iste_prospectxexport` ADD `nom` VARCHAR(255) NOT NULL AFTER `id_export`;
+

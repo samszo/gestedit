@@ -61,10 +61,12 @@
                 'Email2': []
             },
             doublons = [];
+        var maxExportEtab = 0;
         jsEtab.forEach(function (d) {
             if (d.affiliation1) doublons[d.affiliation1] = 'aff1';
             if (d.affiliation2) doublons[d.affiliation2] = 'aff2';
             if (d.affiliation3) doublons[d.affiliation3] = 'aff3';
+            if(maxExportEtab<d.nbExport)maxExportEtab=d.nbExport;
         })
         var maxExportNomen = 0;
         jsNomen.forEach(function (d) {
@@ -90,6 +92,9 @@
             'grid':d3.scaleLinear()
             .domain([maxExport, 0])
             .range([0, 1]),
+            'grid12':d3.scaleLinear()
+            .domain([maxExportEtab, 0])
+            .range([0, 1]),
             'grid14':d3.scaleLinear()
             .domain([maxExportNomen, 0])
             .range([0, 1])
@@ -100,6 +105,9 @@
         });
         jsNomen.forEach(function (d) {
             d.w2ui={ "style": "background-color: "+colors(rangeExport.grid14(d.nbExport)) };
+        });
+        jsEtab.forEach(function (d) {
+            d.w2ui={ "style": "background-color: "+colors(rangeExport.grid12(d.nbExport)) };
         });
 
 
@@ -660,34 +668,36 @@
                             field: 'date_envoi',
                             caption: 'Date dernier mail',
                             type: 'date',
+                            sortable: true,
+                            resizable: true,
                             size: '20%'
                         },
                         {
                             field: 'nombre_mail',
                             caption: 'Nombre de mails envoyé',
                             type: 'text',
+                            sortable: true,
+                            resizable: true,
                             size: '20%'
                         },
                         {
                             field: 'date_creation',
                             caption: 'Date de création prospect',
                             type: 'date',
+                            sortable: true,
+                            resizable: true,
                             size: '20%'
                         },
                         {
                             field: 'date_unsub',
                             caption: 'Date de désinscription',
                             type: 'date',
+                            sortable: true,
+                            resizable: true,
                             size: '20%'
                         }
                     ],
-                    records: [{
-                        recid: 1,
-                        fname: 'John',
-                        lname: 'Doe',
-                        email: 'jdoe@gmail.com',
-                        sdate: '4/3/2012'
-                    }]
+                    records: []
                 }))
             */
             // Création du layout esclave (Prospects)
@@ -747,18 +757,24 @@
                             field: 'affiliation1',
                             caption: 'Affiliation 1',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'affiliation2',
                             caption: 'Affiliation 2',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'affiliation3',
                             caption: 'Affiliation 3',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         }
                     ],
@@ -818,12 +834,16 @@
                             field: 'label',
                             caption: 'Label',
                             size: '40%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'code',
                             caption: 'Code',
                             size: '20%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         }
                     ],
@@ -936,6 +956,8 @@
                             field: 'affiliation1',
                             caption: 'Affiliation 1',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -944,6 +966,8 @@
                             field: 'affiliation2',
                             caption: 'Affiliation 2',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -952,6 +976,8 @@
                             field: 'affiliation3',
                             caption: 'Affiliation 3',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -960,6 +986,8 @@
                             field: 'url_labo',
                             caption: 'URL du Labo',
                             size: '40%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -968,6 +996,8 @@
                             field: 'adresse',
                             caption: 'Adresse',
                             size: '120px',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -976,6 +1006,8 @@
                             field: 'ville_cp',
                             caption: 'Ville + CP',
                             size: '120px',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -984,6 +1016,8 @@
                             field: 'pays',
                             caption: 'Pays',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -992,10 +1026,36 @@
                             field: 'responsable',
                             caption: 'Responsable du Labo',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
                         },
+                        {
+                            field: 'nbProspect',
+                            sortable: true,
+                            resizable: true,
+                            caption: 'Nb. prospect',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
+                            field: 'lastExport',
+                            caption: 'Dernier export',
+                            sortable: true,
+                            resizable: true,
+                            size: '30%',
+                            type: 'date'
+                        },
+                        {
+                            field: 'nbExport',
+                            sortable: true,
+                            resizable: true,
+                            caption: 'Nb. export',
+                            size: '30%',
+                            type: 'int'
+                        }
                     ],
                     /*toolbar: {
                         items: [{
@@ -1018,11 +1078,13 @@
                             var ids = w2ui.grid3.getSelection();
                             // Grille secondaire Affiliation -> Prospects
                             w2ui['grid12'].clear();
+                            w2ui['grid5'].clear();
                             $.get('mailing/affprospect',
                             {id_etab:record.recid, 'ids':ids},
                             function(js){
                                 //finsession(js);
-                                w2ui['grid12'].add(js.rs);
+                                w2ui['grid12'].add(js.rs['pros']);
+                                w2ui['grid5'].add(js.rs['histo']);
                             },"json");
                             // Grille secondaire Affiliation -> Nomenclatures
                             w2ui['grid13'].clear();
@@ -1344,18 +1406,24 @@
                             field: 'nom_prenom',
                             caption: 'Nom Prénom',
                             size: '40%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'email',
                             caption: 'Email',
                             size: '20%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'unsub',
                             caption: 'Unsubscribe',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         }
                     ],
@@ -1405,12 +1473,16 @@
                             field: 'code',
                             caption: 'Code',
                             size: '20%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'label',
                             caption: 'Label',
                             size: '40%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         }
                     ],
@@ -1527,6 +1599,8 @@
                             field: 'code',
                             caption: 'Code',
                             size: '20%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -1535,6 +1609,8 @@
                             field: 'label',
                             caption: 'Label',
                             size: '40%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -1543,6 +1619,8 @@
                             field: 'id_parent',
                             caption: 'ID Parent',
                             size: '10%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -1551,6 +1629,8 @@
                             field: 'label_parent',
                             caption: 'Catégorie Parent',
                             size: '40%',
+                            sortable: true,
+                            resizable: true,
                             editable: {
                                 type: 'text'
                             }
@@ -1558,6 +1638,7 @@
                         {
                             field: 'nbProspect',
                             sortable: true,
+                            resizable: true,
                             caption: 'Nb. prospect',
                             size: '30%',
                             type: 'int'
@@ -1566,12 +1647,14 @@
                             field: 'lastExport',
                             caption: 'Dernier export',
                             sortable: true,
+                            resizable: true,
                             size: '30%',
                             type: 'date'
                         },
                         {
                             field: 'nbExport',
                             sortable: true,
+                            resizable: true,
                             caption: 'Nb. export',
                             size: '30%',
                             type: 'int'
@@ -1795,6 +1878,7 @@
                             field: 'date_export',
                             caption: 'Date export',
                             sortable: true,
+                            resizable: true,
                             type: 'date',
                             size: '20%'
                         },
@@ -1802,6 +1886,7 @@
                             field: 'nom',
                             caption: 'nom',
                             sortable: true,
+                            resizable: true,
                             type: 'text',
                             size: '20%'
                         },
@@ -1809,6 +1894,7 @@
                             field: 'nbProspect',
                             caption: 'Nombre de prospect',
                             sortable: true,
+                            resizable: true,
                             type: 'text',
                             size: '20%'
                         }
@@ -1877,18 +1963,24 @@
                             field: 'nom_prenom',
                             caption: 'Nom Prénom',
                             size: '40%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'email',
                             caption: 'Email',
                             size: '20%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'unsub',
                             caption: 'Unsubscribe',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         }
                     ],
@@ -2077,18 +2169,24 @@
                             field: 'affiliation1',
                             caption: 'Affiliation 1',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'affiliation2',
                             caption: 'Affiliation 2',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'affiliation3',
                             caption: 'Affiliation 3',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                             
                         },
@@ -2222,30 +2320,40 @@
                             field: 'col1',
                             caption: 'URL Labo',
                             size: '40%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col2',
                             caption: 'Nom Prénom',
                             size: '20%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col3',
                             caption: 'Affiliation 1',
                             size: '20%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col4',
                             caption: 'Affiliation 2',
                             size: '20%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col5',
                             caption: 'Affiliation 3',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
 
                         },
@@ -2253,66 +2361,88 @@
                             field: 'col6',
                             caption: 'Adresse',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col7',
                             caption: 'Ville CP',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col8',
                             caption: 'Pays',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col9',
                             caption: 'Code 1',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col10',
                             caption: 'Code 2',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col11',
                             caption: 'Code 3',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'creation',
                             caption: 'Date Import',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col14',
                             caption: 'Origine',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col15',
                             caption: 'Email',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'col16',
                             caption: 'Unsubscribe',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         },
                         {
                             field: 'commentaire',
                             caption: 'Commentaire',
                             size: '30%',
+                            sortable: true,
+                            resizable: true,
                             type: 'text'
                         }
                     ],
