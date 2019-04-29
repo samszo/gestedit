@@ -1891,14 +1891,12 @@
                         name: 'foo4',
                         style: 'border: 0px; background-color: transparent;',
                         formHTML: '<div class="w2ui-page page-0">' +
-                        /*
                             '    <div class="w2ui-field">' +
                             '        <label>Label:</label>' +
                             '        <div>' +
                             '           <input name="label" type="text" maxlength="100" style="width: 250px"/>' +
                             '        </div>' +
                             '    </div>' +
-                        */
                             '    <div class="w2ui-field">' +
                             '        <label>ID Nomenclature:</label>' +
                             '        <div>' +
@@ -1924,13 +1922,12 @@
                             '    <button class="w2ui-btn" name="reset">Reset</button>' +
                             '    <button class="w2ui-btn" name="save">Save</button>' +
                             '</div>',
-                        fields: [/*
+                        fields: [
                             {
                                 field: 'label',
                                 type: 'text',
                                 required: false
                             },
-                            */
                             {
                                 field: 'id_nomenclature',
                                 type: 'text',
@@ -1964,15 +1961,22 @@
                             "save": function () {
                                 var errors = this.validate();
                                 if (errors.length > 0) return;
-                                var data = this.record;
+                                var data = this.record, mail;
+                                var ids = {
+                                    idsNomen: data.id_nomenclature,
+                                    obj : "prospectxnomenclature"
+                                    };
+                                mail += data.email.forEach(function(e){
+                                    
+                                });
                                 jsProsp.forEach(function(d){
-                                    if(d.email == data.email[0].text){
-                                        data.id_prospect = d.id_prospect ;
+                                    if(d.email == mail){
+                                        ids.idsProspect = d.id_prospect;
+                                        ids.recid = d.id_prospect;
                                     }
                                 });
-                                data.obj = "prospectxnomenclature";
                                 $.get('mailing/insert',
-                                    data,
+                                    ids,
                                     function (js) {
                                         //finsession(js);
                                         w2ui['grid14'].add(js.rs);
