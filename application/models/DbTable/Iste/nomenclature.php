@@ -113,6 +113,42 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }
+
+
+    /**
+     * Récupère une entrées Iste_prospect avec certains critères
+     * de tri, intervalles
+     * 
+     * @param string $ids
+     * 
+     * @return array
+     */
+    public function getAllHistorique($ids="")
+    {
+   	
+    	$sql = 'SELECT 
+                n.*,
+                n.id_nomenclature recid,
+                COUNT(DISTINCT p.id_prospect) nbProspect,
+                MAX(pe.maj) lastExport,
+                COUNT(DISTINCT id_export) nbExport
+            FROM
+                iste_nomenclature n
+                    LEFT JOIN
+                iste_prospectxnomenclature pn ON pn.id_nomenclature = n.id_nomenclature
+                    LEFT JOIN
+                iste_prospect p ON p.id_prospect = pn.id_prospect
+                    LEFT JOIN
+                iste_prospectxexport pe ON pe.id_prospect = p.id_prospect
+                    ';
+        if($ids)$sql .= ' WHERE n.id_nomenclature IN ('.$ids.')';
+
+        $sql .= ' GROUP BY n.id_nomenclature';
+                    
+        $db = $this->_db->query($sql);
+        $rs = $db->fetchAll();
+        return $rs;
+    }    
      
     /** 
      * TODO:ajouter la description
@@ -156,7 +192,7 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
         else return false;
     }
 
-        /**
+    /**
      * Récupère une entrées Iste_nomenclature avec certains critères
      * de tri, intervalles
      *  @param int    $id_nomenclature   
@@ -177,6 +213,39 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
                 $rs = $db->fetchAll();
         return $rs;
     }
+
+    /**
+     * Récupère une entrées Iste_nomenclature avec certains critères
+     * de tri, intervalles
+     *  @param string   $ids   
+     *  @param string   $dateFormat
+     * 
+     * @return array
+     */
+    public function getExportByIdNomen($ids, $dateFormat='%d/%m/%Y'){
+        $recid = str_replace("/","",$dateFormat);
+        $sql = 'SELECT 
+            DATE_FORMAT(pe.maj, "'.$dateFormat.'") recid,
+            COUNT(DISTINCT p.id_prospect) nbProspect,
+            DATE_FORMAT(pe.maj, "'.$dateFormat.'") date_export,
+            pe.nom
+        FROM
+            iste_nomenclature n
+                LEFT JOIN
+            iste_prospectxnomenclature pn ON pn.id_nomenclature = n.id_nomenclature
+                LEFT JOIN
+            iste_prospect p ON p.id_prospect = pn.id_prospect
+                LEFT JOIN
+            iste_prospectxexport pe ON pe.id_prospect = p.id_prospect
+            ';
+        if($ids)$sql .= ' WHERE n.id_nomenclature IN ('.$ids.') AND pe.id_export IS NOT NULL ';
+
+        $sql .= ' GROUP BY DATE_FORMAT(pe.maj, "'.$dateFormat.'")'; 
+        $db = $this->_db->query($sql);
+        $rs = $db->fetchAll();
+        return $rs;
+    }
+
 
             /**
      * Récupère une entrées Iste_nomenclature avec certains critères

@@ -10,7 +10,7 @@ class MailingController extends Zend_Controller_Action
 
         // Affichage nomenclature dans l'index mailing
         $dbNom = new Model_DbTable_Iste_nomenclature();
-        $rs = json_encode($dbNom->getAll());
+        $rs = json_encode($dbNom->getAllHistorique());
         $s->trace($rs);
         $this->view->jsNomen = $rs;
 
@@ -266,7 +266,9 @@ class MailingController extends Zend_Controller_Action
         // Affichage grille secondaire nomenclature -> prospect
         $db = new Model_DbTable_Iste_nomenclature();
         if ('id_nomenclature'!= null){
-        $rs = $db->getProspectByIdNomen($this->_getParam('id_nomenclature'));
+        $rs['pros'] = $db->getProspectByIdNomen($this->_getParam('id_nomenclature'));
+        $rs['histo'] = $db->getExportByIdNomen($this->_getParam('id_nomenclature'));
+        
         $this->view->rs = $rs;
         }
     }
