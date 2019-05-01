@@ -185,6 +185,38 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
                 $rs = $db->fetchAll();
         return $rs;
     }
+    
+     /**
+     * Récupère une entrées Iste_nomenclature avec certains critères
+     * de tri, intervalles
+     *  @param string   $ids   
+     *  @param string   $dateFormat
+     * 
+     * @return array
+     */
+    public function getExportByIdEtab($ids, $dateFormat='%d/%m/%Y'){
+        $recid = str_replace("/","",$dateFormat);
+        $sql = 'SELECT 
+            DATE_FORMAT(pe.maj, "'.$dateFormat.'") recid,
+            COUNT(DISTINCT p.id_prospect) nbProspect,
+            DATE_FORMAT(pe.maj, "'.$dateFormat.'") date_export,
+            pe.nom
+        FROM
+            iste_etab et
+                LEFT JOIN
+            iste_prospectxetab pet ON pet.id_etab = et.id_etab
+                LEFT JOIN
+            iste_prospect p ON p.id_prospect = pet.id_prospect
+                LEFT JOIN
+            iste_prospectxexport pe ON pe.id_prospect = p.id_prospect
+            ';
+        if($ids)$sql .= ' WHERE et.id_etab IN ('.$ids.') AND pe.id_export IS NOT NULL ';
+
+        $sql .= ' GROUP BY DATE_FORMAT(pe.maj, "'.$dateFormat.'")'; 
+        $db = $this->_db->query($sql);
+        $rs = $db->fetchAll();
+        return $rs;
+    }
 
         /**
      * Récupère une entrées Iste_etab avec certains critères

@@ -223,7 +223,7 @@
                 name: 'layout',
                 panels: [{
                         type: 'left',
-                        size: '100%',
+                        size: '70%',
                         resizable: true,
                         hidden: false,
                         style: pstyle,
@@ -447,11 +447,13 @@
                             var ids = w2ui.grid.getSelection();
                             // Grille secondaire Prospect -> Affiliations
                             w2ui['grid10'].clear();
+                            w2ui['grid2'].clear();
                             $.get('mailing/prospectaff',
                                 {id_prospect:record.recid, 'ids':ids},
                                 function(js){
                                     //finsession(js);
-                                    w2ui['grid10'].add(js.rs);
+                                    w2ui['grid10'].add(js.rs['pros']);
+                                    w2ui['grid2'].add(js.rs['histo']);
                                 },"json");
                             // Grille secondaire Prospect -> Nomenclatures
                             w2ui['grid11'].clear();  
@@ -642,7 +644,7 @@
                     }
                 });
             }
-            /* Création grille historique des envois mails prospects
+            // Création grille historique des envois mails prospects
             w2ui['layout'].content('main',
                 $().w2grid({
                     name: 'grid2',
@@ -665,41 +667,30 @@
                             resizable: true
                         },
                         {
-                            field: 'date_envoi',
-                            caption: 'Date dernier mail',
-                            type: 'date',
+                            field: 'date_export',
+                            caption: 'Date export',
                             sortable: true,
-                            resizable: true,
+                            type: 'date',
                             size: '20%'
                         },
                         {
-                            field: 'nombre_mail',
-                            caption: 'Nombre de mails envoyé',
+                            field: 'nom',
+                            caption: 'nom',
+                            sortable: true,
                             type: 'text',
-                            sortable: true,
-                            resizable: true,
                             size: '20%'
                         },
                         {
-                            field: 'date_creation',
-                            caption: 'Date de création prospect',
-                            type: 'date',
+                            field: 'nbProspect',
+                            caption: 'Nombre de prospect',
                             sortable: true,
-                            resizable: true,
-                            size: '20%'
-                        },
-                        {
-                            field: 'date_unsub',
-                            caption: 'Date de désinscription',
-                            type: 'date',
-                            sortable: true,
-                            resizable: true,
+                            type: 'text',
                             size: '20%'
                         }
                     ],
                     records: []
                 }))
-            */
+            
             // Création du layout esclave (Prospects)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
             w2ui['layout'].content('bottom',

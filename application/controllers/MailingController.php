@@ -238,7 +238,8 @@ class MailingController extends Zend_Controller_Action
         // Affichage grille secondaire prospect -> affiliations
         $db = new Model_DbTable_Iste_prospect();
         if ('id_prospect'!= null){
-        $rs = $db->getAffiliationByIdProspect($this->_getParam('id_prospect'));
+        $rs['pros'] = $db->getAffiliationByIdProspect($this->_getParam('id_prospect'));
+        $rs['histo'] = $db->getExportByIdProsp($this->_getParam('id_prospect'));
         $this->view->rs = $rs;
         }
     }
@@ -249,7 +250,7 @@ class MailingController extends Zend_Controller_Action
         $db = new Model_DbTable_Iste_etab();
         if ('id_etab'!= null){
         $rs['pros'] = $db->getProspectByIdEtab($this->_getParam('id_etab'));
-        $rs['histo'] = $db->getProspectByIdEtab($this->_getParam('id_etab'));
+        $rs['histo'] = $db->getExportByIdEtab($this->_getParam('id_etab'));
         $this->view->rs = $rs;
         }
     }
