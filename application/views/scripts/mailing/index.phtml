@@ -129,7 +129,7 @@
                 let r = w2ui['grid'].get(d);
                 return r.unsub!="1";
             });
-
+/*
             //enregistrement de l'export
             $.post('mailing/insert',
                 {'ids':idsP,'obj':'prospectxexport'},
@@ -139,15 +139,14 @@
                         /*
                         if(maxExport<d.nbExport)maxExport=d.nbExport;
                         rangeExport.domain([maxExport, 0]);
-                        */
+                        
                        let fct = rangeExport[g];
                         d.w2ui={ "style": "background-color: "+colors(fct(d.nbExport)) };
                         w2ui[g].set(d.recid, d);
                     });
                     w2alert(js.message);
                 }, "json");
-
-
+*/
             //construction du formulaire d'export
             var form = document.getElementById("exportPostForm");
             if (form) {
@@ -173,6 +172,69 @@
             }
             window.open('', 'view');
             form.submit();
+        }
+
+        //Formulaire ajout nom de campagne export
+        function openPopupExport(idsP) {
+                if (!w2ui.fooExp) {
+                    $().w2form({
+                        name: 'fooExp',
+                        style: 'border: 0px; background-color: transparent;',
+                        fields: [{
+                                field: 'nom',
+                                type: 'text',
+                                required: true,
+                                html : {
+                                    caption: 'Nom de la campagne',
+                                    attr: 'style="width: 300px"' }
+                                }
+                        ],
+                        actions: {
+                            "save": function () {
+                                var errors = this.validate();
+                                if (errors.length > 0) return;
+                                var idsP = w2ui.grid.getSelection().filter(function(d){
+                                    let r = w2ui['grid'].get(d);
+                                    return r.unsub!="1";
+                                });
+                                var data = this.record;
+                                data.obj = "prospectxexport";
+                                data.ids = idsP;
+                                $.post('mailing/insert',
+                                    data,
+                                    function (js) {
+                                        //finsession(js);
+                                        w2ui['grid2'].add(js.rs);
+                                    }, "json");
+                                w2popup.close();
+                            },
+                            "reset": function () {
+                                this.clear();
+                            }
+                        }
+                    });
+                }
+                $().w2popup('open', {
+                    title: 'Nom de campagne',
+                    body: '<div id="form" style="width: 100%; height: 100%;"></div>',
+                    style: 'padding: 15px 0px 0px 0px',
+                    width: 500,
+                    height: 600,
+                    showMax: true,
+                    onToggle: function (event) {
+                        $(w2ui.fooExp.box).hide();
+                        event.onComplete = function () {
+                            $(w2ui.fooExp.box).show();
+                            w2ui.fooExp.resize();
+                        }
+                    },
+                    onOpen: function (event) {
+                        event.onComplete = function () {
+                            // specifying an onOpen handler instead is equivalent to specifying an onBeforeOpen handler, which would make this code execute too early and hence not deliver.
+                            $('#w2ui-popup #form').w2render('fooExp');
+                        }
+                    }
+                });
         }
 
         // Création des tabs
@@ -419,6 +481,7 @@
                         }],
                         onClick: function (event) {
                             if (event.target == 'export') {
+                                openPopupExport();
                                 var ids = w2ui.grid.getSelection();
                                 exportByPost(ids, "grid");
                                 //open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
@@ -655,8 +718,8 @@
                     },
                     multiSearch: true,
                     searches: [{
-                        field: 'date_envoi',
-                        caption: 'Date dernier mail',
+                        field: 'date_export',
+                        caption: 'Date Export',
                         type: 'date'
                     }, ],
                     columns: [{
@@ -664,6 +727,7 @@
                             caption: 'ID',
                             size: '50px',
                             sortable: true,
+                            hidden: true,
                             resizable: true
                         },
                         {
@@ -684,6 +748,7 @@
                             field: 'nbProspect',
                             caption: 'Nombre de prospect',
                             sortable: true,
+                            hidden: true,
                             type: 'text',
                             size: '20%'
                         }

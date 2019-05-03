@@ -90,8 +90,9 @@ class MailingController extends Zend_Controller_Action
                 $dbPE = new Model_DbTable_Iste_prospectxexport();
                 $dbP = new Model_DbTable_Iste_prospect();
                 $ids = $this->_getParam('ids');
+                $nom = $this->_getParam('nom');
                 foreach ($ids as $id) {
-                    $dbPE->ajouter(array('id_prospect'=>$id));
+                    $dbPE->ajouter(array('id_prospect'=>$id, 'nom'=>$nom));
                 }
                 $rs = $dbP->getAllHistorique(implode(',',$ids));
                 $this->view->message = "l'export est bien enregistré";
