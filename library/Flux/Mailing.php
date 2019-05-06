@@ -42,7 +42,7 @@ class Flux_Mailing extends Flux_Site{
 		$this->data= $this->csvToArray($path,0,",");
 		
 		//TODO:ajouter les autres colonnes
-		$descColo = array("col1","col2","col3","col4","col5","col6","col7","col8","col9", "col10", "col11","col12", "col13", "col14", "col15", "col16");	
+		$descColo = array("col1","col2","col3","col4","col5","col6","col7","col8","col9", "col10", "col11","col12", "col13", "col14", "col15", "col16", "col17", "col18", "col19");	
 		
 		$nbCol = count($descColo);
 		$nbRow = count($this->data);
@@ -97,10 +97,11 @@ class Flux_Mailing extends Flux_Site{
 			//vérifie si la ligne est en erreur
 			if(substr($d['commentaire'],0,9)!="{'erreurs"){
 				//prospect : voir dbTable/Iste/prospect.php L33 pour éviter la création de doublons
-				$data = array('nom_prenom'=>$d['col2'], 'origine'=>$d['col14'], 'email'=>$d['col15'], 'unsub'=>$d['col16']);
+				$data = array('nom_prenom'=>$d['col2'], 'origine'=>$d['col14'], 'email'=>$d['col15'], 'unsub'=>$d['col16'], 'clientIste'=>$d['col17'], 'membreEdito'=>$d['col18']
+					, 'langue'=>$d['col19'], 'pays'=>$d['col8']);
 				$idP = $this->dbProspect->ajouter($data);
 				//etab
-				$idE = $this->dbEtab->ajouter(array('url_labo'=>$d['col1'],'adresse'=>$d['col6'], 'ville_cp'=>$d['col7'], 'pays'=>$d['col8']
+				$idE = $this->dbEtab->ajouter(array('url_labo'=>$d['col1'],'adresse'=>$d['col6'], 'ville_cp'=>$d['col7'], 'pays'=>$d['col8'], 'langue'=>$d['col19']
 					, 'affiliation1'=>$d['col3'], 'affiliation2'=>$d['col4'], 'affiliation3'=>$d['col5']));
 				//etabxprospect
 				$idPxE = $this->dbPxE->ajouter(array("id_prospect"=>$idP, "id_etab"=>$idE));

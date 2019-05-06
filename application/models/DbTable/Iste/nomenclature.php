@@ -201,7 +201,7 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
      */
     public function getProspectByIdNomen($id_nomenclature){
         $sql = 'SELECT 
-                    n.id_nomenclature, pn.id_prospect recid, p.nom_prenom, p.email, p.unsub
+                    n.id_nomenclature, pn.id_prospect recid, p.nom_prenom, p.email, p.unsub, p.langue, p.pays
                 FROM
                     iste_nomenclature n
                         INNER JOIN

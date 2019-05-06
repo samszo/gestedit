@@ -26,3 +26,7 @@ ALTER TABLE `iste_prospectxexport` CHANGE `maj` `maj` DATETIME(6) NULL DEFAULT N
 
 ALTER TABLE `iste_prospectxexport` ADD `nom` VARCHAR(255) NOT NULL AFTER `id_export`;
 
+ALTER TABLE `iste_prospect` ADD `langue` VARCHAR(70) NOT NULL AFTER `email2`, ADD `pays` VARCHAR(70) NOT NULL AFTER `langue`;
+
+ALTER TABLE `iste_etab` ADD `langue` VARCHAR(70) NOT NULL AFTER `pays`;
+

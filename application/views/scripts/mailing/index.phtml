@@ -58,7 +58,11 @@
                 'Cod': [],
                 'Prosp': [],
                 'Email': [],
-                'Email2': []
+                'Email2': [],
+                'lang': [],
+                'pays': [],
+                'langE': [],
+                'paysE': []
             },
             doublons = [];
         var maxExportEtab = 0;
@@ -66,6 +70,8 @@
             if (d.affiliation1) doublons[d.affiliation1] = 'aff1';
             if (d.affiliation2) doublons[d.affiliation2] = 'aff2';
             if (d.affiliation3) doublons[d.affiliation3] = 'aff3';
+            if (d.langue) doublons[d.langue] = 'langE';
+            if (d.pays) doublons[d.pays] = 'paysE';
             if(maxExportEtab<d.nbExport)maxExportEtab=d.nbExport;
         })
         var maxExportNomen = 0;
@@ -81,6 +87,8 @@
             if (d.nom_prenom) doublons[d.nom_prenom] = "Prosp";
             if (d.email) doublons[d.email] = "Email";
             if (d.email2) doublons[d.email2] = "Email2";
+            if (d.langue) doublons[d.langue] = "lang";
+            if (d.pays) doublons[d.pays] = "pays";
         })
         for (var k in doublons) {
             filters[doublons[k]].push(k);
@@ -355,6 +363,22 @@
                             }
                         },
                         {
+                            field: 'langue',
+                            caption: 'Langue',
+                            type: 'enum',
+                            options: {
+                                items: filters['lang']
+                            }
+                        },
+                        {
+                            field: 'pays',
+                            caption: 'Pays',
+                            type: 'enum',
+                            options: {
+                                items: filters['pays']
+                            }
+                        },
+                        {
                             field: 'membreEdito',
                             caption: 'Membre editorial',
                             type: 'enum',
@@ -411,6 +435,24 @@
                             size: '20%',
                             editable: {
                                 type: 'email'
+                            }
+                        },
+                        {
+                            field: 'langue',
+                            sortable: true,
+                            caption: 'Langue',
+                            size: '20%',
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'pays',
+                            sortable: true,
+                            caption: 'Pays',
+                            size: '20%',
+                            editable: {
+                                type: 'text'
                             }
                         },
                         {
@@ -606,6 +648,18 @@
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
+                            '        <label>Langue:</label>' +
+                            '        <div>' +
+                            '            <input name="langue" type="text" maxlength="150" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
+                            '        <label>Pays:</label>' +
+                            '        <div>' +
+                            '            <input name="pays" type="text" maxlength="150" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
                             '        <label>Origine :</label>' +
                             '        <div>' +
                             '            <input name="origine" type="text" style="width: 250px"/>' +
@@ -647,6 +701,14 @@
                             {
                                 field: 'email2',
                                 type: 'email'
+                            },
+                            {
+                                field: 'langue',
+                                type: 'text'
+                            },
+                            {
+                                field: 'pays',
+                                type: 'text'
                             },
                             {
                                 field: 'origine',
@@ -999,7 +1061,23 @@
                             options: {
                                 items: filters['aff3']
                             }
-                        }
+                        },
+                        {
+                            field: 'pays',
+                            caption: 'Pays',
+                            type: 'enum',
+                            options: {
+                                items: filters['paysE']
+                            }
+                        },
+                        {
+                            field: 'langue',
+                            caption: 'Langue',
+                            type: 'enum',
+                            options: {
+                                items: filters['langE']
+                            }
+                        } 
                     ],
                     columns: [{
                             field: 'recid',
@@ -1071,6 +1149,16 @@
                         {
                             field: 'pays',
                             caption: 'Pays',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'langue',
+                            caption: 'Langue',
                             size: '30%',
                             sortable: true,
                             resizable: true,
@@ -1268,6 +1356,12 @@
                             '        </div>' +
                             '    </div>' +
                             '    <div class="w2ui-field">' +
+                            '        <label>Langue:</label>' +
+                            '        <div>' +
+                            '            <input name="langue" type="text" style="width: 250px"/>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '    <div class="w2ui-field">' +
                             '        <label>Responsable Labo:</label>' +
                             '        <div>' +
                             '            <input name="responsable" type="text" style="width: 250px"/>' +
@@ -1305,6 +1399,10 @@
                             },
                             {
                                 field: 'pays',
+                                type: 'text'
+                            },
+                            {
+                                field: 'langue',
                                 type: 'text'
                             },
                             {
@@ -1992,6 +2090,25 @@
                         toolbarAdd: true,
                         toolbarDelete: true
                     },
+                    multiSearch: true,
+                    searches: [
+                        {
+                            field: 'pays',
+                            caption: 'Pays',
+                            type: 'enum',
+                            options : {
+                                item: filters['pays']
+                            }
+                        },
+                        {
+                            field: 'langue',
+                            caption: 'Langue',
+                            type: 'enum',
+                            options : {
+                                item: filters['lang']
+                            }
+                        } 
+                        ],
                     toolbar: {
                         items: [{
                             id: 'export',
@@ -2026,6 +2143,22 @@
                         {
                             field: 'email',
                             caption: 'Email',
+                            size: '20%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        },
+                        {
+                            field: 'langue',
+                            caption: 'Langue',
+                            size: '20%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        },
+                        {
+                            field: 'pays',
+                            caption: 'Pays',
                             size: '20%',
                             sortable: true,
                             resizable: true,
@@ -2488,6 +2621,30 @@
                         {
                             field: 'col16',
                             caption: 'Unsubscribe',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        },
+                        {
+                            field: 'col17',
+                            caption: 'Client ISTE',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        },
+                        {
+                            field: 'col18',
+                            caption: 'Membre Edito',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        },
+                        {
+                            field: 'col19',
+                            caption: 'Langue',
                             size: '30%',
                             sortable: true,
                             resizable: true,
