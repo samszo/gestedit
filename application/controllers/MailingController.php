@@ -94,7 +94,8 @@ class MailingController extends Zend_Controller_Action
                 foreach ($ids as $id) {
                     $dbPE->ajouter(array('id_prospect'=>$id, 'nom'=>$nom));
                 }
-                $rs = $dbP->getAllHistorique(implode(',',$ids));
+                $rs['p'] = $dbP->getAllHistorique(implode(',',$ids));
+                $rs['h'] = $dbP->getExportByIdProsp(implode(',',$ids));
                 $this->view->message = "l'export est bien enregistré";
                 break;    
             default:
