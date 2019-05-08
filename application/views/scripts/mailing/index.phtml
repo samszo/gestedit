@@ -44,6 +44,7 @@
         var jsProsp = <?php echo $this->jsProsp; ?>;
         var jsEtab = <?php echo $this->jsEtab; ?>;
         var jsImpfic = <?php echo $this->jsImpfic; ?>;
+        var jsExp = <?php echo $this->jsExp; ?>;
         var config;
         // Variable pour exporter les fichiers
         var urlP = "../";
@@ -268,7 +269,7 @@
                     },
                     {
                         id: 'tab4',
-                        caption: 'Imports'
+                        caption: 'Imports & Exports'
                     }
                 ],
                 onClick: function (event) {
@@ -2119,6 +2120,7 @@
                         onClick: function (event) {
                             if (event.target == 'export') {
                                 openPopupExport(w2ui['grid14'], w2ui['grid6']);
+
                             }
                         }
                     },
@@ -2422,8 +2424,30 @@
                 }
                 ]
             })
-            // Création du sidebar , Choix fichier import
+
             w2ui['layout4'].content('left',
+            $().w2layout({
+                name: 'layoutHist',
+                panels: [{
+                    type: 'top',
+                    size: '50%',
+                    resizable: true,
+                    hidden: false,
+                    style: pstyle,
+                    content: ''
+                },
+                {
+                    type: 'bottom',
+                    size: '50%',
+                    resizable: true,
+                    hidden: false,
+                    style: pstyle,
+                    content: ''
+                }
+                ]
+            }))
+            // Création de la grille historique des imports
+            w2ui['layoutHist'].content('top',
                 $().w2grid({
                     name: 'grid20',
                     header: 'Historique des imports',
@@ -2484,7 +2508,46 @@
                         },"json");
                     }
                 }))
-            // Création de la grille import
+            // Création de la grille historique des export
+            w2ui['layoutHist'].content('bottom',
+                $().w2grid({
+                    name: 'gridExp',
+                    header: 'Historique des Exports',
+                    show: {
+                        header: true,
+                        toolbar: true,
+                        footer: true,
+                        toolbarDelete: true,
+                        selectColumn: true
+                    },
+                    columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            hidden: true,
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'nom',
+                            caption: 'Nom de la campagne',
+                            size: '60%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        },
+                        {
+                            field: 'maj',
+                            caption: 'Date export',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        }
+                    ],
+                    records: jsExp,
+                }))
+            // Création de la grille détails import
             w2ui['layout4'].content('main',
                 $().w2grid({
                     name: 'grid7',

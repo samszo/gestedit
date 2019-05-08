@@ -27,15 +27,15 @@ class MailingController extends Zend_Controller_Action
         $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsEtab = $rs;
-/*
-        // Affichage historique import dans index mailing
-        $dbImp = new Model_DbTable_Iste_importdata();
-        $rs = json_encode($dbImp->getAllData());
+
+        // Affichage historique export dans index mailing
+        $dbExp = new Model_DbTable_Iste_prospectxexport();
+        $rs = json_encode($dbExp->getAll());
         $s = new Flux_Site();
         $s->bTrace = false;
         $s->trace($rs);
-        $this->view->jsImp = $rs;
-*/
+        $this->view->jsExp = $rs;
+
 
         // Affichage historique import dans sidebar
         $dbImpfic = new Model_DbTable_Iste_importfic();
@@ -111,6 +111,7 @@ class MailingController extends Zend_Controller_Action
             
         //récupère les paramètres
         $id = $this->_getParam('id');
+        $nom = $this->_getParam('nom');
         //création de l'objet BDD
         $oName = "Model_DbTable_Iste_".$this->_getParam('obj');
         $oBdd = new $oName();
@@ -145,6 +146,11 @@ class MailingController extends Zend_Controller_Action
             };
             break;
             case 'etab':
+            foreach ($id as $ids){
+                $r = $oBdd->remove($ids);
+            };
+           break;
+            case 'prospectxexport':
             foreach ($id as $ids){
                 $r = $oBdd->remove($ids);
             };
