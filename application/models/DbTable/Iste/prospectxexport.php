@@ -86,7 +86,7 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
      */
     public function remove($id, $nom)
     {
-            $this->delete('iste_prospectxexport.id_prospect = ' . $id)
+            $this->delete('iste_prospectxexport.id_prospect = ' . $id);
            // ->where('iste_prospectxexport.nom = ' . $nom);
     }
     
