@@ -84,10 +84,10 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
      *
      * @return void
      */
-    public function remove($id, $nom)
+    public function remove($idProspect, $idExport)
     {
-            $this->delete('iste_prospectxexport.id_prospect = ' . $id);
-           // ->where('iste_prospectxexport.nom = ' . $nom);
+        $this->delete('iste_prospectxexport.id_prospect = '.$idProspect.' AND iste_prospectxexport.id_export = '.$idExport);
+
     }
     
     /**
@@ -100,7 +100,7 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
     	$query = $this->select()
                     ->from( array("n" => "iste_prospectxexport") )
                     ->joinInner(array("nid" => "iste_prospectxexport"),
-                    'n.nom = nid.nom', array("recid"=>"n.nom"));
+                    'n.id_prospect = nid.id_prospect', array("recid"=>"n.id_prospect"));
                     
         if($order != null)
         {

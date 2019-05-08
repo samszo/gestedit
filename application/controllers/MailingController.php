@@ -151,9 +151,13 @@ class MailingController extends Zend_Controller_Action
             };
            break;
             case 'prospectxexport':
-            foreach ($id as $ids){
-                $r = $oBdd->remove($ids);
-            };
+            $arrP = $this->_getParam("idsProspect");
+            $arrE = $this->_getParam("idsExport");
+                foreach ($arrP as $p) {
+                    foreach ($arrE as $e) {
+                        $r[] = array($p,$e,$oBdd->remove($p,$e));
+                    }
+                }
             break;						
             default:
                 $r = $oBdd->remove($id);

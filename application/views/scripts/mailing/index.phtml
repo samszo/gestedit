@@ -2546,6 +2546,24 @@
                         }
                     ],
                     records: jsExp,
+                    onDelete: function(event){
+                        var itemsSelect = w2ui.gridExp.getSelection();
+                        var p = {
+                            'idsProspect': itemsSelect,
+                            obj: 'prospectxexport'
+                        };
+                        if (event.force) {
+                            var s = w2ui[event.target].getCellValue(itemsSelect.parse,1);
+						    p.idsExport = s;
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+
+                    }
                 }))
             // Création de la grille détails import
             w2ui['layout4'].content('main',
