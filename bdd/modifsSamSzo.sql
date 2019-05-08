@@ -30,3 +30,7 @@ ALTER TABLE `iste_prospect` ADD `langue` VARCHAR(70) NOT NULL AFTER `email2`, AD
 
 ALTER TABLE `iste_etab` ADD `langue` VARCHAR(70) NOT NULL AFTER `pays`;
 
+ALTER TABLE `iste_prospect` CHANGE `membreEdito` `membreEdito` VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0';
+
+ALTER TABLE `iste_prospect` CHANGE `clientIste` `clientIste` VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0';
+

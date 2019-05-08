@@ -181,7 +181,7 @@
         }
 
         //Formulaire ajout nom de campagne export
-        function openPopupExport(g) {
+        function openPopupExport(g, r) {
                 if (!w2ui.fooExp) {
                     $().w2form({
                         name: 'fooExp',
@@ -210,10 +210,10 @@
                                     data,
                                     function (js) {
                                         //ajoute dans l'historique
-                                        w2ui['grid2'].add(js.rs.h);
+                                        r.add(js.rs.h);
                                         //modifier grid principal
                                         js.rs.p.forEach(function(d){
-                                            w2ui[g].set(d.recid, d);
+                                            g.set(d.recid, d);
                                         });
                                         w2alert(js.message);
                                         exportByPost(idsP);
@@ -527,7 +527,7 @@
                         }],
                         onClick: function (event) {
                             if (event.target == 'export') {
-                                openPopupExport(w2ui['grid']);
+                                openPopupExport(w2ui['grid'], w2ui['grid2']);
                             }
                         }
                     },
@@ -1543,8 +1543,7 @@
                         }],
                         onClick: function (event) {
                             if (event.target == 'export') {
-                                var ids = w2ui.grid12.getSelection();
-                                exportByPost(ids, "grid12");
+                                openPopupExport(w2ui['grid12'], w2ui['grid5']);
                                 //open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
                             }
                         }
@@ -2119,9 +2118,7 @@
                         }],
                         onClick: function (event) {
                             if (event.target == 'export') {
-                                var ids = w2ui.grid14.getSelection();
-                                exportByPost(ids, "grid14");
-                                //open(urlP + 'export?obj=prospect&ids=' + ids, "_blank");
+                                openPopupExport(w2ui['grid14'], w2ui['grid6']);
                             }
                         }
                     },
