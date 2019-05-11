@@ -2520,6 +2520,12 @@
                         toolbarDelete: true,
                         selectColumn: true
                     },
+                    multiSearch: true,
+                    searches: [{
+                        field: 'nom',
+                        caption: 'Nom de la campagne',
+                        type: 'text'
+                    }, ],
                     columns: [{
                             field: 'recid',
                             caption: 'ID',
@@ -2548,13 +2554,17 @@
                     records: jsExp,
                     onDelete: function(event){
                         var itemsSelect = w2ui.gridExp.getSelection();
+                        var e = [];
                         var p = {
                             'idsProspect': itemsSelect,
-                            obj: 'prospectxexport'
+                            obj: 'prospectxexport',
                         };
                         if (event.force) {
-                            var s = w2ui[event.target].getCellValue(itemsSelect.parse,1);
-						    p.idsExport = s;
+                            var s = w2ui[event.target].get(itemsSelect);
+						    s.forEach(function(d){
+                               e.push(d.id_export);
+                            });
+                            p.idsExport = e;
                             $.get('mailing/delete',
                                 p,
                                 function (js) {
