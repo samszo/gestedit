@@ -852,7 +852,7 @@
                         toolbar: true,
                         footer: true,
                         selectColumn: true,
-                        toolbarAdd: true,
+                        toolbarAdd: false,
                         toolbarDelete: true
                     },
                     columns: [{
@@ -898,9 +898,6 @@
                             type: 'text'
                         }
                     ],
-                    onAdd: function (event) {
-                       // openPopupP();
-                    },
                     onDelete: function (event) {
                         var itemsSelect = w2ui.grid.getSelection();
                         var p = {
@@ -929,7 +926,7 @@
                         toolbar: true,
                         footer: true,
                         selectColumn: true,
-                        toolbarAdd: true,
+                        toolbarAdd: false,
                         toolbarDelete: true
                     },
                     columns: [{
@@ -967,9 +964,6 @@
                             type: 'text'
                         }
                     ],
-                    onAdd: function (event) {
-                       // openPopupP();
-                    },
                     onDelete: function (event) {
                         var itemsSelect = w2ui.grid.getSelection();
                         var p = {
@@ -1203,19 +1197,6 @@
                             type: 'int'
                         }
                     ],
-                    /*toolbar: {
-                        items: [{
-                            id: 'import',
-                            type: 'button',
-                            caption: 'Importer',
-                            icon: 'fas fa-file-import'
-                        }],
-                        onClick: function (event) {
-                            if (event.target == 'import') {
-                                openPopupImportData();
-                            }
-                        }
-                    },*/
                     records: jsEtab,
                     onSelect: function (event) {
                       //  if (record && record.recid == event.recid) return;
@@ -1531,7 +1512,7 @@
                         header: true,
                         toolbar: true,
                         footer: true,
-                        toolbarAdd: true,
+                        toolbarAdd: false,
                         selectColumn: true,
                         toolbarDelete: true
                     },
@@ -1582,9 +1563,6 @@
                             type: 'text'
                         }
                     ],
-                    onAdd: function (event) {
-                        //openPopupP();
-                    },
                     onDelete: function (event) {
                         var itemsSelect = w2ui.grid3.getSelection();
                         var p = {
@@ -1641,26 +1619,6 @@
                             type: 'text'
                         }
                     ],
-                    /*
-                    onAdd: function (event) {
-                        //openPopupP();
-                    },
-                    onDelete: function (event) {
-                        var itemsSelect = w2ui.grid.getSelection();
-                        var p = {
-                            id: itemsSelect,
-                            obj: 'prospect'
-                        };
-                        if (event.force) {
-                            $.get('mailing/delete',
-                                p,
-                                function (js) {
-                                    // finsession(js);
-                                    w2alert(js.message);
-                                }, "json");
-                        }
-                    },
-                    */
                 }))
             // Création du layout 3e onglet (Nomenclatures)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
@@ -2088,7 +2046,7 @@
                         toolbar: true,
                         footer: true,
                         selectColumn: true,
-                        toolbarAdd: true,
+                        toolbarAdd: false,
                         toolbarDelete: true
                     },
                     multiSearch: true,
@@ -2173,20 +2131,6 @@
                             type: 'text'
                         }
                     ],
-                    onAdd: function (event) {
-                        openPopupNP();
-                        event.onComplete = function () {
-                            var sel = w2ui['grid4'].getSelection();
-                            var form = w2ui.foo4;
-                            if (sel.length == 1) {
-                                form.recid  = sel[0];
-                                form.record = $.extend(true, {}, w2ui['grid4'].get(sel[0]));
-                                form.refresh();
-                            } else {
-                                form.clear();
-                            }
-                        }
-                    },
                     onDelete: function (event) {
                         var itemsSelect = w2ui.grid4.getSelection();
                         var p = {
@@ -2206,133 +2150,6 @@
                     },
                     
                 }))
-            // Création du formulaire de création de lien entre nomenclature -> prospect
-            function openPopupNP() {
-                if (!w2ui.foo4) {
-                    $().w2form({
-                        name: 'foo4',
-                        style: 'border: 0px; background-color: transparent;',
-                        formHTML: '<div class="w2ui-page page-0">' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Label:</label>' +
-                            '        <div>' +
-                            '           <input name="label" type="text" maxlength="100" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>ID Nomenclature:</label>' +
-                            '        <div>' +
-                            '           <input name="id_nomenclature" type="text" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                            '    <div class="w2ui-field">' +
-                            '        <label>Prospects:</label>' +
-                            '        <div>' +
-                            '           <input name="email" type="enum" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                        /*
-                            '    <div class="w2ui-field">' +
-                            '        <label>Ids Prospect:</label>' +
-                            '        <div>' +
-                            '            <input name="id_prospect" type="text" maxlength="100" style="width: 250px"/>' +
-                            '        </div>' +
-                            '    </div>' +
-                        */
-                            '</div>' +
-                            '<div class="w2ui-buttons">' +
-                            '    <button class="w2ui-btn" name="reset">Reset</button>' +
-                            '    <button class="w2ui-btn" name="save">Save</button>' +
-                            '</div>',
-                        fields: [
-                            {
-                                field: 'label',
-                                type: 'text',
-                                required: false
-                            },
-                            {
-                                field: 'id_nomenclature',
-                                type: 'text',
-                                required: true
-                            },
-                            {
-                                field: 'email',
-                                type: 'enum',
-                                options: {
-                                items: filters['Email']
-                                },
-                                required: false
-                            },
-                            /*
-                            {
-                                field: 'id_prospect',
-                                type: 'enum',
-                                options: {
-                                    items:  jsProsp.forEach(function(d){
-                                                if(d.email == w2ui['foo4'].get('email'))
-                                                    {
-                                                        return d.id-prospect;
-                                                    }
-                                            })
-                                },
-                                required: true
-                            }
-                            */
-                        ],
-                        actions: {
-                            "save": function () {
-                                var errors = this.validate();
-                                if (errors.length > 0) return;
-                                var data = this.record, mail;
-                                var ids = {
-                                    idsNomen: data.id_nomenclature,
-                                    obj : "prospectxnomenclature"
-                                    };
-                                mail += data.email.forEach(function(e){
-                                    
-                                });
-                                jsProsp.forEach(function(d){
-                                    if(d.email == mail){
-                                        ids.idsProspect = d.id_prospect;
-                                        ids.recid = d.id_prospect;
-                                    }
-                                });
-                                $.get('mailing/insert',
-                                    ids,
-                                    function (js) {
-                                        //finsession(js);
-                                        w2ui['grid14'].add(js.rs);
-                                    }, "json");
-                                w2popup.close();
-                            },
-                            "reset": function () {
-                                this.clear();
-                            }
-                        }
-                    });
-                }
-                $().w2popup('open', {
-                    title: 'Formulaire Nomenclature -> Prospect',
-                    body: '<div id="form" style="width: 100%; height: 100%;"></div>',
-                    style: 'padding: 15px 0px 0px 0px',
-                    width: 500,
-                    height: 300,
-                    showMax: true,
-                    onToggle: function (event) {
-                        $(w2ui.foo3.box).hide();
-                        event.onComplete = function () {
-                            $(w2ui.foo4.box).show();
-                            w2ui.foo4.resize();
-                        }
-                    },
-                    onOpen: function (event) {
-                        event.onComplete = function () {
-                            // specifying an onOpen handler instead is equivalent to specifying an onBeforeOpen handler, which would make this code execute too early and hence not deliver.
-                            $('#w2ui-popup #form').w2render('foo4');
-                        }
-                    }
-                });
-            }
             // Création de la grille esclaves nomenclature
             w2ui['layout7'].content('main',
                 $().w2grid({
@@ -2416,20 +2233,6 @@
                 },
                 {
                     type: 'main',
-                    size: '80%',
-                    resizable: true,
-                    hidden: false,
-                    style: pstyle,
-                    content: ''
-                }
-                ]
-            })
-
-            w2ui['layout4'].content('left',
-            $().w2layout({
-                name: 'layoutHist',
-                panels: [{
-                    type: 'top',
                     size: '50%',
                     resizable: true,
                     hidden: false,
@@ -2445,9 +2248,31 @@
                     content: ''
                 }
                 ]
+            })
+
+            w2ui['layout4'].content('bottom',
+            $().w2layout({
+                name: 'layoutHist',
+                panels: [{
+                    type: 'left',
+                    size: '20%',
+                    resizable: true,
+                    hidden: false,
+                    style: pstyle,
+                    content: ''
+                },
+                {
+                    type: 'main',
+                    size: '50%',
+                    resizable: true,
+                    hidden: false,
+                    style: pstyle,
+                    content: ''
+                }
+                ]
             }))
             // Création de la grille historique des imports
-            w2ui['layoutHist'].content('top',
+            w2ui['layout4'].content('left',
                 $().w2grid({
                     name: 'grid20',
                     header: 'Historique des imports',
@@ -2496,7 +2321,7 @@
                     onSelect: function (event) {
                         if (record && record.recid == event.recid) return;
                         var record = this.get(event.recid);
-                        // Grille secondaire Prospect -> Affiliations
+                        // Grille secondaire détail des imports
                         w2ui['grid7'].clear();
                         $.get('mailing/datafic',
 						{id_importfic:record.recid},
@@ -2506,73 +2331,6 @@
                             voirCouleur(js.rs);
                             w2ui['grid7'].refresh();
                         },"json");
-                    }
-                }))
-            // Création de la grille historique des export
-            w2ui['layoutHist'].content('bottom',
-                $().w2grid({
-                    name: 'gridExp',
-                    header: 'Historique des Exports',
-                    show: {
-                        header: true,
-                        toolbar: true,
-                        footer: true,
-                        toolbarDelete: true,
-                        selectColumn: true
-                    },
-                    multiSearch: true,
-                    searches: [{
-                        field: 'nom',
-                        caption: 'Nom de la campagne',
-                        type: 'text'
-                    }, ],
-                    columns: [{
-                            field: 'recid',
-                            caption: 'ID',
-                            size: '50px',
-                            hidden: true,
-                            sortable: true,
-                            resizable: true
-                        },
-                        {
-                            field: 'nom',
-                            caption: 'Nom de la campagne',
-                            size: '60%',
-                            sortable: true,
-                            resizable: true,
-                            type: 'text'
-                        },
-                        {
-                            field: 'maj',
-                            caption: 'Date export',
-                            size: '30%',
-                            sortable: true,
-                            resizable: true,
-                            type: 'text'
-                        }
-                    ],
-                    records: jsExp,
-                    onDelete: function(event){
-                        var itemsSelect = w2ui.gridExp.getSelection();
-                        var e = [];
-                        var p = {
-                            'idsProspect': itemsSelect,
-                            obj: 'prospectxexport',
-                        };
-                        if (event.force) {
-                            var s = w2ui[event.target].get(itemsSelect);
-						    s.forEach(function(d){
-                               e.push(d.id_export);
-                            });
-                            p.idsExport = e;
-                            $.get('mailing/delete',
-                                p,
-                                function (js) {
-                                    // finsession(js);
-                                    w2alert(js.message);
-                                }, "json");
-                        }
-
                     }
                 }))
             // Création de la grille détails import
@@ -2748,6 +2506,133 @@
                             type: 'text'
                         }
                     ],
+                }))
+            // Création de la grille historique des export
+            w2ui['layoutHist'].content('left',
+                $().w2grid({
+                    name: 'gridExp',
+                    header: 'Historique des Exports',
+                    show: {
+                        header: true,
+                        toolbar: true,
+                        footer: true,
+                        toolbarDelete: true,
+                        selectColumn: true
+                    },
+                    multiSearch: true,
+                    searches: [{
+                        field: 'nom',
+                        caption: 'Nom de la campagne',
+                        type: 'text'
+                    }, ],
+                    columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            hidden: true,
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'nom',
+                            caption: 'Nom de la campagne',
+                            size: '60%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        },
+                        {
+                            field: 'maj',
+                            caption: 'Date export',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        }
+                    ],
+                    records: jsExp,
+                    onDelete: function(event){
+                        var itemsSelect = w2ui.gridExp.getSelection();
+                        var e = [];
+                        var p = {
+                            'idsProspect': itemsSelect,
+                            obj: 'prospectxexport',
+                        };
+                        if (event.force) {
+                            var s = w2ui[event.target].get(itemsSelect);
+						    s.forEach(function(d){
+                               e.push(d.id_export);
+                            });
+                            p.idsExport = e;
+                            $.get('mailing/delete',
+                                p,
+                                function (js) {
+                                    // finsession(js);
+                                    w2alert(js.message);
+                                }, "json");
+                        }
+
+                    },
+                    onSelect: function (event) {
+                        if (record && record.recid == event.recid) return;
+                        var record = this.get(event.recid);
+                        // Grille secondaire détail export
+                        w2ui['gridDetailExp'].clear();
+                        $.get('mailing/dataexport',
+						{id_export:record.recid},
+			            function(js){
+                            //finsession(js);
+                            w2ui['gridDetailExp'].add(js.rs);
+                            w2ui['gridDetailExp'].refresh();
+                        },"json");
+                    }
+                }))
+            // Création de la grille historique des export
+            w2ui['layoutHist'].content('main',
+                $().w2grid({
+                    name: 'gridDetailExp',
+                    header: 'Détail des Exports',
+                    show: {
+                        header: true,
+                        toolbar: true,
+                        footer: true,
+                        toolbarDelete: false,
+                        selectColumn: true
+                    },
+                    /*
+                    multiSearch: true,
+                    searches: [{
+                        field: 'nom',
+                        caption: 'Nom de la campagne',
+                        type: 'text'
+                    }, ],
+                    */
+                    columns: [{
+                            field: 'recid',
+                            caption: 'ID',
+                            size: '50px',
+                            hidden: true,
+                            sortable: true,
+                            resizable: true
+                        },
+                        {
+                            field: 'nom_prenom',
+                            caption: 'Nom Prénom',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        },
+                        {
+                            field: 'email',
+                            caption: 'Email',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'text'
+                        }
+                    ],
+                    records: [],
                 }))
         });
 

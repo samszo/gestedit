@@ -100,7 +100,7 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
     	$query = $this->select()
                     ->from( array("n" => "iste_prospectxexport") )
                     ->joinInner(array("nid" => "iste_prospectxexport"),
-                    'n.id_prospect = nid.id_prospect', array("recid"=>"n.id_prospect"));
+                    'n.id_prospect = nid.id_prospect', array("recid"=>"n.id_export"));
                     
         if($order != null)
         {
@@ -114,4 +114,24 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray();
     }  
+
+                /**
+     * Récupère une entrées Iste_prospect avec certains critères
+     * de tri, intervalles
+     *  @param int    $id_prospect   
+     * 
+     * @return array
+     */
+    public function getProspectByIdExport($id_export){
+        $sql = 'SELECT 
+                    p.id_prospect recid, p.nom_prenom, p.email
+                FROM
+                    iste_prospectxexport pe
+                        INNER JOIN
+                    iste_prospect p ON p.id_prospect = pe.id_prospect
+                WHERE pe.id_export = '.$id_export; 
+        	    $db = $this->_db->query($sql);
+                $rs = $db->fetchAll();
+        return $rs;
+    }
 }

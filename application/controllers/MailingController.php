@@ -307,5 +307,15 @@ class MailingController extends Zend_Controller_Action
         }
     }
 
+    // Grid details export
+    public function dataexportAction(){
+        // Affichage grille secondaire etab -> prospect
+        $db = new Model_DbTable_Iste_prospectxexport();
+        if ('id_export'!= null){
+        $rs = $db->getProspectByIdExport($this->_getParam('id_export'));
+        $this->view->rs = $rs;
+        }
+    }
+
 }
 
