@@ -71,8 +71,14 @@ class Model_DbTable_Iste_proposition extends Zend_Db_Table_Abstract
      * @return void
      */
     public function edit($id, $data)
-    {        
-	    	$this->update($data, 'iste_proposition.id_proposition = ' . $id);
+    {   
+        if(!$data['date_contrat'])$data['date_contrat']=null;
+        if(!$data['date_contrat'])$data['date_manuscrit']=null;
+        if(!$data['nb_page_fr'])$data['nb_page_fr']=null;
+        if(!$data['nb_page_en'])$data['nb_page_en']=null;
+        if(!$data['nb_page_es'])$data['nb_page_es']=null;
+                     
+        $this->update($data, 'iste_proposition.id_proposition = ' . $id);
     }
 
     /**

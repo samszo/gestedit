@@ -139,7 +139,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
             ->joinInner(array("a" => "iste_auteur"),
                 'a.id_auteur = SUBSTRING_INDEX(r.obj_id,"_",1)', array("nom","prenom","id_auteur"))
             ->joinInner(array("l" => "iste_livre"),
-                'l.id_livre = SUBSTRING_INDEX(r.obj_id,"_",-1)', array("titre_fr","titre_en","id_livre"))
+                'l.id_livre = SUBSTRING_INDEX(r.obj_id,"_",-1)', array("titre_fr","titre_en","titre_es","id_livre"))
             ->where( "l.id_livre = ?", $idLivre)            
             ->where( "r.id_importfic = ?", $idMod);            
             
@@ -163,7 +163,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 			r.id_rapport recid, r.url, r.maj
 		    , ids.idAuteur, ids.idLivre
 			, nom, prenom, id_auteur
-			, titre_fr, titre_en, id_livre    
+			, titre_fr, titre_en, titre_es, id_livre    
 		    , SUM(roy.montant_livre) montant_livre
 		    , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
 			, base_contrat, DATE_FORMAT(date_taux,'%Y') periode

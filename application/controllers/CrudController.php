@@ -324,7 +324,7 @@ class CrudController extends Zend_Controller_Action
     		$oBdd = new $oName();
     	    //récupère les données
     		$rs = $oBdd->findLivreById_auteur($this->_getParam('id'));
-		$this->view->rs = $rs;
+				$this->view->rs = $rs;
     }    
 	
     public function livredataAction()

@@ -334,7 +334,7 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
 			->from( array("i" => "iste_isbn") )                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("l" => "iste_livre"),
-                'i.id_livre = l.id_livre', array("titre_fr","titre_en"))
+                'i.id_livre = l.id_livre', array("titre_fr","titre_en","titre_es"))
 			->where( "i.num = ?", $num );
 		$rs = $this->fetchAll($query)->toArray();
         if(count($rs))	
@@ -596,7 +596,9 @@ class Model_DbTable_Iste_isbn extends Zend_Db_Table_Abstract
 			, GROUP_CONCAT(id_isbn ORDER BY id_isbn) ids, GROUP_CONCAT(ifnull(nb_page,0) ORDER BY id_isbn) nbPages
 			, GROUP_CONCAT(id_editeur ORDER BY id_isbn) edit,  GROUP_CONCAT(i.id_livre ORDER BY id_isbn) idsLivre
 			,  GROUP_CONCAT(ifnull(date_parution,0) ORDER BY id_isbn) dates
-			,  GROUP_CONCAT(ifnull(titre_fr,0) ORDER BY id_isbn SEPARATOR ' --- ') titresFR,  GROUP_CONCAT(ifnull(titre_en,0) ORDER BY id_isbn SEPARATOR ' --- ') titresEN
+			,  GROUP_CONCAT(ifnull(titre_fr,0) ORDER BY id_isbn SEPARATOR ' --- ') titresFR
+            ,  GROUP_CONCAT(ifnull(titre_en,0) ORDER BY id_isbn SEPARATOR ' --- ') titresEN
+            ,  GROUP_CONCAT(ifnull(titre_es,0) ORDER BY id_isbn SEPARATOR ' --- ') titresES
 			FROM iste_isbn i
 			INNER JOIN iste_livre l ON l.id_livre = i.id_livre
 			WHERE num is not null 

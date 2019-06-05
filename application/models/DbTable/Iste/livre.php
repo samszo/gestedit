@@ -65,6 +65,9 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 	    	$id=false;
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
+				if(!$data['reference'])$data['reference']=null;
+				if(!$data['num_vol'])$data['num_vol']=null;
+				
 	    	 	$id = $this->insert($data);
 	    	};
 	    	if($rs)
@@ -141,7 +144,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("id"=>$this->_primary[1],"text"=>"CONCAT(IFNULL(titre_fr,''), '/', IFNULL(titre_en,''))"))
+            		,array("id"=>$this->_primary[1],"text"=>"CONCAT(IFNULL(titre_fr,''), '/', IFNULL(titre_en,''), '/', IFNULL(titre_es,''))"))
             ->order("titre_fr");        
         return $this->fetchAll($query)->toArray();
 	} 
@@ -163,7 +166,11 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     {
    	
 	    	$query = $this->select()
-			->from( array("l" => "iste_livre"),array("recid"=>"id_livre","id_livre","reference","titre_fr","soustitre_fr","titre_en","soustitre_en","num_vol","type_1","type_2","production") )
+			->from( array("l" => "iste_livre"),array("recid"=>"id_livre","id_livre","reference"
+				,"titre_fr","soustitre_fr"
+				,"titre_en","soustitre_en"
+				,"titre_es","soustitre_es"
+				,"num_vol","type_1","type_2","production") )
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("i" => "iste_isbn"),
                 'i.id_livre = l.id_livre', array("isbns"=>"GROUP_CONCAT(DISTINCT(i.num) ORDER BY i.ordre)"))
@@ -312,7 +319,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
             ->group("i.id_isbn");
         */
 		$sql = "SELECT 	
-			l.id_livre recid, CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,'')) titre
+			l.id_livre recid, CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''), ' / ', IFNULL(titre_es,'')) titre
 			, ca.auteurs
 			, GROUP_CONCAT(DISTINCT(i.num)) isbns
 			, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d
@@ -364,7 +371,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     public function getAllVenteISBN($resume=false)
     {
         $sql = "SELECT
-		i.id_isbn recid, l.titre_fr, l.titre_en
+		i.id_isbn recid, l.titre_fr, l.titre_en, l.titre_es
 		, i.num, i.type, GROUP_CONCAT(DISTINCT v.type) typeVente
 		, COUNT(v.id_vente) nbV, COUNT(DISTINCT v.id_vente) nbVD
         , SUM(v.nombre)/COUNT(v.id_vente)*COUNT(DISTINCT v.id_vente) nb_vente 
@@ -381,7 +388,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 			INNER JOIN iste_auteur a ON a.id_auteur = ac.id_auteur
             INNER JOIN iste_contrat c ON c.id_contrat = ac.id_contrat
 		GROUP BY i.id_isbn
-		ORDER BY l.titre_fr, l.titre_en";
+		ORDER BY l.titre_fr, l.titre_en, l.titre_es";
         $db = $this->_db->query($sql);
         $rs = $db->fetchAll();
         
@@ -415,7 +422,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
     public function getIdLivreVente($idLivre, $resume=true)
     {
 		$sql = "SELECT 	
-			l.id_livre recid, CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,'')) titre
+			l.id_livre recid, CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''), IFNULL(titre_es,'')) titre
 			, ca.auteurs
 			, GROUP_CONCAT(DISTINCT(i.num)) isbns
 			, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d
@@ -467,7 +474,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 		$sql = "SELECT 	
 			a.id_auteur recid, CONCAT(a.prenom,' ',a.nom) auteur
 			, COUNT(DISTINCT l.id_livre) nbL
-            , GROUP_CONCAT(DISTINCT IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,'')) livres
+            , GROUP_CONCAT(DISTINCT IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''), ' / ', IFNULL(titre_es,'')) livres
 			, GROUP_CONCAT(DISTINCT(i.num)) isbns
 			, SUM(v.nombre) nb_vente , SUM(v.montant_euro) mt_e , SUM(v.montant_livre) mt_l, SUM(v.montant_dollar) mt_d, GROUP_CONCAT(DISTINCT(b.nom)) boutiques			
 			, MAX(v.date_vente) date_last , MIN(v.date_vente) date_first			
@@ -555,13 +562,15 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
      *
      * @param varchar $titreFr
      * @param varchar $titreEn
+     * @param varchar $titreEs
      *
      * @return array
      */
-    public function findByAllTitre($titreFr, $titreEn)
+    public function findByAllTitre($titreFr, $titreEn, $titreEs)
     {
         $query = $this->select()
            	->from( array("i" => "iste_livre") )
+			->where( "i.titre_es = ?", $titreEs)
 			->where( "i.titre_en = ?", $titreEn)
            	->where( "i.titre_fr = ?", $titreFr);
 
@@ -597,6 +606,7 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
         $query = $this->select()
                     ->from( array("i" => "iste_livre") )                           
 					->where( 'i.titre_en LIKE "%'.$titre.'%"')
+					->orWhere( 'i.titre_es LIKE "%'.$titre.'%"')
 					->orWhere( 'i.titre_fr LIKE "%'.$titre.'%"');
 
         return $this->fetchAll($query)->toArray(); 
@@ -757,6 +767,10 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 	    				$w["value"]=rtrim(ltrim($arrVal[1]));
 	    				$colFied = "titre_en";		    				
 	    			}
+	    			if(rtrim($arrVal[2])){
+	    				$w["value"]=rtrim(ltrim($arrVal[2]));
+	    				$colFied = "titre_es";		    				
+	    			}
 	    		}
 	    		
 	    		switch ($w["operator"]) {
@@ -794,13 +808,13 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 				break;
 				case "id_serie":
 					if($colFied)$nop = str_replace("id_serie", "s.".$colFied, $op);
-					else $nop = str_replace("id_serie", "s.titre_fr", $op)." OR ".str_replace("id_serie", "s.titre_en", $op);
+					else $nop = str_replace("id_serie", "s.titre_fr", $op)." OR ".str_replace("id_serie", "s.titre_en", $op)." OR ".str_replace("id_serie", "s.titre_es", $op);
 					$sql .= "INNER JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
 					INNER JOIN iste_serie s ON s.id_serie = ls.id_serie AND (".$nop.")";
 				break;
 				case "id_comite":
 					if($colFied)$nop = str_replace("id_comite", "c.".$colFied, $op);
-					else $nop = str_replace("id_comite", "c.titre_fr", $op)." OR ".str_replace("id_comite", "c.titre_en", $op);
+					else $nop = str_replace("id_comite", "c.titre_fr", $op)." OR ".str_replace("id_comite", "c.titre_en", $op)." OR ".str_replace("id_comite", "c.titre_es", $op);
 					$sql .= "INNER JOIN iste_comitexlivre cl ON cl.id_livre = l.id_livre
 					INNER JOIN iste_comite c ON c.id_comite = cl.id_comite AND (".$nop.")";
 				break;
@@ -887,8 +901,9 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 			, GROUP_CONCAT(DISTINCT IFNULL(a.nom,'') , ' ', IFNULL(a.prenom,'') ORDER BY la.ordre SEPARATOR ', ') 'auteur'
 			, GROUP_CONCAT(DISTINCT IFNULL(co.nom,'') , ' ', IFNULL(co.prenom,'') ORDER BY lac.ordre SEPARATOR ', ') 'coordonateur'			
 						
-			, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.type_1, l.type_2, l.id_livre, l.id_livre recid
-			, l.contexte_fr, l.contexte_en, l.bio_fr, l.bio_en, l.tdm_fr, l.tdm_en, l.production 
+			, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.titre_es, l.soustitre_es
+			, l.type_1, l.type_2, l.id_livre, l.id_livre recid
+			, l.contexte_fr, l.contexte_en, l.contexte_es, l.bio_fr, l.bio_es, l.bio_en, l.tdm_fr, l.tdm_en, l.tdm_es, l.production 
 		    , p.traduction, p.langue
 		    , GROUP_CONCAT(DISTINCT e.nom) editeur
 		FROM iste_livre l
@@ -924,8 +939,8 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 		 	$sql = "SELECT 
 			l.* 
 			, GROUP_CONCAT(i.id_isbn) idsIsbn, GROUP_CONCAT(i.date_parution) date_parution, GROUP_CONCAT(i.num) isbn 
-			, GROUP_CONCAT(DISTINCT s.id_serie, ',', s.titre_fr, ',', s.titre_en SEPARATOR ':') series
-			, GROUP_CONCAT(DISTINCT c.id_comite, ',', c.titre_fr, ',', c.titre_en SEPARATOR ':') comites
+			, GROUP_CONCAT(DISTINCT s.id_serie, ',', s.titre_fr, ',', s.titre_en, ',', s.titre_es SEPARATOR ':') series
+			, GROUP_CONCAT(DISTINCT c.id_comite, ',', c.titre_fr, ',', c.titre_en, ',', c.titre_es SEPARATOR ':') comites
 			FROM iste_livre l
 			INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
 			LEFT JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
@@ -941,8 +956,8 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 		, GROUP_CONCAT(i.id_isbn, ',', i.num, ',', i.type, ',', i.date_parution, ',', i.nb_page SEPARATOR ':') isbns
 		, GROUP_CONCAT(e.nom) editeur
 		, GROUP_CONCAT(p.prix_dollar, ',', p.prix_euro, ',', p.prix_livre SEPARATOR ':') prix
-		, GROUP_CONCAT(DISTINCT s.id_serie, ',', s.titre_fr, ',', s.titre_en SEPARATOR ':') series
-		, GROUP_CONCAT(DISTINCT c.id_comite, ',', c.titre_fr, ',', c.titre_en SEPARATOR ':') comites
+		, GROUP_CONCAT(DISTINCT s.id_serie, ',', s.titre_fr, ',', s.titre_en, ',', s.titre_es SEPARATOR ':') series
+		, GROUP_CONCAT(DISTINCT c.id_comite, ',', c.titre_fr, ',', c.titre_en, ',', c.titre_es SEPARATOR ':') comites
 		, GROUP_CONCAT(DISTINCT fic.id_importfic, ',', fic.type, ',', fic.url SEPARATOR ':') fics
 		FROM iste_livre l
 		INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre
@@ -993,17 +1008,21 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
 		GROUP_CONCAT(DISTINCT a.nom, ' ',a.prenom, ':', la.role) auteurs
 		,l.titre_en 
 		,l.titre_fr 
+		,l.titre_es 
 		,pGB.nombre 'Nbre Pages prévision GB'
 		,pFR.nombre 'Nbre Pages prévision FR'
-        , ELT(FIND_IN_SET(p.langue,'Français,Anglais'), 'FR', 'GB') 'Langue du manuscrit'
+		,pES.nombre 'Nbre Pages prévision ES'
+        , ELT(FIND_IN_SET(p.langue,'Français,Anglais,Espagnol'), 'FR', 'GB', 'ES') 'Langue du manuscrit'
         ,p.publication_en 'Publication prévue GB'
         ,p.publication_fr 'Publication prévue FR'
+        ,p.publication_es 'Publication prévue ES'
         , FIELD(p.traduction,'français -> anglais') 'traduction'
 		, pre1.prevision 'Date de remise prévue du manuscrit'
 		, pre1.fin 'Date de réception du manuscrit'
 		, pre2.fin 'Date de réception de la traduction'
 		, pre3.fin 'Date de publication GB'
 		, pre4.fin 'Date de publication FR'
+		, pre5.fin 'Date de publication ES'
 		, FIND_IN_SET(e.nom,'Wiley,Elsevier') editeur
 		FROM iste_livre l
 		INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre
@@ -1014,16 +1033,19 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
         INNER JOIN iste_prevision pre2 ON pre2.id_pxu = pl.id_plu AND pre2.id_tache = 16
         INNER JOIN iste_prevision pre3 ON pre3.id_pxu = pl.id_plu AND pre3.id_tache = 17
         INNER JOIN iste_prevision pre4 ON pre4.id_pxu = pl.id_plu AND pre4.id_tache = 18
+        LEFT JOIN iste_prevision pre5 ON pre5.id_pxu = pl.id_plu AND pre5.id_tache = 48
 		INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
 		LEFT JOIN iste_editeur e ON e.id_editeur = i.id_editeur
         LEFT JOIN iste_page pGB ON pGB.id_livre = l.id_livre AND
 			pGB.maj = (SELECT MAX(pGBm.maj) FROM iste_page pGBm WHERE pGBm.id_livre = pGB.id_livre AND pGBm.type = 'prévu GB')
         LEFT JOIN iste_page pFR ON pFR.id_livre = l.id_livre AND
 			pFR.maj = (SELECT MAX(pFRm.maj) FROM iste_page pFRm WHERE pFRm.id_livre = pFR.id_livre AND pFRm.type = 'prévu FR')
+		LEFT JOIN iste_page pES ON pES.id_livre = l.id_livre AND
+			pES.maj = (SELECT MAX(pESm.maj) FROM iste_page pESm WHERE pESm.id_livre = pES.id_livre AND pESm.type = 'prévu ES')
 		WHERE i.date_parution IS NULL OR i.date_parution > NOW()
 		GROUP BY l.id_livre";
  	
-	    	//echo $sql."<br/>";
+	    	echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
 	    	return $db->fetchAll();
     }     
@@ -1091,10 +1113,10 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
     public function getNbPage()
     {
  		$sql = "SELECT l.id_livre
-			, p.nb_page_en, p.nb_page_fr 
+			, p.nb_page_en, p.nb_page_fr, p.nb_page_es 
 			, i.nb_page, i.type
 			FROM iste_livre l
-			LEFT JOIN iste_proposition p ON p.id_livre = l.id_livre AND (nb_page_fr > 0 OR nb_page_en > 0)
+			LEFT JOIN iste_proposition p ON p.id_livre = l.id_livre AND (nb_page_fr > 0 OR nb_page_en > 0 OR nb_page_es > 0)
 			LEFT JOIN iste_isbn i ON i.id_livre = l.id_livre AND nb_page > 0 ";
 	    	//echo $sql."<br/>";
 	    	$db = $this->_db->query($sql);
@@ -1152,7 +1174,7 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
     public function getEtatSuivi($ids)
     {
  		$sql = "SELECT 
-			l.id_livre, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.type_1, l.type_2
+			l.id_livre, l.titre_fr, l.soustitre_fr, l.titre_en, l.soustitre_en, l.titre_es, l.soustitre_es, l.type_1, l.type_2
 			, GROUP_CONCAT(DISTINCT IFNULL(a.nom,'') , ' ', IFNULL(a.prenom,'') ORDER BY la.ordre SEPARATOR ', ') 'auteur'
 			, GROUP_CONCAT(DISTINCT IFNULL(co.nom,'') , ' ', IFNULL(co.prenom,'') ORDER BY lac.ordre SEPARATOR ', ') 'coordonateur'			
 			, GROUP_CONCAT(DISTINCT IFNULL(ad.nom,'') , ' ', IFNULL(ad.prenom,'') ORDER BY lad.ordre SEPARATOR ', ') 'directeur'
@@ -1161,20 +1183,22 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
 			,iE.num 'ISBN Elsevier'
 			,iI.num 'ISBN ISTE', iI.date_parution 'Fin Parution FR'
 			
-		    , GROUP_CONCAT(DISTINCT IFNULL(s.titre_en,'') , ' / ', IFNULL(s.titre_fr,'') SEPARATOR ', ') 'Série'
+		    , GROUP_CONCAT(DISTINCT IFNULL(s.titre_en,'') , ' / ', IFNULL(s.titre_fr,'') , ' / ', IFNULL(s.titre_es,'') SEPARATOR ', ') 'Série'
 			-- , GROUP_CONCAT(DISTINCT IFNULL(aSerie.prenom,'') , ' ', IFNULL(aSerie.nom,'') SEPARATOR ', ') 'Resp. de la Série'
 		
-		    , GROUP_CONCAT(DISTINCT IFNULL(c.titre_en,'') , ' / ', IFNULL(c.titre_fr,'') SEPARATOR ', ') 'Comité'
+		    , GROUP_CONCAT(DISTINCT IFNULL(c.titre_en,'') , ' / ', IFNULL(c.titre_fr,'') , ' / ', IFNULL(c.titre_es,'') SEPARATOR ', ') 'Comité'
 			-- , GROUP_CONCAT(DISTINCT IFNULL(aCom.prenom,'') , ' ', IFNULL(aCom.nom,'') SEPARATOR ', ') 'Directeur du comite'
 		
 			, l.production
 			
 			, eFR.nom 'Editeur FR'
 			, eGB.nom 'Editeur GB'
+			, eES.nom 'Editeur ES'
 			
 		    , MAX(pa.nombre) 'Pages Prévu'
 		    , MAX(pfGB.nombre) 'Pages final GB'
 		    , MAX(pfFR.nombre) 'Pages final FR'
+		    , MAX(pfES.nombre) 'Pages final ES'
 		    
 			, pm.prevision 'Prévision de réception du manuscrit'
 		    , pm.commentaire 'réception du manuscrit commentaire'
@@ -1182,6 +1206,8 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
 		    , pt.prevision 'Prévision de réception de la traduction'
 			
 		    , pp.prevision 'Prévisions de parution GB'
+
+		    , ppES.prevision 'Prévisions de parution ES'
 		
 		    , ppr.debut 'Gestion de proposal origine'
 		    , ppr.fin 'Gestion de proposal fin'
@@ -1200,7 +1226,8 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
 				LEFT JOIN iste_isbn iI ON iI.id_livre = l.id_livre AND iI.id_editeur = 1
 				
 				LEFT JOIN iste_editeur eFR ON eFR.id_editeur = iI.id_editeur
-				LEFT JOIN iste_editeur eGB ON eGB.id_editeur = iE.id_editeur	OR eGB.id_editeur = iW.id_editeur								
+				LEFT JOIN iste_editeur eGB ON eGB.id_editeur = iE.id_editeur OR eGB.id_editeur = iW.id_editeur								
+				LEFT JOIN iste_editeur eES ON eES.id_editeur = iE.id_editeur OR eES.id_editeur = iW.id_editeur								
 				
 				LEFT JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
 				LEFT JOIN iste_serie s ON s.id_serie = ls.id_serie
@@ -1231,19 +1258,23 @@ Editeur Wiley ou Elsevier (coder 1 pour Wiley ou 2 pour Elsevier)
 				LEFT JOIN iste_prevision pm ON pm.id_pxu = pl.id_plu AND pm.id_tache = 15
 				LEFT JOIN iste_prevision pp ON pp.id_pxu = pl.id_plu AND pp.id_tache = 17        
 				LEFT JOIN iste_prevision ppr ON ppr.id_pxu = pl.id_plu AND ppr.id_tache = 25
-		
+
+				LEFT JOIN iste_prevision ppES ON ppES.id_pxu = pl.id_plu AND ppES.id_tache = 48
+
 				LEFT JOIN iste_processusxlivre plc ON plc.id_livre = l.id_livre AND plc.id_processus = 3
 				LEFT JOIN iste_prevision ppc ON ppc.id_pxu = plc.id_plu AND ppc.id_tache = 37
 		
 				LEFT JOIN iste_prix pr ON (pr.id_isbn = iW.id_isbn OR pr.id_isbn = iE.id_isbn OR pr.id_isbn = iI.id_isbn)  AND pr.type = 'prix catalogue'
 				LEFT JOIN iste_prix prp ON (prp.id_isbn = iW.id_isbn OR prp.id_isbn = iE.id_isbn OR prp.id_isbn = iI.id_isbn)  AND prp.type = 'papier GB'
 		
-				LEFT JOIN iste_page pa ON pa.id_livre = l.id_livre AND (pa.type = 'prévu FR' OR pa.type = 'prévu GB' OR pa.type = 'pr&#233;vu')			    
+				LEFT JOIN iste_page pa ON pa.id_livre = l.id_livre AND (pa.type = 'prévu FR' OR pa.type = 'prévu GB' OR pa.type = 'prévu ES' OR pa.type = 'pr&#233;vu')			    
 					AND pa.maj = (SELECT MAX(maj) FROM iste_page WHERE id_livre = l.id_livre AND (type = 'prévu FR' OR type = 'prévu GB' OR type = 'pr&#233;vu'))		    
 				LEFT JOIN iste_page pfGB ON pfGB.id_livre = l.id_livre AND (pfGB.type = 'final GB') 
 					AND pfGB.maj = (SELECT MAX(maj) FROM iste_page WHERE id_livre = l.id_livre AND (type = 'final GB'))		    
 				LEFT JOIN iste_page pfFR ON pfFR.id_livre = l.id_livre AND (pfFR.type = 'final FR')			    
 					AND pfFR.maj = (SELECT MAX(maj) FROM iste_page WHERE id_livre = l.id_livre AND (type = 'final FR'))		    
+				LEFT JOIN iste_page pfES ON pfFR.id_livre = l.id_livre AND (pfES.type = 'final ES')			    
+					AND pfES.maj = (SELECT MAX(maj) FROM iste_page WHERE id_livre = l.id_livre AND (type = 'final ES'))		    
 			WHERE l.id_livre IN (".$ids.")
 			GROUP BY l.id_livre
  		";

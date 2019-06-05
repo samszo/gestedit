@@ -278,7 +278,7 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
 	    	$sql = "SELECT 
 			p.nom
 			, pc.date_creation
-		    , c.id_chapitre recid, c.num, c.titre_fr, c.titre_en, c.id_traducteur, c.resume_fr, c.resume_en
+		    , c.id_chapitre recid, c.num, c.titre_fr, c.titre_en, c.titre_es, c.id_traducteur, c.resume_fr, c.resume_en, c.resume_es
 			, u.login
 		    , pre1.id_prevision id1, pre1.fin tache1
 		    , pre2.id_prevision id2, pre2.fin tache2
@@ -313,7 +313,7 @@ class Model_DbTable_Iste_processus extends Zend_Db_Table_Abstract
 	    	$sql = "SELECT 
 			p.nom
 			, pc.date_creation
-		    , c.id_chapitre recid, c.num, c.titre_fr, c.titre_en, c.id_traducteur, c.resume_fr, c.resume_en
+		    , c.id_chapitre recid, c.num, c.titre_fr, c.titre_en, c.titre_es, c.id_traducteur, c.resume_fr, c.resume_en, c.resume_es
 			, u.login
 		    , pre1.id_prevision id1, pre1.fin tache1
 		    , pre2.id_prevision id2, pre2.fin tache2

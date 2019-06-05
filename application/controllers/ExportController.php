@@ -53,8 +53,8 @@ class ExportController extends Zend_Controller_Action
     		if($this->_getParam('json')){
     			$this->view->rs = $rs;
     		}else{
-			$this->_helper->viewRenderer->setNoRender(true);		    			
-			$this->printExcel($rs, $nomFic);
+				$this->_helper->viewRenderer->setNoRender(true);		    			
+				$this->printExcel($rs, $nomFic);
     		}
     }
     

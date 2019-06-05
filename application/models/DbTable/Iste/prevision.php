@@ -415,7 +415,7 @@ class Model_DbTable_Iste_prevision extends Zend_Db_Table_Abstract
 			, pre.commentaire, pre.obj
 			, DATEDIFF(pre.alerte, pre.prevision) nbJour
 			, pro.nom processus, t.nom tache
-			, l.id_livre, CONCAT(l.titre_fr, ' / ', l.titre_en) titre
+			, l.id_livre, CONCAT(l.titre_fr, ' / ', l.titre_en, ' / ', l.titre_es) titre
 			, 'background-color: #C2F5B4' as 'style' 
 			, GROUP_CONCAT(DISTINCT i.id_isbn) isbns
 			FROM iste_prevision pre

@@ -52,6 +52,7 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
 	    	$id=false;
 	    	if($existe)$id = $this->existe($data);
 	    	if(!$id){
+                if(!$data['ordre'])$data['ordre']=1;
 	    	 	$id = $this->insert($data);
 	    	}else return "existe";
 	    	if($rs)
@@ -205,7 +206,7 @@ class Model_DbTable_Iste_livrexauteur extends Zend_Db_Table_Abstract
         		->from( array("la" => "iste_livrexauteur") )                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("l" => "iste_livre"),
-                'l.id_livre = la.id_livre', array("titre_fr","titre_en", "recid"=>"id_livre"))
+                'l.id_livre = la.id_livre', array("titre_fr","titre_en","titre_es", "recid"=>"id_livre"))
         		->where( "la.id_auteur = ?", $id_auteur )
         		->group(array("la.id_livre","la.role"));
 

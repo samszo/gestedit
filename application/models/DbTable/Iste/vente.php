@@ -225,7 +225,7 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
             ->joinInner(array("pro" => "iste_proposition"),
                 'pro.id_livre = i.id_livre', array("base_contrat"))
             ->joinInner(array("l" => "iste_livre"),
-                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''))"))
+                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''), ' / ', IFNULL(titre_es,''))"))
             ->joinInner(array("la" => "iste_livrexauteur"),
                 'la.id_livre = l.id_livre', array())
             ->joinInner(array("b" => "iste_boutique"),
@@ -263,7 +263,7 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
             ->joinInner(array("pro" => "iste_proposition"),
                 'pro.id_livre = i.id_livre', array("base_contrat"))
             ->joinInner(array("l" => "iste_livre"),
-                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''))"))
+                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''), ' / ', IFNULL(titre_es,''))"))
             ->joinInner(array("la" => "iste_livrexauteur"),
                 'la.id_livre = l.id_livre', array())
             ->joinInner(array("b" => "iste_boutique"),
@@ -550,7 +550,7 @@ class Model_DbTable_Iste_vente extends Zend_Db_Table_Abstract
 	    		//modification de la requête
 			switch ($w["field"]) {
 				case "titre":
-					$nop = str_replace("titre", "l.titre_fr", $op)." OR ".str_replace("titre", "l.titre_en", $op);
+					$nop = str_replace("titre", "l.titre_fr", $op)." OR ".str_replace("titre", "l.titre_en", $op)." OR ".str_replace("titre", "l.titre_es", $op);
 					$sql .= " WHERE ".$nop; 
 				break;
 				case "nom":

@@ -636,6 +636,8 @@ function getGridCol(type){
             { field: 'titre_fr', caption: 'Titre fr.', size: '50%', sortable: true, resizable: true
             		,editable: { type: 'text'}},
             { field: 'titre_en', caption: 'Titre en.', size: '50%', sortable: true, resizable: true
+            		,editable: { type: 'text'}},
+			{ field: 'titre_es', caption: 'Titre es.', size: '50%', sortable: true, resizable: true
             		,editable: { type: 'text'}}
             ],
 	    records: arrListes[type],
@@ -683,7 +685,7 @@ function addParam(obj, type){
 	var p
 	if(!type){
 		type=obj;
-	    p = {"obj":obj,"titre_fr":"nouvelle "+type,"titre_en":"new "+type}
+	    p = {"obj":obj,"titre_fr":"nouvelle "+type,"titre_en":"new "+type,"titre_es":"nuevo "+type}
 	}else
 	    p = {"type":type,"obj":obj,"nom":"new "+type}
 	$.get('<?php if(!$this->ajax) echo '../'; ?>crud/insert',
@@ -840,7 +842,7 @@ function openPopupColUser(type) {
 			finsession(js);
 
 		    w2popup.open({
-		        title   : itemSelect.titre_fr+' / '+itemSelect.titre_en,
+		        title   : itemSelect.titre_fr+' / '+itemSelect.titre_en+' / '+itemSelect.titre_es,
 		        width   : 600,
 		        height  : 400,
 		        showMax : true,

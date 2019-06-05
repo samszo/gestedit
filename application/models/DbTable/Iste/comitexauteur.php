@@ -156,7 +156,7 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
         		->from( array("i" => "iste_comitexauteur") )                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("c" => "iste_comite"),
-                'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_comite"))
+                'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en,' / ',c.titre_es)", "recid"=>"id_comite"))
         		->where( "i.id_auteur = ?", $id_auteur );
         		
         return $this->fetchAll($query)->toArray(); 
@@ -177,7 +177,7 @@ class Model_DbTable_Iste_comitexauteur extends Zend_Db_Table_Abstract
         		->from( array("i" => "iste_comitexauteur") )                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("c" => "iste_comite"),
-                'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en)", "recid"=>"id_comite"))
+                'i.id_comite = c.id_comite', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en,' / ',c.titre_es)", "recid"=>"id_comite"))
             ->joinInner(array("a" => "iste_auteur"),
                 'a.id_auteur = i.id_auteur', array("nom"=>"CONCAT(a.prenom,' ',a.nom)", "id_auteur"))
             ->where( "i.id_comite = ?", $idComite )

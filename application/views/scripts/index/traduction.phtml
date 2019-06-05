@@ -237,6 +237,7 @@ function initTraduction() {
 		            },
 		            { field: 'titre_fr', caption: 'Titre FR', editable: { type: 'text'}, size: '20%', sortable: true, resizable: true},
 		            { field: 'titre_en', caption: 'Titre EN', editable: { type: 'text'}, size: '20%', sortable: true, resizable: true},
+		            { field: 'titre_es', caption: 'Titre ES', editable: { type: 'text'}, size: '20%', sortable: true, resizable: true},
 	            ],
 		        onSave: function(event) {
 					var changes = w2ui['grid_<?php echo $idPage;?>_trad_chapitre'].getChanges();
@@ -258,6 +259,10 @@ function initTraduction() {
 				        }
 				        if(c.titre_en){
 				        		data.titre_en=c.titre_en;
+				        		bChap = true;
+				        }
+				        if(c.titre_es){
+				        		data.titre_es=c.titre_es;
 				        		bChap = true;
 				        }
 				        if(c.commentaire){
@@ -335,11 +340,13 @@ function initTraduction() {
 		 		    { name: 'num', type: 'text', required: true, html: { caption: 'N°', attr: 'size="10"' } },
 		            { name: 'titre_fr', type: 'text', required: false, html: { caption: 'Titre français', attr: 'style="width: 100%"' } },
 		            { name: 'titre_en', type: 'text', required: false, html: { caption: 'Titre anglais', attr: 'style="width: 100%"' } },		 		        
+		            { name: 'titre_es', type: 'text', required: false, html: { caption: 'Titre espagnol', attr: 'style="width: 100%"' } },		 		        
 		            { name: 'id_traducteur', required: false, type: 'list', options: { items: arrListes['traducteur'] }
 		            		, html: { caption: 'Traducteur', attr: 'size="20"' } 
 		            		},
 		            { name: 'resume_fr', type: 'textarea', required: false, html: { caption: 'Résumé français', attr: 'style="width: 100%; height: 80px; resize: none"'} },
 		            { name: 'resume_en', type: 'textarea', required: false, html: { caption: 'Résumé anglais', attr: 'style="width: 100%; height: 80px; resize: none"'} },		 		        
+		            { name: 'resume_es', type: 'textarea', required: false, html: { caption: 'Résumé espagnol', attr: 'style="width: 100%; height: 80px; resize: none"'} },		 		        
 		        ],
 		        actions: {
 		            Reset: function () {

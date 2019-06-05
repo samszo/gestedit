@@ -122,8 +122,8 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en)","titre_fr", "titre_en"))
-            ->order(array("titre_fr","titre_en"));        
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en,' / ', titre_es)","titre_fr", "titre_en", "titre_es"))
+            ->order(array("titre_fr","titre_en","titre_es"));        
         if($id)$query->where( "l.id_serie = ?", $id);        
         return $this->fetchAll($query)->toArray();
 	} 
@@ -163,7 +163,7 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     {
         $query = $this->select()
                     ->from( array("i" => "iste_serie")
-                    ,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en)","titre_fr", "titre_en"))                           
+                    ,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en,' / ', titre_es)","titre_fr", "titre_en", "titre_es"))                           
                     ->where( "i.id_serie = ?", $id_serie );
 
         return $this->fetchAll($query)->toArray(); 
@@ -179,8 +179,8 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     public function copier($id)
     {
     		//création de la copie
-		$sql = "INSERT INTO iste_serie (titre_fr, titre_en) 
-				SELECT CONCAT('copie ',titre_fr), CONCAT('copy ',titre_en) FROM iste_serie WHERE id_serie = ".$id; 	 
+		$sql = "INSERT INTO iste_serie (titre_fr, titre_en, titre_es) 
+				SELECT CONCAT('copie ',titre_fr), CONCAT('copy ',titre_en), CONCAT('copy ',titre_es) FROM iste_serie WHERE id_serie = ".$id; 	 
 	    $this->_db->query($sql);
 		$newId = $this->_db->lastInsertId();
 	    $dt = $this->getDependentTables();
@@ -201,9 +201,10 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     public function fusion($ids)
     {
     		//création de la copie
-		$sql = "INSERT INTO iste_serie (titre_fr, titre_en) 
+		$sql = "INSERT INTO iste_serie (titre_fr, titre_en, titre_es) 
 				SELECT CONCAT('fusion : ',GROUP_CONCAT(DISTINCT titre_fr ORDER BY titre_fr DESC SEPARATOR ' - '))
 					, CONCAT('fusion : ',GROUP_CONCAT(DISTINCT titre_en ORDER BY titre_en DESC SEPARATOR ' - ')) 
+					, CONCAT('fusion : ',GROUP_CONCAT(DISTINCT titre_es ORDER BY titre_es DESC SEPARATOR ' - ')) 
 				FROM iste_serie WHERE id_serie IN (".implode(",", $ids).")"; 	 
 	    $this->_db->query($sql);
 		$newId = $this->_db->lastInsertId();
@@ -281,9 +282,9 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     public function getDetails($id)
     {
     		//création de la copie
-		$sql = "SELECT s.id_serie, s.titre_fr serie_titre_fr, s.titre_en serie_titre_en
+		$sql = "SELECT s.id_serie, s.titre_fr serie_titre_fr, s.titre_en serie_titre_en, s.titre_es serie_titre_es
 		, GROUP_CONCAT(DISTINCT IFNULL(ac.prenom,'') , ' ', IFNULL(ac.nom,'') SEPARATOR ', ') coordinateur
-		, l.titre_en, l.titre_fr
+		, l.titre_en, l.titre_fr, l.titre_es
 		, GROUP_CONCAT(DISTINCT IFNULL(a.prenom,'') , ' ', IFNULL(a.nom,'') SEPARATOR ', ') auteurs
 		, pp.fin pFin, pp.prevision pPrev, pp.commentaire pCom
 		, pc.fin cFin, pc.prevision cPrev, pc.commentaire cCom

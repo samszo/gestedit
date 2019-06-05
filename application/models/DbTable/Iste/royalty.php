@@ -223,7 +223,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 			->joinInner(array("i" => "iste_isbn"),
                 'v.id_isbn = i.id_isbn', array("type_isbn"=>"type"))
 			->joinInner(array("l" => "iste_livre"),
-                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''))"))
+                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''), ' / ', IFNULL(titre_es,''))"))
 			->joinInner(array("ac" => "iste_auteurxcontrat"),
                 'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
 			->joinInner(array("c" => "iste_contrat"),
@@ -256,7 +256,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 			->joinInner(array("i" => "iste_isbn"),
                 'v.id_isbn = i.id_isbn', array("type_isbn"=>"type"))
 			->joinInner(array("l" => "iste_livre"),
-                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''))"))
+                'l.id_livre = i.id_livre', array("livre"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''), ' / ', IFNULL(titre_es,''))"))
 			->joinInner(array("ac" => "iste_auteurxcontrat"),
                 'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
             ->joinInner(array("a" => "iste_auteur"),
@@ -555,7 +555,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 		    , ac.pc_papier, ac.pc_ebook
 		    , c.nom contNom
             , MIN(i.date_parution) parution
-		    , l.id_livre, l.titre_en, l.titre_fr
+		    , l.id_livre, l.titre_en, l.titre_fr, l.titre_es
 		FROM iste_royalty r 
 			INNER JOIN iste_vente v ON v.id_vente = r.id_vente
 		    INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
@@ -588,7 +588,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 		    , SUM(v.nombre) vNb, SUM(v.montant_livre) vMtLivre, MIN(v.date_vente) minDateVente, MAX(v.date_vente) maxDateVente
 		    , a.id_auteur, a.nom autNom, a.prenom, a.adresse_1, a.adresse_2, a.civilite, a.code_postal, a.ville, a.pays
             , MIN(i.date_parution) parution, GROUP_CONCAT(DISTINCT i.num SEPARATOR ' - ') isbns
-		    , l.id_livre, l.titre_en, l.titre_fr
+		    , l.id_livre, l.titre_en, l.titre_fr, l.titre_es
             , d.base_contrat, DATE_FORMAT(d.date_taux,'%Y') annee, d.date_taux, d.date_taux_fin, d.taux_livre_euro, d.taux_livre_dollar, d.taxe_taux, d.taxe_deduction
 		FROM iste_royalty r 
 			INNER JOIN iste_vente v ON v.id_vente = r.id_vente
@@ -716,6 +716,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         l.id_livre,
         l.titre_en,
         l.titre_fr,
+        l.titre_es,
         c.type typeContrat,
         c.param,
         c.id_contrat,
@@ -756,6 +757,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         l.id_livre,
         l.titre_en,
         l.titre_fr,
+        l.titre_es,
         c.type typeContrat,
         c.param,
         c.id_contrat,
@@ -803,9 +805,9 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
-            ,l.id_livre, l.titre_en, l.titre_fr
+            ,l.id_livre, l.titre_en, l.titre_fr, l.titre_es
             ,c.type typeContrat, c.param
-            ,s.id_serie, s.titre_fr, s.titre_en
+            ,s.id_serie, s.titre_fr, s.titre_en, s.titre_es
         FROM iste_royalty r 
             INNER JOIN iste_vente v ON v.id_vente = r.id_vente
             INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
@@ -839,7 +841,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 ,SUM(r.montant_livre) rMtRoy
                 ,MIN(r.pourcentage) pc
                 ,i.num, i.type typeISBN
-                ,l.id_livre, l.titre_en, l.titre_fr
+                ,l.id_livre, l.titre_en, l.titre_fr, l.titre_es
                 ,c.type typeContrat, c.param, c.id_contrat
                 ,SUM(r.conversion_livre_euro) taux_livre_euro
             FROM iste_royalty r 
@@ -859,7 +861,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
                 ,SUM(r.montant_livre) rMtRoy
                 ,MIN(r.pourcentage) pc
                 ,i.num, i.type typeISBN
-                ,l.id_livre, l.titre_en, l.titre_fr
+                ,l.id_livre, l.titre_en, l.titre_fr, l.titre_es
                 ,c.type typeContrat, c.param, c.id_contrat
                 ,SUM(r.conversion_livre_euro) taux_livre_euro
             FROM iste_isbn i 
@@ -894,9 +896,9 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
-            ,l.id_livre, l.titre_en, l.titre_fr
+            ,l.id_livre, l.titre_en, l.titre_fr, l.titre_es
             ,c.type typeContrat
-            ,com.id_comite, com.titre_fr, com.titre_en
+            ,com.id_comite, com.titre_fr, com.titre_en, com.titre_es
         FROM iste_royalty r 
             INNER JOIN iste_vente v ON v.id_vente = r.id_vente
             INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
@@ -930,9 +932,9 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             ,SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
             ,SUM(r.montant_livre) rMtRoy
             ,MIN(r.taxe_taux) taux, MIN(r.taxe_deduction) deduction, MIN(r.pourcentage) pc
-            ,l.id_livre, l.titre_en, l.titre_fr
+            ,l.id_livre, l.titre_en, l.titre_fr, l.titre_es
             ,c.type typeContrat
-            ,com.id_comite, com.titre_fr, com.titre_en
+            ,com.id_comite, com.titre_fr, com.titre_en, com.titre_es
         FROM iste_royalty r 
             INNER JOIN iste_vente v ON v.id_vente = r.id_vente
             INNER JOIN iste_isbn i ON i.id_isbn = v.id_isbn
