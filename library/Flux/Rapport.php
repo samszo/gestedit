@@ -100,7 +100,7 @@ class Flux_Rapport extends Flux_Site{
 		$this->odf->setVars('aut_pays', $data["pays"]);
 		
 		//ajout des infos du livre
-		$this->odf->setVars('livre_titre', $data["titre_fr"]." - ".$data["titre_en"]);
+		$this->odf->setVars('livre_titre', $data["titre_fr"]." - ".$data["titre_en"]." - ".$data["titre_es"]);
 		$this->odf->setVars('livre_parution', $data["parution"]);
 		/*
 		$this->odf->setVars('livre_prix', $data["vMtLivre"]/$data["vNb"]);
@@ -278,13 +278,13 @@ class Flux_Rapport extends Flux_Site{
 				} else
 					$roys->setVars('roy_periode', "-");
 				*/
-				$titre = $r["titre_en"]." - ".$r["titre_fr"];
+				$titre = $r["titre_en"]." - ".$r["titre_fr"]." - ".$r["titre_es"];
 				if($oTitre!=$titre){
 					if($oTitre!=""){
 						$roys->merge();
 					}
 					$oTitre=$titre;	
-					$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]);
+					$roys->setVars('roy_item', $r["titre_en"]." - ".$r["titre_fr"]." - ".$r["titre_es"]);
 					if($type=="livre"){
 						$roys->setVars('roy_role', $r["typeContrat"]);
 						$roys->setVars('roy_isbn', "");

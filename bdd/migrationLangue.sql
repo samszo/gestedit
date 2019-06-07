@@ -26,10 +26,10 @@ ALTER TABLE `iste_proposition` ADD `nb_page_es` int(11) NULL;
 
 ALTER TABLE `iste_serie` ADD `titre_es` VARCHAR(255) NULL;
 
---processus projet livre
+-- processus projet livre
 INSERT INTO `iste_tache` (`id_processus`, `nom`, `ordre`) VALUES ('3', 'Réception traduction ES', '8');
 INSERT INTO `iste_tache` (`id_processus`, `nom`, `ordre`) VALUES ('3', 'Parution ES', '9');
---processus production ES
+-- processus production ES
 INSERT INTO `iste_processus` (`id_processus`, `nom`) VALUES (7, 'Production ES');
 INSERT INTO `iste_tache` (`id_processus`, `nom`, `ordre`) VALUES (7, 'Questionnaire', '1');
 INSERT INTO `iste_tache` (`id_processus`, `nom`, `ordre`) VALUES (7, 'validation titre/st', '2');
