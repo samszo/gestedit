@@ -5,6 +5,8 @@ class MailingController extends Zend_Controller_Action
 
     public function indexAction()
     {
+        $this->initInstance();
+
         $s = new Flux_Site();
         $s->bTrace = false;
 
@@ -23,16 +25,12 @@ class MailingController extends Zend_Controller_Action
         // Affichage établissement dans index mailing
         $dbEtab = new Model_DbTable_Iste_etab();
         $rs = json_encode($dbEtab->getAllHistorique());
-        $s = new Flux_Site();
-        $s->bTrace = false;
         $s->trace($rs);
         $this->view->jsEtab = $rs;
 
         // Affichage historique export dans index mailing
-        $dbExp = new Model_DbTable_Iste_prospectxexport();
-        $rs = json_encode($dbExp->getAll());
-        $s = new Flux_Site();
-        $s->bTrace = false;
+        //$dbExp = new Model_DbTable_Iste_prospectxexport();
+        $rs = json_encode($dbProsp->getExportByIdProsp(false));
         $s->trace($rs);
         $this->view->jsExp = $rs;
 
@@ -48,6 +46,7 @@ class MailingController extends Zend_Controller_Action
 
     public function insertAction()
     {
+        $this->initInstance();
         switch ($this->_getParam('obj')) {
             case 'prospect':
                 $dbP = new Model_DbTable_Iste_prospect();
@@ -108,6 +107,7 @@ class MailingController extends Zend_Controller_Action
 
     public function deleteAction()
     {
+        $this->initInstance();
             
         //récupère les paramètres
         $id = $this->_getParam('id');
@@ -173,24 +173,25 @@ class MailingController extends Zend_Controller_Action
     
     public function updateAction()
     {
+        $this->initInstance();
     	
-    		//récupère les paramètres
-    		$params = $this->_request->getParams();
-    		$id = $this->_getParam('recid');
-    		$obj = $this->_getParam('obj');
-    		//création de l'objet BDD
-    		$oName = "Model_DbTable_Iste_".$obj;
-    		$oBdd = new $oName();
-    		//enlève les paramètres Zend
-    		unset($params['controller']);
-    		unset($params['action']);
-    		unset($params['module']);
-    		//et les paramètres de l'ajout
-    		unset($params['obj']);
-    		unset($params['recid']);
-    		//traitement des boolean
-    		if($params['pdf'])$params['pdf']=="true" ? $params['pdf']=1 : $params['pdf']=0;  				    			
-    		//traitement des sauvegardes
+        //récupère les paramètres
+        $params = $this->_request->getParams();
+        $id = $this->_getParam('recid');
+        $obj = $this->_getParam('obj');
+        //création de l'objet BDD
+        $oName = "Model_DbTable_Iste_".$obj;
+        $oBdd = new $oName();
+        //enlève les paramètres Zend
+        unset($params['controller']);
+        unset($params['action']);
+        unset($params['module']);
+        //et les paramètres de l'ajout
+        unset($params['obj']);
+        unset($params['recid']);
+        //traitement des boolean
+        if($params['pdf'])$params['pdf']=="true" ? $params['pdf']=1 : $params['pdf']=0;  				    			
+        //traitement des sauvegardes
 		switch ($this->_getParam('obj')) {
 			case 'prospectxetab':
 				$oBdd->edit($params["id_prospect"],$params["id_etab"]);
@@ -219,7 +220,7 @@ class MailingController extends Zend_Controller_Action
     }
 
     function initInstance(){
-            $auth = Zend_Auth::getInstance();
+        $auth = Zend_Auth::getInstance();
         if ($auth->hasIdentity()) {						
             // l'identité existe ; on la récupère
             $this->view->identite = $auth->getIdentity();
@@ -233,72 +234,96 @@ class MailingController extends Zend_Controller_Action
     // Gestion des grid 'details'
     // Grid details Prospect
     public function prospectnomAction(){
+        $this->initInstance();
+
         // Affichage grille secondaire prospect -> nomenclature
         $db = new Model_DbTable_Iste_prospect();
+        $rs = array();
         if ($this->_getParam('ids')){
             $ids = $this->_getParam('ids');
             $ids = implode(',',$ids);
             $rs = $db->getNomenclatureByIdProspect($this->_getParam('id_prospect'),$ids);
-            $this->view->rs = $rs;
-        }else{
+        }elseif($this->_getParam('id_prospect')){
             $rs = $db->getNomenclatureByIdProspect($this->_getParam('id_prospect'));
-            $this->view->rs = $rs;
         }
+        $this->view->rs = $rs;
     }
 
     public function prospectaffAction(){
+        $this->initInstance();
         // Affichage grille secondaire prospect -> affiliations
         $db = new Model_DbTable_Iste_prospect();
-        if ('id_prospect'!= null){
-        $rs['pros'] = $db->getAffiliationByIdProspect($this->_getParam('id_prospect'));
-        $rs['histo'] = $db->getExportByIdProsp($this->_getParam('id_prospect'));
-        $this->view->rs = $rs;
+        $rs['pros'] = array();
+        $rs['histo'] = array();
+        if ($this->_getParam('ids')){
+            $ids = $this->_getParam('ids');
+            $ids = implode(',',$ids);
+            $rs['pros'] = $db->getAffiliationByIdProspect($ids);
+            $rs['histo'] = $db->getExportByIdProsp($ids);
+        }elseif($this->_getParam('id_prospect')){
+            $rs['pros'] = $db->getAffiliationByIdProspect($this->_getParam('id_prospect'));
+            $rs['histo'] = $db->getExportByIdProsp($this->_getParam('id_prospect'));
         }
+        $this->view->rs = $rs;
+
     }
 
     // Grid details etab
     public function affprospectAction(){
+        $this->initInstance();
         // Affichage grille secondaire etab -> prospect
         $db = new Model_DbTable_Iste_etab();
-        if ('id_etab'!= null){
-        $rs['pros'] = $db->getProspectByIdEtab($this->_getParam('id_etab'));
-        $rs['histo'] = $db->getExportByIdEtab($this->_getParam('id_etab'));
-        $this->view->rs = $rs;
+        $rs['pros'] = array();
+        $rs['histo'] = array();
+        if ($this->_getParam('ids')){
+            $ids = implode(',',$this->_getParam('ids'));
+            $rs['pros'] = $db->getProspectByIdEtab($ids);
+            $rs['histo'] = $db->getExportByIdEtab($ids);
         }
+        $this->view->rs = $rs;
     }
 
     public function affnomenAction(){
+        $this->initInstance();
         // Affichage grille secondaire etab -> nomenclature
         $db = new Model_DbTable_Iste_etab();
-        if ('id_etab'!= null){
-        $rs = $db->getNomenByIdEtab($this->_getParam('id_etab'));
-        $this->view->rs = $rs;
+        $rs = array();
+        if ($this->_getParam('ids')){
+            $ids = implode(',',$this->_getParam('ids'));
+            $rs = $db->getNomenByIdEtab($ids);
         }
+        $this->view->rs = $rs;
     }
 
     // Grid details nomenclature
     public function nomenprospectAction(){
+        $this->initInstance();
         // Affichage grille secondaire nomenclature -> prospect
         $db = new Model_DbTable_Iste_nomenclature();
-        if ('id_nomenclature'!= null){
-        $rs['pros'] = $db->getProspectByIdNomen($this->_getParam('id_nomenclature'));
-        $rs['histo'] = $db->getExportByIdNomen($this->_getParam('id_nomenclature'));
-        
-        $this->view->rs = $rs;
+        $rs['pros']=array();
+        $rs['histo']=array();
+        $ids = implode(',',$this->_getParam('ids'));
+        if($ids){
+            $rs['pros'] = $db->getProspectByIdNomen($ids);
+            $rs['histo'] = $db->getExportByIdNomen($ids);                
         }
+        $this->view->rs = $rs;
     }
 
     public function nomenaffAction(){
+        $this->initInstance();
         // Affichage grille secondaire nomenclature -> etab
         $db = new Model_DbTable_Iste_nomenclature();
-        if ('id_nomenclature'!= null){
-        $rs = $db->getEtabByIdNomen($this->_getParam('id_nomenclature'));
+        $rs=array();
+        $ids = implode(',',$this->_getParam('ids'));
+        if($ids)$rs = $db->getEtabByIdNomen($ids);
         $this->view->rs = $rs;
-        }
+        
     }
 
     // Grid details import
     public function dataficAction(){
+        $this->initInstance();
         // Affichage grille secondaire etab -> prospect
         $db = new Model_DbTable_Iste_importfic();
         if ('id_importfic'!= null){
@@ -309,11 +334,14 @@ class MailingController extends Zend_Controller_Action
 
     // Grid details export
     public function dataexportAction(){
+        $this->initInstance();
         // Affichage grille secondaire etab -> prospect
         $db = new Model_DbTable_Iste_prospectxexport();
-        if ('id_export'!= null){
-        $rs = $db->getProspectByIdExport($this->_getParam('id_export'));
-        $this->view->rs = $rs;
+        //if ('id_export'!= null){
+            //$rs = $db->getProspectByIdExport($this->_getParam('id_export'));
+        if ($this->_getParam('date')){
+            $rs = $db->getProspectByDateNom($this->_getParam('date'),$this->_getParam('nom'));
+            $this->view->rs = $rs;
         }
     }
 

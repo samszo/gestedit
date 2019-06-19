@@ -127,11 +127,14 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
     {
    	
     	$sql = 'SELECT 
-                n.*,
-                n.id_nomenclature recid,
-                COUNT(DISTINCT p.id_prospect) nbProspect,
-                MAX(pe.maj) lastExport,
-                COUNT(DISTINCT id_export) nbExport
+                n.*
+                , n.id_nomenclature recid
+                , COUNT(DISTINCT p.id_prospect) nbProspect
+                , MIN(pe.maj) firstExport
+                , MAX(pe.maj) lastExport
+                , COUNT(DISTINCT pe.id_export) nbExportTot
+                , COUNT(DISTINCT pe3.id_export) nbExportMois3
+                , COUNT(DISTINCT pe6.id_export) nbExportMois6
             FROM
                 iste_nomenclature n
                     LEFT JOIN
@@ -140,6 +143,10 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
                 iste_prospect p ON p.id_prospect = pn.id_prospect
                     LEFT JOIN
                 iste_prospectxexport pe ON pe.id_prospect = p.id_prospect
+                LEFT JOIN
+                iste_prospectxexport pe3 ON pe3.id_prospect = p.id_prospect AND pe3.maj >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+                    LEFT JOIN
+                iste_prospectxexport pe6 ON pe6.id_prospect = p.id_prospect AND pe6.maj >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
                     ';
         if($ids)$sql .= ' WHERE n.id_nomenclature IN ('.$ids.')';
 
@@ -195,20 +202,20 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
     /**
      * Récupère une entrées Iste_nomenclature avec certains critères
      * de tri, intervalles
-     *  @param int    $id_nomenclature   
+     *  @param int    $ids 
      * 
      * @return array
      */
-    public function getProspectByIdNomen($id_nomenclature){
+    public function getProspectByIdNomen($ids){
         $sql = 'SELECT 
-                    n.id_nomenclature, pn.id_prospect recid, p.nom_prenom, p.email, p.unsub, p.langue, p.pays
+                    DISTINCT pn.id_prospect recid, p.nom_prenom, p.email, p.unsub, p.langue, p.pays
                 FROM
                     iste_nomenclature n
                         INNER JOIN
                     iste_prospectxnomenclature pn ON pn.id_nomenclature = n.id_nomenclature
                         INNER JOIN
                     iste_prospect p ON p.id_prospect = pn.id_prospect
-                WHERE n.id_nomenclature = '.$id_nomenclature; 
+                WHERE n.id_nomenclature IN ('.$ids.')'; 
         	    $db = $this->_db->query($sql);
                 $rs = $db->fetchAll();
         return $rs;
@@ -250,13 +257,12 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
             /**
      * Récupère une entrées Iste_nomenclature avec certains critères
      * de tri, intervalles
-     *  @param int    $id_nomenclature  
+     *  @param string    $ids  
      * 
      * @return array
      */
-    public function getEtabByIdNomen($id_nomenclature){
+    public function getEtabByIdNomen($ids){
         $sql = 'SELECT DISTINCT
-                n.id_nomenclature,
                 pe.id_etab recid,
                 e.affiliation1,
                 e.affiliation2,
@@ -272,7 +278,7 @@ class Model_DbTable_Iste_nomenclature extends Zend_Db_Table_Abstract
                     INNER JOIN
                 iste_etab e ON e.id_etab = pe.id_etab
             WHERE
-                n.id_nomenclature =' .$id_nomenclature.'
+                n.id_nomenclature IN (' .$ids.')
             ORDER BY n.label';
     
             $db = $this->_db->query($sql);

@@ -25,6 +25,15 @@
             padding: 10px;
             overflow: auto;
         }
+        .cell0{
+            background-color:blue;
+        }
+        .cell1{
+            background-color:coral;
+        }
+        .cell2{
+            background-color:green;
+        }
     </style>
 
     <div id="tab-example" style="width: 100%; height: 600px;" >
@@ -73,18 +82,32 @@
             if (d.affiliation3) doublons[d.affiliation3] = 'aff3';
             if (d.langue) doublons[d.langue] = 'langE';
             if (d.pays) doublons[d.pays] = 'paysE';
-            if(maxExportEtab<d.nbExport)maxExportEtab=d.nbExport;
+            //parse les nombre pour un meilleur tri
+            d.nbExportTot = parseInt(d.nbExportTot);
+            d.nbExportMois3 = parseInt(d.nbExportMois3);
+            d.nbExportMois6 = parseInt(d.nbExportMois6);
+            d.nbProspect = parseInt(d.nbProspect);
+            if(maxExportEtab<d.nbExportTot)maxExportEtab=d.nbExportTot;
         })
         var maxExportNomen = 0;
         jsNomen.forEach(function (d) {
             if (d.label) doublons[d.label] = 'Nom';
             if (d.label_parent) doublons[d.label_parent] = 'NomP';
             if (d.code) doublons[d.code] = 'Cod';
-            if(maxExportNomen<d.nbExport)maxExportNomen=d.nbExport;
+            //parse les nombre pour un meilleur tri
+            d.nbExportTot = parseInt(d.nbExportTot);
+            d.nbExportMois3 = parseInt(d.nbExportMois3);
+            d.nbExportMois6 = parseInt(d.nbExportMois6);
+            d.nbProspect = parseInt(d.nbProspect);
+            if(maxExportNomen<d.nbExportTot)maxExportNomen=d.nbExportTot;
         })
         var maxExport = 0;
         jsProsp.forEach(function (d) {
-            if(maxExport<d.nbExport)maxExport=d.nbExport;
+            //parse les nombre pour un meilleur tri
+            d.nbExportTot = parseInt(d.nbExportTot);
+            d.nbExportMois3 = parseInt(d.nbExportMois3);
+            d.nbExportMois6 = parseInt(d.nbExportMois6);
+            if(maxExport<d.nbExportTot)maxExport=d.nbExportTot;
             if (d.nom_prenom) doublons[d.nom_prenom] = "Prosp";
             if (d.email) doublons[d.email] = "Email";
             if (d.email2) doublons[d.email2] = "Email2";
@@ -96,29 +119,83 @@
         }
 
         //échelle des couleurs cf. https://github.com/d3/d3-scale-chromatic
-        var colors = d3.interpolateRdYlGn;        
+        var colors = d3.interpolateYlOrRd;// d3.interpolateRdYlGn;//        
+        var colorsFont = d3.interpolateYlOrBr;
+        
+        function invertColor(hex, bw) {
+            if (hex.indexOf('#') === 0) {
+                hex = hex.slice(1);
+            }
+            // convert 3-digit hex to 6-digits.
+            if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            }
+            if (hex.length !== 6) {
+                throw new Error('Invalid HEX color.');
+            }
+            var r = parseInt(hex.slice(0, 2), 16),
+                g = parseInt(hex.slice(2, 4), 16),
+                b = parseInt(hex.slice(4, 6), 16);
+            if (bw) {
+                // http://stackoverflow.com/a/3943023/112731
+                return (r * 0.299 + g * 0.587 + b * 0.114) > 186
+                    ? '#000000'
+                    : '#FFFFFF';
+            }
+            // invert color components
+            r = (255 - r).toString(16);
+            g = (255 - g).toString(16);
+            b = (255 - b).toString(16);
+            // pad each with zeros and return
+            return "#" + padZero(r) + padZero(g) + padZero(b);
+        }        
+        function padZero(str, len) {
+            len = len || 2;
+            var zeros = new Array(len).join('0');
+            return (zeros + str).slice(-len);
+        }
+
         var rangeExport = {
             'grid':d3.scaleLinear()
-            .domain([maxExport, 0])
-            .range([0, 1]),
+                .domain([maxExport, 0])
+                .range([1, 0]),
             'grid12':d3.scaleLinear()
-            .domain([maxExportEtab, 0])
-            .range([0, 1]),
+                .domain([maxExportEtab, 0])
+                .range([1, 0]),
             'grid14':d3.scaleLinear()
-            .domain([maxExportNomen, 0])
-            .range([0, 1])
+                .domain([maxExportNomen, 0])
+                .range([1, 0])
         };
         //applique les styles
-        jsProsp.forEach(function (d) {
-            d.w2ui={ "style": "background-color: "+colors(rangeExport.grid(d.nbExport)) };
+        jsProsp.forEach(function (d,i) {
+            d.w2ui={ "style": getStyleCell(rangeExport.grid,d,4)};
+            
         });
         jsNomen.forEach(function (d) {
-            d.w2ui={ "style": "background-color: "+colors(rangeExport.grid14(d.nbExport)) };
+            //let c = colors(rangeExport.grid14(d.nbExportTot));
+            //d.w2ui={ "style": "background-color:"+c+";color:"+invertColor(d3.color(c).hex(),true) };
+            d.w2ui={ "style": getStyleCell(rangeExport.grid14,d,4)};
         });
         jsEtab.forEach(function (d) {
-            d.w2ui={ "style": "background-color: "+colors(rangeExport.grid12(d.nbExport)) };
+            d.w2ui={ "style": getStyleCell(rangeExport.grid12,d,4)};
         });
 
+        function getStyleCell(rg,d,startColonne){
+            let c4 = colors(rg(d.nbExportMois3));
+            let c5 = colors(rg(d.nbExportMois6));
+            let c6 = colors(rg(d.nbExportTot));
+            /*
+            let nC1 = startColonne;
+            let nC2 = startColonne+1;
+            let nC3 = startColonne+2;
+            */
+            let s = {
+                4:"background-color:"+c4+";color:"+invertColor(d3.color(c4).hex(),true),
+                5:"background-color:"+c5+";color:"+invertColor(d3.color(c5).hex(),true),
+                6:"background-color:"+c6+";color:"+invertColor(d3.color(c6).hex(),true),
+            };
+            return s;
+        }
 
         // Fonction pour exporter un fichier
         function exportSave(ids, obj) {
@@ -134,28 +211,22 @@
         function exportByPost(idsP) {
 
             //construction du formulaire d'export
-            var form = document.getElementById("exportPostForm");
-            if (form) {
-                form.ids.value = idsP;
-                form.obj.value = obj;
-            } else {
-                var form = document.createElement("form");
-                form.setAttribute("id", "exportPostForm");
-                form.setAttribute("method", "post");
-                form.setAttribute("action", "export");
-                form.setAttribute("target", "view");
-                var hiddenField = document.createElement("input");
-                hiddenField.setAttribute("type", "hidden");
-                hiddenField.setAttribute("name", "ids");
-                hiddenField.setAttribute("value", idsP);
-                form.appendChild(hiddenField);
-                hiddenField = document.createElement("input");
-                hiddenField.setAttribute("type", "hidden");
-                hiddenField.setAttribute("name", "obj");
-                hiddenField.setAttribute("value", 'prospect');
-                form.appendChild(hiddenField);
-                document.body.appendChild(form);
-            }
+            var form = document.createElement("form");
+            form.setAttribute("id", "exportPostForm");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "export");
+            form.setAttribute("target", "view");
+            var hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", "ids");
+            hiddenField.setAttribute("value", idsP);
+            form.appendChild(hiddenField);
+            hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", "obj");
+            hiddenField.setAttribute("value", 'prospect');
+            form.appendChild(hiddenField);
+            document.body.appendChild(form);
             window.open('', 'view');
             form.submit();
         }
@@ -202,7 +273,7 @@
                                 if (errors.length > 0) return;
                                 var idsP = g.getSelection().filter(function(d){
                                     let r = g.get(d);
-                                    return r.unsub!="1";
+                                    return r.unsub != "1";
                                 });
                                 var data = this.record;
                                 data.obj = "prospectxexport";
@@ -413,7 +484,8 @@
                             caption: 'ID',
                             size: '50px',
                             sortable: true,
-                            resizable: true
+                            resizable: true,
+                            hidden:true,
                         },
                         {
                             field: 'nom_prenom',
@@ -423,6 +495,41 @@
                             editable: {
                                 type: 'text'
                             }
+                        },
+                        {
+                            field: 'lastExport',
+                            caption: 'Dernier export',
+                            sortable: true,
+                            size: '30%',
+                            type: 'date'
+                        },
+                        {
+                            field: 'firstExport',
+                            caption: 'Premier export',
+                            sortable: true,
+                            size: '30%',
+                            type: 'date'
+                        },
+                        {
+                            field: 'nbExportMois3',
+                            sortable: true,
+                            caption: 'Nb. 3 m.',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
+                            field: 'nbExportMois6',
+                            sortable: true,
+                            caption: 'Nb. 6 m.',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
+                            field: 'nbExportTot',
+                            sortable: true,
+                            caption: 'Nb. tot',
+                            size: '30%',
+                            type: 'int'
                         },
                         {
                             field: 'email',
@@ -498,20 +605,6 @@
                             }
                         },
                         {
-                            field: 'lastExport',
-                            caption: 'Dernier export',
-                            sortable: true,
-                            size: '30%',
-                            type: 'date'
-                        },
-                        {
-                            field: 'nbExport',
-                            sortable: true,
-                            caption: 'Nb. export',
-                            size: '30%',
-                            type: 'int'
-                        },
-                        {
                             field: 'maj',
                             caption: 'maj.',
                             sortable: true,
@@ -547,29 +640,16 @@
                                 }, "json");
                         });
                     },
+                    onUnselect: function (event) {
+                      //  if (record && record.recid == event.recid) return;
+                        event.onComplete = function (){
+                            prospectDetails();
+                        }
+                    },
                     onSelect: function (event) {
-                        //if (record && record.recid == event.recid) return;
-                        event.onComplete = function () {
-                            var record = this.get(event.recid);
-                            var ids = w2ui.grid.getSelection();
-                            // Grille secondaire Prospect -> Affiliations
-                            w2ui['grid10'].clear();
-                            w2ui['grid2'].clear();
-                            $.get('mailing/prospectaff',
-                                {id_prospect:record.recid, 'ids':ids},
-                                function(js){
-                                    //finsession(js);
-                                    w2ui['grid10'].add(js.rs['pros']);
-                                    w2ui['grid2'].add(js.rs['histo']);
-                                },"json");
-                            // Grille secondaire Prospect -> Nomenclatures
-                            w2ui['grid11'].clear();  
-                            $.get('mailing/prospectnom',
-                                {id_prospect:record.recid, 'ids':ids},
-                                function(js){
-                                    //finsession(js);
-                                    w2ui['grid11'].add(js.rs);		
-                                },"json");      
+                      //  if (record && record.recid == event.recid) return;
+                        event.onComplete = function (){
+                            prospectDetails();
                         }
                     },
                     onAdd: function (event) {
@@ -812,12 +892,12 @@
                             field: 'nbProspect',
                             caption: 'Nombre de prospect',
                             sortable: true,
-                            hidden: true,
+                            hidden: false,
                             type: 'text',
                             size: '20%'
                         }
                     ],
-                    records: []
+                    records: jsExp
                 }))
             
             // Création du layout esclave (Prospects)
@@ -851,7 +931,7 @@
                         header: true,
                         toolbar: true,
                         footer: true,
-                        selectColumn: true,
+                        selectColumn: false,
                         toolbarAdd: false,
                         toolbarDelete: true
                     },
@@ -925,7 +1005,7 @@
                         header: true,
                         toolbar: true,
                         footer: true,
-                        selectColumn: true,
+                        selectColumn: false,
                         toolbarAdd: false,
                         toolbarDelete: true
                     },
@@ -1080,7 +1160,8 @@
                             caption: 'ID',
                             size: '50px',
                             sortable: true,
-                            resizable: true
+                            resizable: true,
+                            hidden:true
                         },
                         {
                             field: 'affiliation1',
@@ -1111,6 +1192,61 @@
                             editable: {
                                 type: 'text'
                             }
+                        },
+                        {
+                            field: 'nbExportMois3',
+                            sortable: true,
+                            caption: 'Nb. 3 m.',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
+                            field: 'nbExportMois6',
+                            sortable: true,
+                            caption: 'Nb. 6 m.',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
+                            field: 'nbExportTot',
+                            sortable: true,
+                            caption: 'Nb. tot',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
+                            field: 'responsable',
+                            caption: 'Responsable du Labo',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            editable: {
+                                type: 'text'
+                            }
+                        },
+                        {
+                            field: 'nbProspect',
+                            sortable: true,
+                            resizable: true,
+                            caption: 'Nb. prospect',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
+                            field: 'firstExport',
+                            caption: 'Premier export',
+                            sortable: true,
+                            resizable: true,
+                            size: '30%',
+                            type: 'date'
+                        },
+                        {
+                            field: 'lastExport',
+                            caption: 'Dernier export',
+                            sortable: true,
+                            resizable: true,
+                            size: '30%',
+                            type: 'date'
                         },
                         {
                             field: 'url_labo',
@@ -1162,65 +1298,19 @@
                                 type: 'text'
                             }
                         },
-                        {
-                            field: 'responsable',
-                            caption: 'Responsable du Labo',
-                            size: '30%',
-                            sortable: true,
-                            resizable: true,
-                            editable: {
-                                type: 'text'
-                            }
-                        },
-                        {
-                            field: 'nbProspect',
-                            sortable: true,
-                            resizable: true,
-                            caption: 'Nb. prospect',
-                            size: '30%',
-                            type: 'int'
-                        },
-                        {
-                            field: 'lastExport',
-                            caption: 'Dernier export',
-                            sortable: true,
-                            resizable: true,
-                            size: '30%',
-                            type: 'date'
-                        },
-                        {
-                            field: 'nbExport',
-                            sortable: true,
-                            resizable: true,
-                            caption: 'Nb. export',
-                            size: '30%',
-                            type: 'int'
-                        }
+
                     ],
                     records: jsEtab,
+                    onUnselect: function (event) {
+                      //  if (record && record.recid == event.recid) return;
+                        event.onComplete = function (){
+                            etabDetails();
+                        }
+                    },
                     onSelect: function (event) {
                       //  if (record && record.recid == event.recid) return;
                         event.onComplete = function (){
-                            var record = this.get(event.recid);
-                            var ids = w2ui.grid3.getSelection();
-                            // Grille secondaire Affiliation -> Prospects
-                            w2ui['grid12'].clear();
-                            w2ui['grid5'].clear();
-                            $.get('mailing/affprospect',
-                            {id_etab:record.recid, 'ids':ids},
-                            function(js){
-                                //finsession(js);
-                                w2ui['grid12'].add(js.rs['pros']);
-                                w2ui['grid5'].add(js.rs['histo']);
-                            },"json");
-                            // Grille secondaire Affiliation -> Nomenclatures
-                            w2ui['grid13'].clear();
-                            $.get('mailing/affnomen',
-                            {id_etab:record.recid, 'ids':ids},
-                            function(js){
-                                //finsession(js);
-                                w2ui['grid13'].add(js.rs);
-                            },"json");
+                            etabDetails();
                         }
                     },
                     onSave: function (event) {
@@ -1455,7 +1545,8 @@
                             caption: 'ID',
                             size: '50px',
                             sortable: true,
-                            resizable: true
+                            resizable: true,
+                            hidden:true
                         },
                         {
                             field: 'date_export',
@@ -1479,7 +1570,7 @@
                             size: '20%'
                         }
                     ],
-                    records: []
+                    records: jsExp
                 }))
                 // Création du layout esclave (Affiliations)
                 var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
@@ -1590,7 +1681,7 @@
                         header: true,
                         toolbar: false,
                         footer: true,
-                        selectColumn: true,
+                        selectColumn: false,
                         toolbarAdd: false,
                         toolbarDelete: false
                     },
@@ -1706,7 +1797,8 @@
                             caption: 'ID',
                             size: '50px',
                             sortable: true,
-                            resizable: true
+                            resizable: true,
+                            hidden:true,
                         },
                         {
                             field: 'code',
@@ -1716,7 +1808,8 @@
                             resizable: true,
                             editable: {
                                 type: 'text'
-                            }
+                            },
+                            hidden:false,
                         },
                         {
                             field: 'label',
@@ -1734,9 +1827,31 @@
                             size: '10%',
                             sortable: true,
                             resizable: true,
-                            editable: {
-                                type: 'text'
-                            }
+                            hidden:true,
+                        },
+                        {
+                            field: 'nbExportMois3',
+                            sortable: true,
+                            resizable: true,
+                            caption: 'Nb. 3 m.',
+                            size: '30%',
+                            type: 'int'
+                        },
+                        {
+                            field: 'nbExportMois6',
+                            sortable: true,
+                            resizable: true,
+                            caption: 'Nb. 6 m.',
+                            size: '30%',
+                            type: 'int',
+                        },
+                        {
+                            field: 'nbExportTot',
+                            sortable: true,
+                            resizable: true,
+                            caption: 'Nb. tot.',
+                            size: '30%',
+                            type: 'int'
                         },
                         {
                             field: 'label_parent',
@@ -1744,9 +1859,6 @@
                             size: '40%',
                             sortable: true,
                             resizable: true,
-                            editable: {
-                                type: 'text'
-                            }
                         },
                         {
                             field: 'nbProspect',
@@ -1757,6 +1869,14 @@
                             type: 'int'
                         },
                         {
+                            field: 'firstExport',
+                            caption: 'Premier export',
+                            sortable: true,
+                            resizable: true,
+                            size: '30%',
+                            type: 'date'
+                        },
+                        {
                             field: 'lastExport',
                             caption: 'Dernier export',
                             sortable: true,
@@ -1764,39 +1884,17 @@
                             size: '30%',
                             type: 'date'
                         },
-                        {
-                            field: 'nbExport',
-                            sortable: true,
-                            resizable: true,
-                            caption: 'Nb. export',
-                            size: '30%',
-                            type: 'int'
-                        },
                         
                     ],
                     records: jsNomen,
-                    onSelect: function (event) {
-                      //  if (record && record.recid == event.recid) return;
+                    onUnselect: function (event) {
                         event.onComplete = function (){
-                            var record = this.get(event.recid);
-                            var ids = w2ui.grid4.getSelection();
-                            // Grille secondaire Nomenclature -> Prospects
-                            w2ui['grid14'].clear();
-                            w2ui['grid6'].clear();
-                            $.get('mailing/nomenprospect',
-                            {id_nomenclature:record.recid, 'ids': ids},
-                            function(js){
-                                //finsession(js);
-                                w2ui['grid14'].add(js.rs['pros']);
-                                w2ui['grid6'].add(js.rs['histo']);
-                            },"json");
-                            w2ui['grid15'].clear();
-                            $.get('mailing/nomenaff',
-                            {id_nomenclature:record.recid, 'ids': ids},
-                            function(js){
-                                //finsession(js);
-                                w2ui['grid15'].add(js.rs);
-                            },"json");
+                            nomenDetails();
+                        }
+                    },
+                    onSelect: function (event) {
+                        event.onComplete = function (){
+                            nomenDetails();
                         }
                     },
                     onSave: function (event) {
@@ -2012,7 +2110,7 @@
                             size: '20%'
                         }
                     ],
-                    records: []
+                    records: jsExp
                 }))
             // Création du layout esclave (Affiliations)
             var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
@@ -2161,7 +2259,7 @@
                         footer: true,
                         toolbarAdd: false,
                         toolbarDelete: false,
-                        selectColumn: true
+                        selectColumn: false
                     },
                     columns: [{
                             field: 'recid',
@@ -2517,8 +2615,9 @@
                         toolbar: true,
                         footer: true,
                         toolbarDelete: true,
-                        selectColumn: true
+                        selectColumn: true,
                     },
+                    multiSelect: false,
                     multiSearch: true,
                     searches: [{
                         field: 'nom',
@@ -2542,12 +2641,20 @@
                             type: 'text'
                         },
                         {
-                            field: 'maj',
+                            field: 'date_export',
                             caption: 'Date export',
                             size: '30%',
                             sortable: true,
                             resizable: true,
                             type: 'text'
+                        },
+                        {
+                            field: 'nbProspect',
+                            caption: 'Nb pros.',
+                            size: '30%',
+                            sortable: true,
+                            resizable: true,
+                            type: 'int'
                         }
                     ],
                     records: jsExp,
@@ -2574,17 +2681,9 @@
 
                     },
                     onSelect: function (event) {
-                        if (record && record.recid == event.recid) return;
-                        var record = this.get(event.recid);
-                        // Grille secondaire détail export
-                        w2ui['gridDetailExp'].clear();
-                        $.get('mailing/dataexport',
-						{id_export:record.recid},
-			            function(js){
-                            //finsession(js);
-                            w2ui['gridDetailExp'].add(js.rs);
-                            w2ui['gridDetailExp'].refresh();
-                        },"json");
+                        event.onComplete = function (){
+                            exportDetails();
+                        }
                     }
                 }))
             // Création de la grille historique des export
@@ -2664,6 +2763,89 @@
                 }
             })   
         }; 
+
+        function nomenDetails(){
+            var ids = w2ui.grid4.getSelection();
+            // Grille secondaire Nomenclature -> Prospects
+            w2ui['grid14'].clear();
+            w2ui['grid6'].clear();
+            $.get('mailing/nomenprospect',
+            {'ids': ids},
+            function(js){
+                //finsession(js);
+                w2ui['grid14'].add(js.rs['pros']);
+                w2ui['grid6'].add(js.rs['histo']);
+            },"json");
+            w2ui['grid15'].clear();
+            $.get('mailing/nomenaff',
+            {'ids': ids},
+            function(js){
+                //finsession(js);
+                w2ui['grid15'].add(js.rs);
+            },"json");
+        }
+        function etabDetails(){
+            var ids = w2ui.grid3.getSelection();
+            // Grille secondaire Affiliation -> Prospects
+            w2ui['grid12'].clear();
+            w2ui['grid5'].clear();
+            $.get('mailing/affprospect',
+            {'ids':ids},
+            function(js){
+                //finsession(js);
+                w2ui['grid12'].add(js.rs['pros']);
+                w2ui['grid5'].add(js.rs['histo']);
+            },"json");
+            // Grille secondaire Affiliation -> Nomenclatures
+            w2ui['grid13'].clear();
+            $.get('mailing/affnomen',
+            {'ids':ids},
+            function(js){
+                //finsession(js);
+                w2ui['grid13'].add(js.rs);
+            },"json");            
+        }
+
+        function prospectDetails(){
+            var ids = w2ui.grid.getSelection();
+            // Grille secondaire Prospect -> Affiliations
+            w2ui['grid10'].clear();
+            w2ui['grid2'].clear();
+            $.get('mailing/prospectaff',
+                {'ids':ids},
+                function(js){
+                    //finsession(js);
+                    w2ui['grid10'].add(js.rs['pros']);
+                    w2ui['grid2'].add(js.rs['histo']);
+                },"json");
+            // Grille secondaire Prospect -> Nomenclatures
+            w2ui['grid11'].clear();  
+            $.get('mailing/prospectnom',
+                {'ids':ids},
+                function(js){
+                    //finsession(js);
+                    w2ui['grid11'].add(js.rs);		
+                },"json");      
+        }
+
+        function exportDetails(){
+            
+            var id = w2ui.gridExp.getSelection();
+            var record = w2ui.gridExp.get(id)[0];
+            // Grille secondaire détail export
+            w2ui['gridDetailExp'].clear();
+            $.get('mailing/dataexport',
+            {date:record.date_export,nom:record.nom},
+            function(js){
+                //finsession(js);
+                if(js.rs){
+                    w2ui['gridDetailExp'].add(js.rs);
+                    w2ui['gridDetailExp'].refresh();
+                }
+            },"json");
+        }
+
+
     </script>
 
 </body>

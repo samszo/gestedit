@@ -115,7 +115,23 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray();
     }  
 
-                /**
+    /**
+     * Récupère toutes les entrées Iste_prospectxexport avec certains critères
+     * de tri, intervalles
+     */
+    public function getListe()
+    {
+   	
+    	$query = $this->select()
+                    ->from( array("n" => "iste_prospectxexport") )
+                    ->joinInner(array("nid" => "iste_prospectxexport"),
+                    'n.id_prospect = nid.id_prospect', array("recid"=>"n.id_export"))
+                    ->group;
+                    
+
+        return $this->fetchAll($query)->toArray();
+    }      
+    /**
      * Récupère une entrées Iste_prospect avec certains critères
      * de tri, intervalles
      *  @param int    $id_prospect   
@@ -134,4 +150,27 @@ class Model_DbTable_Iste_prospectxexport extends Zend_Db_Table_Abstract
                 $rs = $db->fetchAll();
         return $rs;
     }
+    /**
+     * Récupère une entrées Iste_prospect avec certains critères
+     * de tri, intervalles
+     *  @param string    $date   
+     *  @param string    $nom   
+     * 
+     * @return array
+     */
+    public function getProspectByDateNom($date, $nom, $format="%d/%m/%Y"){
+        $sql = 'SELECT 
+                    p.id_prospect recid, p.nom_prenom, p.email
+                FROM
+                    iste_prospectxexport pe
+                        INNER JOIN
+                    iste_prospect p ON p.id_prospect = pe.id_prospect
+                WHERE DATE_FORMAT(pe.maj,"'.$format.'") = "'.$date.'" ';
+                if($nom) $sql .= ' AND pe.nom = "'.$nom.'" '; 
+                else $sql .= ' AND pe.nom = "" '; 
+                //echo $sql;
+        	    $db = $this->_db->query($sql);
+                $rs = $db->fetchAll();
+        return $rs;
+    }    
 }

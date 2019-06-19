@@ -128,9 +128,12 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
     	$sql = 'SELECT 
                 et.*,
                 et.id_etab recid,
-                COUNT(DISTINCT p.id_prospect) nbProspect,
-                MAX(pet.maj) lastExport,
-                COUNT(DISTINCT id_export) nbExport
+                COUNT(DISTINCT p.id_prospect) nbProspect
+                , MIN(pe.maj) firstExport
+                , MAX(pe.maj) lastExport
+                , COUNT(DISTINCT pe.id_export) nbExportTot
+                , COUNT(DISTINCT pe3.id_export) nbExportMois3
+                , COUNT(DISTINCT pe6.id_export) nbExportMois6
             FROM
                 iste_etab et
                     LEFT JOIN
@@ -139,6 +142,10 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
                 iste_prospect p ON p.id_prospect = pet.id_prospect
                     LEFT JOIN
                 iste_prospectxexport pe ON pe.id_prospect = p.id_prospect
+                LEFT JOIN
+                iste_prospectxexport pe3 ON pe3.id_prospect = p.id_prospect AND pe3.maj >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+                    LEFT JOIN
+                iste_prospectxexport pe6 ON pe6.id_prospect = p.id_prospect AND pe6.maj >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
                     ';
         if($ids)$sql .= ' WHERE et.id_etab IN ('.$ids.')';
 
@@ -167,20 +174,20 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
         /**
      * Récupère une entrées Iste_etab avec certains critères
      * de tri, intervalles
-     *  @param int    $id_etab   
+     *  @param string    $ids   
      * 
      * @return array
      */
-    public function getProspectByIdEtab($id_etab){
+    public function getProspectByIdEtab($ids){
         $sql = 'SELECT 
-                    e.id_etab, ep.id_prospect recid, p.nom_prenom, p.email, p.unsub
+                    DISTINCT ep.id_prospect recid, p.nom_prenom, p.email, p.unsub
                 FROM
                     iste_etab e
                         INNER JOIN
                     iste_prospectxetab ep ON ep.id_etab = e.id_etab
                         INNER JOIN
                     iste_prospect p ON p.id_prospect = ep.id_prospect
-                WHERE e.id_etab = '.$id_etab; 
+                WHERE e.id_etab IN ('.$ids.')'; 
         	    $db = $this->_db->query($sql);
                 $rs = $db->fetchAll();
         return $rs;
@@ -221,13 +228,12 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
         /**
      * Récupère une entrées Iste_etab avec certains critères
      * de tri, intervalles
-     *  @param int    $id_etab   
+     *  @param string    $ids   
      * 
      * @return array
      */
-    public function getNomenByIdEtab($id_etab){
+    public function getNomenByIdEtab($ids){
     $sql = 'SELECT DISTINCT
-            e.id_etab,
             pn.id_nomenclature recid,
             n.code,
             n.label
@@ -242,7 +248,7 @@ class Model_DbTable_Iste_etab extends Zend_Db_Table_Abstract
                 INNER JOIN
             iste_etab e ON e.id_etab = pe.id_etab
         WHERE
-            e.id_etab =' .$id_etab.'
+            e.id_etab IN (' .$ids.')
         ORDER BY n.label';
 
         $db = $this->_db->query($sql);

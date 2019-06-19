@@ -102,12 +102,15 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
      * Récupère toutes les entrées Iste_prospect avec certains critères
      * de tri, intervalles
      *  @param string $order
+     *  @param string $limit
+     *  @param string $from
+     *  @param string $where
+     *  @param string $ids
      * 
      * @return array
      */
-    public function getAll($order=null, $limit=0, $from=0)
+    public function getAll($order=null, $limit=0, $from=0, $where=null,$ids=false)
     {
-   	
     	$query = $this->select()
                     ->from( array("n" => "iste_prospect") )
                     ->joinInner(array("nid" => "iste_prospect"),
@@ -121,6 +124,10 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
         if($limit != 0)
         {
             $query->limit($limit, $from);
+        }
+        if($ids){
+            $query->where("n.id_prospect in (".$ids.")");
+
         }
 
         return $this->fetchAll($query)->toArray();
@@ -160,13 +167,22 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
     {
    	
     	$sql = 'SELECT 
-                p.*, 
-                p.id_prospect recid,
-                MAX(pe.maj) lastExport, COUNT(DISTINCT id_export) nbExport
+                p.* 
+                , p.id_prospect recid
+                , MIN(pe.maj) firstExport
+                , MAX(pe.maj) lastExport
+                , COUNT(DISTINCT pe.id_export) nbExportTot
+                , COUNT(DISTINCT pe3.id_export) nbExportMois3
+                , COUNT(DISTINCT pe6.id_export) nbExportMois6
             FROM
                 iste_prospect p
                     LEFT JOIN
-                iste_prospectxexport pe ON pe.id_prospect = p.id_prospect ';
+                iste_prospectxexport pe ON pe.id_prospect = p.id_prospect 
+                    LEFT JOIN
+                iste_prospectxexport pe3 ON pe3.id_prospect = p.id_prospect AND pe3.maj >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+                    LEFT JOIN
+                iste_prospectxexport pe6 ON pe6.id_prospect = p.id_prospect AND pe6.maj >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+                ';
         if($ids)$sql .= ' WHERE p.id_prospect IN ('.$ids.')';
 
         $sql .= ' GROUP BY p.id_prospect';
@@ -219,7 +235,7 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
                     iste_prospectxetab pe ON pe.id_prospect = p.id_prospect
                         INNER JOIN
                     iste_etab e ON e.id_etab = pe.id_etab
-                WHERE p.id_prospect = '.$id_prospect; 
+                WHERE p.id_prospect IN ('.$id_prospect.')'; 
         	    $db = $this->_db->query($sql);
                 $rs = $db->fetchAll();
         return $rs;
@@ -234,20 +250,19 @@ class Model_DbTable_Iste_prospect extends Zend_Db_Table_Abstract
      * @return array
      */
     public function getExportByIdProsp($ids, $dateFormat='%d/%m/%Y'){
-        $recid = str_replace("/","",$dateFormat);
         $sql = 'SELECT 
-            DATE_FORMAT(pe.maj, "'.$dateFormat.'") recid,
+            CONCAT(DATE_FORMAT(pe.maj, "'.$dateFormat.'"),pe.nom) recid,
             COUNT(DISTINCT p.id_prospect) nbProspect,
             DATE_FORMAT(pe.maj, "'.$dateFormat.'") date_export,
             pe.nom
         FROM
             iste_prospect p
-                LEFT JOIN
+                INNER JOIN
             iste_prospectxexport pe ON pe.id_prospect = p.id_prospect
             ';
         if($ids)$sql .= ' WHERE p.id_prospect IN ('.$ids.') AND pe.id_export IS NOT NULL ';
 
-        $sql .= ' GROUP BY DATE_FORMAT(pe.maj, "'.$dateFormat.'")'; 
+        $sql .= ' GROUP BY DATE_FORMAT(pe.maj, "'.$dateFormat.'"), pe.nom'; 
         $db = $this->_db->query($sql);
         $rs = $db->fetchAll();
         return $rs;
