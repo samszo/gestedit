@@ -119,10 +119,10 @@ class IndexController extends Zend_Controller_Action
         $this->initInstance();
         $bdd = new Model_DbTable_Iste_livre();
         $rs = $bdd->getAllVenteISBN(true);
-        $this->view->jsonISBN = json_encode($rs);
+        $this->view->jsonISBN = json_encode($rs,JSON_NUMERIC_CHECK);
         $bdd = new Model_DbTable_Iste_auteur();
         $rs = $bdd->getAllVente(true);
-        $this->view->jsonAuteur = json_encode($rs);
+        $this->view->jsonAuteur = json_encode($rs, JSON_NUMERIC_CHECK);
         $dbD = new Model_DbTable_Iste_devise();
         $this->view->rsDev = json_encode($dbD->getAll('date_taux'));
         $dbC = new Model_DbTable_Iste_contrat;
@@ -133,6 +133,10 @@ class IndexController extends Zend_Controller_Action
     }
     
     function initInstance(){
+
+		//ATTENTION au bug de cession
+		//session_unset();
+
 		$this->view->ajax = $this->_getParam('ajax');
 		$this->view->idObj = $this->_getParam('idObj');
 		$this->view->typeObj = $this->_getParam('typeObj');

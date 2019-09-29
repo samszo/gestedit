@@ -228,7 +228,7 @@ class MailingController extends Zend_Controller_Action
             $this->view->uti = json_encode($ssUti->uti);
         }else{			
             //$this->view->uti = json_encode(array("login"=>"inconnu", "id_uti"=>0));
-            $this->_redirect('/auth/finsession');		    
+            $this->_redirect('/auth/deconnexion');		    
         }
     }
     // Gestion des grid 'details'

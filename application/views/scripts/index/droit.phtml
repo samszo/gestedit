@@ -173,7 +173,9 @@ function initDroit() {
 					    style: 'background-color: white; border: 1px solid silver; border-top: 0px; padding: 10px;',
 					    tabs: {
 					        active: 'tabTop2',
-					        tabs: [{ id: 'tabTop2', caption: "Fichier de ventes" },{ id: 'tabTop0', caption: "Ventes par ISBN" },{ id: 'tabTop1', caption: "Ventes par auteur" }
+							tabs: [{ id: 'tabTop2', caption: "Fichier de ventes" },{ id: 'tabTop0', caption: "Ventes par ISBN" }
+								,{ id: 'tabTop1', caption: "Ventes par auteur" }
+					        	,{ id: 'tabTop1', caption: "Ventes par auteur" }
 					        	,{ id: 'tabTop3', caption: "Paramètres" }],
 					        onClick: function (event) {
 								// initTabs();
@@ -295,10 +297,20 @@ function initDroit() {
 		        toolbar: {
 		            items: [
 		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		                ,{ id: 'recalculRoyaltieByISBN', type: 'button', caption: 'Re-calculer royalties', icon: 'fa-calculator' }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
-		                		open(urlP+'export?obj=venteISBN',"_blank")
+		                	open(urlP+'export?obj=venteISBN',"_blank")
+		                }
+		                if (event.target == 'recalculRoyaltieByISBN') {
+							var s = w2ui['grid_<?php echo $idPage;?>_vente_isbn'].getSelection();
+							if(s.length){
+								openPopup();
+								w2popup.lock('Merci de patienter...', true);
+								recalculerRoyalties('isbn',s);
+							}else
+								w2alert('Veuillez sélectionner des lignes.');
 		                }
 		            }
 		        },
@@ -377,11 +389,22 @@ function initDroit() {
 		        toolbar: {
 		            items: [
 		                { id: 'export', type: 'button', caption: 'Exporter', icon: 'fa-file' }
+		                ,{ id: 'recalculRoyaltieByAuteur', type: 'button', caption: 'Re-calculer royalties', icon: 'fa-calculator' }
 		            ],
 		            onClick: function (event) {
 		                if (event.target == 'export') {
 		                		open(urlP+'export?obj=venteAuteur',"_blank")
+						}
+		                if (event.target == 'recalculRoyaltieByAuteur') {
+							var s = w2ui['grid_<?php echo $idPage;?>_vente_auteur'].getSelection();
+							if(s.length){
+								openPopup();
+								w2popup.lock('Merci de patienter...', true);
+								recalculerRoyalties('auteur',s);
+							}else
+								w2alert('Veuillez sélectionner des lignes.');
 		                }
+						
 		            }
 		        },
 		        records: rsVenteAuteur,
@@ -651,9 +674,9 @@ function initDroit() {
 	                	toolbarSearch   : false,
 	                	toolbarAdd      : false,
 	                	toolbarDelete   : false,
-	                	toolbarSave		: true,
+	                	toolbarSave		: false,
 	                	header			: false, 
-						selectColumn		: false,
+						selectColumn	: false,
 	                	columnHeaders	: true},
 		        columns: [      		  		           
 		            { field: 'recid', caption: 'ID', size: '50px', hidden:true, sortable: true, resizable: true },
@@ -667,14 +690,14 @@ function initDroit() {
 		            { field: 'annee', caption: 'Année', size: '80px', sortable: true, resizable: true },
 		            { field: 'date_vente', caption: 'Date de vente', size: '80px', sortable: true, resizable: true },
 		            { field: 'nombre', caption: 'Nb. de vente', size: '80px', sortable: true, resizable: true },
-		            { field: 'montant_vente', editable:{type:'float'}, caption: 'Vente &pound;', size: '80px', sortable: true, resizable: true},
-		            { field: 'montant_livre', editable:{type:'float'}, caption: 'Montant &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'montant_vente', editable:false, caption: 'Vente &pound;', size: '80px', sortable: true, resizable: true},
+		            { field: 'montant_livre', editable:false, caption: 'Montant &pound;', size: '80px', sortable: true, resizable: true},
 		            { field: 'conversion_livre_euro', caption: '&pound; -> &euro;', size: '200px', sortable: true, resizable: true},
-		            { field: 'montant_euro', editable:{type:'float'}, caption: 'Montant &euro;', size: '80px', sortable: true, resizable: true},
-		            { hidden:true, field: 'montant_dollar', editable:{type:'float'}, caption: 'Montant $', size: '80px', sortable: true, resizable: true},
-		            { hidden:true, field: 'taxe_taux', editable:{type:'float'}, caption: 'Taxe taux', size: '80px', sortable: true, resizable: true},
-		            { hidden:true, field: 'taxe_deduction', editable:{type:'float'}, caption: 'Taxe déduction', size: '100px', sortable: true, resizable: true},
-		            { field: 'pourcentage', editable:{type:'float'}, caption: '%', size: '200px', sortable: true, resizable: true},
+		            { field: 'montant_euro', editable:false, caption: 'Montant &euro;', size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'montant_dollar', editable:false, caption: 'Montant $', size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taxe_taux', editable:false, caption: 'Taxe taux', size: '80px', sortable: true, resizable: true},
+		            { hidden:true, field: 'taxe_deduction', editable:false, caption: 'Taxe déduction', size: '100px', sortable: true, resizable: true},
+		            { field: 'pourcentage', editable:false, caption: '%', size: '200px', sortable: true, resizable: true},
 		            { field: 'date_edition', caption: 'Edition', size: '100px', sortable: true, resizable: true},
 		            { field: 'date_paiement', caption: 'Paiement', size: '100px', sortable: true, resizable: true},
 		            { field: 'date_encaissement', caption: 'Encaissement', size: '100px', sortable: true, resizable: true},
@@ -1564,6 +1587,24 @@ function showPdf(url){
 	var urlLoad = '../../js/pdfjs/web/viewer.html?file='+encodeURIComponent(url);
 	PDFViewerApplication.open(url);
 }
+
+function recalculerRoyalties(type,ids){
+	$.get('<?php if(!$this->ajax) echo '../'; ?>calculer/royalties',
+		{'type':type,'ids':ids},
+			function(js){
+				finsession(js);
+				g = w2ui['grid_<?php echo $idPage;?>_ficRapport'];
+				g.clear();		            		
+				if(js.rs.length){
+					g.add(js.rs);
+				}
+				w2popup.unlock();
+				w2popup.close();
+	},"json");           		           		
+}
+
+
+
 function setPaiement(idsRapport){
 	$.get('<?php if(!$this->ajax) echo '../'; ?>calculer/paiement',
 		{'type':'rapport','idsRapport':idsRapport},

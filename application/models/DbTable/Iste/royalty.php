@@ -18,6 +18,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      */
     protected $_primary = 'id_royalty';
     
+    var $dbRapport = false;
+
     /**
      * Vérifie si une entrée Iste_royalty existe.
      *
@@ -83,13 +85,20 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
      * Recherche une entrée Iste_royalty avec la clef primaire spécifiée
      * et supprime cette entrée.
      *
-     * @param integer $id
+     * @param integer $idRoyalty
+     * @param integer $idRapport
      *
-     * @return void
+     * @return integer
      */
-    public function remove($id)
+    public function remove($idRoyalty, $idRapport=false)
     {
-	    	$this->delete('iste_royalty.id_royalty = ' . $id);
+        $nb = 0;
+        if($idRapport){
+            if(!$this->dbRapport)$this->dbRapport = new Model_DbTable_Iste_rapport();
+            $nb=$this->dbRapport->remove($idRapport);
+        }
+        $nb += $this->delete('iste_royalty.id_royalty = ' . $idRoyalty);
+        return $nb;
     }
 
     /**
@@ -203,7 +212,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    	/**
+    /**
      * Recherche une entrée Iste_royalty avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -233,6 +242,44 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         return $this->fetchAll($query)->toArray(); 
     }
 
+    /**
+     * Recherche une entrée Iste_royalty avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idsAuteur
+     *
+     * @return array
+     */
+    public function findByIdsAuteur($idsAuteur)
+    {
+        $query = $this->select()
+			->from( array("r" => "iste_royalty"),array("id_royalty","id_rapport"))                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+			->joinInner(array("ac" => "iste_auteurxcontrat"),
+                'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
+			->where( "ac.id_auteur IN (?)", $idsAuteur);
+    	
+        return $this->fetchAll($query)->toArray(); 
+    }    
+    /**
+     * Recherche une entrée Iste_royalty avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param int $idIsbn
+     *
+     * @return array
+     */
+    public function findByIdIsbn($idIsbn)
+    {
+        $query = $this->select()
+			->from( array("r" => "iste_royalty"),array("id_royalty","id_rapport"))                           
+			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
+            ->joinInner(array("v" => "iste_vente"),
+                'v.id_vente = r.id_vente', array())
+			->where( "v.id_isbn IN (?)", $idIsbn);
+    	
+        return $this->fetchAll($query)->toArray(); 
+    }    
     /**
      * Recherche une entrée Iste_royalty avec la valeur spécifiée
      * et retourne cette entrée.
@@ -536,7 +583,39 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     }
     
 
+	/**
+     * supprime les royalties pour une liste d'ISBN
+     * 
+     * @param string $ids
+     *
+     * @return integer
+     */
+    public function removeByISBN($ids)
+    {
+        $rs = $this->findByIdIsbn($ids);
+        $nb = 0;
+        foreach ($rs as $r) {
+            $nb += $this->remove($r['id_royalty'],$r['id_rapport']);
+        }
+        return $nb;
+    }    
 	
+	/**
+     * supprime les royalties pour une liste d'auteur
+     * 
+     * @param string $ids
+     *
+     * @return integer
+     */
+    public function removeByAuteur($ids)
+    {
+        $rs = $this->findByIdsAuteur($ids);
+        $nb = 0;
+        foreach ($rs as $r) {
+            $nb += $this->remove($r['id_royalty'],$r['id_rapport']);
+        }
+        return $nb;
+    }    
 
 	/**
      * Calcule les paiements pour lancer les éditions

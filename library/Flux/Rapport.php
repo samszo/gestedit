@@ -219,7 +219,7 @@ class Flux_Rapport extends Flux_Site{
 		$this->odf->setVars('roy_reference', $refRapport);
 		//les périodes sont différentes suivant les contrats on affiche à la fin
 		$periode = $data["minDateVente"]." -> ".$data["maxDateVente"];
-		//$this->odf->setVars('roy_periode', $periode);
+		$this->odf->setVars('roy_periode', $periode);
 		//$this->odf->setVars('livre_roy_pc', $data["pc_papier"]." %");
 				
 		//ajout des infos d'auteur
@@ -397,7 +397,7 @@ class Flux_Rapport extends Flux_Site{
 
 		if(!$odtPath)return;
 		//pour localhot 
-		if(WEB_ROOT=="http://localhost/gestedit"){
+		if(WEB_ROOT=="http://localhost/gestedit" || WEB_ROOT=="http://gapai.univ-paris8.fr/gestedit"){
 			$cmd = "export HOME=/tmp; ".LIBREOFFICE_PATH.' --headless ';
 			$cmd .= '--convert-to pdf --outdir '.$pdfPath.' '.$odtPath;
 			$result = exec($cmd);	

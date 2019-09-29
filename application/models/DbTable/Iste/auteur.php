@@ -336,7 +336,7 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
 
         return $this->fetchAll($query)->toArray(); 
     }
-    	/**
+    /**
      * Recherche une entrée Iste_auteur avec la valeur spécifiée
      * et retourne cette entrée.
      *
@@ -351,6 +351,33 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
                     ->where( "i.isni = ?", $isni );
 
         return $this->fetchAll($query)->toArray(); 
+    }
+
+    /**
+     * Recherche une entrée Iste_auteur avec la valeur spécifiée
+     * et retourne cette entrée.
+     *
+     * @param varchar $isbn
+     *
+     * @return array
+     */
+    public function findByIsbn($isbn)
+    {
+        $sql = "SELECT 
+            a.id_auteur, COUNT(DISTINCT ac.id_contrat) nbContrat
+        FROM
+            iste_auteur a
+                INNER JOIN
+            iste_livrexauteur la ON la.id_auteur = a.id_auteur
+                INNER JOIN
+            iste_isbn i ON i.id_livre = la.id_livre
+                AND i.id_isbn IN (".$isbn.")
+                LEFT JOIN
+            iste_auteurxcontrat ac ON ac.id_auteur = a.id_auteur
+        GROUP BY a.id_auteur ";
+
+        $db = $this->_db->query($sql);
+        return $db->fetchAll();
     }
     
     	/**
@@ -375,8 +402,8 @@ class Model_DbTable_Iste_auteur extends Zend_Db_Table_Abstract
 		LEFT JOIN iste_livrexauteur la ON la.id_auteur = a.id_auteur
 		WHERE a.id_auteur ='.$idAuteur;     
 		       
-	    	$db = $this->_db->query($sql);
-	    	return $db->fetchAll();
+        $db = $this->_db->query($sql);
+        return $db->fetchAll();
     }
     
 /**

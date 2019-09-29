@@ -48,15 +48,44 @@ class CalculerController extends Zend_Controller_Action
     public function royaltiesAction()
     {
     	$this->initInstance();
-    		
-    	//récupère les ventes
-        $dbR = new Model_DbTable_Iste_royalty();    		
-		$this->view->rs = $dbR->setForAuteur();	
-		
-		//$bdd = new Model_DbTable_Iste_livre();
-		$bdd = new Model_DbTable_Iste_auteur();
-		$this->view->rs = $bdd->getAllVente();
-		
+		$bddA = new Model_DbTable_Iste_auteur();
+		$dbRoy = new Model_DbTable_Iste_royalty();
+		$dbRap = new Model_DbTable_Iste_rapport();    		
+		$rapport = new Flux_Rapport($this->_getParam('idBase'),$this->_getParam('trace'));
+		$rapport->bTraceFlush = $this->_getParam('trace');   
+		$ids = implode(",", $this->_getParam('ids'));
+		switch ($this->_getParam('type')) {
+			case 'isbn':
+				//supprime les royalties liées aux isbn
+				$nbR = $dbRoy->removeByISBN($ids);
+				//calcule les royalties
+				$dbRoy->setForAuteur();
+				//récupère les auteurs concernés
+				$rsAuteur = $bddA->findByIsbn($ids);					
+				//calcule les éditions liées au royalties
+				foreach ($rsAuteur as $a) {
+					if($a['nbContrat'])$rapport->setAll($a['id_auteur']);
+				} 
+				$this->view->rs = $dbRap->findPaiementByISBN($ids);
+				break;			
+			case 'auteur':
+				//supprime les royalties liées aux auteurs
+				$nbR = $dbRoy->removeByAuteur($ids);
+				//calcule les royalties
+				$dbRoy->setForAuteur();
+				//calcule les éditions liées au royalties
+				foreach ($this->_getParam('ids') as $a) {
+					$rapport->setAll($a);
+				} 		
+				$this->view->rs = $dbRap->findPaiementByIdsAuteur($ids);			
+				break;			
+			default:
+				//calcule les ventes
+				$this->view->rs = $dbRoy->setForAuteur();					
+				//récupère toutes les ventes
+				$this->view->rs = $bddA->getAllVente();
+				break;
+		}
 		$this->view->message = "Les royalties sont calculés.";		
 		
     }

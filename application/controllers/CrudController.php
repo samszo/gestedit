@@ -375,7 +375,8 @@ class CrudController extends Zend_Controller_Action
 					$this->view->rs .= $this->arrayToCsv($v,",").PHP_EOL;
 				}
 			}else
-		    	$this->view->rs = json_encode(array("rs"=>$rs),JSON_NUMERIC_CHECK);
+				$this->view->rs = json_encode(array("rs"=>$rs,"message"=>"OK"),JSON_NUMERIC_CHECK);
+
     }    
     
     public function finduserAction()

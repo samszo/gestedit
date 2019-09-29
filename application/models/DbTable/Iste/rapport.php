@@ -196,15 +196,23 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
     public function findPaiementByISBN($idsISBN)
     {
         $sql = "SELECT 
-            r.id_rapport recid, r.url, r.maj
+            r.id_rapport recid
+            , r.url
+            , r.maj
+            , r.type
+            , ids.idsImpFic
             , ids.idAuteur
             , a.nom, a.prenom, a.id_auteur
             , r.montant montant_livre
-            , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
+            , MIN(date_paiement) date_paiement
+            , MIN(date_edition) date_edition
+            , MIN(date_encaissement) date_encaissement
+            , MIN(date_envoi) date_envoi
             , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode 
         FROM iste_rapport r
-            INNER JOIN (SELECT id_rapport  
-                , SUBSTRING_INDEX(obj_id,'_',1) idAuteur
+            INNER JOIN (SELECT id_rapport,  
+                    SUBSTRING_INDEX(obj_id, '_', 1) idAuteur,
+                    SUBSTRING_INDEX(obj_id, '_', - 1) idsImpFic
                 FROM iste_rapport) ids ON ids.id_rapport = r.id_rapport
             INNER JOIN iste_auteur a ON a.id_auteur = ids.idAuteur
             INNER JOIN iste_royalty roy ON roy.id_rapport = r.id_rapport
@@ -233,16 +241,23 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
     public function findPaiementByIdsAuteur($idsAuteur)
     {
         $sql = "SELECT 
-            r.id_rapport recid, r.url, r.maj
+            r.id_rapport recid
+            , r.url
+            , r.maj
+            , r.type
+            , ids.idsImpFic
             , ids.idAuteur
             , a.nom, a.prenom, a.id_auteur
             , r.montant montant_livre
-            , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
-            , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
-            , r.type
+            , MIN(date_paiement) date_paiement
+            , MIN(date_edition) date_edition
+            , MIN(date_encaissement) date_encaissement
+            , MIN(date_envoi) date_envoi
+            , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode 
         FROM iste_rapport r
-            INNER JOIN (SELECT id_rapport  
-                , SUBSTRING_INDEX(obj_id,'_',1) idAuteur
+            INNER JOIN (SELECT id_rapport,  
+                    SUBSTRING_INDEX(obj_id, '_', 1) idAuteur,
+                    SUBSTRING_INDEX(obj_id, '_', - 1) idsImpFic
                 FROM iste_rapport) ids ON ids.id_rapport = r.id_rapport
             INNER JOIN iste_auteur a ON a.id_auteur = ids.idAuteur
             INNER JOIN iste_royalty roy ON roy.id_rapport = r.id_rapport
@@ -452,7 +467,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
      *
      * @param integer $id
      *
-     * @return void
+     * @return integer
      */
     public function remove($id)
     {
@@ -466,7 +481,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 		$dbRoyalty->update(array("id_rapport"=>null,"date_edition"=>null), 'iste_royalty.id_rapport = '.$id);
     		
         //suprime la ligne
-        $this->delete('iste_rapport.id_rapport = ' . $id);
+        return $this->delete('iste_rapport.id_rapport = ' . $id);
     		
     }
     
