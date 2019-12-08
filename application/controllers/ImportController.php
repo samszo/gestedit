@@ -1904,14 +1904,6 @@ class ImportController extends Zend_Controller_Action
 					/*pour tester
 					$tr = new Zend_Mail_Transport_File(array("path" => ROOT_PATH."/tmp/mail",'callback' => 'recipientFilename'));
 					*/
-
-					$tr = new Zend_Mail_Transport_Smtp('smtp.univ-paris8.fr', array(
-						'auth'     => 'login',
-						'username' => "samuel.szoniecky@univ-paris8.fr",
-						'password' => "Para2014",
-						'port'     => 25
-					));
-
 					/*SMTP server configuration
 					$smtpHost = 'smtp.gmail.com';
 					$smtpConf = array(
@@ -1925,8 +1917,10 @@ class ImportController extends Zend_Controller_Action
 					*/
 
 					//Zend_Mail::setDefaultTransport($tr);
-					$mail->send();
-	
+					//ATTENTION on n'envoie pas de mail pour l'instant
+					//$mail->send();
+					$mail = true;
+
 					//si mail envoyé màj bdd
 					if ($mail){
 						array_push($log,array("recid"=>$ligne["recid"],"nom"=>$auteur["nom"],"prenom"=>$auteur["prenom"],"etat"=>"Email préparé !"));
