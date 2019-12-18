@@ -86,7 +86,7 @@ class Flux_Rapport extends Flux_Site{
 		$this->odf->setVars('roy_date_edition', $date->format('l d F Y'));
 		$this->odf->setVars('roy_reference', $data["isbns"]);
 		$periode = $data["date_taux"]." - ".$data["date_taux_fin"];
-		$this->odf->setVars('roy_periode', $periode);
+		//pas dans la version de prod $this->odf->setVars('roy_periode', $periode);
 		$this->odf->setVars('livre_roy_pc', $data["pc_papier"]." %");
 		
 		//ajout des infos d'auteur
@@ -219,7 +219,7 @@ class Flux_Rapport extends Flux_Site{
 		$this->odf->setVars('roy_reference', $refRapport);
 		//les périodes sont différentes suivant les contrats on affiche à la fin
 		$periode = $data["minDateVente"]." -> ".$data["maxDateVente"];
-		$this->odf->setVars('roy_periode', $periode);
+		//pas dans la version de prod $this->odf->setVars('roy_periode', $periode);
 		//$this->odf->setVars('livre_roy_pc', $data["pc_papier"]." %");
 				
 		//ajout des infos d'auteur
@@ -254,8 +254,11 @@ class Flux_Rapport extends Flux_Site{
 			$rsRoyalty = $this->dbRoyalty->getDetailsEditoriaux($data["idsRoyalty"]);
 			$royTitre = "Editor Royalty";
 		}
-
+		//pour différencier les royalties globales de celles liées au type de rapport
+		//et associer le bon rapport à la bonne royalty
+		$cumulIdRoy = "-1";
 		if(count($rsRoyalty)){
+
 			$this->odf->setVars('roy_titre', $royTitre);
 				
 			//ajout des infos de royalty		
@@ -264,6 +267,7 @@ class Flux_Rapport extends Flux_Site{
 			$oTitre = "";
 			foreach ($rsRoyalty as $r) {
 				$this->trace("détail royalties Livre",$r);
+				$cumulIdRoy .= ",".$r['idRD'];
 
 				/*période
 				$contrats = $this->dbContrat->getPeriodes($r["annee"],$r["id_contrat"]);
@@ -332,7 +336,7 @@ class Flux_Rapport extends Flux_Site{
 		//ajout les totaux
 		$this->odf->setVars('roy_rev_tot', sprintf("%01.2f", $revTot));
 		$this->odf->setVars('roy_balance_due', sprintf("%01.2f", $due));
-
+		$dueHT = $due;
 		if($data['taxe_uk']=='oui'){
 			$this->odf->setVars('roy_tax_deduc_pc', sprintf("%01.2f", $taux_reduction));
 			$deduc = $due*$taux_reduction;
@@ -348,13 +352,13 @@ class Flux_Rapport extends Flux_Site{
 			$moyenneTaux = round($taux_livre_euro/$nbRoy,2);
 			$this->odf->setVars('roy_devise_date', $periode);
 			$this->odf->setVars('roy_devise_pc', sprintf("%01.2f", $moyenneTaux));
-			$montant = round($due*$moyenneTaux,2);
-			$this->odf->setVars('roy_net_due_euro', sprintf("%01.2f", $montant));
+			$montantEuro = round($due*$moyenneTaux,2);
+			$this->odf->setVars('roy_net_due_euro', sprintf("%01.2f", $$montantEuro));
 		}else{
 			$this->odf->setVars('roy_devise_date', 'no');
 			$this->odf->setVars('roy_devise_pc', 'no');
 			$this->odf->setVars('roy_net_due_euro', 'no');
-			$montant = $due;
+			$montantEuro = "";
 		}
 		
 				
@@ -374,11 +378,12 @@ class Flux_Rapport extends Flux_Site{
 
 		//enregistrement du rapport
 		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic.".pdf"
-			,"id_importfic"=>$mod["id_importfic"], "periode_deb"=>$data["minDateVente"], "periode_fin"=>$data["maxDateVente"], 'montant'=>$due
+			,"id_importfic"=>$mod["id_importfic"], "periode_deb"=>$data["minDateVente"], "periode_fin"=>$data["maxDateVente"]
+			, 'montant'=>$due, 'montant_ht'=>$dueHT, 'montant_euro'=>$montantEuro
 			, "data"=>json_encode($data),"type"=>$type, "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
 					
 		//mise à jour de la date d'éditions
-		$this->dbRoyalty->edit(false,array("id_rapport"=>$idRapport,"date_edition"=>new Zend_Db_Expr('NOW()')),$data["idsRoyalty"]);
+		$this->dbRoyalty->edit(false,array("id_rapport"=>$idRapport,"date_edition"=>new Zend_Db_Expr('NOW()')),$cumulIdRoy);
 
 		$this->trace("FIN");		
 		

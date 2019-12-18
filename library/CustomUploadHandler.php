@@ -35,6 +35,9 @@ class CustomUploadHandler extends UploadHandler {
 
     protected function handle_file_upload($uploaded_file, $name, $size, $type, $error,
             $index = null, $content_range = null) {
+        /*ATTENTION l'adresse étant absolu il faut la modifier
+        
+        */
         $f = parent::handle_file_upload($uploaded_file, $name, $size, $type, $error, $index, $content_range);
         if (empty($f->error)) {        	
     		$rs =$this->db->ajouter(array("nom"=>$f->name,"url"=>$f->url,"size"=>$f->size

@@ -56,8 +56,8 @@ class CalculerController extends Zend_Controller_Action
 		$ids = implode(",", $this->_getParam('ids'));
 		switch ($this->_getParam('type')) {
 			case 'isbn':
-				//supprime les royalties liées aux isbn
-				$nbR = $dbRoy->removeByISBN($ids);
+				//supprime les royalties liées aux isbn qui n'ont pas de date
+				$nbR = $dbRoy->removeByISBN($ids, true);
 				//calcule les royalties
 				$dbRoy->setForAuteur();
 				//récupère les auteurs concernés
@@ -70,7 +70,7 @@ class CalculerController extends Zend_Controller_Action
 				break;			
 			case 'auteur':
 				//supprime les royalties liées aux auteurs
-				$nbR = $dbRoy->removeByAuteur($ids);
+				$nbR = $dbRoy->removeByAuteur($ids, true);
 				//calcule les royalties
 				$dbRoy->setForAuteur();
 				//calcule les éditions liées au royalties

@@ -125,7 +125,7 @@ class Model_DbTable_Iste_livrexcollection extends Zend_Db_Table_Abstract
 			->from( array("i" => "iste_livrexcollection") )                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("c" => "iste_collection"),
-                'i.id_collection = c.id_collection', array("titre"=>"CONCAT(c.titre_fr,' / ',c.titre_en,' / ',c.titre_es)", "recid"=>"id_collection"))
+                'i.id_collection = c.id_collection', array("titre"=>"CONCAT(IFNULL(s.titre_fr,' '),' / ',IFNULL(s.titre_en,' '),' / ',IFNULL(s.titre_es,' '))", "recid"=>"id_collection"))
         		->where( "i.id_livre = ?", $id_livre );
 
         return $this->fetchAll($query)->toArray(); 

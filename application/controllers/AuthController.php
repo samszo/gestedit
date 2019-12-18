@@ -62,10 +62,10 @@ class AuthController extends Zend_Controller_Action
             	}
 	   	}
     }
-
     
     public function deconnexionAction()
     {
+		if($this->_getParam('all'))Zend_Session::destroy( true );
 		$this->clearConnexion();
     }
 
@@ -80,7 +80,7 @@ class AuthController extends Zend_Controller_Action
 		Zend_Session::namespaceUnset('uti');
 		$auth = Zend_Auth::getInstance();
 		$auth->clearIdentity();
-	    	$this->_redirect($redir);            	
+	    $this->_redirect($redir);            	
     }   
   
 }

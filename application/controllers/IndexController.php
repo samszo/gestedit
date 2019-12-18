@@ -129,6 +129,8 @@ class IndexController extends Zend_Controller_Action
         $this->view->rsDroitParam = json_encode($dbC->getParams());
 		$dbPM = new Model_DbTable_Iste_parammail();		
 		$this->view->rsParamMail = json_encode($dbPM->getListeForm());
+		//$dbFicImp = new Model_DbTable_Iste_importfic();		
+		//$this->view->rsFicImport = json_encode($dbFicImp->findByType('Vente Globale'));
         
     }
     

@@ -167,6 +167,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
 		    , SUM(roy.montant_livre) montant_livre
 		    , MIN(date_paiement) date_paiement, MIN(date_edition) date_edition, MIN(date_encaissement) date_encaissement, MIN(date_envoi) date_envoi
 			, base_contrat, DATE_FORMAT(date_taux,'%Y') periode
+            , ajout_somme, ajout_commentaire 
 		FROM iste_rapport r
 			INNER JOIN (SELECT id_rapport  
 				, SUBSTRING_INDEX(obj_id,'_',1) idAuteur
@@ -204,11 +205,14 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
             , ids.idAuteur
             , a.nom, a.prenom, a.id_auteur
             , r.montant montant_livre
+            , r.montant_ht 
+            , r.montant_euro
             , MIN(date_paiement) date_paiement
             , MIN(date_edition) date_edition
             , MIN(date_encaissement) date_encaissement
             , MIN(date_envoi) date_envoi
-            , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode 
+            , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
+            ,ajout_somme, ajout_commentaire 
         FROM iste_rapport r
             INNER JOIN (SELECT id_rapport,  
                     SUBSTRING_INDEX(obj_id, '_', 1) idAuteur,
@@ -249,11 +253,14 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
             , ids.idAuteur
             , a.nom, a.prenom, a.id_auteur
             , r.montant montant_livre
+            , r.montant_ht montant_ht
+            , r.montant_euro
             , MIN(date_paiement) date_paiement
             , MIN(date_edition) date_edition
             , MIN(date_encaissement) date_encaissement
             , MIN(date_envoi) date_envoi
-            , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode 
+            , CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
+            , ajout_somme, ajout_commentaire 
         FROM iste_rapport r
             INNER JOIN (SELECT id_rapport,  
                     SUBSTRING_INDEX(obj_id, '_', 1) idAuteur,
@@ -294,11 +301,15 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
             a.prenom,
             a.id_auteur,
             r.montant montant_livre,
+            r.montant_ht montant_ht,
+            r.montant_euro,
             MIN(date_paiement) date_paiement,
             MIN(date_edition) date_edition,
             MIN(date_encaissement) date_encaissement,
             MIN(date_envoi) date_envoi,
             CONCAT(r.periode_deb, ' -> ', r.periode_fin) periode
+            , ajout_somme, ajout_commentaire 
+
         FROM
             iste_rapport r
                 INNER JOIN
@@ -364,7 +375,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
     public function edit($id, $data)
     {        
    	
-    	$this->update($data, 'iste_rapport.id_rapport = ' . $id);
+    	$this->update($data, 'iste_rapport.id_rapport IN (' . $id. ')');
     }
     
 
@@ -392,7 +403,7 @@ class Model_DbTable_Iste_rapport extends Zend_Db_Table_Abstract
                 iste_royalty roy ON roy.id_rapport = r.id_rapport
             WHERE
                 a.id_auteur IN (".$idsAuteur.")
-                    AND roy.date_envoi IS NULL
+                    AND roy.date_envoi IS NULL AND roy.date_paiement IS NULL AND roy.date_encaissement IS NULL
             GROUP BY r.id_rapport";  
         //echo $sql;
             

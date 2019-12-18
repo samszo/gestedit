@@ -253,12 +253,12 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     public function findByIdsAuteur($idsAuteur)
     {
         $query = $this->select()
-			->from( array("r" => "iste_royalty"),array("id_royalty","id_rapport"))                           
+			->from( array("r" => "iste_royalty"),array("id_royalty","id_rapport",'date_envoi','date_paiement','date_encaissement'))                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
 			->joinInner(array("ac" => "iste_auteurxcontrat"),
                 'ac.id_auteurxcontrat = r.id_auteurxcontrat', array())
 			->where( "ac.id_auteur IN (?)", $idsAuteur);
-    	
+
         return $this->fetchAll($query)->toArray(); 
     }    
     /**
@@ -272,7 +272,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
     public function findByIdIsbn($idIsbn)
     {
         $query = $this->select()
-			->from( array("r" => "iste_royalty"),array("id_royalty","id_rapport"))                           
+			->from( array("r" => "iste_royalty"),array("id_royalty","id_rapport",'date_envoi',"date_paiement","date_encaissement"))                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("v" => "iste_vente"),
                 'v.id_vente = r.id_vente', array())
@@ -586,16 +586,23 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 	/**
      * supprime les royalties pour une liste d'ISBN
      * 
-     * @param string $ids
+     * @param string    $ids
+     * @param boolean   $verifDate
      *
      * @return integer
      */
-    public function removeByISBN($ids)
+    public function removeByISBN($ids,$verifDate=false)
     {
         $rs = $this->findByIdIsbn($ids);
         $nb = 0;
         foreach ($rs as $r) {
-            $nb += $this->remove($r['id_royalty'],$r['id_rapport']);
+            if($verifDate){
+                if($r['date_envoi']==null && $r['date_paiement']==null  && $r['date_encaissement']==null ){
+                    $nb += $this->remove($r['id_royalty'],$r['id_rapport']);
+                }
+            }else{
+                $nb += $this->remove($r['id_royalty'],$r['id_rapport']);
+            } 
         }
         return $nb;
     }    
@@ -603,16 +610,24 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
 	/**
      * supprime les royalties pour une liste d'auteur
      * 
-     * @param string $ids
+     * @param string    $ids
+     * @param boolean   $verifDate  
      *
      * @return integer
      */
-    public function removeByAuteur($ids)
+    public function removeByAuteur($ids, $verifDate=false)
     {
         $rs = $this->findByIdsAuteur($ids);
         $nb = 0;
         foreach ($rs as $r) {
-            $nb += $this->remove($r['id_royalty'],$r['id_rapport']);
+            if($verifDate){
+                if($r['date_envoi']==null && $r['date_paiement']==null  && $r['date_encaissement']==null ){
+                    $nb += $this->remove($r['id_royalty'],$r['id_rapport']);
+                }
+            }else{
+                $nb += $this->remove($r['id_royalty'],$r['id_rapport']);
+            } 
+
         }
         return $nb;
     }    
@@ -725,7 +740,7 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
             INNER JOIN
         iste_auteur a ON a.id_auteur = ac.id_auteur
     WHERE
-        r.date_envoi IS NULL ";
+        r.date_envoi IS NULL AND r.date_paiement IS NULL AND r.date_encaissement IS NULL";
     if($idsAuteur) $sql .= " AND ac.id_auteur IN (".$idsAuteur.") ";
     $sql .= " GROUP BY a.id_auteur ORDER BY a.nom, a.prenom";
 
@@ -780,8 +795,9 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         //récupère les royalty pour les livres yant des ventes
         $sql = "SELECT 
         COUNT(DISTINCT r.id_royalty) nbRoy,
-        COUNT(DISTINCT r.id_royalty) idRD,
-        COUNT(DISTINCT v.id_vente) idVD,
+        -- COUNT(DISTINCT r.id_royalty) idRD,
+        GROUP_CONCAT(DISTINCT r.id_royalty) idRD,	        
+        COUNT(DISTINCT v.id_vente) idVD,        
         COUNT(v.id_vente) idV,
         MIN(v.date_vente) perDeb,
         MAX(v.date_vente) perFin,
@@ -821,7 +837,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         //récupère les royalty pour les livres avec ou sans ventes
         $sql = "SELECT 
         COUNT(DISTINCT r.id_royalty) nbRoy,
-        COUNT(DISTINCT r.id_royalty) idRD,
+        -- COUNT(DISTINCT r.id_royalty) idRD,
+        GROUP_CONCAT(DISTINCT r.id_royalty) idRD,	        
         COUNT(DISTINCT v.id_vente) idVD,
         COUNT(v.id_vente) idV,
         MIN(v.date_vente) perDeb,
@@ -916,6 +933,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         //récupère les royalty pour les livres ayant des ventes
         $sql = "SELECT
                 COUNT(DISTINCT r.id_royalty) nbRoy
+                -- COUNT(DISTINCT r.id_royalty) idRD,
+                ,GROUP_CONCAT(DISTINCT r.id_royalty) idRD	        
                 ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit, v.type typeVente
                 ,SUM(r.montant_livre) rMtRoy
                 ,MIN(r.pourcentage) pc
@@ -935,6 +954,8 @@ class Model_DbTable_Iste_royalty extends Zend_Db_Table_Abstract
         //avec les sans vente
         $sql = "SELECT
                 COUNT(DISTINCT r.id_royalty) nbRoy
+                -- COUNT(DISTINCT r.id_royalty) idRD,
+                ,GROUP_CONCAT(DISTINCT r.id_royalty) idRD	        
                 ,MIN(v.date_vente) perDeb, MAX(v.date_vente) perFin, SUM(v.montant_livre) rMtVente, SUM(v.nombre) unit
                 , IFNULL(v.type, '') typeVente
                 ,SUM(r.montant_livre) rMtRoy
