@@ -122,7 +122,7 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en,' / ', titre_es)","titre_fr", "titre_en", "titre_es"))
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(IFNULL(titre_fr,''),' / ', IFNULL(titre_en,''),' / ', IFNULL(titre_es,''))","titre_fr", "titre_en", "titre_es"))
             ->order(array("titre_fr","titre_en","titre_es"));        
         if($id)$query->where( "l.id_serie = ?", $id);        
         return $this->fetchAll($query)->toArray();
@@ -163,7 +163,7 @@ class Model_DbTable_Iste_serie extends Zend_Db_Table_Abstract
     {
         $query = $this->select()
                     ->from( array("i" => "iste_serie")
-                    ,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr,' / ', titre_en,' / ', titre_es)","titre_fr", "titre_en", "titre_es"))                           
+                    ,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(IFNULL(titre_fr,' '),' / ',IFNULL(titre_en,' '),' / ',IFNULL(titre_es,' '))","titre_fr", "titre_en", "titre_es"))                           
                     ->where( "i.id_serie = ?", $id_serie );
 
         return $this->fetchAll($query)->toArray(); 

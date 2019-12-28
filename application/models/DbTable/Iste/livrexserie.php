@@ -175,7 +175,7 @@ class Model_DbTable_Iste_livrexserie extends Zend_Db_Table_Abstract
         		->from( array("ls" => "iste_livrexserie") )                           
 			->setIntegrityCheck(false) //pour pouvoir sélectionner des colonnes dans une autre table
             ->joinInner(array("s" => "iste_serie"),
-                'ls.id_serie = s.id_serie', array("titre"=>"CONCAT(s.titre_fr,' / ',s.titre_en,' / ',s.titre_es)", "recid"=>"id_serie"))
+                'ls.id_serie = s.id_serie', array("titre"=>"CONCAT(IFNULL(s.titre_fr,' '),' / ',IFNULL(s.titre_en,' '),' / ',IFNULL(s.titre_es,' '))", "recid"=>"id_serie"))
         		->where( "ls.id_serie = ?", $idSerie )
             ->where( "ls.id_livre = ?", $idLivre );
         		

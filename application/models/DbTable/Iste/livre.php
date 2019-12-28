@@ -939,8 +939,8 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 		 	$sql = "SELECT 
 			l.* 
 			, GROUP_CONCAT(i.id_isbn) idsIsbn, GROUP_CONCAT(i.date_parution) date_parution, GROUP_CONCAT(i.num) isbn 
-			, GROUP_CONCAT(DISTINCT s.id_serie, ',', s.titre_fr, ',', s.titre_en, ',', s.titre_es SEPARATOR ':') series
-			, GROUP_CONCAT(DISTINCT c.id_comite, ',', c.titre_fr, ',', c.titre_en, ',', c.titre_es SEPARATOR ':') comites
+			, GROUP_CONCAT(DISTINCT s.id_serie, ',', IFNULL(s.titre_fr,''), ',', IFNULL(s.titre_en,''), ',', IFNULL(s.titre_es,'') SEPARATOR ':') series
+			, GROUP_CONCAT(DISTINCT c.id_comite, ',', IFNULL(c.titre_fr,''), ',', IFNULL(c.titre_en,''), ',', IFNULL(c.titre_es,'') SEPARATOR ':') comites
 			FROM iste_livre l
 			INNER JOIN iste_isbn i ON i.id_livre = l.id_livre
 			LEFT JOIN iste_livrexserie ls ON ls.id_livre = l.id_livre
@@ -956,8 +956,8 @@ class Model_DbTable_Iste_livre extends Zend_Db_Table_Abstract
 		, GROUP_CONCAT(i.id_isbn, ',', i.num, ',', i.type, ',', i.date_parution, ',', i.nb_page SEPARATOR ':') isbns
 		, GROUP_CONCAT(e.nom) editeur
 		, GROUP_CONCAT(p.prix_dollar, ',', p.prix_euro, ',', p.prix_livre SEPARATOR ':') prix
-		, GROUP_CONCAT(DISTINCT s.id_serie, ',', s.titre_fr, ',', s.titre_en, ',', s.titre_es SEPARATOR ':') series
-		, GROUP_CONCAT(DISTINCT c.id_comite, ',', c.titre_fr, ',', c.titre_en, ',', c.titre_es SEPARATOR ':') comites
+		, GROUP_CONCAT(DISTINCT s.id_serie, ',', IFNULL(s.titre_fr,''), ',', IFNULL(s.titre_en,''), ',', IFNULL(s.titre_es,'') SEPARATOR ':') series
+		, GROUP_CONCAT(DISTINCT c.id_comite, ',', IFNULL(c.titre_fr,''), ',', IFNULL(c.titre_en,''), ',', IFNULL(c.titre_es,'') SEPARATOR ':') comites
 		, GROUP_CONCAT(DISTINCT fic.id_importfic, ',', fic.type, ',', fic.url SEPARATOR ':') fics
 		FROM iste_livre l
 		INNER JOIN iste_livrexauteur la ON la.id_livre = l.id_livre

@@ -353,7 +353,7 @@ class Flux_Rapport extends Flux_Site{
 			$this->odf->setVars('roy_devise_date', $periode);
 			$this->odf->setVars('roy_devise_pc', sprintf("%01.2f", $moyenneTaux));
 			$montantEuro = round($due*$moyenneTaux,2);
-			$this->odf->setVars('roy_net_due_euro', sprintf("%01.2f", $$montantEuro));
+			$this->odf->setVars('roy_net_due_euro', sprintf("%01.2f", $montantEuro));
 		}else{
 			$this->odf->setVars('roy_devise_date', 'no');
 			$this->odf->setVars('roy_devise_pc', 'no');

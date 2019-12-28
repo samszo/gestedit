@@ -111,7 +111,7 @@ class Model_DbTable_Iste_comite extends Zend_Db_Table_Abstract
     {
     		$query = $this->select()
             ->from( array("l" => $this->_name)
-            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr, ' / ', titre_en)","titre_fr", "titre_en"))
+            		,array("recid"=>$this->_primary[1],"id"=>$this->_primary[1],"text"=>"CONCAT(IFNULL(titre_fr,''), ' / ', IFNULL(titre_en,''), ' / ', IFNULL(titre_es,''))","titre_fr", "titre_en"))
             ->order(array("titre_fr","titre_en"));        
         if($id)$query->where( "l.id_comite = ?", $id);        
         return $this->fetchAll($query)->toArray();

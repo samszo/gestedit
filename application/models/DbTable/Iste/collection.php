@@ -91,12 +91,12 @@ class Model_DbTable_Iste_collection extends Zend_Db_Table_Abstract
      */
     public function getListe()
     {
-    		$query = $this->select()
-            ->from( array("l" => $this->_name)
-            		,array("id"=>$this->_primary[1],"text"=>"CONCAT(titre_fr, '/', titre_en,' / ', titre_es)"))
-            ->order("titre_fr");        
+        $query = $this->select()
+        ->from( array("l" => $this->_name)
+                ,array("id"=>$this->_primary[1],"text"=>"CONCAT(IFNULL(titre_fr,''), '/', IFNULL(titre_en,''),' / ', IFNULL(titre_es,''))"))
+        ->order("titre_fr");        
         return $this->fetchAll($query)->toArray();
-    		}    
+    }    
     /**
      * Récupère toutes les entrées Iste_collection avec certains critères
      * de tri, intervalles

@@ -51,7 +51,7 @@ var rsParamMail = <?php echo $this->rsParamMail; ?>;
 var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
 var pstyleDetail = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
 var config;
-var idPLU, idPCU, itemSelectAuteur, itemSelectISBN, itemSelectVente, rsIsbnLivre, rsIsbnPrix, urlPDF=false;
+var idPLU, idPCU, itemSelectRapport, itemSelectAuteur, itemSelectISBN, itemSelectVente, rsIsbnLivre, rsIsbnPrix, urlPDF=false,bChange=false;
 
 function initDroit() {
 	var tabsFichierVente = {
@@ -972,6 +972,7 @@ function initDroit() {
 			            var r = w2ui[event.target].get(c.recid);
 			            c.id_rapport = c.recid;		            
 			            c.obj = 'rapport';
+						bChange = false;
 			            //if(c.date_paiement) c.date_paiement = w2utils.formatDate(c.date_paiement, 'yyyy-mm-dd');
 			            //if(c.date_encaissement) c.date_encaissement = w2utils.formatDate(c.date_encaissement, 'yyyy-mm-dd');			            
 						$.get('<?php if(!$this->ajax) echo '../'; ?>crud/update',
@@ -982,14 +983,21 @@ function initDroit() {
 							},"json");                        
 					});					
 				},
+				onChange:function(event) {
+					bChange=true;
+				},
 		        onClick: function (event) {
-					var item = this.get(event.recid);
-					showPdf(item.url);
+					itemSelectRapport = this.get(event.recid);
+					/*
+					//pour ne pas rentrer en conflit avec un changement
+					if(!bChange) showPdf(item.url);
+					*/
 		        },	    
 		        toolbar: {
 		            items: [
 		                //{ id: 'voirRapport', type: 'button', caption: "Télécharger", icon: 'fa-file' },
 		                { id: 'impRapport', type: 'button', caption: "Envoyer", icon: 'fa-envelope' }
+						,{ id: 'voirPDF', type: 'button', caption: "Voir", icon: 'fa-eye' }
 		                ,{ id: 'zipRapport', type: 'button', caption: "Zipper", icon: 'fa-file-archive' }
 		                ,{ id: 'groupRapport', type: 'button', caption: "Grouper", icon: 'fa-object-group' }
 		                ,{ id: 'payerRapport', type: 'button', caption: "Payer", icon: 'fa-money' }
@@ -1049,6 +1057,9 @@ function initDroit() {
 											w2ui['grid_<?php echo $idPage;?>_ficRapport'].set(r.recid, { 'date_envoi': d.toUTCString()});
 										})
 								},"json");
+							}
+							else if (event.target=='voirPDF'){
+								showPdf(itemSelectRapport.url);
 							}
 							else if (event.target=="groupRapport"){
 								var rapport = "";
