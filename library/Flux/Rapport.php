@@ -18,7 +18,7 @@ class Flux_Rapport extends Flux_Site{
     function __construct($idBase=false,$bTrace=false){    	
     	    	
     	parent::__construct($idBase,$bTrace);
-		$this->pathPaiement = ROOT_PATH."/data/editions/modeles/royalty.odt";		
+		$this->pathPaiement = ROOT_PATH."/data/".RAPPORT_PATH."/modeles/royalty.odt";		
 		$this->temps_debut = microtime(true);
     		
     }
@@ -146,14 +146,14 @@ class Flux_Rapport extends Flux_Site{
 		//on enregistre le fichier
 		$nomFic = utf8_encode($refRapport).".odt";
 		//copie le fichier dans le répertoire data
-		$newfile = ROOT_PATH."/data/editions/".$nomFic;
+		$newfile = ROOT_PATH."/data/".RAPPORT_PATH."/".$nomFic;
 		//copy($this->odf->tmpfile, $newfile);
 
 		$this->odf->saveToDisk($newfile);
 		$this->trace("//enregistre le fichier ".$newfile);
 		
 		//enregistrement du rapport
-		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic,"id_importfic"=>$mod["id_importfic"]
+		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/".RAPPORT_PATH."/".$nomFic,"id_importfic"=>$mod["id_importfic"]
 			, "data"=>json_encode($data), "obj_type"=>"auteur_livre", "obj_id"=>$data["id_auteur"]."_".$data["id_livre"]));		
 			
 		//mise à jour de la date d'éditions
@@ -365,7 +365,7 @@ class Flux_Rapport extends Flux_Site{
 		//on enregistre le fichier
 		$nomFic = $ordreGen."_".$refRapport;
 		//copie le fichier dans le répertoire data
-		$newfile = ROOT_PATH."/data/editions/tmp/".$nomFic.".odt";
+		$newfile = ROOT_PATH."/data/".RAPPORT_PATH."/tmp/".$nomFic.".odt";
 		//copy($this->odf->tmpfile, $newfile);
 
 		$this->odf->saveToDisk($newfile);
@@ -373,11 +373,11 @@ class Flux_Rapport extends Flux_Site{
 		
 		//ATTENTION  très gourmant d'ouvrir et de fermet libre office
 		//la création des pdf se fait globalement 
-		//$this->convertOdtToPdf($newfile, ROOT_PATH."/data/editions");
+		//$this->convertOdtToPdf($newfile, ROOT_PATH."/data/".RAPPORT_PATH."");
 		//$this->trace("//enregistre le pdf ".$newfile);
 
 		//enregistrement du rapport
-		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic.".pdf"
+		$idRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/".RAPPORT_PATH."/".$nomFic.".pdf"
 			,"id_importfic"=>$mod["id_importfic"], "periode_deb"=>$data["minDateVente"], "periode_fin"=>$data["maxDateVente"]
 			, 'montant'=>$due, 'montant_ht'=>$dueHT, 'montant_euro'=>$montantEuro
 			, "data"=>json_encode($data),"type"=>$type, "obj_type"=>"auteur_ficimport", "obj_id"=>$data["id_auteur"]."_".$data["idsFicImport"]));		
@@ -413,7 +413,7 @@ class Flux_Rapport extends Flux_Site{
 			$connection = ssh2_connect(SSH2_PATH);
 			ssh2_auth_password($connection, SSH2_USER, SSH2_MDP);		
 			$result = ssh2_exec($connection, $cmd);
-			//export HOME=/tmp; soffice --headless --convert-to pdf --outdir /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/editions /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/editions/tmp/*.odt	
+			//export HOME=/tmp; soffice --headless --convert-to pdf --outdir /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/".RAPPORT_PATH." /home/clients/680a35fe32961faf6d197a8c38f2570a/web/data/".RAPPORT_PATH."/tmp/*.odt	
 		}
 		$this->trace($cmd);
 		$this->trace("result=".$result);
@@ -505,14 +505,14 @@ class Flux_Rapport extends Flux_Site{
 		//on enregistre le fichier
 		$nomFic = $refRapport.".odt";
 		//copie le fichier dans le répertoire data
-		$newfile = ROOT_PATH."/data/editions/".$nomFic;
+		$newfile = ROOT_PATH."/data/".RAPPORT_PATH."/".$nomFic;
 		//copy($this->odf->tmpfile, $newfile);
 
 		$this->odf->saveToDisk($newfile);
 		$this->trace("//enregistre le fichier ".$newfile);
 		
 		//enregistrement du rapport
-		$rsRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/editions/".$nomFic,"id_importfic"=>$mod["id_importfic"]
+		$rsRapport = $this->dbRapport->ajouter(array("url"=>WEB_ROOT."/data/".RAPPORT_PATH."/".$nomFic,"id_importfic"=>$mod["id_importfic"]
 			, "data"=>json_encode($data), "obj_type"=>"serie", "obj_id"=>implode(",", $data)),true,true);		
 			
 		$this->trace("FIN");		
@@ -597,9 +597,9 @@ class Flux_Rapport extends Flux_Site{
 		$dbDev = new Model_DbTable_Iste_devise();
 
 		//on supprime le répertoire tmp
-		if(!$idAuteur)$this->delTree(ROOT_PATH."/data/editions/tmp");
+		if(!$idAuteur)$this->delTree(ROOT_PATH."/data/".RAPPORT_PATH."/tmp");
 		//on le recrée
-		if(!$idAuteur)mkdir(ROOT_PATH."/data/editions/tmp", 0775);
+		if(!$idAuteur)mkdir(ROOT_PATH."/data/".RAPPORT_PATH."/tmp", 0775);
 		//récupère le taux actuel
 		$taux_reduction = floatval($dbDev->findByAnnee(date('Y'))["taxe_deduction"]);
 		//on récupère les paiements
@@ -612,16 +612,16 @@ class Flux_Rapport extends Flux_Site{
 				$this->supprimeObsoletes($r['id_auteur']);
 				//calcule les odt
 				$fic = $this->creaPaiementFic($r,"livre",$taux_reduction,($i % 9));
-				if($idAuteur)$this->convertOdtToPdf($fic[1], ROOT_PATH."/data/editions");
+				if($idAuteur)$this->convertOdtToPdf($fic[1], ROOT_PATH."/data/".RAPPORT_PATH);
 				$fic = $this->creaPaiementFic($r,"editoriaux",$taux_reduction,($i % 9));  
-				if($idAuteur)$this->convertOdtToPdf($fic[1], ROOT_PATH."/data/editions");
+				if($idAuteur)$this->convertOdtToPdf($fic[1], ROOT_PATH."/data/".RAPPORT_PATH);
 				$i++;
 			}
 		}
 		//pour gérer la génération d'un grand nombre de pdf
 		if(!$idAuteur){
 			for ($i=0; $i < 10; $i++) { 
-				$this->convertOdtToPdf(ROOT_PATH."/data/editions/tmp/".$i."_*.odt", ROOT_PATH."/data/editions");
+				$this->convertOdtToPdf(ROOT_PATH."/data/".RAPPORT_PATH."/tmp/".$i."_*.odt", ROOT_PATH."/data/".RAPPORT_PATH);
 			}	
 		}
 	}

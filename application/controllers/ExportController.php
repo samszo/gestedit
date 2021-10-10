@@ -70,7 +70,7 @@ class ExportController extends Zend_Controller_Action
     
 	/**
 	* array via fputcsv() zu csv
-	* http://blog.abmeier.de/zend-csv-action-helper
+	* http://blog.abmeier.de/Zend-csv-action-helper
 	* @param  array $aryData
 	* @param  string $strName
 	* @param  bool $bolCols

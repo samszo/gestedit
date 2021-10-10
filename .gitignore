@@ -52,6 +52,8 @@ bdd/istePreHisto.sql
 bdd/isteProcessus.sql
 
 bdd/isteDataTest.sql
+bdd/*.sql
+bdd/*.zip
 
 data/_/
 data/editions/
@@ -335,3 +337,9 @@ data/import_vente/Royalties Wiley lm correcnoarnaldi 1104 - Copy.csv
 data/import_vente/Droit elseiver - corr sept.csv
 data/import_vente/Wiley correc 0210 sauf arnaldi.csv
 data/modeles/droitFR.odt
+bdd/exportContrat.sql
+bdd/iste_prod2.sql
+.gitignore
+bdd/iste_prod4.zip
+bdd/lyor_iste_admin_dump_sql_2020-03-04_15-50-12.sql.gz
+data/vente_vente/cumul 2020 csv -.csv

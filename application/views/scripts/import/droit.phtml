@@ -182,7 +182,7 @@ function initFileUploadDroit(){
 	    		data.formData = {
 	    	    		'dateDeb': $('input[type=dateDeb]').w2field().get()
 	    	    		,'dateFin':$('input[type=dateFin]').w2field().get()
-	    	    		,'type':'vente','obj':'import','dir':1
+	    	    		,'type':'vente','obj':'<?php echo IMPORT_VENTE;?>','dir':1
 						,'conversion':$('#livreToEuro').w2field().get().replace('%','')
 		    	    		};
 	    		if(!data.formData.dateDeb ){

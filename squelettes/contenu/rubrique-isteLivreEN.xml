@@ -1,6 +1,0 @@
-<composition>
-	<nom>Rubrique ISTE Livre EN</nom>
-	<description>Composition pour les rubriques gérant des livres anglais</description>
-	<icon>images/objet-liste-contenus.png</icon>
-	<branche type="article" composition="isteLivreEn" />
-</composition>

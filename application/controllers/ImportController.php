@@ -23,7 +23,7 @@ class ImportController extends Zend_Controller_Action
 		$this->view->inc = $this->_getParam('inc');
 		$this->view->ajax = $this->_getParam('ajax');
 		$this->view->idObj = $this->_getParam('idObj',-1);
-		$this->view->obj = $this->_getParam('obj','vente');
+		$this->view->obj = $this->_getParam('obj',IMPORT_VENTE);
 		$this->view->typeObj = $this->_getParam('typeObj');
 		$this->view->nameObj = $this->_getParam('nameObj');
 	}     
@@ -168,7 +168,7 @@ class ImportController extends Zend_Controller_Action
 				$options = array('upload_dir' => ROOT_PATH.$path,'upload_url' => WEB_ROOT.$path
 					,'print_response'=>false);	
 			}
-			$upload_handler = new CustomUploadHandler($options);
+-			$upload_handler = new CustomUploadHandler($options);
 			$response = $upload_handler->get_response();
     	$this->view->json = json_encode($response);
     			      
